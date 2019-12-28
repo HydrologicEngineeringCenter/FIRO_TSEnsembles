@@ -1,8 +1,9 @@
 package hec.firo;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
+
 
 public class Watershed
   {
@@ -16,7 +17,7 @@ public class Watershed
 
     public ArrayList<Location> Locations;
 
-    public Forecast AddForecast(String locName, Date issueDate, float[][] ensemble, Date[] timeStamps)
+    public Forecast AddForecast(String locName, LocalDateTime issueDate, float[][] ensemble, LocalDateTime[] timeStamps)
     {
       Location loc = GetOrCreateLocation(locName);
 

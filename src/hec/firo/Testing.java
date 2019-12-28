@@ -5,11 +5,11 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 
-public class CsvTest {
+public class Testing {
 
     static String CacheDir = "C:\\Temp\\hefs_cache";
     @Test
-    public void ReadTest()
+    public void ReadCsv()
     {
      RfcCsvFile csv = new RfcCsvFile(CacheDir+"\\test.csv");
         float[][] data = csv.GetEnsemble("SCRN2");
@@ -22,4 +22,6 @@ public class CsvTest {
         assertEquals(-59.2f, data[58][2],0.0001);
 
     }
+
+
 }

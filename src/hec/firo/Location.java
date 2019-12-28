@@ -1,7 +1,8 @@
 package hec.firo;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class Location
   {
@@ -23,7 +24,7 @@ public class Location
     /// </summary>
     public ArrayList<Forecast> Forecasts;
 
-     Forecast AddForecast(Date issueDate, float[][] ensemble, Date[] timeStamps)
+     Forecast AddForecast(LocalDateTime issueDate, float[][] ensemble, LocalDateTime[] timeStamps)
     {
       Forecast f = new Forecast(this, issueDate,ensemble,timeStamps);
       Forecasts.add(f);

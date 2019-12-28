@@ -1,6 +1,6 @@
 package hec.firo;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Forecast contains an Ensemble with some associated information
@@ -9,7 +9,7 @@ import java.util.Date;
 
 public class Forecast
   {
-    public Forecast(Location location, Date issueDate, float[][] ensemble, Date[] timeStamps)
+    public Forecast(Location location, LocalDateTime issueDate, float[][] ensemble, LocalDateTime[] timeStamps)
     {
       this.Location = location;
       this.IssueDate = issueDate;
@@ -22,9 +22,9 @@ public class Forecast
     /// </summary>
     public Location Location;
 
-    public Date IssueDate;
+    public LocalDateTime IssueDate;
 
-    public Date[] TimeStamps;
+    public LocalDateTime[] TimeStamps;
 
     public float[][] Ensemble;
 

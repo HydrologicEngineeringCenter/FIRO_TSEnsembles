@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class RfcCsvFile
@@ -16,7 +17,7 @@ public class RfcCsvFile
     public String FileName;
     public List<String> LocationNames ;
 
-    public Date[] TimeStamps;
+    public LocalDateTime[] TimeStamps;
 
     private float[][] Data;
 
@@ -125,7 +126,7 @@ public class RfcCsvFile
       int idx1 = 2; // data starts after two header lines
       int rowCount = idx2 - idx1 + 1;
       int columnCount = header.length - 1; // date column will not be part of data
-      TimeStamps = new Date[rowCount];
+      TimeStamps = new LocalDateTime[rowCount];
       Data = new float[columnCount][rowCount]; // swap axis
       for (int rowIdx = 0; rowIdx < rowCount; rowIdx++)
       {
@@ -179,24 +180,11 @@ public class RfcCsvFile
         }
       }
     }
- static SimpleDateFormat _formatter = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+ static DateTimeFormatter _formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm");
 
-    public static Date ParseDateTime(String dt)
+    public static LocalDateTime ParseDateTime(String dt)
     {
       // 11/3/2013 12:00
-      Date rval = null;
-      try {
-        rval = _formatter.parse(dt);
-      } catch (ParseException e) {
-        e.printStackTrace();
-      }
-
-      return rval;
-      //return LocalDateTime.parse(dt);
-      //string[] dateTime = dt.Split(' ');
-      //string[] yyyymmdd = dateTime[0].Split('-');
-      //string[] hhmmss = dateTime[1].Split(':');
-      //DateTime output = new DateTime(int.Parse(yyyymmdd[0]), int.Parse(yyyymmdd[1]), int.Parse(yyyymmdd[2]), int.Parse(hhmmss[0]), int.Parse(hhmmss[1]), int.Parse(hhmmss[2]));
-      //return output;
+      return LocalDateTime.parse(dt,_formatter);
     }
   }
