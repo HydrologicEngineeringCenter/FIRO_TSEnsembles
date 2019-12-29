@@ -47,7 +47,7 @@ public class EnsembleDatabase {
                 {
                     index++;
                     float[][] data = f.Ensemble;
-                    byte[] bytes = EnsembleCompression.Compress(data);
+                    byte[] bytes = EnsembleCompression.Pack(data,compress);
                      InsertEnsemble(index, f.IssueDate, watershed.Name, loc.Name, f.TimeStamps[0],
                             data[0].length, data.length, compress, bytes);
                 }
@@ -63,7 +63,7 @@ public class EnsembleDatabase {
 
     }
 
-    public static Watershed Read(String watershedName, LocalDateTime startTime, LocalDateTime endTime)
+    public Watershed Read(String watershedName, LocalDateTime startTime, LocalDateTime endTime)
     {
         Watershed rval = new Watershed(watershedName);
 
@@ -74,7 +74,28 @@ public class EnsembleDatabase {
         sql += " order by watershed,issue_date,location_name";
 
 
-
+        try {
+            Statement stmt  = _connection.createStatement();
+            ResultSet rs    = stmt.executeQuery(sql);
+            // loop through the result set
+            while (rs.next()) {
+               // id = rs.getInt(1);
+                LocalDateTime issue_date = rs.getObject(2,LocalDateTime.class);
+                //watershedName = rs.getString(3,);
+                String locName = rs.getString(4);
+                LocalDateTime start_date = rs.getObject(5, LocalDateTime.class);
+                int member_length = rs.getInt(6 );
+                int member_count = rs.getInt(7);
+                boolean compressed = rs.getBoolean(8);
+                byte[] byte_value_array = rs.getBytes(9);
+                float[][] ensemble = EnsembleCompression.UnPack(byte_value_array,member_count,member_length,compressed);
+                int secondsPerHour = 3600;// TO DO .. FIX ME hardcoded (need to add increment to schema)
+                LocalDateTime[] timeStamps = GetTimeStamps(start_date,member_length,secondsPerHour);
+                rval.AddForecast(locName,issue_date,ensemble,timeStamps);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
 //        LocalDateTime prevIssueDate = Convert.ToDateTime(table.Rows[0]["issue_date"]);
 //        DateTime currentDate = Convert.ToDateTime(table.Rows[0]["issue_date"]);
 //        foreach (DataRow row in table.Rows)
@@ -93,7 +114,16 @@ public class EnsembleDatabase {
         return rval;
     }
 
-
+    private static LocalDateTime[] GetTimeStamps(LocalDateTime t1, int count, int secondsIncrement)
+    {
+        LocalDateTime[] rval = new LocalDateTime[count];
+        for (int i = 0; i < count; i++)
+        {
+            rval[i] = t1;
+            t1 = t1.plusSeconds(secondsIncrement);
+        }
+        return rval;
+    }
     static DateTimeFormatter _formatter = DateTimeFormatter.ofPattern(DateTimeFormat);
     private static String FormatDate(LocalDateTime t)
     {

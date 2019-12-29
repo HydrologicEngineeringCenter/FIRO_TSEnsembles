@@ -12,25 +12,32 @@ public class EnsembleCompression {
 
 
     /**
-     * UnCompress a GZIP a byte array
+     * UnPack a GZIP a byte array
      * returns an ensemble  (float[][])
      * @param data
      * @return
      */
-    public static float[][] UnCompress(byte[] data, int rowCount, int columnCount)
+    public static float[][] UnPack(byte[] data, int rowCount, int columnCount, boolean compressed)
     {
-       byte[] bytes = gzipUncompress(data);
+        byte[] bytes;
+        if( compressed)
+            bytes = gzipUncompress(data);
+        else
+            bytes = data;
        float[][] rval = ConvertFromBytes(bytes,rowCount,columnCount);
        return rval;
     }
 
     /**
-     * Compress an float[]] ensemble into a byte array
+     * Pack an float[]] ensemble into a byte array
      * @return
      */
-    public static byte[] Compress(float[][] data)
+    public static byte[] Pack(float[][] data, boolean compress)
     {
+
         byte[] bytes = ConvertToBytes(data);
+        if( !compress)
+            return bytes;
         byte[] compressed =  gzipCompress(bytes);
         return compressed;
     }
