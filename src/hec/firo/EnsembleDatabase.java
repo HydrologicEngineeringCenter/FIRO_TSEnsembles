@@ -1,24 +1,17 @@
 package hec.firo;
 
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  *  Read/Write Ensembles to a ODBC database
  */
 public class EnsembleDatabase {
 
-    public static String DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
+    static String DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
     private static String TableName = "timeseries_blob";
 
     String FileName;
@@ -35,23 +28,29 @@ public class EnsembleDatabase {
         CreateTable();
     }
 
+    PreparedStatement insertCMD;
 
-    public void Write(Watershed watershed, boolean compress)
+    public void Write(Watershed watershed)
     {
         try {
+            String sql = "INSERT INTO timeseries_blob ([id], [issue_date], [watershed], [location_name], "+
+                    " [timeseries_start_date], [member_length], [member_count], [compressed], [byte_value_array]) VALUES "+
+                    "(?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+            insertCMD = _connection.prepareStatement(sql);
+
+            boolean compress = true;
             int index = GetMaxID();
-            byte[] uncompressed = null;
             for(Location loc : watershed.Locations)
             {
                 for(Forecast f : loc.Forecasts)
                 {
                     index++;
                     float[][] data = f.Ensemble;
+                    byte[] bytes = EnsembleCompression.Compress(data);
                      InsertEnsemble(index, f.IssueDate, watershed.Name, loc.Name, f.TimeStamps[0],
-                            data[0].length, data.length, compress, ConvertToBytes(f.Ensemble, compress, ref uncompressed));
+                            data[0].length, data.length, compress, bytes);
                 }
-
             }
             _connection.commit();
         }catch(Exception e)
@@ -63,6 +62,38 @@ public class EnsembleDatabase {
         }
 
     }
+
+    public static Watershed Read(String watershedName, LocalDateTime startTime, LocalDateTime endTime)
+    {
+        Watershed rval = new Watershed(watershedName);
+
+        String sql = "select * from " + TableName +
+                " WHERE issue_date >= '" + FormatDate(startTime) + "' "
+                + " AND issue_date <= '" + FormatDate(endTime) + "' "
+                + " AND watershed = '" + watershedName + "' ";
+        sql += " order by watershed,issue_date,location_name";
+
+
+
+//        LocalDateTime prevIssueDate = Convert.ToDateTime(table.Rows[0]["issue_date"]);
+//        DateTime currentDate = Convert.ToDateTime(table.Rows[0]["issue_date"]);
+//        foreach (DataRow row in table.Rows)
+//        {
+//            currentDate = Convert.ToDateTime(row["issue_date"]);
+//
+//            var times = GetTimes(row);
+//            GetValues(row,ref values);
+//
+//            rval.AddForecast(row["location_name"].ToString(),
+//                    currentDate,
+//                    values,
+//                    times);
+//
+//        }
+        return rval;
+    }
+
+
     static DateTimeFormatter _formatter = DateTimeFormatter.ofPattern(DateTimeFormat);
     private static String FormatDate(LocalDateTime t)
     {
@@ -73,22 +104,18 @@ public class EnsembleDatabase {
                                LocalDateTime timeseries_start_date,int member_length, int member_count,boolean compressed,
                                byte[] byte_value_array) throws Exception
     {
-        String sql = "INSERT INTO timeseries_blob ([id], [issue_date], [watershed], [location_name], "+
-                " [timeseries_start_date], [member_length], [member_count], [compressed], [byte_value_array]) VALUES "+
-                "(?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        PreparedStatement cmd = _connection.prepareStatement(sql);
 
-        cmd.setInt(1, id);
-        cmd.setString(2,FormatDate(issue_date));
-        cmd.setString(3,watershed);
-        cmd.setString(4,location_name);
-        cmd.setString(5, FormatDate(timeseries_start_date));
-        cmd.setInt(6, member_length);
-        cmd.setInt(7, member_count);
-        cmd.setBoolean(8, compressed  );
-        cmd.setBytes(9, byte_value_array);
-        cmd.execute();
+        insertCMD.setInt(1, id);
+        insertCMD.setString(2,FormatDate(issue_date));
+        insertCMD.setString(3,watershed);
+        insertCMD.setString(4,location_name);
+        insertCMD.setString(5, FormatDate(timeseries_start_date));
+        insertCMD.setInt(6, member_length);
+        insertCMD.setInt(7, member_count);
+        insertCMD.setBoolean(8, compressed  );
+        insertCMD.setBytes(9, byte_value_array);
+        insertCMD.execute();
     }
 
 
@@ -128,57 +155,4 @@ public class EnsembleDatabase {
 
 
 
-//https://stackoverflow.com/questions/14777800/gzip-compression-to-a-byte-array
-    private static byte[] gzipCompress(byte[] uncompressedData) {
-        byte[] result = new byte[]{};
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(uncompressedData.length);
-             GZIPOutputStream gzipOS = new GZIPOutputStream(bos)) {
-            gzipOS.write(uncompressedData);
-            // You need to close it before using bos
-            gzipOS.close();
-            result = bos.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    private static byte[] gzipUncompress(byte[] compressedData) {
-        byte[] result = new byte[]{};
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(compressedData);
-             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             GZIPInputStream gzipIS = new GZIPInputStream(bis)) {
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = gzipIS.read(buffer)) != -1) {
-                bos.write(buffer, 0, len);
-            }
-            result = bos.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-
-
-    // assuming float[][] is not jagged
-    //https://stackoverflow.com/questions/4635769/how-do-i-convert-an-array-of-floats-to-a-byte-and-back
-    private static byte[] ConvertToBytes(float[][] data)
-    {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(data.length*data[0].length * 4);
-
-        FloatBuffer fBuffer = byteBuffer.asFloatBuffer();
-        for (int i = 0; i <data.length ; i++) {
-            fBuffer.put(data[i],);
-        }
-
-        byte[] array = byteBuffer.array();
-
-        for (int i=0; i < array.length; i++)
-        {
-            System.out.println(i + ": " + array[i]);
-        }
-
-    }
 }
