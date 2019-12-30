@@ -2,6 +2,7 @@ package hec.firo;
 
 
 import java.sql.*;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
@@ -30,7 +31,7 @@ public class EnsembleDatabase {
 
     PreparedStatement insertCMD;
 
-    public void Write(Watershed watershed)
+    public void Write(Watershed watershed) throws Exception
     {
         try {
             String sql = "INSERT INTO timeseries_blob ([id], [issue_date], [watershed], [location_name], "+
@@ -40,7 +41,7 @@ public class EnsembleDatabase {
             insertCMD = _connection.prepareStatement(sql);
 
             boolean compress = true;
-            int index = GetMaxID();
+            int index = GetNextID();
             for(Location loc : watershed.Locations)
             {
                 for(Forecast f : loc.Forecasts)
@@ -48,17 +49,18 @@ public class EnsembleDatabase {
                     index++;
                     float[][] data = f.Ensemble;
                     byte[] bytes = EnsembleCompression.Pack(data,compress);
-                     InsertEnsemble(index, f.IssueDate, watershed.Name, loc.Name, f.TimeStamps[0],
+                     InsertEnsemble(index, f.IssueDate, watershed.Name, loc.Name, f.startDateTime,
                             data[0].length, data.length, compress, bytes);
                 }
             }
             _connection.commit();
         }catch(Exception e)
         {
-            System.out.println(e.getMessage());
+            System.out.println("Error: writing ensembles "+e.getMessage());
         }
         finally {
-
+            if( _connection!= null)
+                _connection.close();
         }
 
     }
@@ -90,8 +92,8 @@ public class EnsembleDatabase {
                 byte[] byte_value_array = rs.getBytes(9);
                 float[][] ensemble = EnsembleCompression.UnPack(byte_value_array,member_count,member_length,compressed);
                 int secondsPerHour = 3600;// TO DO .. FIX ME hardcoded (need to add increment to schema)
-                LocalDateTime[] timeStamps = GetTimeStamps(start_date,member_length,secondsPerHour);
-                rval.AddForecast(locName,issue_date,ensemble,timeStamps);
+                //LocalDateTime[] timeStamps = GetTimeStamps(start_date,member_length,secondsPerHour);
+                rval.AddForecast(locName,issue_date,ensemble,start_date, Duration.ofSeconds(secondsPerHour));
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -149,22 +151,24 @@ public class EnsembleDatabase {
     }
 
 
-    private int GetMaxID()
+    private int GetNextID()
     {
-        String sql = "SELECT max(id) FROM "+TableName;
+        String sql = "SELECT max(id) max FROM "+TableName;
         int rval = -1;
         try {
             Statement stmt  = _connection.createStatement();
             ResultSet rs    = stmt.executeQuery(sql);
             // loop through the result set
             while (rs.next()) {
-                rval = rs.getInt("id");
-                return rval;
+                Object o = rs.getObject("max");
+                if( o == null)
+                    return -1;
+                rval = (int)o;
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        return rval;
+        return rval+1;
     }
 
     private void  CreateTable()throws Exception

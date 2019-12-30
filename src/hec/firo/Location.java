@@ -1,5 +1,6 @@
 package hec.firo;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,9 +25,9 @@ public class Location
     /// </summary>
     public ArrayList<Forecast> Forecasts;
 
-     Forecast AddForecast(LocalDateTime issueDate, float[][] ensemble, LocalDateTime[] timeStamps)
+     Forecast AddForecast(LocalDateTime issueDate, float[][] ensemble, LocalDateTime startDate, Duration interval)
     {
-      Forecast f = new Forecast(this, issueDate,ensemble,timeStamps);
+      Forecast f = new Forecast(this, issueDate,ensemble,startDate,interval);
       Forecasts.add(f);
       return f;
     }

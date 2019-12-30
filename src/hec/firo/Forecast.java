@@ -1,5 +1,6 @@
 package hec.firo;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
@@ -9,12 +10,15 @@ import java.time.LocalDateTime;
 
 public class Forecast
   {
-    public Forecast(Location location, LocalDateTime issueDate, float[][] ensemble, LocalDateTime[] timeStamps)
+    private final Duration interval;
+
+    public Forecast(Location location, LocalDateTime issueDate, float[][] ensemble, LocalDateTime startDate, Duration interval)
     {
       this.Location = location;
       this.IssueDate = issueDate;
       this.Ensemble = ensemble;
-      this.TimeStamps = timeStamps;
+      this.startDateTime = startDate;
+      this.interval = interval;
     }
 
     /// <summary>
@@ -24,8 +28,29 @@ public class Forecast
 
     public LocalDateTime IssueDate;
 
-    public LocalDateTime[] TimeStamps;
+    public LocalDateTime startDateTime;
 
+    public int getTimeCount(){
+      return Ensemble[0].length;
+  }
+    public LocalDateTime[] getTimeStamps() {
+
+      LocalDateTime[] rval = new LocalDateTime[getTimeCount()];
+      LocalDateTime t = startDateTime;
+      int size= getTimeCount();
+      for (int i = 0; i <size ; i++) {
+        rval[i] =t;
+        t.plus(interval);
+      }
+      return rval;
+    }
+
+
+    /**
+     * ensemble data
+     * row represents ensemble members
+     * columns are time steps
+     */
     public float[][] Ensemble;
 
 

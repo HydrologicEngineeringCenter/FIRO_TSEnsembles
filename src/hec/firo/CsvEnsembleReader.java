@@ -4,7 +4,9 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class CsvEnsembleReader {
 
@@ -15,8 +17,6 @@ public class CsvEnsembleReader {
         this.path = path;
     }
 
-    // Allegedly threadsafe
-    // https://docs.microsoft.com/en-us/dotnet/api/system.console?redirectedfrom=MSDN&view=netframework-4.8
     static boolean DebugMode = false;
 
     static void Log(String msg) {
@@ -38,9 +38,8 @@ public class CsvEnsembleReader {
         //https://www.cnrfc.noaa.gov/csv/2019092312_RussianNapa_hefs_csv_hourly.zip
 
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHH");
-
-        String fileName = sdf.format(issueDate) + "_";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHH");
+        String fileName = formatter.format(issueDate) + "_";
         fileName += watershedName;
         fileName += "_hefs_csv_hourly";
 
@@ -71,12 +70,14 @@ public class CsvEnsembleReader {
         while( t.isBefore(endDate.plusHours(1)))
         {
             RfcCsvFile csv = Read(watershedName, t);
+
             if (csv != null)
             {
                 for (String locName : csv.LocationNames)
                 {
-                    Forecast f = output.AddForecast(locName, t, csv.GetEnsemble(locName),csv.TimeStamps);
-                    f.TimeStamps = csv.TimeStamps;
+                    LocalDateTime t1 = csv.TimeStamps[0];
+                    Forecast f = output.AddForecast(locName, t, csv.GetEnsemble(locName),t1,csv.getInterval());
+                    //f.TimeStamps = csv.TimeStamps;
                 }
             }
             t = t.plusDays(1);

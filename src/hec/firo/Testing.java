@@ -7,6 +7,9 @@ import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
 import org.junit.Test;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -28,6 +31,7 @@ public class Testing {
 
     }
 
+    @Test
     public void WriteEnsemble(){
         try {
             RfcCsvFile csv = new RfcCsvFile(CacheDir + "\\test.csv");
@@ -39,15 +43,63 @@ public class Testing {
             EnsembleDatabase db = new EnsembleDatabase(fn);
             Watershed ws = new Watershed("texas");
             LocalDateTime issuedate= LocalDateTime.of(2019,1,1,12,0);
-            LocalDateTime[] timestamps = {issuedate};
-            ws.AddForecast("home",issuedate,data,timestamps);
+
+            ws.AddForecast("home",issuedate,data,issuedate,csv.getInterval());
             db.Write(ws);
 
         }catch (Exception e)
         {
+            System.out.println("error");
             System.out.println(e.getMessage());
         }
     }
+
+    @Test
+    public void Load40Days()
+    {
+        String cacheDir = "c:/temp/hefs_cache";
+        String fn = "c:/temp/java-ensemble-test.db";
+
+        File f = new File(fn);
+        f.delete();
+        // TO DO.. need Ensemble Reader
+        CsvEnsembleReader reader = new CsvEnsembleReader(cacheDir);
+
+        String[] watershedNames = { "RussianNapa", "EastSierra", "FeatherYuba" };
+        try {
+            for (String name : watershedNames) {
+
+                LocalDateTime t1 = LocalDateTime.of(2013, 11, 3, 12, 0, 0);
+                Watershed ws = reader.Read(name, t1, t1.plusDays(40));
+
+                EnsembleDatabase db = new EnsembleDatabase(fn);
+                db.Write( ws);
+            }
+        }
+        catch (Exception ex)
+        {
+        System.out.println("Error: "+ex.getMessage());
+
+        }
+    }
+
+    @Test
+    public void SqLiteTest() {
+        //-Djava.io.tmpdir=c:/temp
+        Connection c =null;
+        String cs = "jdbc:sqlite:c:/temp/sqlite_test.db";
+        try{
+        c = DriverManager.getConnection(cs);
+        System.out.println("Hi");
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error: "+e.getMessage());
+        }
+
+
+    }
+
 
 
 }
