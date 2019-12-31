@@ -9,10 +9,10 @@ import java.util.Properties;
 /**
  *  Read/Write Ensembles to a ODBC database
  */
-public class EnsembleDatabase {
+public class EnsembleDatabase implements AutoCloseable {
 
     static String DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
-    private static String TableName = "timeseries_blob";
+    private static String TableName = "timeseries_ensemble";
 
     String FileName;
     Connection _connection;
@@ -28,10 +28,11 @@ public class EnsembleDatabase {
         CreateTable();
     }
 
-    public void commit()
+    public void close()
     {
         try {
             _connection.commit();
+            _connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -42,7 +43,7 @@ public class EnsembleDatabase {
     public void Write(Watershed watershed) throws Exception
     {
         try {
-            String sql = "INSERT INTO timeseries_blob ([id], [issue_date], [watershed], [location_name], "+
+            String sql = "INSERT INTO "+TableName+" ([id], [issue_date], [watershed], [location_name], "+
                     " [timeseries_start_date], [member_length], [member_count], [compressed], [byte_value_array]) VALUES "+
                     "(?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -57,6 +58,7 @@ public class EnsembleDatabase {
                     index++;
                     float[][] data = f.Ensemble;
                     byte[] bytes = EnsembleCompression.Pack(data,compress);
+                    int len = bytes.length;
                      InsertEnsemble(index, f.IssueDate, watershed.Name, loc.Name, f.startDateTime,
                             data[0].length, data.length, compress, bytes);
                 }
@@ -198,6 +200,14 @@ public class EnsembleDatabase {
         cmd.execute();
     }
 
+    /**
+     * insertPiscesCatalog adds entries to the pisces series catalog
+     */
+    private void insertPiscesCatalog(){
+
+        //
+
+    }
 
 
 }

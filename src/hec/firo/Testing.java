@@ -1,5 +1,6 @@
 package hec.firo;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -12,7 +13,11 @@ import static org.junit.Assert.*;
 
 public class Testing {
 
+
+
     static String CacheDir = "C:\\Temp\\hefs_cache";
+    static String[] watershedNames = { "RussianNapa", "EastSierra", "FeatherYuba" };
+
     @Test
     public void ReadCsv()
     {
@@ -51,8 +56,11 @@ public class Testing {
             db = new EnsembleDatabase(fn);
             Watershed ws2 = db.Read("texas",issuedate,issuedate);
             float[][] data2 = ws2.Locations.get(0).Forecasts.get(0).Ensemble;
-            AssertSCRN2(data2);
 
+
+            AssertSCRN2(data2);
+            Assert.assertEquals(data.length,data2.length);
+            Assert.assertEquals(data[0].length,data2[0].length);
 
         }catch (Exception e)
         {
@@ -65,19 +73,15 @@ public class Testing {
     @Test
     public void Load40Days()
     {
-        String cacheDir = "c:/temp/hefs_cache";
         int numDays = 40;
         String fn = "c:/temp/java-ensemble-test"+numDays+".db";
 
         File f = new File(fn);
         f.delete();
-        // TO DO.. need Ensemble Reader
-        CsvEnsembleReader reader = new CsvEnsembleReader(cacheDir);
+        CsvEnsembleReader reader = new CsvEnsembleReader(CacheDir);
 
-        String[] watershedNames = { "RussianNapa", "EastSierra", "FeatherYuba" };
-
-        try {
-            EnsembleDatabase db = new EnsembleDatabase(fn);
+        try ( EnsembleDatabase db = new EnsembleDatabase(fn))
+        {
             for (String name : watershedNames) {
 
                 LocalDateTime t1 = LocalDateTime.of(2013, 11, 3, 12, 0, 0);
@@ -94,7 +98,7 @@ public class Testing {
     }
 
     @Test
-    public void SqLiteTest() {
+    public void minimalSqLiteTest() {
         //-Djava.io.tmpdir=c:/temp
         Connection c =null;
         String cs = "jdbc:sqlite:c:/temp/sqlite_test.db";
@@ -106,9 +110,48 @@ public class Testing {
         {
             System.out.println("Error: "+e.getMessage());
         }
+    }
 
+    /**
+     * ensembleWriter may be used to test
+     * writing large amounts of ensemble data
+     *
+     */
+    //@Test
+    public void ensembleWriter()
+    {
+        boolean SPEEDRUN = false;
+        LocalDateTime t1 = LocalDateTime.of(2013, 11, 3, 12, 0, 0);
+        LocalDateTime t2 = LocalDateTime.of(2018, 11, 3, 12, 0, 0);
+
+        if(SPEEDRUN)
+            t2 = t1.plusDays(365);
+        String fn = "c:/temp/ensembleTester.db";
+        File f = new File(fn);
+        f.delete();
+        CsvEnsembleReader reader = new CsvEnsembleReader(CacheDir);
+
+        long total = 0;
+        try ( EnsembleDatabase db = new EnsembleDatabase(fn))
+        {
+            for (String name : watershedNames) {
+
+                Watershed ws = reader.Read(name, t1, t2);
+                long start = System.currentTimeMillis();
+                db.Write( ws);
+                long end = System.currentTimeMillis();
+                total += end-start;
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error: "+e.getMessage());
+            e.printStackTrace();
+        }
+     System.out.println("Write Time: "+total/1000.0);
 
     }
+
 
 
 
