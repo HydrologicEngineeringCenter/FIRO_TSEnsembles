@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -47,7 +48,7 @@ public class EnsembleCompression {
     private static byte[] gzipCompress(byte[] uncompressedData) {
         byte[] result = new byte[]{};
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream(uncompressedData.length);
-             GZIPOutputStream gzipOS = new GZIPOutputStream(bos)) {
+             GZIPOutputStream gzipOS = new GZIPOutputStream(bos /*,65536,false*/)) {
             gzipOS.write(uncompressedData);
             // You need to close it before using bos
             gzipOS.close();
@@ -85,6 +86,7 @@ public class EnsembleCompression {
         //byteBuffer.clear()
         for (int i = 0; i <data.length ; i++) {
             float[] row = data[i];
+            //FloatBuffer fb = FloatBuffer.wrap(row);
             for (int j = 0; j <row.length ; j++) {
                 byteBuffer.putFloat(row[j]);
             }

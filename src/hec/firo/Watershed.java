@@ -32,8 +32,9 @@ public class Watershed
 
       if (loc == null) {
           loc = new Location(locName, this);
-      }
         Locations.add(loc);
+      }
+
 
       return loc;
     }

@@ -66,7 +66,8 @@ public class Testing {
     public void Load40Days()
     {
         String cacheDir = "c:/temp/hefs_cache";
-        String fn = "c:/temp/java-ensemble-test.db";
+        int numDays = 40;
+        String fn = "c:/temp/java-ensemble-test"+numDays+".db";
 
         File f = new File(fn);
         f.delete();
@@ -80,7 +81,7 @@ public class Testing {
             for (String name : watershedNames) {
 
                 LocalDateTime t1 = LocalDateTime.of(2013, 11, 3, 12, 0, 0);
-                Watershed ws = reader.Read(name, t1, t1.plusDays(4));
+                Watershed ws = reader.Read(name, t1, t1.plusDays(numDays));
 
                 db.Write( ws);
             }

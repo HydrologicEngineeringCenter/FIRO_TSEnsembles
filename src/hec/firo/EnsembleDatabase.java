@@ -165,7 +165,7 @@ public class EnsembleDatabase {
     private int GetNextID()
     {
         String sql = "SELECT max(id) max FROM "+TableName;
-        int rval = -1;
+        int rval = 0;
         try {
             Statement stmt  = _connection.createStatement();
             ResultSet rs    = stmt.executeQuery(sql);
@@ -173,13 +173,13 @@ public class EnsembleDatabase {
             while (rs.next()) {
                 Object o = rs.getObject("max");
                 if( o == null)
-                    return -1;
+                    return 0;
                 rval = (int)o;
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        return rval+1;
+        return rval;
     }
 
     private void  CreateTable()throws Exception
