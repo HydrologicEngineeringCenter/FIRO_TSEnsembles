@@ -6,11 +6,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class RfcCsvFile
@@ -132,7 +129,7 @@ public class RfcCsvFile
       for (int rowIdx = 0; rowIdx < rowCount; rowIdx++)
       {
         String[] values = rows[rowIdx+idx1].split(",");
-        TimeStamps[rowIdx] = ParseDateTime(values[0]); // first column is DateTime
+        TimeStamps[rowIdx] = DateUtility.ParseDateTime(values[0]); // first column is DateTime
         for (int columnIdx = 0; columnIdx < columnCount; columnIdx++)
         {
           // if (columnIdx >= values.Length)
@@ -181,15 +178,6 @@ public class RfcCsvFile
         }
       }
     }
- //static DateTimeFormatter _formatter = DateTimeFormatter.ofPattern("MM/d/yyyy H:mm");
- static DateTimeFormatter _formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-    public static LocalDateTime ParseDateTime(String dt)
-    {
-      // 11/3/2013 12:00
-      return LocalDateTime.parse(dt,_formatter);
-    }
-
     public Duration getInterval() {
       LocalDateTime t1 = TimeStamps[0];
       LocalDateTime t2 = TimeStamps[1];

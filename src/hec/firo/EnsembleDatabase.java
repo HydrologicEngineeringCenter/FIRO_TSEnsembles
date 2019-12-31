@@ -1,6 +1,5 @@
 package hec.firo;
 
-
 import java.sql.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -27,6 +26,15 @@ public class EnsembleDatabase {
       _connection =  DriverManager.getConnection("jdbc:sqlite:"+FileName,prop);
       _connection.setAutoCommit(false);
         CreateTable();
+    }
+
+    public void commit()
+    {
+        try {
+            _connection.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     PreparedStatement insertCMD;
@@ -59,8 +67,8 @@ public class EnsembleDatabase {
             System.out.println("Error: writing ensembles "+e.getMessage());
         }
         finally {
-            if( _connection!= null)
-                _connection.close();
+           // if( _connection!= null)
+             //   _connection.close();
         }
 
     }
@@ -81,11 +89,14 @@ public class EnsembleDatabase {
             ResultSet rs    = stmt.executeQuery(sql);
             // loop through the result set
             while (rs.next()) {
-               // id = rs.getInt(1);
-                LocalDateTime issue_date = rs.getObject(2,LocalDateTime.class);
+                int id = rs.getInt(1);
+                String d = rs.getString(2);
+                LocalDateTime issue_date = DateUtility.ParseDateTime(d);
+
                 //watershedName = rs.getString(3,);
                 String locName = rs.getString(4);
-                LocalDateTime start_date = rs.getObject(5, LocalDateTime.class);
+                d = rs.getString(5);
+                LocalDateTime start_date =  DateUtility.ParseDateTime(d);
                 int member_length = rs.getInt(6 );
                 int member_count = rs.getInt(7);
                 boolean compressed = rs.getBoolean(8);

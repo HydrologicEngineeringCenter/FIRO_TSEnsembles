@@ -75,7 +75,8 @@ public class EnsembleCompression {
         return result;
     }
 
-
+//https://www.evanjones.ca/software/java-bytebuffers.html
+// You want to allocate a single direct ByteBuffer, and reuse it for all I/O to and from a particular channel.
     // assuming float[][] is not jagged
     //   https://stackoverflow.com/questions/14619653/how-to-convert-a-float-into-a-byte-array-and-vice-versa/20698700#20698700
     private static byte[] ConvertToBytes(float[][] data)
@@ -85,7 +86,7 @@ public class EnsembleCompression {
         for (int i = 0; i <data.length ; i++) {
             float[] row = data[i];
             for (int j = 0; j <row.length ; j++) {
-                byteBuffer.putFloat(row[i]);
+                byteBuffer.putFloat(row[j]);
             }
         }
         return byteBuffer.array();
@@ -95,6 +96,7 @@ public class EnsembleCompression {
     {
         ByteBuffer byteBuffer = ByteBuffer.allocate(data.length).order(ByteOrder.LITTLE_ENDIAN);
         byteBuffer.put(data);
+        byteBuffer.rewind();
         float[][] rval = new float[rowCount][columnCount];
 
         for (int i = 0; i <rowCount ; i++) {

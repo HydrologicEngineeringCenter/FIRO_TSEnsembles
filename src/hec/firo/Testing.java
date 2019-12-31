@@ -1,16 +1,13 @@
 package hec.firo;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
 import org.junit.Test;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import static org.junit.Assert.*;
 
 
 public class Testing {
@@ -22,17 +19,21 @@ public class Testing {
      RfcCsvFile csv = new RfcCsvFile(CacheDir+"\\test.csv");
         float[][] data = csv.GetEnsemble("SCRN2");
 
+        AssertSCRN2(data);
+
+    }
+
+    private void AssertSCRN2(float[][] data) {
         assertEquals(-1.0f, data[0][ 0],0.0001);
         assertEquals(-2.1f, data[0][1],0.0001);
         assertEquals(-3.1f, data[0][2],0.0001);
         assertEquals(-59.0f, data[58][ 0],0.0001);
         assertEquals(-59.1f, data[58][1],0.0001);
         assertEquals(-59.2f, data[58][2],0.0001);
-
     }
 
     @Test
-    public void WriteEnsemble(){
+    public void readWriteEnsemble(){
         try {
             RfcCsvFile csv = new RfcCsvFile(CacheDir + "\\test.csv");
             float[][] data = csv.GetEnsemble("SCRN2");
@@ -47,10 +48,17 @@ public class Testing {
             ws.AddForecast("home",issuedate,data,issuedate,csv.getInterval());
             db.Write(ws);
 
+            db = new EnsembleDatabase(fn);
+            Watershed ws2 = db.Read("texas",issuedate,issuedate);
+            float[][] data2 = ws2.Locations.get(0).Forecasts.get(0).Ensemble;
+            AssertSCRN2(data2);
+
+
         }catch (Exception e)
         {
             System.out.println("error");
             System.out.println(e.getMessage());
+            assertFalse(true);
         }
     }
 
@@ -66,13 +74,14 @@ public class Testing {
         CsvEnsembleReader reader = new CsvEnsembleReader(cacheDir);
 
         String[] watershedNames = { "RussianNapa", "EastSierra", "FeatherYuba" };
+
         try {
+            EnsembleDatabase db = new EnsembleDatabase(fn);
             for (String name : watershedNames) {
 
                 LocalDateTime t1 = LocalDateTime.of(2013, 11, 3, 12, 0, 0);
-                Watershed ws = reader.Read(name, t1, t1.plusDays(40));
+                Watershed ws = reader.Read(name, t1, t1.plusDays(4));
 
-                EnsembleDatabase db = new EnsembleDatabase(fn);
                 db.Write( ws);
             }
         }
