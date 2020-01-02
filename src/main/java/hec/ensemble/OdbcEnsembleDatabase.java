@@ -9,14 +9,14 @@ import java.util.Properties;
 /**
  *  Read/Write Ensembles to a ODBC database
  */
-public class EnsembleDatabase implements AutoCloseable {
+public class OdbcEnsembleDatabase implements AutoCloseable {
 
     static String DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
     private static String TableName = "timeseries_ensemble";
 
     String FileName;
     Connection _connection;
-    public EnsembleDatabase(String fileName) throws Exception
+    public OdbcEnsembleDatabase(String fileName) throws Exception
     {
       FileName= fileName;
       Properties prop = new Properties();
