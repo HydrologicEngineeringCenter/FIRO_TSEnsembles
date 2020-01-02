@@ -15,16 +15,7 @@ public class CsvEnsembleReader {
         this.path = path;
     }
 
-    static boolean DebugMode = false;
 
-    static void Log(String msg) {
-        if (DebugMode)
-            System.out.println(msg);
-    }
-
-    static void LogWarning(String msg) {
-        System.out.println("Warning: " + msg);
-    }
     /// <summary>
     /// Reads list of Forecast
     /// </summary>
@@ -46,13 +37,13 @@ public class CsvEnsembleReader {
           File f = p.toFile();
         if ( f.exists())
         {
-            Log("Found " + f.toString() + " in cache.  Reading...");
+            Logger.log("Found " + f.toString() + " in cache.  Reading...");
             RfcCsvFile csv = new RfcCsvFile(p.toString());
             return csv;
         }
         else
         {
-            LogWarning("Warning: " + p.toString() + " not found, skipping");
+            Logger.logWarning("Warning: " + p.toString() + " not found, skipping");
             return null;
         }
     }
@@ -120,18 +111,18 @@ public class CsvEnsembleReader {
     {
         if (startDate.getHour() != 12)
         {
-            System.out.println("start time must be 12");
+            Logger.logError("start time must be 12");
             return false;
         }
         if (endDate.getHour() != 12)
         {
-            System.out.println("end time must be 12");
+            Logger.logError("end time must be 12");
             return false;
         }
 
         if (startDate.isAfter(endDate))
         {
-            System.out.println("end date should be after start date");
+            Logger.logError("end date should be after start date");
             return false;
         }
         return true;

@@ -66,7 +66,7 @@ public class EnsembleDatabase implements AutoCloseable {
             _connection.commit();
         }catch(Exception e)
         {
-            System.out.println("Error: writing ensembles "+e.getMessage());
+            Logger.logError("writing ensembles "+e.getMessage());
         }
         finally {
            // if( _connection!= null)
@@ -109,7 +109,7 @@ public class EnsembleDatabase implements AutoCloseable {
                 rval.AddForecast(locName,issue_date,ensemble,start_date, Duration.ofSeconds(secondsPerHour));
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.logError(e.getMessage());
         }
 //        LocalDateTime prevIssueDate = Convert.ToDateTime(table.Rows[0]["issue_date"]);
 //        DateTime currentDate = Convert.ToDateTime(table.Rows[0]["issue_date"]);
@@ -179,7 +179,7 @@ public class EnsembleDatabase implements AutoCloseable {
                 rval = (int)o;
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.logError(e.getMessage());
         }
         return rval;
     }
