@@ -5,13 +5,16 @@ import java.time.format.DateTimeFormatter;
 
 public class DateUtility {
 
-    //static DateTimeFormatter _formatter = DateTimeFormatter.ofPattern("MM/d/yyyy H:mm");
-    static DateTimeFormatter _formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    static DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
     public static ZonedDateTime ParseDateTime(String dt)
     {
-        // 11/3/2013 12:00
-        return ZonedDateTime.parse(dt,_formatter);
+        //2013-11-03 12:00:00
+        String gmt =dt.substring(0,10)+"T"+dt.substring(11)+"Z";
+
+        ZonedDateTime zdt = ZonedDateTime.parse(gmt, formatter);
+        return zdt;
     }
 
 
