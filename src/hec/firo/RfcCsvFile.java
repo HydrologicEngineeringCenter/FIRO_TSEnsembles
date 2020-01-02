@@ -77,7 +77,7 @@ public class RfcCsvFile
       ParseData(rows);
     }
 
-    private float[][] _ensemble;
+
     /// <summary>
     /// Returns 2-D array where each row is an ensemble member
     /// note: this is an axis swap from the CSV on disk
@@ -87,6 +87,7 @@ public class RfcCsvFile
     /// <returns></returns>
     public float[][] GetEnsemble(String locationName)
     {
+      float[][] _ensemble = null;
       int idx1 = locationStart.get(locationName);
       int idx2 = locationEnd.get(locationName);
 

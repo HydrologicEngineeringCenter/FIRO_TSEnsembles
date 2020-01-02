@@ -16,20 +16,27 @@ public class Testing {
 
 
     static String CacheDir = "C:\\Temp\\hefs_cache";
+    static String TestFile = CacheDir+"\\test.csv";
     static String[] watershedNames = { "RussianNapa", "EastSierra", "FeatherYuba" };
 
     @Test
     public void ReadCsv()
     {
-     RfcCsvFile csv = new RfcCsvFile(CacheDir+"\\test.csv");
+     RfcCsvFile csv = new RfcCsvFile(TestFile);
         float[][] data = csv.GetEnsemble("SCRN2");
 
         AssertSCRN2(data);
+        float[][] susc1 = csv.GetEnsemble("SUSC1");
+
+        assertEquals(1.0f, susc1[0][0],0.0001);
+        assertEquals(2.0f, susc1[0][1],0.0001);
+        assertEquals(3.0f, susc1[0][2],0.0001);
+
 
     }
 
     private void AssertSCRN2(float[][] data) {
-        assertEquals(-1.0f, data[0][ 0],0.0001);
+        assertEquals(-1.0f, data[0][0],0.0001);
         assertEquals(-2.1f, data[0][1],0.0001);
         assertEquals(-3.1f, data[0][2],0.0001);
         assertEquals(-59.0f, data[58][ 0],0.0001);
@@ -40,8 +47,9 @@ public class Testing {
     @Test
     public void readWriteEnsemble(){
         try {
-            RfcCsvFile csv = new RfcCsvFile(CacheDir + "\\test.csv");
+            RfcCsvFile csv = new RfcCsvFile(TestFile);
             float[][] data = csv.GetEnsemble("SCRN2");
+
             String fn= "c:/temp/test.db";
             File f = new File(fn);
             f.delete();
@@ -116,16 +124,18 @@ public class Testing {
      * ensembleWriter may be used to test
      * writing large amounts of ensemble data
      *
+     * Results:
+     *  initial: 420 seconds to write a file 8.17 gb in size
+     *
      */
+
     //@Test
     public void ensembleWriter()
     {
-        boolean SPEEDRUN = false;
-        LocalDateTime t1 = LocalDateTime.of(2013, 11, 3, 12, 0, 0);
-        LocalDateTime t2 = LocalDateTime.of(2018, 11, 3, 12, 0, 0);
+        //select id, issue_date,watershed, location_name, length(byte_value_array)  from timeseries_ensemble order by issue_date, watershed
 
-        if(SPEEDRUN)
-            t2 = t1.plusDays(365);
+        if(DEBUG)
+            t2 = t1.plusDays(0);
         String fn = "c:/temp/ensembleTester.db";
         File f = new File(fn);
         f.delete();
@@ -151,7 +161,41 @@ public class Testing {
      System.out.println("Write Time: "+total/1000.0);
 
     }
+    boolean DEBUG = false;
+    LocalDateTime t1 = LocalDateTime.of(2013, 11, 3, 12, 0, 0);
+    LocalDateTime t2 = LocalDateTime.of(2018, 11, 3, 12, 0, 0);
 
+    /**
+     * 189 seconds to read 8.17 gb file
+     */
+    @Test
+    public void ensembleReader()
+    {
+        //select id, issue_date,watershed, location_name, length(byte_value_array)  from timeseries_ensemble order by issue_date, watershed
+
+        if(DEBUG)
+            t2 = t1.plusDays(0);
+        String fn = "c:/temp/ensembleTester.db";
+
+
+        long start = System.currentTimeMillis();
+        long total = 0;
+        try ( EnsembleDatabase db = new EnsembleDatabase(fn))
+        {
+            for (String name : watershedNames) {
+              Watershed ws = db.Read( name,t1,t2);
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error: "+e.getMessage());
+            e.printStackTrace();
+        }
+        long end = System.currentTimeMillis();
+        total += end-start;
+        System.out.println("Read Time: "+total/1000.0);
+
+    }
 
 
 
