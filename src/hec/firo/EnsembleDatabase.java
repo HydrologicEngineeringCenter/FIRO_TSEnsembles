@@ -2,7 +2,7 @@ package hec.firo;
 
 import java.sql.*;
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
@@ -75,7 +75,7 @@ public class EnsembleDatabase implements AutoCloseable {
 
     }
 
-    public Watershed Read(String watershedName, LocalDateTime startTime, LocalDateTime endTime)
+    public Watershed Read(String watershedName, ZonedDateTime startTime, ZonedDateTime endTime)
     {
         Watershed rval = new Watershed(watershedName);
 
@@ -93,25 +93,25 @@ public class EnsembleDatabase implements AutoCloseable {
             while (rs.next()) {
                 int id = rs.getInt(1);
                 String d = rs.getString(2);
-                LocalDateTime issue_date = DateUtility.ParseDateTime(d);
+                ZonedDateTime issue_date = DateUtility.ParseDateTime(d);
 
                 //watershedName = rs.getString(3,);
                 String locName = rs.getString(4);
                 d = rs.getString(5);
-                LocalDateTime start_date =  DateUtility.ParseDateTime(d);
+                ZonedDateTime start_date =  DateUtility.ParseDateTime(d);
                 int member_length = rs.getInt(6 );
                 int member_count = rs.getInt(7);
                 boolean compressed = rs.getBoolean(8);
                 byte[] byte_value_array = rs.getBytes(9);
                 float[][] ensemble = EnsembleCompression.UnPack(byte_value_array,member_count,member_length,compressed);
                 int secondsPerHour = 3600;// TO DO .. FIX ME hardcoded (need to add increment to schema)
-                //LocalDateTime[] timeStamps = GetTimeStamps(start_date,member_length,secondsPerHour);
+                //ZonedDateTime[] timeStamps = GetTimeStamps(start_date,member_length,secondsPerHour);
                 rval.AddForecast(locName,issue_date,ensemble,start_date, Duration.ofSeconds(secondsPerHour));
             }
         } catch (Exception e) {
             Logger.logError(e.getMessage());
         }
-//        LocalDateTime prevIssueDate = Convert.ToDateTime(table.Rows[0]["issue_date"]);
+//        ZonedDateTime prevIssueDate = Convert.ToDateTime(table.Rows[0]["issue_date"]);
 //        DateTime currentDate = Convert.ToDateTime(table.Rows[0]["issue_date"]);
 //        foreach (DataRow row in table.Rows)
 //        {
@@ -129,9 +129,9 @@ public class EnsembleDatabase implements AutoCloseable {
         return rval;
     }
 
-    private static LocalDateTime[] GetTimeStamps(LocalDateTime t1, int count, int secondsIncrement)
+    private static ZonedDateTime[] GetTimeStamps(ZonedDateTime t1, int count, int secondsIncrement)
     {
-        LocalDateTime[] rval = new LocalDateTime[count];
+        ZonedDateTime[] rval = new ZonedDateTime[count];
         for (int i = 0; i < count; i++)
         {
             rval[i] = t1;
@@ -140,13 +140,13 @@ public class EnsembleDatabase implements AutoCloseable {
         return rval;
     }
     static DateTimeFormatter _formatter = DateTimeFormatter.ofPattern(DateTimeFormat);
-    private static String FormatDate(LocalDateTime t)
+    private static String FormatDate(ZonedDateTime t)
     {
      return t.format(_formatter);
     }
 
-    private void InsertEnsemble(int id, LocalDateTime issue_date, String watershed, String location_name,
-                               LocalDateTime timeseries_start_date,int member_length, int member_count,boolean compressed,
+    private void InsertEnsemble(int id, ZonedDateTime issue_date, String watershed, String location_name,
+                               ZonedDateTime timeseries_start_date,int member_length, int member_count,boolean compressed,
                                byte[] byte_value_array) throws Exception
     {
 

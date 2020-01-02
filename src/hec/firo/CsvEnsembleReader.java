@@ -3,7 +3,7 @@ package hec.firo;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class CsvEnsembleReader {
@@ -22,7 +22,7 @@ public class CsvEnsembleReader {
     /// <param name="watershedName"></param>
     /// <param name="issueDate"></param>
     /// <returns></returns>
-    RfcCsvFile Read(String watershedName, LocalDateTime issueDate)
+    RfcCsvFile Read(String watershedName, ZonedDateTime issueDate)
     {
         //https://www.cnrfc.noaa.gov/csv/2019092312_RussianNapa_hefs_csv_hourly.zip
 
@@ -47,14 +47,14 @@ public class CsvEnsembleReader {
             return null;
         }
     }
-    public Watershed Read(String watershedName, LocalDateTime startDate, LocalDateTime endDate)
+    public Watershed Read(String watershedName, ZonedDateTime startDate, ZonedDateTime endDate)
     {
 
         if (!ValidDates(startDate, endDate))
             return null;
         Watershed output = new Watershed(watershedName);
 
-        LocalDateTime t = startDate;
+        ZonedDateTime t = startDate;
 
         while( t.isBefore(endDate.plusHours(1)))
         {
@@ -64,7 +64,7 @@ public class CsvEnsembleReader {
             {
                 for (String locName : csv.LocationNames)
                 {
-                    LocalDateTime t1 = csv.TimeStamps[0];
+                    ZonedDateTime t1 = csv.TimeStamps[0];
                     Forecast f = output.AddForecast(locName, t, csv.GetEnsemble(locName),t1,csv.getInterval());
                     //f.TimeStamps = csv.TimeStamps;
                 }
@@ -107,7 +107,7 @@ public class CsvEnsembleReader {
 //        return output;
 //    }
 
-    boolean ValidDates(LocalDateTime startDate, LocalDateTime endDate)
+    boolean ValidDates(ZonedDateTime startDate, ZonedDateTime endDate)
     {
         if (startDate.getHour() != 12)
         {

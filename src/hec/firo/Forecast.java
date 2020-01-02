@@ -1,7 +1,7 @@
 package hec.firo;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Forecast contains an Ensemble with some associated information
@@ -12,7 +12,7 @@ public class Forecast
   {
     private final Duration interval;
 
-    public Forecast(Location location, LocalDateTime issueDate, float[][] ensemble, LocalDateTime startDate, Duration interval)
+    public Forecast(Location location, ZonedDateTime issueDate, float[][] ensemble, ZonedDateTime startDate, Duration interval)
     {
       this.Location = location;
       this.IssueDate = issueDate;
@@ -26,17 +26,17 @@ public class Forecast
     /// </summary>
     public Location Location;
 
-    public LocalDateTime IssueDate;
+    public ZonedDateTime IssueDate;
 
-    public LocalDateTime startDateTime;
+    public ZonedDateTime startDateTime;
 
     public int getTimeCount(){
       return Ensemble[0].length;
   }
-    public LocalDateTime[] getTimeStamps() {
+    public ZonedDateTime[] getTimeStamps() {
 
-      LocalDateTime[] rval = new LocalDateTime[getTimeCount()];
-      LocalDateTime t = startDateTime;
+      ZonedDateTime[] rval = new ZonedDateTime[getTimeCount()];
+      ZonedDateTime t = startDateTime;
       int size= getTimeCount();
       for (int i = 0; i <size ; i++) {
         rval[i] =t;

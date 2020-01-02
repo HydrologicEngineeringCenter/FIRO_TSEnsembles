@@ -7,7 +7,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 public class RfcCsvFile
@@ -15,7 +15,7 @@ public class RfcCsvFile
     public String FileName;
     public List<String> LocationNames ;
 
-    public LocalDateTime[] TimeStamps;
+    public ZonedDateTime[] TimeStamps;
 
     private float[][] Data;
 
@@ -125,7 +125,7 @@ public class RfcCsvFile
       int idx1 = 2; // data starts after two header lines
       int rowCount = idx2 - idx1 + 1;
       int columnCount = header.length - 1; // date column will not be part of data
-      TimeStamps = new LocalDateTime[rowCount];
+      TimeStamps = new ZonedDateTime[rowCount];
       Data = new float[columnCount][rowCount]; // swap axis
       for (int rowIdx = 0; rowIdx < rowCount; rowIdx++)
       {
@@ -180,8 +180,8 @@ public class RfcCsvFile
       }
     }
     public Duration getInterval() {
-      LocalDateTime t1 = TimeStamps[0];
-      LocalDateTime t2 = TimeStamps[1];
+      ZonedDateTime t1 = TimeStamps[0];
+      ZonedDateTime t2 = TimeStamps[1];
       Duration interval = Duration.between(t1, t2);
       return interval;
     }
