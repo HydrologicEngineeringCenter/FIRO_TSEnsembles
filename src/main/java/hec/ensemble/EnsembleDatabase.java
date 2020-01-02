@@ -1,4 +1,4 @@
-package hec.firo;
+package hec.ensemble;
 
 import java.sql.*;
 import java.time.Duration;

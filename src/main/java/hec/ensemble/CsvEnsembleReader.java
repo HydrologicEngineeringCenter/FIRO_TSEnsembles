@@ -1,4 +1,4 @@
-package hec.firo;
+package hec.ensemble;
 
 import java.io.File;
 import java.nio.file.Path;

@@ -1,4 +1,4 @@
-package hec.firo;
+package hec.ensemble;
 
 public class Logger {
 
