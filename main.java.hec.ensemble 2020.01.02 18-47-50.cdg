@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ClassDiagram name="main.java.hec.ensemble">
+  <ClassDiagramComponents>
+    <Class name="EnsembleCompression" package="hec.ensemble" visibility="public" xPosition="20.0" yPosition="20.0">
+      <Fields/>
+      <Constructors/>
+      <Methods>
+        <Method name="UnPack" returnType="float[][]" visibility="public" isStatic="true">
+          <Argument type="byte[]" name="data"/>
+          <Argument type="int" name="rowCount"/>
+          <Argument type="int" name="columnCount"/>
+          <Argument type="boolean" name="compressed"/>
+        </Method>
+        <Method name="Pack" returnType="byte[]" visibility="public" isStatic="true">
+          <Argument type="float[][]" name="data"/>
+          <Argument type="boolean" name="compress"/>
+        </Method>
+        <Method name="gzipCompress" returnType="byte[]" visibility="private" isStatic="true">
+          <Argument type="byte[]" name="uncompressedData"/>
+        </Method>
+        <Method name="gzipUncompress" returnType="byte[]" visibility="private" isStatic="true">
+          <Argument type="byte[]" name="compressedData"/>
+        </Method>
+        <Method name="ConvertToBytes" returnType="byte[]" visibility="private" isStatic="true">
+          <Argument type="float[][]" name="data"/>
+        </Method>
+        <Method name="ConvertFromBytes" returnType="float[][]" visibility="private" isStatic="true">
+          <Argument type="byte[]" name="data"/>
+          <Argument type="int" name="rowCount"/>
+          <Argument type="int" name="columnCount"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="Forecast" package="hec.ensemble" visibility="public" xPosition="320.0" yPosition="20.0">
+      <Fields>
+        <Field name="interval" type="Duration" visibility="private" isFinal="true"/>
+        <Field name="Location" type="Location" visibility="public"/>
+        <Field name="IssueDate" type="ZonedDateTime" visibility="public"/>
+        <Field name="startDateTime" type="ZonedDateTime" visibility="public"/>
+        <Field name="Ensemble" type="float[][]" visibility="public"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="Location" name="location"/>
+          <Argument type="ZonedDateTime" name="issueDate"/>
+          <Argument type="float[][]" name="ensemble"/>
+          <Argument type="ZonedDateTime" name="startDate"/>
+          <Argument type="Duration" name="interval"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="getTimeCount" returnType="int" visibility="public"/>
+        <Method name="getTimeStamps" returnType="ZonedDateTime[]" visibility="public"/>
+      </Methods>
+    </Class>
+    <Class name="Logger" package="hec.ensemble" visibility="public" xPosition="620.0" yPosition="20.0">
+      <Fields>
+        <Field name="DebugMode" type="boolean" visibility="package" isStatic="true"/>
+      </Fields>
+      <Constructors/>
+      <Methods>
+        <Method name="log" returnType="void" visibility="package" isStatic="true">
+          <Argument type="String" name="msg"/>
+        </Method>
+        <Method name="logWarning" returnType="void" visibility="package" isStatic="true">
+          <Argument type="String" name="msg"/>
+        </Method>
+        <Method name="logError" returnType="void" visibility="package" isStatic="true">
+          <Argument type="String" name="msg"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="OdbcEnsembleDatabase" package="hec.ensemble" visibility="public" xPosition="920.0" yPosition="20.0">
+      <Fields>
+        <Field name="DateTimeFormat" type="String" visibility="package" isStatic="true"/>
+        <Field name="TableName" type="String" visibility="private" isStatic="true"/>
+        <Field name="FileName" type="String" visibility="package"/>
+        <Field name="_connection" type="Connection" visibility="package"/>
+        <Field name="insertCMD" type="PreparedStatement" visibility="package"/>
+        <Field name="_formatter" type="DateTimeFormatter" visibility="package" isStatic="true"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="String" name="fileName"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="close" returnType="void" visibility="public"/>
+        <Method name="Write" returnType="void" visibility="public">
+          <Argument type="Watershed" name="watershed"/>
+        </Method>
+        <Method name="Read" returnType="Watershed" visibility="public">
+          <Argument type="String" name="watershedName"/>
+          <Argument type="ZonedDateTime" name="startTime"/>
+          <Argument type="ZonedDateTime" name="endTime"/>
+        </Method>
+        <Method name="GetTimeStamps" returnType="ZonedDateTime[]" visibility="private" isStatic="true">
+          <Argument type="ZonedDateTime" name="t1"/>
+          <Argument type="int" name="count"/>
+          <Argument type="int" name="secondsIncrement"/>
+        </Method>
+        <Method name="FormatDate" returnType="String" visibility="private" isStatic="true">
+          <Argument type="ZonedDateTime" name="t"/>
+        </Method>
+        <Method name="InsertEnsemble" returnType="void" visibility="private">
+          <Argument type="int" name="id"/>
+          <Argument type="ZonedDateTime" name="issue_date"/>
+          <Argument type="String" name="watershed"/>
+          <Argument type="String" name="location_name"/>
+          <Argument type="ZonedDateTime" name="timeseries_start_date"/>
+          <Argument type="int" name="member_length"/>
+          <Argument type="int" name="member_count"/>
+          <Argument type="boolean" name="compressed"/>
+          <Argument type="byte[]" name="byte_value_array"/>
+        </Method>
+        <Method name="GetNextID" returnType="int" visibility="private"/>
+        <Method name="CreateTable" returnType="void" visibility="private"/>
+        <Method name="insertPiscesCatalog" returnType="void" visibility="private"/>
+      </Methods>
+    </Class>
+    <Class name="Watershed" package="hec.ensemble" visibility="public" xPosition="1220.0" yPosition="20.0">
+      <Fields>
+        <Field name="Name" type="String" visibility="public"/>
+        <Field name="Locations" type="ArrayList&lt;Location&gt;" visibility="public"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="String" name="name"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="AddForecast" returnType="Forecast" visibility="public">
+          <Argument type="String" name="locName"/>
+          <Argument type="ZonedDateTime" name="issueDate"/>
+          <Argument type="float[][]" name="ensemble"/>
+          <Argument type="ZonedDateTime" name="startDate"/>
+          <Argument type="Duration" name="interval"/>
+        </Method>
+        <Method name="GetOrCreateLocation" returnType="Location" visibility="private">
+          <Argument type="String" name="locName"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="Location" package="hec.ensemble" visibility="public" xPosition="1520.0" yPosition="20.0">
+      <Fields>
+        <Field name="Name" type="String" visibility="public"/>
+        <Field name="Watershed" type="Watershed" visibility="public"/>
+        <Field name="Forecasts" type="ArrayList&lt;Forecast&gt;" visibility="public"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="String" name="name"/>
+          <Argument type="Watershed" name="watershed"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="AddForecast" returnType="Forecast" visibility="package">
+          <Argument type="ZonedDateTime" name="issueDate"/>
+          <Argument type="float[][]" name="ensemble"/>
+          <Argument type="ZonedDateTime" name="startDate"/>
+          <Argument type="Duration" name="interval"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="RfcCsvFile" package="hec.ensemble" visibility="public" xPosition="1820.0" yPosition="20.0">
+      <Fields>
+        <Field name="FileName" type="String" visibility="public"/>
+        <Field name="LocationNames" type="List&lt;String&gt;" visibility="public"/>
+        <Field name="TimeStamps" type="ZonedDateTime[]" visibility="public"/>
+        <Field name="Data" type="float[][]" visibility="private"/>
+        <Field name="locationStart" type="Map&lt;String, Integer&gt;" visibility="package"/>
+        <Field name="locationEnd" type="Map&lt;String, Integer&gt;" visibility="package"/>
+        <Field name="header" type="String[]" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="String" name="fileName"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="GetEnsemble" returnType="float[][]" visibility="public">
+          <Argument type="String" name="locationName"/>
+        </Method>
+        <Method name="ParseData" returnType="void" visibility="private">
+          <Argument type="String[]" name="rows"/>
+        </Method>
+        <Method name="FindLastRowIndex" returnType="int" visibility="private">
+          <Argument type="String[]" name="rows"/>
+        </Method>
+        <Method name="ParseHeader" returnType="void" visibility="private">
+          <Argument type="String" name="line"/>
+        </Method>
+        <Method name="getInterval" returnType="Duration" visibility="public"/>
+      </Methods>
+    </Class>
+    <Class name="CsvEnsembleReader" package="hec.ensemble" visibility="public" xPosition="2120.0" yPosition="20.0">
+      <Fields>
+        <Field name="path" type="String" visibility="package"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="String" name="path"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="Read" returnType="RfcCsvFile" visibility="package">
+          <Argument type="String" name="watershedName"/>
+          <Argument type="ZonedDateTime" name="issueDate"/>
+        </Method>
+        <Method name="Read" returnType="Watershed" visibility="public">
+          <Argument type="String" name="watershedName"/>
+          <Argument type="ZonedDateTime" name="startDate"/>
+          <Argument type="ZonedDateTime" name="endDate"/>
+        </Method>
+        <Method name="ValidDates" returnType="boolean" visibility="package">
+          <Argument type="ZonedDateTime" name="startDate"/>
+          <Argument type="ZonedDateTime" name="endDate"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="DateUtility" package="hec.ensemble" visibility="public" xPosition="20.0" yPosition="420.0">
+      <Fields>
+        <Field name="formatter" type="DateTimeFormatter" visibility="package" isStatic="true"/>
+      </Fields>
+      <Constructors/>
+      <Methods>
+        <Method name="ParseDateTime" returnType="ZonedDateTime" visibility="public" isStatic="true">
+          <Argument type="String" name="dt"/>
+        </Method>
+      </Methods>
+    </Class>
+  </ClassDiagramComponents>
+  <ClassDiagramRelations>
+    <UseRelation source="hec.ensemble.OdbcEnsembleDatabase" target="hec.ensemble.Watershed" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="hec.ensemble.Location" target="hec.ensemble.Forecast" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="hec.ensemble.Watershed" target="hec.ensemble.Location" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="hec.ensemble.CsvEnsembleReader" target="hec.ensemble.RfcCsvFile" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="hec.ensemble.CsvEnsembleReader" target="hec.ensemble.Watershed" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="hec.ensemble.Watershed" target="hec.ensemble.Forecast" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="Locations" source="hec.ensemble.Watershed" target="hec.ensemble.Location" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="ArrayList&lt;Location&gt;"/>
+    <HasRelation name="Forecasts" source="hec.ensemble.Location" target="hec.ensemble.Forecast" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="ArrayList&lt;Forecast&gt;"/>
+    <HasRelation name="Watershed" source="hec.ensemble.Location" target="hec.ensemble.Watershed" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="Location" source="hec.ensemble.Forecast" target="hec.ensemble.Location" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+  </ClassDiagramRelations>
+</ClassDiagram>
