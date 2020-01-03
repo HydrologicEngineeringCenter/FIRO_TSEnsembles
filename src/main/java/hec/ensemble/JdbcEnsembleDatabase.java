@@ -7,16 +7,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 /**
- *  Read/Write Ensembles to a ODBC database
+ *  Read/Write Ensembles to a JDBC database
  */
-public class OdbcEnsembleDatabase implements AutoCloseable {
+public class JdbcEnsembleDatabase implements AutoCloseable {
 
     static String DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
     private static String TableName = "timeseries_ensemble";
 
     String FileName;
     Connection _connection;
-    public OdbcEnsembleDatabase(String fileName) throws Exception
+    public JdbcEnsembleDatabase(String fileName) throws Exception
     {
       FileName= fileName;
       Properties prop = new Properties();
