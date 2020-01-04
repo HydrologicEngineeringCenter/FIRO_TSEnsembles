@@ -40,7 +40,10 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
 
     PreparedStatement insertCMD;
 
-    public void Write(EnsembleTimeSeries[] ets) throws Exception
+    public void Write(EnsembleTimeSeries ets) throws Exception {
+        Write(new EnsembleTimeSeries[]{ets});
+    }
+        public void Write(EnsembleTimeSeries[] ets) throws Exception
     {
         try {
             String sql = "INSERT INTO "+TableName+" ([id], [issue_date], [watershed], [location_name], "+
@@ -53,14 +56,13 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
             int index = GetNextID();
             for(EnsembleTimeSeries loc : ets)
             {
-                for(Ensemble f : loc.ensembleList)
+                for(Ensemble e : loc.ensembleList)
                 {
                     index++;
-                    float[][] data = f.values;
+                    float[][] data = e.values;
                     byte[] bytes = EnsembleCompression.Pack(data,compress);
-                    int len = bytes.length;
-                     InsertEnsemble(index, f.IssueDate, loc.getWatershedName(),
-                             loc.getLocationName(), f.startDateTime,
+                     InsertEnsemble(index, e.IssueDate, loc.getWatershedName(),
+                             loc.getLocationName(), e.startDateTime,
                             data[0].length, data.length, compress, bytes);
                 }
             }
@@ -76,15 +78,14 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
 
     }
 
-    public EnsembleTimeSeries Read(String watershedName, ZonedDateTime startTime, ZonedDateTime endTime)
+    public EnsembleTimeSeries Read(String  locationName, ZonedDateTime issueDate)
     {
-        EnsembleTimeSeries rval = new EnsembleTimeSeries(watershedName);
+        EnsembleTimeSeries rval = new EnsembleTimeSeries(locationName,"","");
 
         String sql = "select * from " + TableName +
-                " WHERE issue_date >= '" + FormatDate(startTime) + "' "
-                + " AND issue_date <= '" + FormatDate(endTime) + "' "
-                + " AND watershed = '" + watershedName + "' ";
-        sql += " order by watershed,issue_date,location_name";
+                " WHERE issue_date = '" + FormatDate(issueDate) + "' "
+                + " AND location_name = '" + locationName + "' ";
+        sql += " order by issue_date";
 
 
         try {
@@ -97,49 +98,24 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
                 ZonedDateTime issue_date = DateUtility.ParseDateTime(d);
 
                 //watershedName = rs.getString(3,);
-                String locName = rs.getString(4);
+                //String locName = rs.getString(4);
                 d = rs.getString(5);
                 ZonedDateTime start_date =  DateUtility.ParseDateTime(d);
                 int member_length = rs.getInt(6 );
                 int member_count = rs.getInt(7);
                 boolean compressed = rs.getBoolean(8);
                 byte[] byte_value_array = rs.getBytes(9);
-                float[][] ensemble = EnsembleCompression.UnPack(byte_value_array,member_count,member_length,compressed);
+                float[][] values = EnsembleCompression.UnPack(byte_value_array,member_count,member_length,compressed);
                 int secondsPerHour = 3600;// TO DO .. FIX ME hardcoded (need to add increment to schema)
-                //ZonedDateTime[] timeStamps = GetTimeStamps(start_date,member_length,secondsPerHour);
-                rval.addEnsemble(locName,issue_date,ensemble,start_date, Duration.ofSeconds(secondsPerHour));
+                Ensemble e = new Ensemble(issue_date,values,start_date,Duration.ofSeconds(secondsPerHour));
+                rval.addEnsemble(e);
             }
         } catch (Exception e) {
             Logger.logError(e.getMessage());
         }
-//        ZonedDateTime prevIssueDate = Convert.ToDateTime(table.Rows[0]["issue_date"]);
-//        DateTime currentDate = Convert.ToDateTime(table.Rows[0]["issue_date"]);
-//        foreach (DataRow row in table.Rows)
-//        {
-//            currentDate = Convert.ToDateTime(row["issue_date"]);
-//
-//            var times = GetTimes(row);
-//            GetValues(row,ref values);
-//
-//            rval.addEnsemble(row["location_name"].ToString(),
-//                    currentDate,
-//                    values,
-//                    times);
-//
-//        }
         return rval;
     }
 
-    private static ZonedDateTime[] GetTimeStamps(ZonedDateTime t1, int count, int secondsIncrement)
-    {
-        ZonedDateTime[] rval = new ZonedDateTime[count];
-        for (int i = 0; i < count; i++)
-        {
-            rval[i] = t1;
-            t1 = t1.plusSeconds(secondsIncrement);
-        }
-        return rval;
-    }
     static DateTimeFormatter _formatter = DateTimeFormatter.ofPattern(DateTimeFormat);
     private static String FormatDate(ZonedDateTime t)
     {
@@ -199,15 +175,6 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
                 + "  byte_value_array BLOB NULL )";
         PreparedStatement cmd = _connection.prepareStatement(sql);
         cmd.execute();
-    }
-
-    /**
-     * insertPiscesCatalog adds entries to the pisces series catalog
-     */
-    private void insertPiscesCatalog(){
-
-        //
-
     }
 
 

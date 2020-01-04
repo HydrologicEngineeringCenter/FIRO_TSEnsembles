@@ -38,7 +38,7 @@ public class EnsembleTimeSeries
     }
 
     public void addEnsemble(Ensemble ensemble) {
-
+      ensemble.parent = this;
     ensembleList.add(ensemble);
     }
 

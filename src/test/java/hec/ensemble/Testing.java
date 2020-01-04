@@ -53,15 +53,15 @@ public class Testing {
             f.delete();
 
             JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fn);
-            EnsembleTimeSeries ws = new EnsembleTimeSeries("texas");
+            EnsembleTimeSeries ets = new EnsembleTimeSeries("texas","","");
             ZonedDateTime issuedate = ZonedDateTime.of(2019, 1, 1, 12, 0,0,0, ZoneId.of("GMT"));
 
-            ws.addEnsemble("home", issuedate, data, issuedate, csv.getInterval());
-            db.Write(ws);
+            ets.addEnsemble(issuedate, data, issuedate, csv.getInterval());
+            db.Write(ets);
 
             db = new JdbcEnsembleDatabase(fn);
-            EnsembleTimeSeries ws2 = db.Read("texas", issuedate, issuedate);
-            float[][] data2 = ws2.ensembleList.get(0).Forecasts.get(0).values;
+            EnsembleTimeSeries ws2 = db.Read("texas", issuedate);
+            float[][] data2 = ws2.ensembleList.get(0).values;
 
 
             AssertSCRN2(data2);
@@ -88,9 +88,9 @@ public class Testing {
             for (String name : watershedNames) {
 
                 ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0,0,ZoneId.of("GMT"));
-                EnsembleTimeSeries ws = reader.Read(name, t1, t1.plusDays(numDays));
+                EnsembleTimeSeries[] ets = reader.Read(name, t1, t1.plusDays(numDays));
 
-                db.Write(ws);
+                db.Write(ets);
             }
         } catch (Exception ex) {
             System.out.println("Error: " + ex.getMessage());
@@ -132,7 +132,7 @@ public class Testing {
         try (JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fn)) {
             for (String name : watershedNames) {
 
-                EnsembleTimeSeries ws = reader.Read(name, t1, t2);
+                EnsembleTimeSeries[] ws = reader.Read(name, t1, t2);
                 long start = System.currentTimeMillis();
                 db.Write(ws);
                 long end = System.currentTimeMillis();
@@ -166,7 +166,7 @@ public class Testing {
         long total = 0;
         try (JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fn)) {
             for (String name : watershedNames) {
-                EnsembleTimeSeries ws = db.Read(name, t1, t2);
+                EnsembleTimeSeries ws = db.Read(name, t1);
             }
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -178,22 +178,4 @@ public class Testing {
 
     }
 
-    public void readSingleLocation() {
-        try {
-//            // Assume single watershed per sqlite database.
-//            JdbcEnsembleDatabase db = new JdbcEnsembleDatabase("basin7.db");
-//            // query a list of location?
-//            String[] locationNames = db.getLocationNames();
-//
-//            ZonedDateTime issueDate = ZonedDateTime.of(2020, 1, 1, 12, 0);
-//            values forecast = db.values(locationNames[2], issueDate);
-//
-//            float[] member1 = forecast.values[0];
-//            ZonedDateTime[] timestamps = forecast.getTimeStamps();
-
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
 }
