@@ -53,15 +53,15 @@ public class Testing {
             f.delete();
 
             JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fn);
-            Watershed ws = new Watershed("texas");
+            EnsembleTimeSeries ws = new EnsembleTimeSeries("texas");
             ZonedDateTime issuedate = ZonedDateTime.of(2019, 1, 1, 12, 0,0,0, ZoneId.of("GMT"));
 
-            ws.AddForecast("home", issuedate, data, issuedate, csv.getInterval());
+            ws.addEnsemble("home", issuedate, data, issuedate, csv.getInterval());
             db.Write(ws);
 
             db = new JdbcEnsembleDatabase(fn);
-            Watershed ws2 = db.Read("texas", issuedate, issuedate);
-            float[][] data2 = ws2.Locations.get(0).Forecasts.get(0).Ensemble;
+            EnsembleTimeSeries ws2 = db.Read("texas", issuedate, issuedate);
+            float[][] data2 = ws2.ensembleList.get(0).Forecasts.get(0).values;
 
 
             AssertSCRN2(data2);
@@ -88,7 +88,7 @@ public class Testing {
             for (String name : watershedNames) {
 
                 ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0,0,ZoneId.of("GMT"));
-                Watershed ws = reader.Read(name, t1, t1.plusDays(numDays));
+                EnsembleTimeSeries ws = reader.Read(name, t1, t1.plusDays(numDays));
 
                 db.Write(ws);
             }
@@ -132,7 +132,7 @@ public class Testing {
         try (JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fn)) {
             for (String name : watershedNames) {
 
-                Watershed ws = reader.Read(name, t1, t2);
+                EnsembleTimeSeries ws = reader.Read(name, t1, t2);
                 long start = System.currentTimeMillis();
                 db.Write(ws);
                 long end = System.currentTimeMillis();
@@ -166,7 +166,7 @@ public class Testing {
         long total = 0;
         try (JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fn)) {
             for (String name : watershedNames) {
-                Watershed ws = db.Read(name, t1, t2);
+                EnsembleTimeSeries ws = db.Read(name, t1, t2);
             }
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -186,9 +186,9 @@ public class Testing {
 //            String[] locationNames = db.getLocationNames();
 //
 //            ZonedDateTime issueDate = ZonedDateTime.of(2020, 1, 1, 12, 0);
-//            Forecast forecast = db.Forecast(locationNames[2], issueDate);
+//            values forecast = db.values(locationNames[2], issueDate);
 //
-//            float[] member1 = forecast.Ensemble[0];
+//            float[] member1 = forecast.values[0];
 //            ZonedDateTime[] timestamps = forecast.getTimeStamps();
 
 

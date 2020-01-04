@@ -17,7 +17,7 @@ public class CsvEnsembleReader {
 
 
     /// <summary>
-    /// Reads list of Forecast
+    /// Reads list of values
     /// </summary>
     /// <param name="watershedName"></param>
     /// <param name="issueDate"></param>
@@ -47,12 +47,12 @@ public class CsvEnsembleReader {
             return null;
         }
     }
-    public Watershed Read(String watershedName, ZonedDateTime startDate, ZonedDateTime endDate)
+    public EnsembleTimeSeries Read(String watershedName, ZonedDateTime startDate, ZonedDateTime endDate)
     {
 
         if (!ValidDates(startDate, endDate))
             return null;
-        Watershed output = new Watershed(watershedName);
+        EnsembleTimeSeries output = new EnsembleTimeSeries(watershedName);
 
         ZonedDateTime t = startDate;
 
@@ -65,7 +65,7 @@ public class CsvEnsembleReader {
                 for (String locName : csv.LocationNames)
                 {
                     ZonedDateTime t1 = csv.TimeStamps[0];
-                    Forecast f = output.AddForecast(locName, t, csv.GetEnsemble(locName),t1,csv.getInterval());
+                    Ensemble f = output.addEnsemble(locName, t, csv.GetEnsemble(locName),t1,csv.getInterval());
                     //f.TimeStamps = csv.TimeStamps;
                 }
             }
@@ -74,12 +74,12 @@ public class CsvEnsembleReader {
         return output;
     }
 
-//    public Watershed ReadParallel(String watershedName, DateTime startDate, DateTime endDate)
+//    public EnsembleTimeSeries ReadParallel(String watershedName, DateTime startDate, DateTime endDate)
 //    {
 //        if (!ValidDates(startDate, endDate))
 //            return null;
 //
-//        var output = new Watershed(watershedName);
+//        var output = new EnsembleTimeSeries(watershedName);
 //
 //        // Each forecast is one day
 //        int numTotal = (int)Math.Round((endDate - startDate).TotalDays) + 1;
@@ -96,7 +96,7 @@ public class CsvEnsembleReader {
 //            {
 //                foreach (String locName in csv.LocationNames)
 //                {
-//                    Forecast f = output.AddForecast(locName, day, csv.GetEnsemble(locName),csv.TimeStamps);
+//                    values f = output.addEnsemble(locName, day, csv.GetEnsemble(locName),csv.TimeStamps);
 //                    f.TimeStamps = csv.TimeStamps;
 //                }
 //            }

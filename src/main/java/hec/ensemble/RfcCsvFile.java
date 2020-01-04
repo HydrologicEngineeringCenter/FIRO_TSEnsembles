@@ -55,7 +55,7 @@ public class RfcCsvFile
      */
 
     /// <summary>
-    /// CSV file format from California Nevada River Forecast Center
+    /// CSV file format from California Nevada River values Center
     /// https://www.cnrfc.noaa.gov/
     /// 
     /// First column is date/time

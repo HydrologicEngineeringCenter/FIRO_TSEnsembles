@@ -40,7 +40,7 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
 
     PreparedStatement insertCMD;
 
-    public void Write(Watershed watershed) throws Exception
+    public void Write(EnsembleTimeSeries[] ets) throws Exception
     {
         try {
             String sql = "INSERT INTO "+TableName+" ([id], [issue_date], [watershed], [location_name], "+
@@ -51,15 +51,16 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
 
             boolean compress = true;
             int index = GetNextID();
-            for(Location loc : watershed.Locations)
+            for(EnsembleTimeSeries loc : ets)
             {
-                for(Forecast f : loc.Forecasts)
+                for(Ensemble f : loc.ensembleList)
                 {
                     index++;
-                    float[][] data = f.Ensemble;
+                    float[][] data = f.values;
                     byte[] bytes = EnsembleCompression.Pack(data,compress);
                     int len = bytes.length;
-                     InsertEnsemble(index, f.IssueDate, watershed.Name, loc.Name, f.startDateTime,
+                     InsertEnsemble(index, f.IssueDate, loc.getWatershedName(),
+                             loc.getLocationName(), f.startDateTime,
                             data[0].length, data.length, compress, bytes);
                 }
             }
@@ -75,9 +76,9 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
 
     }
 
-    public Watershed Read(String watershedName, ZonedDateTime startTime, ZonedDateTime endTime)
+    public EnsembleTimeSeries Read(String watershedName, ZonedDateTime startTime, ZonedDateTime endTime)
     {
-        Watershed rval = new Watershed(watershedName);
+        EnsembleTimeSeries rval = new EnsembleTimeSeries(watershedName);
 
         String sql = "select * from " + TableName +
                 " WHERE issue_date >= '" + FormatDate(startTime) + "' "
@@ -106,7 +107,7 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
                 float[][] ensemble = EnsembleCompression.UnPack(byte_value_array,member_count,member_length,compressed);
                 int secondsPerHour = 3600;// TO DO .. FIX ME hardcoded (need to add increment to schema)
                 //ZonedDateTime[] timeStamps = GetTimeStamps(start_date,member_length,secondsPerHour);
-                rval.AddForecast(locName,issue_date,ensemble,start_date, Duration.ofSeconds(secondsPerHour));
+                rval.addEnsemble(locName,issue_date,ensemble,start_date, Duration.ofSeconds(secondsPerHour));
             }
         } catch (Exception e) {
             Logger.logError(e.getMessage());
@@ -120,7 +121,7 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
 //            var times = GetTimes(row);
 //            GetValues(row,ref values);
 //
-//            rval.AddForecast(row["location_name"].ToString(),
+//            rval.addEnsemble(row["location_name"].ToString(),
 //                    currentDate,
 //                    values,
 //                    times);

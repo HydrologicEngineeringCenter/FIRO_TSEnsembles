@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class Location
   {
-    public Location(String name, Watershed watershed)
+    public Location(String name, EnsembleTimeSeries watershed)
     {
       this.Name = name;
       Forecasts = new ArrayList<>();
@@ -15,18 +15,18 @@ public class Location
     public String Name;
 
     /// <summary>
-    /// Parent Watershed
+    /// Parent EnsembleTimeSeries
     /// </summary>
-    public Watershed Watershed;
+    public EnsembleTimeSeries Watershed;
     
     /// <summary>
     /// List of forecasts 
     /// </summary>
-    public ArrayList<Forecast> Forecasts;
+    public ArrayList<Ensemble> Forecasts;
 
-     Forecast AddForecast(ZonedDateTime issueDate, float[][] ensemble, ZonedDateTime  startDate, Duration interval)
+     Ensemble AddForecast(ZonedDateTime issueDate, float[][] ensemble, ZonedDateTime  startDate, Duration interval)
     {
-      Forecast f = new Forecast(this, issueDate,ensemble,startDate,interval);
+      Ensemble f = new Ensemble(this, issueDate,ensemble,startDate,interval);
       Forecasts.add(f);
       return f;
     }
