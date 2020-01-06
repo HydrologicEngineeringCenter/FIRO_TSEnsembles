@@ -76,10 +76,13 @@ public class CsvEnsembleReader {
                 {
                     EnsembleTimeSeries ets=null;
                     ZonedDateTime t1 = csv.TimeStamps[0];
-                    if( locationMap.containsKey(locName))
+                    if( locationMap.containsKey(locName)) {
                         ets = locationMap.get(locName);
-                    else
-                        ets = locationMap.put(locName,new EnsembleTimeSeries(locName,watershedName,csv.FileName));
+                    }
+                    else {
+                        ets = new EnsembleTimeSeries(locName, watershedName, csv.FileName);
+                        locationMap.put(locName, ets);
+                    }
 
                     ets.addEnsemble(t,csv.GetEnsemble(locName),t1,csv.getInterval());
                 }

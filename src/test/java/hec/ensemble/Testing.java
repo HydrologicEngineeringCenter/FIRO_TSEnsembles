@@ -42,6 +42,9 @@ public class Testing {
         assertEquals(-59.2f, data[58][2], 0.0001);
     }
 
+    /**
+     * Reads CSV, saves one ensemble to a database, then reads ensemble back in.
+     */
     @Test
     public void readWriteEnsemble() {
         try {
@@ -76,40 +79,32 @@ public class Testing {
     }
 
     @Test
-    public void Load40Days() {
-        int numDays = 40;
-        String fn = "c:/temp/java-ensemble-test" + numDays + ".db";
-
+    public void bulkTesting() throws Exception
+    {
+        String fn = "c:/temp/ensembleTester.db";
         File f = new File(fn);
         f.delete();
-        CsvEnsembleReader reader = new CsvEnsembleReader(CacheDir);
 
-        try (JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fn)) {
-            for (String name : watershedNames) {
+        ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0,0,ZoneId.of("GMT"));
+        //   ZonedDateTime t2 = ZonedDateTime.of(2018, 11, 3, 12, 0, 0,0,ZoneId.of("GMT"));
+        ZonedDateTime t2 = t1.plusDays(50);
+        double writeTime = 0;
+        double readTime = 0;
 
-                ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0,0,ZoneId.of("GMT"));
-                EnsembleTimeSeries[] ets = reader.Read(name, t1, t1.plusDays(numDays));
+        for (String name:watershedNames) {
 
-                db.Write(ets);
-            }
-        } catch (Exception ex) {
-            System.out.println("Error: " + ex.getMessage());
-
+            CsvEnsembleReader reader = new CsvEnsembleReader(CacheDir);
+            EnsembleTimeSeries[] ws = reader.Read(name, t1, t2);
+            writeTime += ensembleWriter(fn, ws);
+            readTime  += ensembleReader(fn,t1,t2);
         }
+        System.out.println("SUMMARY");
+        System.out.println("Write Time: " + writeTime+" s");
+        System.out.println("Read Time: " + readTime +" s");
+
     }
 
-    @Test
-    public void minimalSqLiteTest() {
-        //-Djava.io.tmpdir=c:/temp
-        Connection c = null;
-        String cs = "jdbc:sqlite:c:/temp/sqlite_test.db";
-        try {
-            c = DriverManager.getConnection(cs);
-            System.out.println("Hi");
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
+
 
     /**
      * ensembleWriter may be used to test
@@ -119,62 +114,52 @@ public class Testing {
      * initial: 420 seconds to write a file 8.17 gb in size
      */
 
-    @Test
-    public void ensembleWriter() {
+    private double ensembleWriter(String fn, EnsembleTimeSeries[] ets)
+     throws Exception{
         //select id, issue_date,watershed, location_name, length(byte_value_array)  from timeseries_ensemble order by issue_date, watershed
-        t2 = t1.plusDays(60);
-        String fn = "c:/temp/ensembleTester.db";
-        File f = new File(fn);
-        f.delete();
-        CsvEnsembleReader reader = new CsvEnsembleReader(CacheDir);
 
         long total = 0;
         try (JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fn)) {
-            for (String name : watershedNames) {
-
-                EnsembleTimeSeries[] ws = reader.Read(name, t1, t2);
+            for (EnsembleTimeSeries e : ets) {
                 long start = System.currentTimeMillis();
-                db.Write(ws);
+                db.Write(e);
                 long end = System.currentTimeMillis();
                 total += end - start;
             }
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
             e.printStackTrace();
+            throw (e);
         }
-        System.out.println("Write Time: " + total / 1000.0);
-
+        double rval = total / 1000.0;
+        System.out.println("Write Time: " + rval);
+        return rval;
     }
 
-    boolean DEBUG = false;
-    ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0,0,ZoneId.of("GMT"));
-    ZonedDateTime t2 = ZonedDateTime.of(2018, 11, 3, 12, 0, 0,0,ZoneId.of("GMT"));
 
     /**
      * 189 seconds to read 8.17 gb file
      */
-    //@Test
-    public void ensembleReader() {
+    public double ensembleReader(String fileName, ZonedDateTime t1, ZonedDateTime t2) throws Exception {
         //select id, issue_date,watershed, location_name, length(byte_value_array)  from timeseries_ensemble order by issue_date, watershed
-
-        if (DEBUG)
-            t2 = t1.plusDays(0);
-        String fn = "c:/temp/ensembleTester.db";
-
 
         long start = System.currentTimeMillis();
         long total = 0;
-        try (JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fn)) {
+        try (JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fileName)) {
             for (String name : watershedNames) {
-                EnsembleTimeSeries ws = db.Read(name, t1);
+                EnsembleTimeSeries ets = db.Read(name, t1);
+
             }
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
             e.printStackTrace();
+            throw e;
         }
         long end = System.currentTimeMillis();
         total += end - start;
-        System.out.println("Read Time: " + total / 1000.0);
+        double rval = total/1000.0;
+        System.out.println("Read Time: " + rval);
+        return rval;
 
     }
 
