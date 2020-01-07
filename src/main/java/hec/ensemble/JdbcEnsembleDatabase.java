@@ -4,6 +4,8 @@ import java.sql.*;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -11,14 +13,15 @@ import java.util.Properties;
  */
 public class JdbcEnsembleDatabase implements AutoCloseable {
 
-    static String DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
+
     private static String TableName = "timeseries_ensemble";
 
-    String FileName;
+    private String FileName;
     Connection _connection;
-    public JdbcEnsembleDatabase(String fileName) throws Exception
+
+    public JdbcEnsembleDatabase(String database) throws Exception
     {
-      FileName= fileName;
+      FileName= database;
       Properties prop = new Properties();
       //prop.setProperty("shared_cache", "false");
         //  Synchronous=Off;Pooling=True;Journal Mode=Off";  // dangerous but faster.
@@ -83,7 +86,7 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
         EnsembleTimeSeries rval = new EnsembleTimeSeries(locationName,"","");
 
         String sql = "select * from " + TableName +
-                " WHERE issue_date = '" + FormatDate(issueDate) + "' "
+                " WHERE issue_date = '" + DateUtility.FormatDate(issueDate) + "' "
                 + " AND location_name = '" + locationName + "' ";
         sql += " order by issue_date";
 
@@ -95,12 +98,12 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
             while (rs.next()) {
                 int id = rs.getInt(1);
                 String d = rs.getString(2);
-                ZonedDateTime issue_date = DateUtility.ParseDateTime(d);
+                ZonedDateTime issue_date = DateUtility.parseDateTime(d);
 
                 //watershedName = rs.getString(3,);
                 //String locName = rs.getString(4);
                 d = rs.getString(5);
-                ZonedDateTime start_date =  DateUtility.ParseDateTime(d);
+                ZonedDateTime start_date =  DateUtility.parseDateTime(d);
                 int member_length = rs.getInt(6 );
                 int member_count = rs.getInt(7);
                 boolean compressed = rs.getBoolean(8);
@@ -116,11 +119,7 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
         return rval;
     }
 
-    static DateTimeFormatter _formatter = DateTimeFormatter.ofPattern(DateTimeFormat);
-    private static String FormatDate(ZonedDateTime t)
-    {
-     return t.format(_formatter);
-    }
+
 
     private void InsertEnsemble(int id, ZonedDateTime issue_date, String watershed, String location_name,
                                ZonedDateTime timeseries_start_date,int member_length, int member_count,boolean compressed,
@@ -129,10 +128,10 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
 
 
         insertCMD.setInt(1, id);
-        insertCMD.setString(2,FormatDate(issue_date));
+        insertCMD.setString(2,DateUtility.FormatDate(issue_date));
         insertCMD.setString(3,watershed);
         insertCMD.setString(4,location_name);
-        insertCMD.setString(5, FormatDate(timeseries_start_date));
+        insertCMD.setString(5, DateUtility.FormatDate(timeseries_start_date));
         insertCMD.setInt(6, member_length);
         insertCMD.setInt(7, member_count);
         insertCMD.setBoolean(8, compressed  );
@@ -178,4 +177,21 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
     }
 
 
+    public List<String> getLocations() {
+
+        List<String> rval = new ArrayList<>();
+        String sql = "select location_name from " + TableName +
+              " order by location_name";
+        try {
+            Statement stmt  = _connection.createStatement();
+            ResultSet rs    = stmt.executeQuery(sql);
+            // loop through the result set
+            while (rs.next()) {
+                rval.add(rs.getString(1));
+            }
+        } catch (Exception e) {
+            Logger.logError(e.getMessage());
+        }
+        return rval;
+    }
 }

@@ -5,9 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CsvEnsembleReader {
@@ -84,7 +82,7 @@ public class CsvEnsembleReader {
                         locationMap.put(locName, ets);
                     }
 
-                    ets.addEnsemble(t,csv.GetEnsemble(locName),t1,csv.getInterval());
+                    ets.addEnsemble(t,csv.getEnsemble(locName),t1,csv.getInterval());
                 }
             }
             t = t.plusDays(1);

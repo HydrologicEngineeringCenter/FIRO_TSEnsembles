@@ -4,7 +4,10 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 
 /**
- * Ensemble contains an array of timeseries
+ * Ensemble is an array of time-series data
+ *
+ * each time-series has the same timestamps
+ *
  *
  */
 
