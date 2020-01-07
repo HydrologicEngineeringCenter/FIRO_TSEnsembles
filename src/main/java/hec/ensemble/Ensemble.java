@@ -4,34 +4,33 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 
 /**
- * Forecast contains an Ensemble with some associated information
+ * Ensemble is an array of time-series data
+ *
+ * each time-series has the same timestamps
+ *
  *
  */
 
-public class Forecast
+public class Ensemble
   {
     private final Duration interval;
+    EnsembleTimeSeries parent = null;
 
-    public Forecast(Location location, ZonedDateTime issueDate, float[][] ensemble, ZonedDateTime startDate, Duration interval)
+    public Ensemble(ZonedDateTime issueDate, float[][] values, ZonedDateTime startDate, Duration interval)
     {
-      this.Location = location;
       this.IssueDate = issueDate;
-      this.Ensemble = ensemble;
+      this.values = values;
       this.startDateTime = startDate;
       this.interval = interval;
     }
 
-    /// <summary>
-    /// Location of this forecast
-    /// </summary>
-    public Location Location;
 
     public ZonedDateTime IssueDate;
 
     public ZonedDateTime startDateTime;
 
     public int getTimeCount(){
-      return Ensemble[0].length;
+      return values[0].length;
   }
     public ZonedDateTime[] getTimeStamps() {
 
@@ -45,13 +44,12 @@ public class Forecast
       return rval;
     }
 
-
     /**
      * ensemble data
      * row represents ensemble members
      * columns are time steps
      */
-    public float[][] Ensemble;
+    public float[][] values;
 
 
   }

@@ -9,7 +9,7 @@ import java.nio.FloatBuffer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public class EnsembleCompression {
+ class EnsembleCompression {
 
 
     /**
@@ -18,7 +18,7 @@ public class EnsembleCompression {
      * @param data
      * @return
      */
-    public static float[][] UnPack(byte[] data, int rowCount, int columnCount, boolean compressed)
+    static float[][] UnPack(byte[] data, int rowCount, int columnCount, boolean compressed)
     {
         byte[] bytes;
         if( compressed)
@@ -33,7 +33,7 @@ public class EnsembleCompression {
      * Pack an float[]] ensemble into a byte array
      * @return
      */
-    public static byte[] Pack(float[][] data, boolean compress)
+     static byte[] Pack(float[][] data, boolean compress)
     {
 
         byte[] bytes = ConvertToBytes(data);

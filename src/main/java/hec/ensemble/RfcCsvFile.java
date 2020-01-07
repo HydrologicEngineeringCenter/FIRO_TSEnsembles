@@ -7,7 +7,9 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class RfcCsvFile
@@ -16,17 +18,17 @@ public class RfcCsvFile
     public List<String> LocationNames ;
 
     public ZonedDateTime[] TimeStamps;
+    private DateTimeFormatter dateTimeFormatter;
 
     private float[][] Data;
-
     /// <summary>
     /// index to start of each location in Data
     /// </summary>
-    Map<String,Integer> locationStart = new HashMap<String, Integer>();
+    private Map<String,Integer> locationStart = new HashMap<String, Integer>();
     /// <summary>
     /// index to end of each location in Data
     /// </summary>
-    Map<String,Integer>  locationEnd = new HashMap<String, Integer>();
+    private Map<String,Integer>  locationEnd = new HashMap<String, Integer>();
     
     private String[] header;
 
@@ -55,7 +57,7 @@ public class RfcCsvFile
      */
 
     /// <summary>
-    /// CSV file format from California Nevada River Forecast Center
+    /// CSV file format from California Nevada River values Center
     /// https://www.cnrfc.noaa.gov/
     /// 
     /// First column is date/time
@@ -73,8 +75,8 @@ public class RfcCsvFile
         e.printStackTrace();
       }
       String[] rows = stringList.toArray(new String[ stringList.size()]);
-      ParseHeader(rows[0]);
-      ParseData(rows);
+      parseHeader(rows[0]);
+      parseData(rows);
     }
 
 
@@ -85,7 +87,7 @@ public class RfcCsvFile
     /// <param name="locationName"></param>
     /// <param name="swapAxis">when true rows represent time steps</param>
     /// <returns></returns>
-    public float[][] GetEnsemble(String locationName)
+    public float[][] getEnsemble(String locationName)
     {
       float[][] _ensemble = null;
       int idx1 = locationStart.get(locationName);
@@ -119,9 +121,9 @@ public class RfcCsvFile
     /// columns represent locations
     /// </summary>
     /// <param name="rows"></param>
-    private void ParseData(String[] rows)
+    private void parseData(String[] rows)
     {
-      int idx2 = FindLastRowIndex(rows);
+      int idx2 = findLastRowIndex(rows);
       int idx1 = 2; // data starts after two header lines
       int rowCount = idx2 - idx1 + 1;
       int columnCount = header.length - 1; // date column will not be part of data
@@ -130,7 +132,7 @@ public class RfcCsvFile
       for (int rowIdx = 0; rowIdx < rowCount; rowIdx++)
       {
         String[] values = rows[rowIdx+idx1].split(",");
-        TimeStamps[rowIdx] = DateUtility.ParseDateTime(values[0]); // first column is DateTime
+        TimeStamps[rowIdx] = parseDate(values[0]); // first column is DateTime
         for (int columnIdx = 0; columnIdx < columnCount; columnIdx++)
         {
           // if (columnIdx >= values.Length)
@@ -140,13 +142,21 @@ public class RfcCsvFile
         }
       }
     }
+
+
+    private ZonedDateTime parseDate(String dt) {
+      // parse: //2013-11-03 12:00:00
+      ZonedDateTime zdt = ZonedDateTime.parse(dt,dateTimeFormatter);
+      return zdt;
+    }
+
     /// <summary>
     /// find last row of data.
     /// some files have empty lines at the bottom.
     /// </summary>
     /// <param name="rows"></param>
     /// <returns></returns>
-    private int FindLastRowIndex(String[] rows)
+    private int findLastRowIndex(String[] rows)
     {
       for (int i = rows.length-1; i>0;  i--)
       {
@@ -157,7 +167,7 @@ public class RfcCsvFile
     }
 
 
-    private void ParseHeader(String line)
+    private void parseHeader(String line)
     {
      
       header = line.split(",");
@@ -165,6 +175,11 @@ public class RfcCsvFile
     
       LocationNames = new ArrayList<>();
       //first data element in header is timezone.
+      String timeZoneText = header[0];
+      dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss",
+              Locale.getDefault()).withZone(ZoneId.of(timeZoneText));
+
+
       for (int i = 1; i < header.length; i++)
       {
         if (!currHeader.equals(header[i]))
@@ -184,5 +199,9 @@ public class RfcCsvFile
       ZonedDateTime t2 = TimeStamps[1];
       Duration interval = Duration.between(t1, t2);
       return interval;
+    }
+
+    public ZonedDateTime getIssueDate() {
+      return TimeStamps[0]; //
     }
   }

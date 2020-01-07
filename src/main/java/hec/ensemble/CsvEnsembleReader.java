@@ -5,6 +5,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CsvEnsembleReader {
 
@@ -17,7 +19,7 @@ public class CsvEnsembleReader {
 
 
     /// <summary>
-    /// Reads list of Forecast
+    /// Reads list of values
     /// </summary>
     /// <param name="watershedName"></param>
     /// <param name="issueDate"></param>
@@ -47,13 +49,19 @@ public class CsvEnsembleReader {
             return null;
         }
     }
-    public Watershed Read(String watershedName, ZonedDateTime startDate, ZonedDateTime endDate)
-    {
 
+    /**
+     * Reads EnsembleTimeSeries grouped by LocationName
+     * @param watershedName
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    public EnsembleTimeSeries[] Read(String watershedName, ZonedDateTime startDate, ZonedDateTime endDate)
+    {
         if (!ValidDates(startDate, endDate))
             return null;
-        Watershed output = new Watershed(watershedName);
-
+        Map<String,EnsembleTimeSeries> locationMap = new HashMap<String, EnsembleTimeSeries>();
         ZonedDateTime t = startDate;
 
         while( t.isBefore(endDate.plusHours(1)))
@@ -64,48 +72,29 @@ public class CsvEnsembleReader {
             {
                 for (String locName : csv.LocationNames)
                 {
+                    EnsembleTimeSeries ets=null;
                     ZonedDateTime t1 = csv.TimeStamps[0];
-                    Forecast f = output.AddForecast(locName, t, csv.GetEnsemble(locName),t1,csv.getInterval());
-                    //f.TimeStamps = csv.TimeStamps;
+                    if( locationMap.containsKey(locName)) {
+                        ets = locationMap.get(locName);
+                    }
+                    else {
+                        ets = new EnsembleTimeSeries(locName, watershedName, csv.FileName);
+                        locationMap.put(locName, ets);
+                    }
+
+                    ets.addEnsemble(t,csv.getEnsemble(locName),t1,csv.getInterval());
                 }
             }
             t = t.plusDays(1);
         }
-        return output;
+        EnsembleTimeSeries[] rval = new EnsembleTimeSeries[locationMap.size()];
+        int i=0;
+        for (EnsembleTimeSeries ets: locationMap.values()) {
+            rval[i]=ets;
+            i++;
+        }
+        return rval;
     }
-
-//    public Watershed ReadParallel(String watershedName, DateTime startDate, DateTime endDate)
-//    {
-//        if (!ValidDates(startDate, endDate))
-//            return null;
-//
-//        var output = new Watershed(watershedName);
-//
-//        // Each forecast is one day
-//        int numTotal = (int)Math.Round((endDate - startDate).TotalDays) + 1;
-//
-//        Parallel.For(0, numTotal, i =>
-//                {
-//                        DateTime day = startDate.AddDays(i);
-//
-//        var csv = Read(watershedName, day);
-//
-//        if (csv != null)
-//        {
-//            lock (output)
-//            {
-//                foreach (String locName in csv.LocationNames)
-//                {
-//                    Forecast f = output.AddForecast(locName, day, csv.GetEnsemble(locName),csv.TimeStamps);
-//                    f.TimeStamps = csv.TimeStamps;
-//                }
-//            }
-//        }
-//
-//      });
-//
-//        return output;
-//    }
 
     boolean ValidDates(ZonedDateTime startDate, ZonedDateTime endDate)
     {
