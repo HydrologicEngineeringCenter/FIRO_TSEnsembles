@@ -6,6 +6,7 @@ import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -54,22 +55,22 @@ public class Testing {
             f.delete();
 
             CsvEnsembleReader csvReader = new CsvEnsembleReader(CacheDir);
-            ZonedDateTime issueDate = ZonedDateTime.of(2013,11,3,12,0,0,0,ZoneId.of("GMT"));
-            RfcCsvFile csv = csvReader.Read("test",issueDate);
+            ZonedDateTime issueDate = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+            RfcCsvFile csv = csvReader.Read("test", issueDate);
             //RfcCsvFile csv = new RfcCsvFile(TestFile);
             float[][] data = csv.getEnsemble("SCRN2");
 
 
             JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fn);
-            EnsembleTimeSeries ets = new EnsembleTimeSeries("texas","","");
+            EnsembleTimeSeries ets = new EnsembleTimeSeries("texas", "", "");
 
-            ets.addEnsemble(csv.getIssueDate(), data,csv.TimeStamps[0], csv.getInterval());
+            ets.addEnsemble(csv.getIssueDate(), data, csv.TimeStamps[0], csv.getInterval());
             db.Write(ets);
 
             // --- READ
             db = new JdbcEnsembleDatabase(fn);
-            EnsembleTimeSeries ws2 = db.Read("texas", csv.getIssueDate());
-            float[][] data2 = ws2.ensembleList.get(0).values;
+            Ensemble e = db.Read("texas", csv.getIssueDate());
+            float[][] data2 = e.values;
 
 
             AssertSCRN2(data2);
@@ -83,33 +84,53 @@ public class Testing {
         }
     }
 
-    @Test
-    public void bulkTesting() throws Exception
-    {
+    /**
+     * Write Time: 468.171 s
+     *
+     * @throws Exception
+     */
+    //@Test
+    public void bulkTesting() throws Exception {
         String fn = "c:/temp/ensembleTester.db";
         File f = new File(fn);
         f.delete();
 
-        ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0,0,ZoneId.of("GMT"));
-       // ZonedDateTime t2 = ZonedDateTime.of(2018, 11, 3, 12, 0, 0,0,ZoneId.of("GMT"));
-        ZonedDateTime t2 = t1.plusDays(30);
+        ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+        ZonedDateTime t2 = ZonedDateTime.of(2018, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+        // ZonedDateTime t2 = t1.plusDays(30);
         double writeTime = 0;
         double readTime = 0;
 
-        for (String name:watershedNames) {
+        for (String name : watershedNames) {
 
             CsvEnsembleReader reader = new CsvEnsembleReader(CacheDir);
-            EnsembleTimeSeries[] ws = reader.Read(name, t1, t2);
-            writeTime += ensembleWriter(fn, ws);
-            readTime  += ensembleReader(fn,t1,t2);
+            EnsembleTimeSeries[] ets = reader.Read(name, t1, t2);
+            writeTime += ensembleWriter(fn, ets);
         }
+        readTime = ensembleReader(fn, t1, t2);
         System.out.println("SUMMARY");
-        System.out.println("Write Time: " + writeTime+" s");
-        System.out.println("Read Time: " + readTime +" s");
+        System.out.println("Write Time: " + writeTime + " s");
+        System.out.println("Read Time: " + readTime + " s");
 
     }
 
+    /**
+     * Read Time: 205.362 s
+     * @throws Exception
+     */
+    //@Test
+    public void readAll() throws Exception {
+        String fn = "c:/temp/ensembleTester_copy.db";
 
+        ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+        ZonedDateTime t2 = ZonedDateTime.of(2018, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+        double readTime = 0;
+
+        readTime = ensembleReader(fn, t1, t2);
+
+        System.out.println("Read Time: " + readTime + " s");
+
+    }
 
     /**
      * ensembleWriter may be used to test
@@ -145,13 +166,14 @@ public class Testing {
         //select id, issue_date,watershed, location_name, length(byte_value_array)  from timeseries_ensemble order by issue_date, watershed
 
         long start = System.currentTimeMillis();
-        ZonedDateTime t = t1;
+        int count = 0;
         try (JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fileName)) {
             List<String> locations = db.getLocations();
             for (String name : locations) {
-                EnsembleTimeSeries ets = db.Read(name, t1);
-
-                t = t.plusDays(1);
+                EnsembleTimeSeries ets = db.ReadTS(name, t1,t2);
+                if( ets.size() ==0 )
+                    System.out.println("Warning no ensembles found at location '"+name+"'");
+                count += ets.size();
             }
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -160,6 +182,8 @@ public class Testing {
         }
         double rval =(System.currentTimeMillis() - start)/1000.0;
         System.out.println("Read Time: " + rval);
+        System.out.println("count = " + count);
+
         return rval;
 
     }

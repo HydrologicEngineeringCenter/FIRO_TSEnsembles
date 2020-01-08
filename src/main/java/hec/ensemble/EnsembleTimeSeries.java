@@ -12,34 +12,38 @@ public class EnsembleTimeSeries
     private final String source; // where did this data come from i.e. 'rfc'
     private String locationName;  // name of location
 
-    public ArrayList<Ensemble> ensembleList;
+    public int size()
+    {
+      return items.size();
+    }
+    public ArrayList<Ensemble> items;
 
     public EnsembleTimeSeries(String locationName, String watershedName, String source)
     {
       this.locationName = locationName;
       this.watershedName = watershedName;
       this.source = source;
-      ensembleList = new ArrayList<>(10);
+      items = new ArrayList<>(10);
     }
 
     ZonedDateTime getStartDateTime()
     {
-      return ensembleList.get(0).startDateTime;
+      return items.get(0).startDateTime;
     }
     ZonedDateTime getEndDateTime()
     {
-      return ensembleList.get(ensembleList.size()-1).startDateTime;
+      return items.get(items.size()-1).startDateTime;
     }
 
     public void addEnsemble(ZonedDateTime issueDate, float[][] ensemble, ZonedDateTime startDate, Duration interval)
     {
       Ensemble e = new Ensemble(issueDate,ensemble,startDate, interval);
-      ensembleList.add(e);
+      items.add(e);
     }
 
     public void addEnsemble(Ensemble ensemble) {
       ensemble.parent = this;
-    ensembleList.add(ensemble);
+    items.add(ensemble);
     }
 
     public String getWatershedName() {

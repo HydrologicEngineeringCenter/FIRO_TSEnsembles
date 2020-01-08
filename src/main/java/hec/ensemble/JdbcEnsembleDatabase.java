@@ -3,7 +3,6 @@ package hec.ensemble;
 import java.sql.*;
 import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -59,7 +58,7 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
             int index = GetNextID();
             for(EnsembleTimeSeries loc : ets)
             {
-                for(Ensemble e : loc.ensembleList)
+                for(Ensemble e : loc.items)
                 {
                     index++;
                     float[][] data = e.values;
@@ -80,20 +79,28 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
         }
 
     }
+    public Ensemble Read(String  locationName, ZonedDateTime issueDate) {
 
-    public EnsembleTimeSeries Read(String  locationName, ZonedDateTime issueDate)
+        EnsembleTimeSeries ts = ReadTS(locationName,issueDate,issueDate);
+        if( ts.size() >0)
+            return ts.items.get(0);
+        return  null;
+    }
+
+    public EnsembleTimeSeries ReadTS(String  locationName, ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd)
     {
         EnsembleTimeSeries rval = new EnsembleTimeSeries(locationName,"","");
 
         String sql = "select * from " + TableName +
-                " WHERE issue_date = '" + DateUtility.FormatDate(issueDate) + "' "
-                + " AND location_name = '" + locationName + "' ";
+                " WHERE issue_date  >= '" + DateUtility.FormatDate(issueDateStart) + "' "
+                +" AND issue_date <= '"+DateUtility.FormatDate(issueDateEnd)+" '"
+                + " AND location_name = ? ";
         sql += " order by issue_date";
 
-
         try {
-            Statement stmt  = _connection.createStatement();
-            ResultSet rs    = stmt.executeQuery(sql);
+            PreparedStatement statement  = _connection.prepareStatement(sql);
+            statement.setString(1,locationName);
+            ResultSet rs    = statement.executeQuery();
             // loop through the result set
             while (rs.next()) {
                 int id = rs.getInt(1);
@@ -180,7 +187,7 @@ public class JdbcEnsembleDatabase implements AutoCloseable {
     public List<String> getLocations() {
 
         List<String> rval = new ArrayList<>();
-        String sql = "select location_name from " + TableName +
+        String sql = "select distinct location_name from " + TableName +
               " order by location_name";
         try {
             Statement stmt  = _connection.createStatement();
