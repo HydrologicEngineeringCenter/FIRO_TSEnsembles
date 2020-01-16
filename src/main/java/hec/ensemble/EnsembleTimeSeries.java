@@ -1,60 +1,150 @@
 package hec.ensemble;
 
-
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 
+/**
+ *  EnsembleTimeSeries is a collection of Ensembles over time
+ *
+ *  backing can be database or in-memory (from csv)
+ *
+ */
 public class EnsembleTimeSeries
   {
-    private final String watershedName; // name of basin/watershed
-    private final String source; // where did this data come from i.e. 'rfc'
-    private String locationName;  // name of location
 
-    public int size()
+    private EnsembleTimeSeriesDatabase _db = null;
+
+    private TimeSeriesIdentifier timeseriesID;
+    private String units;
+    private String dataType;
+    private String version;
+
+    public int getCount()
     {
+      if( _db == null)
       return items.size();
-    }
-    public ArrayList<Ensemble> items;
+      else
+        return _db.getCount(timeseriesID);
 
-    public EnsembleTimeSeries(String locationName, String watershedName, String source)
-    {
-      this.locationName = locationName;
-      this.watershedName = watershedName;
-      this.source = source;
-      items = new ArrayList<>(10);
     }
 
-    ZonedDateTime getStartDateTime()
+    private ArrayList<Ensemble> items;
+    private ArrayList<ZonedDateTime> issueDates; // TO DO .need something sorted..
+
+
+    /**
+     * EnsembleTimeSeries constructor for use with a EnsembleDatabase
+     * @param db
+     * @param timeseriesID
+     * @param units
+     * @param dataType
+     * @param version
+     */
+    protected EnsembleTimeSeries(EnsembleTimeSeriesDatabase db, TimeSeriesIdentifier timeseriesID, String units, String dataType, String version)
     {
-      return items.get(0).startDateTime;
+      this._db = db;
+      this.timeseriesID = timeseriesID;
+      this.units = units;
+      this.dataType = dataType;
+      this.version = version;
+      issueDates = new ArrayList<>();
+      reLoadIssueDates();
     }
-    ZonedDateTime getEndDateTime()
+
+    public EnsembleTimeSeries(TimeSeriesIdentifier timeseriesID, String units, String dataType, String version)
     {
-      return items.get(items.size()-1).startDateTime;
+      this.timeseriesID = timeseriesID;
+      this.units = units;
+      this.dataType = dataType;
+      this.version = version;
+      items = new ArrayList<>();
+      reLoadIssueDates();
+
     }
 
     public void addEnsemble(ZonedDateTime issueDate, float[][] ensemble, ZonedDateTime startDate, Duration interval)
     {
       Ensemble e = new Ensemble(issueDate,ensemble,startDate, interval);
-      items.add(e);
+      addEnsemble(e);
+
+    }
+
+    private void reLoadIssueDates() {
+      issueDates = new ArrayList<>();
+      if(_db != null)
+      { // get issue dates from database/
+        _db.getEnsembleTimeSeries(this.timeseriesID);
+      }
+      else
+      {
+        for (Ensemble e : items) {
+          issueDates.add(e.getIssueDate());
+        }
+      }
     }
 
     public void addEnsemble(Ensemble ensemble) {
       ensemble.parent = this;
-    items.add(ensemble);
+      items.add(ensemble);
+
+      reLoadIssueDates();// SLOW>>>>  need sorted issueDate list
+      // TO DO.. what if database backend?
     }
 
-    public String getWatershedName() {
-      return watershedName;
+
+    public ZonedDateTime[] getIssueDates() {
+    return (ZonedDateTime[])issueDates.toArray();
     }
 
-    public String getSource() {
-      return source;
+    /**
+     * gets nearest ensemble at or before time t
+     * @param t
+     * @param tolerance
+     * @return
+     */
+    public Ensemble getEnsemble(ZonedDateTime t, int tolerance) {
+    return null;
     }
 
-    public String getLocationName() {
-      return locationName;
+    public Ensemble getEnsemble(ZonedDateTime t) {
+
+      if( _db != null)
+      {
+        return null;
+      //_db.getEnsemble()
+      }
+    return null;
+    }
+
+    public String getUnits() {
+      return units;
+    }
+
+    public String getDataType() {
+      return dataType;
+    }
+
+    public String getVersion() {
+      return version;
+    }
+
+    public TimeSeriesIdentifier getTimeSeriesIdentifier() {
+      return timeseriesID;
+    }
+
+    /**
+     *
+     * @param issueDate
+     * @param hoursTolerance hours before t to check
+     * @return true if an ensemble exists at or before time t
+     */
+    public boolean issueDateExists(ZonedDateTime issueDate, int hoursTolerance) {
+
+      if( hoursTolerance == 0)
+         return issueDates.contains(issueDate);
+      else
+      return false; // TODO... not implemented.
     }
   }

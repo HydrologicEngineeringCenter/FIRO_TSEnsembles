@@ -18,10 +18,10 @@ import java.util.zip.GZIPOutputStream;
      * @param data
      * @return
      */
-    static float[][] UnPack(byte[] data, int rowCount, int columnCount, boolean compressed)
+    static float[][] UnPack(byte[] data, int rowCount, int columnCount, String compression)
     {
         byte[] bytes;
-        if( compressed)
+        if( compression == "gzip")
             bytes = gzipUncompress(data);
         else
             bytes = data;
@@ -33,11 +33,11 @@ import java.util.zip.GZIPOutputStream;
      * Pack an float[]] ensemble into a byte array
      * @return
      */
-     static byte[] Pack(float[][] data, boolean compress)
+     static byte[] Pack(float[][] data, String compression)
     {
 
         byte[] bytes = ConvertToBytes(data);
-        if( !compress)
+        if( compression!= "gzip")
             return bytes;
         byte[] compressed =  gzipCompress(bytes);
         return compressed;

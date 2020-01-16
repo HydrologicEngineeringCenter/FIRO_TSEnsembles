@@ -6,8 +6,6 @@ import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,15 +59,16 @@ public class Testing {
             float[][] data = csv.getEnsemble("SCRN2");
 
 
-            JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fn);
-            EnsembleTimeSeries ets = new EnsembleTimeSeries("texas", "", "");
+            JdbcEnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(fn);
+            TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("comal_river","flow");
+            EnsembleTimeSeries ets = new EnsembleTimeSeries(tsid,"cfs" ,"PER-AVE", "");
 
             ets.addEnsemble(csv.getIssueDate(), data, csv.TimeStamps[0], csv.getInterval());
             db.Write(ets);
 
             // --- READ
-            db = new JdbcEnsembleDatabase(fn);
-            Ensemble e = db.Read("texas", csv.getIssueDate());
+            db = new JdbcEnsembleTimeSeriesDatabase(fn);
+            Ensemble e = db.getEnsemble(tsid, csv.getIssueDate());
             float[][] data2 = e.values;
 
 
@@ -144,7 +143,7 @@ public class Testing {
      throws Exception{
         //select id, issue_date,watershed, location_name, length(byte_value_array)  from timeseries_ensemble order by issue_date, watershed
         long start = System.currentTimeMillis();
-        try (JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fn)) {
+        try (JdbcEnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(fn)) {
             for (EnsembleTimeSeries e : ets) {
                 db.Write(e);
             }
@@ -167,13 +166,13 @@ public class Testing {
 
         long start = System.currentTimeMillis();
         int count = 0;
-        try (JdbcEnsembleDatabase db = new JdbcEnsembleDatabase(fileName)) {
-            List<String> locations = db.getLocations();
-            for (String name : locations) {
-                EnsembleTimeSeries ets = db.ReadTS(name, t1,t2);
-                if( ets.size() ==0 )
-                    System.out.println("Warning no ensembles found at location '"+name+"'");
-                count += ets.size();
+        try (JdbcEnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(fileName)) {
+            TimeSeriesIdentifier[] locations = db.getTimeSeriesIDs();
+            for (TimeSeriesIdentifier tsid : locations) {
+                EnsembleTimeSeries ets = db.getEnsembleTimeSeriesWithData(tsid, t1,t2);
+                if( ets.getCount() ==0 )
+                    System.out.println("Warning no ensembles found at location '"+tsid+"'");
+                count += ets.getCount();
             }
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -203,4 +202,45 @@ public class Testing {
     }
 
 
+    @Test
+    public void simulateResSim() throws Exception
+    {
+        // get an ensembleTimeSeries from the database
+        // in initialization code somewhere.
+        // database layer (base/interface ) = jdbc/sqlite instance
+        EnsembleTimeSeriesDatabase  db =new JdbcEnsembleTimeSeriesDatabase("test.db");
+        // InMemoryEnsembleTimeSeriesDatabase
+
+        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("quinhagqk","inflow");
+
+        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
+        Object R = null; // Represents result of ResSim script processing an ensemble.
+        // -- end initialization
+
+        Ensemble e = null;
+        // t represents ResSim timestep (RunTimeStep)
+        ZonedDateTime t = ZonedDateTime.of(2019,12,25,0,0,0,0,ZoneId.of("PST"));
+        ZonedDateTime timeOfPreviousEnsemble = t;
+        int numSteps  = 168; // hourly time steps
+        int tolerance = 24; // require new ensemble at least every 24 hours
+
+
+        for (int i = 0; i <numSteps ; i++) {
+
+            // assuming issue_times might not be exactly regular.
+            if( i == 0 || (t.isAfter(timeOfPreviousEnsemble) && ets.issueDateExists(t,tolerance) )) {
+                e = ets.getEnsemble(t, tolerance);// gets nearest ensemble at or before time t
+                R =  ProcessEnsemble(e);// process the new ensemble
+                timeOfPreviousEnsemble = t;
+            }
+
+            // Do smart stuff with R
+
+            t = t.plusHours(1);
+        }
+    }
+
+    private Object ProcessEnsemble(Ensemble e) {
+        return new Object();
+    }
 }
