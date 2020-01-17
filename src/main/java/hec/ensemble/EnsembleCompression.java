@@ -21,7 +21,7 @@ import java.util.zip.GZIPOutputStream;
     static float[][] UnPack(byte[] data, int rowCount, int columnCount, String compression)
     {
         byte[] bytes;
-        if( compression == "gzip")
+        if( compression.equals("gzip"))
             bytes = gzipUncompress(data);
         else
             bytes = data;
@@ -37,7 +37,7 @@ import java.util.zip.GZIPOutputStream;
     {
 
         byte[] bytes = ConvertToBytes(data);
-        if( compression!= "gzip")
+        if( !compression.equals("gzip"))
             return bytes;
         byte[] compressed =  gzipCompress(bytes);
         return compressed;

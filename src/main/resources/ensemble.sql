@@ -1,6 +1,6 @@
-drop table if exists ensemble_timeseries;
-drop table if exists ensemble;
-drop view if exists view_ensemble;
+--drop table if exists ensemble_timeseries;
+--drop table if exists ensemble;
+--drop view if exists view_ensemble;
 
 CREATE TABLE IF NOT EXISTS ensemble_timeseries
       ( id integer not null primary key,
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS ensemble_timeseries
        data_type NVARCHAR(100), 
        version NVARCHAR(100) 
 				 );
-CREATE UNIQUE INDEX idx_u_ensemble_timeseries ON ensemble_timeseries(location,parameter_name);
+CREATE UNIQUE INDEX if not EXISTS idx_u_ensemble_timeseries ON ensemble_timeseries(location,parameter_name);
 
 				 
 CREATE TABLE IF NOT EXISTS ensemble

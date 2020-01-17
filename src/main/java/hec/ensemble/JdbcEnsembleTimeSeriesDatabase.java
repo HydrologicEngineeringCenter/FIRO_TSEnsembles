@@ -49,6 +49,8 @@ public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase i
     public void Write(EnsembleTimeSeries ets) throws Exception {
         Write(new EnsembleTimeSeries[]{ets});
     }
+
+
         public void Write(EnsembleTimeSeries[] etsArray) throws Exception
     {
         try {
@@ -190,8 +192,8 @@ public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase i
         String sql = "select * from  view_ensemble "
                 + " WHERE issue_datetime  >= '" + DateUtility.formatDate(issueDateStart) + "' "
                 + " AND issue_datetime <= '"+DateUtility.formatDate(issueDateEnd)+" '"
-                + " AND location_name = ? "
-                + " AND parameter = ? ";
+                + " AND location = ? "
+                + " AND parameter_name = ? ";
         sql += " order by issue_datetime";
 
         Ensemble rval=null;
@@ -261,9 +263,10 @@ public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase i
                                byte[] byte_value_array) throws Exception
     {
         if( ps_insertEnsemble == null) {
-            String sql = "INSERT INTO "+ ensembleTableName +" ([id], [ensemble_collection_id],[issue_datetime], "+
-                    " [start_datetime], [member_length], [member_count], [compression], [byte_value_array]) VALUES "+
-                    "(?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO "+ ensembleTableName +" ([id], [ensemble_timeseries_id],[issue_datetime], "
+                    +" [start_datetime], [member_length], [member_count], [compression], [interval_seconds], "
+                    +"[byte_value_array]) VALUES "
+                    +"(?, ?, ?, ?, ?, ?, ?, ?,? )";
             ps_insertEnsemble = _connection.prepareStatement(sql);
         }
 
@@ -312,9 +315,18 @@ public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase i
 
     private void createTables()throws Exception
     {
-        String sql = new String(Files.readAllBytes(Paths.get(getClass().getResource("ensemble.sql").toURI())));
-        PreparedStatement cmd = _connection.prepareStatement(sql);
-        cmd.execute();
+
+        String sql = new String(Files.readAllBytes(Paths.get(getClass().getResource("/ensemble.sql").toURI())));
+
+        String[] commands = sql.split(";");
+        for (String s:commands  ) {
+            if( s.trim().startsWith("--"))
+                continue;
+
+            PreparedStatement cmd = _connection.prepareStatement(s);
+            cmd.execute();
+            _connection.commit();
+        }
 
     }
 

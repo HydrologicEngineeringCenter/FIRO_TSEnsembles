@@ -49,7 +49,6 @@ public class EnsembleTimeSeries
       this.units = units;
       this.dataType = dataType;
       this.version = version;
-      issueDates = new ArrayList<>();
       reLoadIssueDates();
     }
 
@@ -72,7 +71,7 @@ public class EnsembleTimeSeries
     }
 
     private void reLoadIssueDates() {
-      issueDates = new ArrayList<>();
+      issueDates = new ArrayList<ZonedDateTime>();
       if(_db != null)
       { // get issue dates from database/
         _db.getEnsembleTimeSeries(this.timeseriesID);
@@ -95,7 +94,7 @@ public class EnsembleTimeSeries
 
 
     public ZonedDateTime[] getIssueDates() {
-    return (ZonedDateTime[])issueDates.toArray();
+    return issueDates.toArray(new ZonedDateTime[0]);
     }
 
     /**
@@ -112,10 +111,15 @@ public class EnsembleTimeSeries
 
       if( _db != null)
       {
-        return null;
-      //_db.getEnsemble()
+        return _db.getEnsemble(this.timeseriesID,t);
       }
-    return null;
+      else {
+        for (Ensemble e : items) {
+          if( e.getIssueDate() == t)
+            return e;
+        }
+      }
+      return null;
     }
 
     public String getUnits() {

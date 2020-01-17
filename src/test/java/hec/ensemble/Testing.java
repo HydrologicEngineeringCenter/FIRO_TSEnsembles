@@ -14,12 +14,27 @@ public class Testing {
 
 
     private static String CacheDir = "C:\\Temp\\hefs_cache";
-    static String TestFile = CacheDir + "\\2013110312_test_hefs_csv_hourly.csv";
     static String[] watershedNames = {"RussianNapa", "EastSierra", "FeatherYuba"};
+
+    private String getTestCsvFileName()
+    {
+        String path = new File(getClass().getResource(
+            "/hefs_cache/2013110312_test_hefs_csv_hourly.csv").getFile()).toString();
+        return path;
+    }
+    private String getCacheDir()
+    {
+        File f = new File(getTestCsvFileName());
+        String rval =  f.getParent();
+        return rval;
+    }
 
     @Test
     public void ReadCsv() {
-        RfcCsvFile csv = new RfcCsvFile(TestFile);
+
+
+
+        RfcCsvFile csv = new RfcCsvFile(getTestCsvFileName());
         float[][] data = csv.getEnsemble("SCRN2");
 
         AssertSCRN2(data);
@@ -45,14 +60,14 @@ public class Testing {
      * Reads CSV, saves one ensemble to a database, then reads ensemble back in.
      */
     @Test
-    public void readWriteEnsemble() {
+    public void readWriteTestEnsemble() {
         try {
 
-            String fn = "c:/temp/test.db";
+            String fn = "test.db";
             File f = new File(fn);
             f.delete();
 
-            CsvEnsembleReader csvReader = new CsvEnsembleReader(CacheDir);
+            CsvEnsembleReader csvReader = new CsvEnsembleReader(getCacheDir());
             ZonedDateTime issueDate = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
             RfcCsvFile csv = csvReader.Read("test", issueDate);
             //RfcCsvFile csv = new RfcCsvFile(TestFile);
