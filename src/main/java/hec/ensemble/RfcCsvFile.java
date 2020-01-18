@@ -15,7 +15,7 @@ import java.util.*;
 public class RfcCsvFile
   {
     public String FileName;
-    public List<String> LocationNames ;
+    private List<String> LocationNames ;
 
     public ZonedDateTime[] TimeStamps;
     private DateTimeFormatter dateTimeFormatter;
@@ -204,4 +204,9 @@ public class RfcCsvFile
     public ZonedDateTime getIssueDate() {
       return TimeStamps[0]; //
     }
+
+    public String[] getLocationNames() {
+      return LocationNames.toArray(new String[0]);
+    }
+
   }

@@ -70,7 +70,7 @@ public class CsvEnsembleReader {
 
             if (csv != null)
             {
-                for (String locName : csv.LocationNames)
+                for (String locName : csv.getLocationNames())
                 {
                     EnsembleTimeSeries ets=null;
                     ZonedDateTime t1 = csv.TimeStamps[0];

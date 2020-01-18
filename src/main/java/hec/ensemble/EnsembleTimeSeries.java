@@ -3,6 +3,8 @@ package hec.ensemble;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 
 
 /**
@@ -20,6 +22,8 @@ public class EnsembleTimeSeries
     private String units;
     private String dataType;
     private String version;
+    //https://docs.oracle.com/javase/7/docs/api/java/util/TreeMap.html
+    private TreeMap<ZonedDateTime,Ensemble> items;
 
     public int getCount()
     {
@@ -30,8 +34,7 @@ public class EnsembleTimeSeries
 
     }
 
-    private ArrayList<Ensemble> items;
-    private ArrayList<ZonedDateTime> issueDates; // TO DO .need something sorted..
+
 
 
     /**
@@ -45,81 +48,83 @@ public class EnsembleTimeSeries
     protected EnsembleTimeSeries(EnsembleTimeSeriesDatabase db, TimeSeriesIdentifier timeseriesID, String units, String dataType, String version)
     {
       this._db = db;
-      this.timeseriesID = timeseriesID;
-      this.units = units;
-      this.dataType = dataType;
-      this.version = version;
-      reLoadIssueDates();
+      init(timeseriesID, units, dataType, version);
+      List<ZonedDateTime> times = db.getIssueDates(timeseriesID);
+      for (ZonedDateTime t: times ) {
+         items.put(t,null); // keep all Timestamps in memory, ensembles come from disk.
+      }
     }
-
     public EnsembleTimeSeries(TimeSeriesIdentifier timeseriesID, String units, String dataType, String version)
     {
+      init(timeseriesID,units,dataType,version);
+    }
+
+    private void init(TimeSeriesIdentifier timeseriesID, String units, String dataType, String version) {
       this.timeseriesID = timeseriesID;
       this.units = units;
       this.dataType = dataType;
       this.version = version;
-      items = new ArrayList<>();
-      reLoadIssueDates();
-
+      items = new TreeMap<>();
     }
+
+
 
     public void addEnsemble(ZonedDateTime issueDate, float[][] ensemble, ZonedDateTime startDate, Duration interval)
     {
       Ensemble e = new Ensemble(issueDate,ensemble,startDate, interval);
       addEnsemble(e);
-
-    }
-
-    private void reLoadIssueDates() {
-      issueDates = new ArrayList<ZonedDateTime>();
-      if(_db != null)
-      { // get issue dates from database/
-        _db.getEnsembleTimeSeries(this.timeseriesID);
-      }
-      else
-      {
-        for (Ensemble e : items) {
-          issueDates.add(e.getIssueDate());
-        }
-      }
     }
 
     public void addEnsemble(Ensemble ensemble) {
       ensemble.parent = this;
-      items.add(ensemble);
-
-      reLoadIssueDates();// SLOW>>>>  need sorted issueDate list
-      // TO DO.. what if database backend?
+      items.put(ensemble.getIssueDate(),ensemble);
     }
 
-
-    public ZonedDateTime[] getIssueDates() {
-    return issueDates.toArray(new ZonedDateTime[0]);
+    public List<ZonedDateTime> getIssueDates() {
+      // convert from map to a List<>
+      List<ZonedDateTime> rval = new ArrayList<>(items.size());
+      rval.addAll(items.keySet());
+      return rval;
     }
 
     /**
      * gets nearest ensemble at or before time t
-     * @param t
-     * @param tolerance
+     *
+     *   t1 --- t2 --- t3  (issue dates in TreeMap)
+     *   t1 --- t2         (issue dates from floorKey )
+     *             t       (requested date)
+     *
+     *  In the example above t2 will be returned
+     *  if  t2 + toleranceHours >= t
+     *
+     *
+     * @param t   request ensemble at date
+     * @param toleranceHours allow toleranceHours back to match an issue date
      * @return
      */
-    public Ensemble getEnsemble(ZonedDateTime t, int tolerance) {
-    return null;
+    public Ensemble getEnsemble(ZonedDateTime t, int toleranceHours) {
+
+      ZonedDateTime t2 = getNearestIssueDate(t,toleranceHours);
+      if( t2 == null)
+        return null;
+
+      if (_db != null)
+         return _db.getEnsemble(timeseriesID,t2); // from disk
+
+       return items.get(t2);
     }
+
+    private ZonedDateTime getNearestIssueDate(ZonedDateTime t, int toleranceHours)
+    {
+      ZonedDateTime t2 =  items.floorKey(t); //https://docs.oracle.com/javase/7/docs/api/java/util/TreeMap.html#floorEntry(K)
+      if( t2 != null && t2.plusHours(toleranceHours).compareTo(t) >=0)
+        return t2;
+      return null;
+      }
 
     public Ensemble getEnsemble(ZonedDateTime t) {
 
-      if( _db != null)
-      {
-        return _db.getEnsemble(this.timeseriesID,t);
-      }
-      else {
-        for (Ensemble e : items) {
-          if( e.getIssueDate() == t)
-            return e;
-        }
-      }
-      return null;
+      return items.get(t);
     }
 
     public String getUnits() {
@@ -145,10 +150,6 @@ public class EnsembleTimeSeries
      * @return true if an ensemble exists at or before time t
      */
     public boolean issueDateExists(ZonedDateTime issueDate, int hoursTolerance) {
-
-      if( hoursTolerance == 0)
-         return issueDates.contains(issueDate);
-      else
-      return false; // TODO... not implemented.
-    }
+      return getNearestIssueDate(issueDate,hoursTolerance)!= null;
+     }
   }

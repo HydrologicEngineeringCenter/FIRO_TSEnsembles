@@ -6,6 +6,7 @@ import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,7 +20,7 @@ public class Testing {
     private String getTestCsvFileName()
     {
         String path = new File(getClass().getResource(
-            "/hefs_cache/2013110312_test_hefs_csv_hourly.csv").getFile()).toString();
+                "/hefs_cache/2013110312_Kanektok_hefs_csv_hourly.csv").getFile()).toString();
         return path;
     }
     private String getCacheDir()
@@ -31,8 +32,6 @@ public class Testing {
 
     @Test
     public void ReadCsv() {
-
-
 
         RfcCsvFile csv = new RfcCsvFile(getTestCsvFileName());
         float[][] data = csv.getEnsemble("SCRN2");
@@ -57,49 +56,53 @@ public class Testing {
     }
 
     /**
+     * Creates a EnsembleTimeSeriesDatabase
+     * with multiple locations and issue dates
+     *
+     * @param filename name of database to create
+     *
+     */
+    private EnsembleTimeSeriesDatabase createTestDatabase(String filename, int numberOfDates) throws Exception {
+
+
+        ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+        ZonedDateTime issueDate2 = issueDate1.plusDays(numberOfDates);
+
+        CsvEnsembleReader csvReader = new CsvEnsembleReader(getCacheDir());
+        EnsembleTimeSeries[] ets = csvReader.Read("Kanektok", issueDate1, issueDate2);
+
+        EnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(filename, true);
+        db.write(ets);
+        return db;
+    }
+    /**
      * Reads CSV, saves one ensemble to a database, then reads ensemble back in.
      */
     @Test
-    public void readWriteTestEnsemble() {
+    public void importCsvToDatabase() {
         try {
 
             String fn = "test.db";
             File f = new File(fn);
             f.delete();
 
-            CsvEnsembleReader csvReader = new CsvEnsembleReader(getCacheDir());
-            ZonedDateTime issueDate = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
-            RfcCsvFile csv = csvReader.Read("test", issueDate);
-            //RfcCsvFile csv = new RfcCsvFile(TestFile);
-            float[][] data = csv.getEnsemble("SCRN2");
-
-
-            JdbcEnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(fn);
-            TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("comal_river","flow");
-            EnsembleTimeSeries ets = new EnsembleTimeSeries(tsid,"cfs" ,"PER-AVE", "");
-
-            ets.addEnsemble(csv.getIssueDate(), data, csv.TimeStamps[0], csv.getInterval());
-            db.Write(ets);
-
+            EnsembleTimeSeriesDatabase db  = createTestDatabase(fn,1);
             // --- READ
-            db = new JdbcEnsembleTimeSeriesDatabase(fn);
-            Ensemble e = db.getEnsemble(tsid, csv.getIssueDate());
+            TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2","flow");
+            EnsembleTimeSeries ets =  db.getEnsembleTimeSeries(tsid);
+            List<ZonedDateTime> issueDates = ets.getIssueDates();
+            Ensemble e = db.getEnsemble(tsid, issueDates.get(0));
             float[][] data2 = e.values;
-
-
             AssertSCRN2(data2);
-            assertEquals(data.length, data2.length);
-            assertEquals(data[0].length, data2[0].length);
 
         } catch (Exception e) {
-            System.out.println("error");
-            System.out.println(e.getMessage());
+            Logger.logError(e);
             fail();
         }
     }
 
     /**
-     * Write Time: 468.171 s
+     * write Time: 468.171 s
      *
      * @throws Exception
      */
@@ -123,7 +126,7 @@ public class Testing {
         }
         readTime = ensembleReader(fn, t1, t2);
         System.out.println("SUMMARY");
-        System.out.println("Write Time: " + writeTime + " s");
+        System.out.println("write Time: " + writeTime + " s");
         System.out.println("Read Time: " + readTime + " s");
 
     }
@@ -158,9 +161,9 @@ public class Testing {
      throws Exception{
         //select id, issue_date,watershed, location_name, length(byte_value_array)  from timeseries_ensemble order by issue_date, watershed
         long start = System.currentTimeMillis();
-        try (JdbcEnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(fn)) {
+        try (JdbcEnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(fn,true)) {
             for (EnsembleTimeSeries e : ets) {
-                db.Write(e);
+                db.write(e);
             }
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -168,7 +171,7 @@ public class Testing {
             throw (e);
         }
         double rval = (System.currentTimeMillis()-start) / 1000.0;
-        System.out.println("Write Time: " + rval);
+        System.out.println("write Time: " + rval);
         return rval;
     }
 
@@ -181,7 +184,7 @@ public class Testing {
 
         long start = System.currentTimeMillis();
         int count = 0;
-        try (JdbcEnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(fileName)) {
+        try (JdbcEnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(fileName,false)) {
             TimeSeriesIdentifier[] locations = db.getTimeSeriesIDs();
             for (TimeSeriesIdentifier tsid : locations) {
                 EnsembleTimeSeries ets = db.getEnsembleTimeSeriesWithData(tsid, t1,t2);
@@ -220,21 +223,29 @@ public class Testing {
     @Test
     public void simulateResSim() throws Exception
     {
+        String fn = "ResSim.db";
+        File f = new File(fn);
+        f.delete();
+
         // get an ensembleTimeSeries from the database
         // in initialization code somewhere.
         // database layer (base/interface ) = jdbc/sqlite instance
-        EnsembleTimeSeriesDatabase  db =new JdbcEnsembleTimeSeriesDatabase("test.db");
+        createTestDatabase(fn,2);
+        EnsembleTimeSeriesDatabase  db =new JdbcEnsembleTimeSeriesDatabase(fn,false);
         // InMemoryEnsembleTimeSeriesDatabase
 
-        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("quinhagqk","inflow");
+        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.FARC1F","flow");
 
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
+        if( ets == null)
+            throw new Exception("could not find "+tsid.toString());
         Object R = null; // Represents result of ResSim script processing an ensemble.
         // -- end initialization
 
         Ensemble e = null;
         // t represents ResSim timestep (RunTimeStep)
-        ZonedDateTime t = ZonedDateTime.of(2019,12,25,0,0,0,0,ZoneId.of("PST"));
+        ZoneId pst = ZoneId.of("America/Los_Angeles");
+        ZonedDateTime t = ZonedDateTime.of(2019,12,25,0,0,0,0,pst);
         ZonedDateTime timeOfPreviousEnsemble = t;
         int numSteps  = 168; // hourly time steps
         int tolerance = 24; // require new ensemble at least every 24 hours

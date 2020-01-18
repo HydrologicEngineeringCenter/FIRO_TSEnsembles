@@ -17,5 +17,7 @@ public class Logger {
     }
     static void logError(Exception e) {
         log("Error: " + e.getMessage());
+        e.printStackTrace(System.out);
+
     }
 }

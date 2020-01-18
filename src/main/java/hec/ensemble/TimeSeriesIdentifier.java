@@ -8,4 +8,10 @@ public class TimeSeriesIdentifier {
         this.location = location;
         this.parameter = parameter;
     }
+
+    @Override
+    public String toString()
+    {
+        return location+"/"+parameter;
+    }
 }
