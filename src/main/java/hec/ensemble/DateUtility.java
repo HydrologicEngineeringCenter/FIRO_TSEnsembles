@@ -16,7 +16,7 @@ public class DateUtility {
         return zdt;
     }
 
-    static String FormatDate(ZonedDateTime t)
+    static String formatDate(ZonedDateTime t)
     {
         return t.format(formatter);
     }

@@ -70,7 +70,7 @@ public class CsvEnsembleReader {
 
             if (csv != null)
             {
-                for (String locName : csv.LocationNames)
+                for (String locName : csv.getLocationNames())
                 {
                     EnsembleTimeSeries ets=null;
                     ZonedDateTime t1 = csv.TimeStamps[0];
@@ -78,7 +78,8 @@ public class CsvEnsembleReader {
                         ets = locationMap.get(locName);
                     }
                     else {
-                        ets = new EnsembleTimeSeries(locName, watershedName, csv.FileName);
+                        TimeSeriesIdentifier tsid= new TimeSeriesIdentifier(watershedName+"."+locName,"flow");
+                        ets = new EnsembleTimeSeries(tsid, "","",csv.FileName);
                         locationMap.put(locName, ets);
                     }
 

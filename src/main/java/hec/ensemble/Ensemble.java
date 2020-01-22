@@ -6,7 +6,7 @@ import java.time.ZonedDateTime;
 /**
  * Ensemble is an array of time-series data
  *
- * each time-series has the same timestamps
+ * each time-series in the Ensemble has the same timestamps
  *
  *
  */
@@ -25,13 +25,14 @@ public class Ensemble
     }
 
 
-    public ZonedDateTime IssueDate;
+    private ZonedDateTime IssueDate;
 
-    public ZonedDateTime startDateTime;
+    private ZonedDateTime startDateTime;
 
     public int getTimeCount(){
       return values[0].length;
   }
+
     public ZonedDateTime[] getTimeStamps() {
 
       ZonedDateTime[] rval = new ZonedDateTime[getTimeCount()];
@@ -52,4 +53,16 @@ public class Ensemble
     public float[][] values;
 
 
+    public ZonedDateTime getIssueDate() {
+      return IssueDate;
+    }
+
+    public Duration getInterval()
+    {
+      return this.interval;
+    }
+
+    public ZonedDateTime getStartDateTime() {
+      return startDateTime;
+    }
   }

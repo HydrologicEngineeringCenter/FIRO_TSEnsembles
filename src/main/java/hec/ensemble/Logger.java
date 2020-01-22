@@ -15,4 +15,9 @@ public class Logger {
     static void logError(String msg) {
         log("Error: " + msg);
     }
+    static void logError(Exception e) {
+        log("Error: " + e.getMessage());
+        e.printStackTrace(System.out);
+
+    }
 }
