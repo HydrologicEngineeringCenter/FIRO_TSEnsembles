@@ -20,8 +20,11 @@ public class Testing {
 
     private String getTestCsvFileName()
     {
+        //System.out.println(System.getProperty("user.dir"));
         String path = new File(getClass().getResource(
-                "/hefs_cache/2013110312_Kanektok_hefs_csv_hourly.csv").getFile()).toString();
+              "/hefs_cache/2013110312_Kanektok_hefs_csv_hourly.csv").getFile()).toString();
+
+//        return "src/test/resources/hefs_cache/2013110312_Kanektok_hefs_csv_hourly.csv";
         return path;
     }
     private String getCacheDir()

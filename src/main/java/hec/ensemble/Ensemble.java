@@ -27,7 +27,7 @@ public class Ensemble
 
     private ZonedDateTime IssueDate;
 
-    public ZonedDateTime startDateTime;
+    private ZonedDateTime startDateTime;
 
     public int getTimeCount(){
       return values[0].length;
@@ -60,5 +60,9 @@ public class Ensemble
     public Duration getInterval()
     {
       return this.interval;
+    }
+
+    public ZonedDateTime getStartDateTime() {
+      return startDateTime;
     }
   }

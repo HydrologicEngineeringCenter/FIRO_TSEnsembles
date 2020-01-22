@@ -81,7 +81,7 @@ public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase i
                 float[][] data = e.values;
                 byte[] bytes = EnsembleCompression.Pack(data, compress);
                 InsertEnsemble(++timeseries_ensemble_id, timeseries_ensemble_collection_id, e.getIssueDate(),
-                        e.startDateTime,
+                        e.getStartDateTime(),
                         data[0].length, data.length, compress, e.getInterval().getSeconds(), bytes);
             }
         }
