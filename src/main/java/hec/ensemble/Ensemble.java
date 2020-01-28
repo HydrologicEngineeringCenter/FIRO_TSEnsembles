@@ -18,14 +18,14 @@ public class Ensemble
 
     public Ensemble(ZonedDateTime issueDate, float[][] values, ZonedDateTime startDate, Duration interval)
     {
-      this.IssueDate = issueDate;
+      this.issueDate = issueDate;
       this.values = values;
       this.startDateTime = startDate;
       this.interval = interval;
     }
 
 
-    private ZonedDateTime IssueDate;
+    private ZonedDateTime issueDate;
 
     private ZonedDateTime startDateTime;
 
@@ -45,16 +45,11 @@ public class Ensemble
       return rval;
     }
 
-    /**
-     * ensemble data
-     * row represents ensemble members
-     * columns are time steps
-     */
-    public float[][] values;
+    private float[][] values;
 
 
     public ZonedDateTime getIssueDate() {
-      return IssueDate;
+      return issueDate;
     }
 
     public Duration getInterval()
@@ -65,4 +60,14 @@ public class Ensemble
     public ZonedDateTime getStartDateTime() {
       return startDateTime;
     }
+
+    /**
+     * ensemble data
+     * row represents ensemble members
+     * columns are time steps
+     */
+    public float[][] getValues() {
+      return values;
+    }
+
   }

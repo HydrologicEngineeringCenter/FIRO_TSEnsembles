@@ -78,7 +78,7 @@ public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase i
             for (int i = 0; i < issueDates.size(); i++) {
                 ZonedDateTime t = issueDates.get(i);
                 Ensemble e = ets.getEnsemble(t);
-                float[][] data = e.values;
+                float[][] data = e.getValues();
                 byte[] bytes = EnsembleCompression.Pack(data, compress);
                 InsertEnsemble(++timeseries_ensemble_id, timeseries_ensemble_collection_id, e.getIssueDate(),
                         e.getStartDateTime(),

@@ -3,7 +3,7 @@ package hec.ensemble;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class DateUtility {
+class DateUtility {
 
 
    // static String DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
