@@ -137,7 +137,7 @@ public class RfcCsvFile
         {
           // if (columnIdx >= values.Length)
           //  Console.WriteLine("Error: was file truncated? " + FileName);
-          float f = Float.parseFloat(values[columnIdx + 1]);
+          float f = Float.parseFloat(values[columnIdx + 1])*1000;
           Data[columnIdx][ rowIdx] = f;
         }
       }

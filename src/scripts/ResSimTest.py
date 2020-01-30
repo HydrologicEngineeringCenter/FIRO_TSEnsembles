@@ -35,13 +35,14 @@ def initStateVariable(currentVariable, network):
 
 from java.time import  ZoneId
 from java.time import  ZonedDateTime
+import math
 
 # This Script demonstrates using ensembles (FIRO_TSEnsembles.jar) within ResSim
 # https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles
 
 # The ResSim environment needs FIRO_TSEnsembles.jar and sqlite-jdbc-3.30.1.jar to be in the class path
 
-# The Hec-ResSim.config can be modified to add to the class path
+# modify Hec-ResSim.config append to the class path
 
 # addjars ..\FIRO_TSEnsembles\build\libs
 
@@ -53,14 +54,16 @@ def computeReleaseInfo(t):
   e = ets.getEnsemble(t, 25)  # 25 hours tolerance for forecast  
 
   if e is None:
-    raise Exception("Error: forecast not found for date: "+ t )
+    raise StopComputeException("Error: forecast not found for date: "+ t )
     
-  print "ensemble loaded"
+  print "ensemble loaded issueDate = ",e.getIssueDate()
   issueDate = e.getIssueDate()
   currentVariable.varPut("lastEnsembleTimestamp",issueDate)
   currentVariable.varPut("nextEnsembleTimestamp",issueDate.plusDays(1))
-  computeVolumes(e,7) # compute 7 day volume
-  
+  data = computeVolumes(e,7*24) # compute 7 day volume from hourly data
+  index = indexToExceedanceLevel(data,50)  # interpolate/lookup 50% exceedance index to ensemble
+  e50percent = e.getValues()[index]
+  print "len(e50percent) = ",len(e50percent)
   return t.getDayOfMonth() %2
   
   
@@ -70,24 +73,42 @@ def getZonedDateTime(currentRuntimestep):
   return  t
 
 
+# computes index to specified exceedance (weibul rank)
+# data              -- array of values to sort 
+# percentExceedance -- percent exceedance to lookup (i.e.  10,50, 90)
+#  returns index to input array that matches or exceeds the percent exceedance
+def indexToExceedanceLevel(data,percentExceedance):
+  data.sort(reverse=True) # sort high to low
+  #https://stackoverflow.com/questions/7851077/how-to-return-index-of-a-sorted-list
+  index = sorted(range(len(data)), key=lambda k: data[k])
+  size=len(data)
+#  for i in range (size):
+#    print i," ",data[i], float(i+1)/(float(size)+1)
+
+  rval =int( math.ceil((size+1.0)*float(percentExceedance)/100.0-1.0))
+  print "index = ",rval
+  return rval
+
+
 # compute volume for the first steps
 # for each ensemble member
 def computeVolumes(ensemble, steps):
  
   values = ensemble.getValues()
   numMembers =len(values) 
+
   numSteps = min(steps,len(values[0]))
  
-  rval = [0]* numMembers
- 
-  print "numMembers =",numMembers
-  print "numSteps =",numSteps
-
-  for member in range(0,numMembers-1):
-    for i in range(0,numSteps-1):
+  rval = [0]* numMembers # initilize to zero
+  
+  for member in range(numMembers):
+    for i in range(numSteps):
       rval[member] += values[member][i]
 
+  return rval
 
+
+    
   
 # no return values are used by the compute from this script.
 #
@@ -110,11 +131,11 @@ t = getZonedDateTime(currentRuntimestep)
 isFirst = not currentVariable.varExists("lastEnsembleTimestamp")
 nextEnsembleTimestamp = currentVariable.varGet("nextEnsembleTimestamp")
 
-if isFirst or t.compareTo(nextEnsembleTimestamp) >= 0 :
+if isFirst or t.isEqual(nextEnsembleTimestamp) or t.isAfter(nextEnsembleTimestamp) :
+#if isFirst or tnextEnsembleTimestamp.isAfter(t) :
   R = computeReleaseInfo(t)
   currentVariable.varPut("ReleaseInfo",R)
-  print "R=",R
-
+  print "updated R=",R
   print t
 else:
   R = currentVariable.varGet("ReleaseInfo")

@@ -21,20 +21,20 @@ class RfcCsvFileTest {
         AssertSCRN2(data);
         float[][] susc1 = csv.getEnsemble("SUSC1");
 
-        assertEquals(1.0f, susc1[0][0], 0.0001);
-        assertEquals(2.0f, susc1[0][1], 0.0001);
-        assertEquals(3.0f, susc1[0][2], 0.0001);
+        assertEquals(1000.0f, susc1[0][0], 0.0001);
+        assertEquals(2000.0f, susc1[0][1], 0.0001);
+        assertEquals(3000.0f, susc1[0][2], 0.0001);
 
 
     }
 
     private void AssertSCRN2(float[][] data) {
-        assertEquals(-1.0f, data[0][0], 0.0001);
-        assertEquals(-2.1f, data[0][1], 0.0001);
-        assertEquals(-3.1f, data[0][2], 0.0001);
-        assertEquals(-59.0f, data[58][0], 0.0001);
-        assertEquals(-59.1f, data[58][1], 0.0001);
-        assertEquals(-59.2f, data[58][2], 0.0001);
+        assertEquals(-1000.0f, data[0][0], 0.0001);
+        assertEquals(-2100f, data[0][1], 0.0001);
+        assertEquals(-3100f, data[0][2], 0.0001);
+        assertEquals(-59000.0f, data[58][0], 0.0001);
+        assertEquals(-59100f, data[58][1], 0.0001);
+        assertEquals(-59200f, data[58][2], 0.0001);
     }
 
 
