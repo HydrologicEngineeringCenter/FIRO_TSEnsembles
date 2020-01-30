@@ -76,7 +76,7 @@ def getZonedDateTime(currentRuntimestep):
 # computes index to specified exceedance (weibul rank)
 # data              -- array of values to sort 
 # percentExceedance -- percent exceedance to lookup (i.e.  10,50, 90)
-#  returns index to input array that matches, or exceeds, percentExceedance
+#  returns index to input array that matches or exceeds the percent exceedance
 def indexToExceedanceLevel(data,percentExceedance):
     
   #https://stackoverflow.com/questions/7851077/how-to-return-index-of-a-sorted-list
@@ -126,27 +126,30 @@ def computeVolumes(ensemble, steps):
 # where newValue is the value you want to set it to.
 
 
+def ensembleProcessing():
  
-t = getZonedDateTime(currentRuntimestep)
+  t = getZonedDateTime(currentRuntimestep)
  
-isFirst = not currentVariable.varExists("lastEnsembleTimestamp")
-nextEnsembleTimestamp = currentVariable.varGet("nextEnsembleTimestamp")
+  isFirst = not currentVariable.varExists("lastEnsembleTimestamp")
+  nextEnsembleTimestamp = currentVariable.varGet("nextEnsembleTimestamp")
 
-if isFirst or t.isEqual(nextEnsembleTimestamp) or t.isAfter(nextEnsembleTimestamp) :
-#if isFirst or tnextEnsembleTimestamp.isAfter(t) :
-  R = computeReleaseInfo(t)
-  currentVariable.varPut("ReleaseInfo",R)
-  print "updated R=",R
-  print t
-else:
-  R = currentVariable.varGet("ReleaseInfo")
+  if isFirst or t.isEqual(nextEnsembleTimestamp) or t.isAfter(nextEnsembleTimestamp) :
+  #if isFirst or tnextEnsembleTimestamp.isAfter(t) :
+    R = computeReleaseInfo(t)
+    currentVariable.varPut("ReleaseInfo",R)
+    print "updated R=",R
+    print t
+  else:
+    R = currentVariable.varGet("ReleaseInfo")
 	
-if R is None:
- raise StopComputeException("Error: missing ensemble forecast")
+  if R is None:
+   raise StopComputeException("Error: missing ensemble forecast")
 
+  return R
  
 
-tempValue = R
+#tempValue = ensembleProcessing()
+tempValue = 1 
 currentVariable.setValue(currentRuntimestep, tempValue)
 
 #####
