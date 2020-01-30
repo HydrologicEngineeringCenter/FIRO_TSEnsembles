@@ -60,7 +60,7 @@ def computeReleaseInfo(t):
   issueDate = e.getIssueDate()
   currentVariable.varPut("lastEnsembleTimestamp",issueDate)
   currentVariable.varPut("nextEnsembleTimestamp",issueDate.plusDays(1))
-  data = computeVolumes(e,7*24) # compute 7 day volume from hourly data
+  data = computeVolumes(e,7*24) # compute 7 day volume from hourly data, for each ensemble member
   index = indexToExceedanceLevel(data,50)  # interpolate/lookup 50% exceedance index to ensemble
   e50percent = e.getValues()[index]
   print "len(e50percent) = ",len(e50percent)
@@ -76,18 +76,19 @@ def getZonedDateTime(currentRuntimestep):
 # computes index to specified exceedance (weibul rank)
 # data              -- array of values to sort 
 # percentExceedance -- percent exceedance to lookup (i.e.  10,50, 90)
-#  returns index to input array that matches or exceeds the percent exceedance
+#  returns index to input array that matches, or exceeds, percentExceedance
 def indexToExceedanceLevel(data,percentExceedance):
-  data.sort(reverse=True) # sort high to low
+    
   #https://stackoverflow.com/questions/7851077/how-to-return-index-of-a-sorted-list
-  index = sorted(range(len(data)), key=lambda k: data[k])
+  index = sorted(range(len(data)), key=lambda k: data[k],  reverse=True)
+  data.sort(reverse=True) # sort high to low
   size=len(data)
 #  for i in range (size):
-#    print i," ",data[i], float(i+1)/(float(size)+1)
+#    print i," index=",index[i]," ",data[i], float(i+1)/(float(size)+1)
 
-  rval =int( math.ceil((size+1.0)*float(percentExceedance)/100.0-1.0))
-  print "index = ",rval
-  return rval
+  pos =int( math.ceil((size+1.0)*float(percentExceedance)/100.0-1.0))
+  print "index = ",index[pos]
+  return index[pos]
 
 
 # compute volume for the first steps
