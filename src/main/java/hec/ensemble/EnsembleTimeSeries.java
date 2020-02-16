@@ -10,7 +10,8 @@ import java.util.TreeMap;
 /**
  *  EnsembleTimeSeries is a collection of Ensembles over time
  *
- *  backing can be database or in-memory (from csv)
+ *  storage of data can be EnsembleTimeSeriesDatabase
+ *  or in-memory (from csv files for example)
  *
  */
 public class EnsembleTimeSeries
@@ -33,7 +34,6 @@ public class EnsembleTimeSeries
         return _db.getCount(timeseriesID);
 
     }
-
 
 
 
@@ -149,7 +149,7 @@ public class EnsembleTimeSeries
      * @param hoursTolerance hours before t to check
      * @return true if an ensemble exists at or before time t
      */
-    public boolean issueDateExists(ZonedDateTime issueDate, int hoursTolerance) {
+    protected boolean issueDateExists(ZonedDateTime issueDate, int hoursTolerance) {
       return getNearestIssueDate(issueDate,hoursTolerance)!= null;
      }
   }

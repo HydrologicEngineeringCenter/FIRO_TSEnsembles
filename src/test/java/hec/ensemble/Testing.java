@@ -1,5 +1,7 @@
 package hec.ensemble;
 
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -17,23 +19,25 @@ public class Testing {
      *
      * @throws Exception
      */
-    //@Test
+    @Test
     public void bulkTesting() throws Exception {
         String fn = "c:/temp/ensembleTester.db";
         File f = new File(fn);
         f.delete();
 
         ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
-        ZonedDateTime t2 = ZonedDateTime.of(2018, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
-        // ZonedDateTime t2 = t1.plusDays(30);
+        //ZonedDateTime t2 = ZonedDateTime.of(2018, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+         ZonedDateTime t2 = t1.plusDays(3);
         double writeTime = 0;
         double readTime = 0;
-
+        boolean create=true;
         for (String name : watershedNames) {
 
             CsvEnsembleReader reader = new CsvEnsembleReader(CacheDir);
             EnsembleTimeSeries[] ets = reader.Read(name, t1, t2);
-            writeTime += ensembleWriter(fn, ets);
+            writeTime += ensembleWriter(fn, ets,create);
+            if( create)
+                create=false; // just create database on first pass
         }
         readTime = ensembleReader(fn, t1, t2);
         System.out.println("SUMMARY");
@@ -68,11 +72,11 @@ public class Testing {
      * initial: 420 seconds to write a file 8.17 gb in size
      */
 
-    private double ensembleWriter(String fn, EnsembleTimeSeries[] ets)
+    private double ensembleWriter(String fn, EnsembleTimeSeries[] ets, boolean create)
      throws Exception{
         //select id, issue_date,watershed, location_name, length(byte_value_array)  from timeseries_ensemble order by issue_date, watershed
         long start = System.currentTimeMillis();
-        try (JdbcEnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(fn,true)) {
+        try (JdbcEnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(fn,create)) {
             for (EnsembleTimeSeries e : ets) {
                 db.write(e);
             }

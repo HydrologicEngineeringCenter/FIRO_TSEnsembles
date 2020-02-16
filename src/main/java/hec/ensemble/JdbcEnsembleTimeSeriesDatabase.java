@@ -348,7 +348,7 @@ public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase i
         } catch (Exception e) {
             Logger.logError(e);
         }
-        return (TimeSeriesIdentifier[]) rval.toArray();
+        return (TimeSeriesIdentifier[]) rval.toArray(new TimeSeriesIdentifier[0] );
     }
 
 
