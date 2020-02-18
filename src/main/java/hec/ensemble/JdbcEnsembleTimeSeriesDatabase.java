@@ -317,11 +317,15 @@ public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase i
 
     private void createTables() throws Exception {
 
-        String sql = new String(Files.readAllBytes(Paths.get(getClass().getResource("/ensemble.sql").toURI())));
+        String sql = new String(Files.readAllBytes(Paths.get(getClass().getResource("/database.sql").toURI())));
 
         String[] commands = sql.split(";");
-        for (String s : commands) {
-            if (s.trim().startsWith("--"))
+        for (String s : commands) {            
+            s = s.trim();
+            if (   s.isEmpty()
+                || s.startsWith("--") 
+                || s.startsWith("\r")
+                || s.startsWith("\n"))
                 continue;
 
             PreparedStatement cmd = _connection.prepareStatement(s);
