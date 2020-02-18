@@ -1,3 +1,11 @@
+.classpath
+.project
+*.db
+build/**
+.nb-gradle/**
+bin/**
+.gradle/**
+.settings/**
 # Compiled class file
 *.class
 
