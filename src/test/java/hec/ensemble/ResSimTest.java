@@ -6,6 +6,8 @@ import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import hec.*;
+
 public class ResSimTest {
 
 
@@ -37,7 +39,7 @@ public class ResSimTest {
         // in initialization code somewhere.
         // database layer (base/interface ) = jdbc/sqlite instance
         DatabaseGenerator.createTestDatabase(fn,2);
-        EnsembleTimeSeriesDatabase  db =new JdbcEnsembleTimeSeriesDatabase(fn,false);
+        TimeSeriesDatabase  db =new JdbcTimeSeriesDatabase(fn,false);
         // InMemoryEnsembleTimeSeriesDatabase
 
         TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.FARC1F","flow");

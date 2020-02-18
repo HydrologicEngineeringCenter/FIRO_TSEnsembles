@@ -5,7 +5,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
-
+import hec.*;
 
 /**
  *  EnsembleTimeSeries is a collection of Ensembles over time
@@ -17,7 +17,7 @@ import java.util.TreeMap;
 public class EnsembleTimeSeries
   {
 
-    private EnsembleTimeSeriesDatabase _db = null;
+    private TimeSeriesDatabase _db = null;
 
     private TimeSeriesIdentifier timeseriesID;
     private String units;
@@ -45,7 +45,7 @@ public class EnsembleTimeSeries
      * @param dataType
      * @param version
      */
-    protected EnsembleTimeSeries(EnsembleTimeSeriesDatabase db, TimeSeriesIdentifier timeseriesID, String units, String dataType, String version)
+    public EnsembleTimeSeries(TimeSeriesDatabase db, TimeSeriesIdentifier timeseriesID, String units, String dataType, String version)
     {
       this._db = db;
       init(timeseriesID, units, dataType, version);
@@ -108,8 +108,10 @@ public class EnsembleTimeSeries
       if( t2 == null)
         return null;
 
-      if (_db != null)
-         return _db.getEnsemble(timeseriesID,t2); // from disk
+      if (_db != null){
+        return _db.getEnsemble(timeseriesID,t2); // from disk
+      }
+         
 
        return items.get(t2);
     }

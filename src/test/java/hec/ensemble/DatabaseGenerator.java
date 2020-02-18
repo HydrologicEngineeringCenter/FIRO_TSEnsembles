@@ -4,6 +4,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import hec.*;
+
 public class DatabaseGenerator {
 
     /**
@@ -13,7 +15,7 @@ public class DatabaseGenerator {
      * @param filename name of database to create
      * @param numberOfDates number of forecasts to include
      */
-    static public EnsembleTimeSeriesDatabase createTestDatabase(String filename, int numberOfDates) throws Exception {
+    static public TimeSeriesDatabase createTestDatabase(String filename, int numberOfDates) throws Exception {
 
         String cacheDir = TestingPaths.instance.getCacheDir();
         ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
@@ -21,12 +23,12 @@ public class DatabaseGenerator {
 
         CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir);
         EnsembleTimeSeries[] ets = csvReader.Read("Kanektok", issueDate1, issueDate2);
-        EnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(filename, true);
+        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(filename, true);
 
         db.write(ets);
         return db;
     }
-    static public EnsembleTimeSeriesDatabase create1997TestDatabase(String filename) throws Exception {
+    static public TimeSeriesDatabase create1997TestDatabase(String filename) throws Exception {
 
         int numberOfDates = 30;
         String cacheDir = "c:/temp/hefs_cache";
@@ -36,7 +38,7 @@ public class DatabaseGenerator {
 
         CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir);
         EnsembleTimeSeries[] ets = csvReader.Read("RussianNapa", issueDate1, issueDate2);
-        EnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(filename, true);
+        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(filename, true);
         ZonedDateTime startDateTime = ZonedDateTime.of(1996, 12, 24, 12, 0, 0, 0, ZoneId.of("GMT"));
 
          // modify start/issue dates/ location

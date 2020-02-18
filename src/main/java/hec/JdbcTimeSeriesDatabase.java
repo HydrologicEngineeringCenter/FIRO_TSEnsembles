@@ -1,4 +1,4 @@
-package hec.ensemble;
+package hec;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,10 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import hec.ensemble.*;
+import hec.paireddata.*;
 /**
  * Read/write Ensembles to a JDBC database
  */
-public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase implements AutoCloseable {
+public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCloseable {
 
 
     private static String ensembleTableName = "ensemble";
@@ -30,7 +32,7 @@ public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase i
      * @param create   when true creates a new database (database file must not exist)
      * @throws Exception
      */
-    public JdbcEnsembleTimeSeriesDatabase(String database, boolean create) throws Exception {
+    public JdbcTimeSeriesDatabase(String database, boolean create) throws Exception {
         File f = new File(database);
         if (f.exists() && create)
             throw new FileAlreadyExistsException(database);
@@ -124,7 +126,7 @@ public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase i
      * @param issueDateEnd
      * @return
      */
-    protected EnsembleTimeSeries getEnsembleTimeSeriesWithData(TimeSeriesIdentifier timeseriesID, ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
+    public EnsembleTimeSeries getEnsembleTimeSeriesWithData(TimeSeriesIdentifier timeseriesID, ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
         EnsembleTimeSeries rval = getEnsembleTimeSeries(timeseriesID);
 
         String sql = "select * from  view_ensemble "
@@ -391,5 +393,11 @@ public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase i
             Logger.logError(e);
         }
         return rval;
+    }
+
+    @Override
+    public PairedData getPairedData(TimeSeriesIdentifier id) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

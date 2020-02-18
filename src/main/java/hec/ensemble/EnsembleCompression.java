@@ -5,11 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
- class EnsembleCompression {
+ public class EnsembleCompression {
 
 
     /**
@@ -18,7 +17,7 @@ import java.util.zip.GZIPOutputStream;
      * @param data
      * @return
      */
-    static float[][] UnPack(byte[] data, int rowCount, int columnCount, String compression)
+    public static float[][] UnPack(byte[] data, int rowCount, int columnCount, String compression)
     {
         byte[] bytes;
         if( compression.equals("gzip"))
@@ -33,7 +32,7 @@ import java.util.zip.GZIPOutputStream;
      * Pack an float[]] ensemble into a byte array
      * @return
      */
-     static byte[] Pack(float[][] data, String compression)
+    public static byte[] Pack(float[][] data, String compression)
     {
 
         byte[] bytes = ConvertToBytes(data);

@@ -6,6 +6,8 @@ import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import hec.*;
+
 public class Testing {
 
 
@@ -76,7 +78,7 @@ public class Testing {
      throws Exception{
         //select id, issue_date,watershed, location_name, length(byte_value_array)  from timeseries_ensemble order by issue_date, watershed
         long start = System.currentTimeMillis();
-        try (JdbcEnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(fn,create)) {
+        try (JdbcTimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn,create)) {
             for (EnsembleTimeSeries e : ets) {
                 db.write(e);
             }
@@ -99,7 +101,7 @@ public class Testing {
 
         long start = System.currentTimeMillis();
         int count = 0;
-        try (JdbcEnsembleTimeSeriesDatabase db = new JdbcEnsembleTimeSeriesDatabase(fileName,false)) {
+        try (JdbcTimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName,false)) {
             TimeSeriesIdentifier[] locations = db.getTimeSeriesIDs();
             for (TimeSeriesIdentifier tsid : locations) {
                 EnsembleTimeSeries ets = db.getEnsembleTimeSeriesWithData(tsid, t1,t2);
