@@ -20,5 +20,7 @@ public abstract class TimeSeriesDatabase {
 	
 
 
+    public abstract void write(EnsembleTimeSeries ets) throws Exception;
+    public abstract TimeSeriesIdentifier[] getTimeSeriesIDs();
 
 }
