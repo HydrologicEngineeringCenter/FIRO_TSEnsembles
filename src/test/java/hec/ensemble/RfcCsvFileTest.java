@@ -8,6 +8,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import hec.*;
+
 class RfcCsvFileTest {
 
 
@@ -49,7 +51,7 @@ class RfcCsvFileTest {
             File f = new File(fn);
             f.delete();
 
-            EnsembleTimeSeriesDatabase db  = DatabaseGenerator.createTestDatabase(fn,1);
+            TimeSeriesDatabase db  = DatabaseGenerator.createTestDatabase(fn,1);
             // --- READ
             TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2","flow");
             EnsembleTimeSeries ets =  db.getEnsembleTimeSeries(tsid);

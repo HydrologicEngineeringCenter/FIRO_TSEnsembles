@@ -4,18 +4,18 @@ public class Logger {
 
     static boolean DebugMode = false;
 
-    static void log(String msg) {
+    public static void log(String msg) {
         if (DebugMode)
             System.out.println(msg);
     }
 
-    static void logWarning(String msg) {
+    public static void logWarning(String msg) {
         log("Warning: " + msg);
     }
-    static void logError(String msg) {
+    public static void logError(String msg) {
         log("Error: " + msg);
     }
-    static void logError(Exception e) {
+    public static void logError(Exception e) {
         log("Error: " + e.getMessage());
         e.printStackTrace(System.out);
 
