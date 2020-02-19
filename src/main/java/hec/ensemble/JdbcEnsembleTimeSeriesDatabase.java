@@ -1,16 +1,17 @@
 package hec.ensemble;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
 import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.*;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  * Read/write Ensembles to a JDBC database
@@ -317,7 +318,12 @@ public class JdbcEnsembleTimeSeriesDatabase extends EnsembleTimeSeriesDatabase i
 
     private void createTables() throws Exception {
 
-        String sql = new String(Files.readAllBytes(Paths.get(getClass().getResource("/ensemble.sql").toURI())));
+        StringBuilder sb = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(
+                                getClass().getResourceAsStream("/ensemble.sql")));
+
+        String sql = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+
 
         String[] commands = sql.split(";");
         for (String s : commands) {
