@@ -14,8 +14,7 @@ public abstract class TimeSeriesDatabase {
     public abstract List<ZonedDateTime> getIssueDates(TimeSeriesIdentifier timeseriesID);
     public abstract void write(EnsembleTimeSeries[] etsArray) throws Exception;
     public abstract void write(EnsembleTimeSeries ets) throws Exception;	
-    public abstract void write(PairedData table);
-    public abstract void write(EnsembleTimeSeries ets) throws Exception;
+    public abstract void write(PairedData table);    
     public abstract TimeSeriesIdentifier[] getTimeSeriesIDs();
 
 }

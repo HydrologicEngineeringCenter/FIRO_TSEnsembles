@@ -3,6 +3,7 @@ package hec;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.FileAlreadyExistsException;
 import java.sql.*;
@@ -318,13 +319,11 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
     }
 
     private void createTables() throws Exception {
-
-        StringBuilder sb = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(
-                                getClass().getResourceAsStream("/ensemble.sql")));
-
+        InputStream is = this.getClass().getResourceAsStream("/database.sql");
+        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader reader = new BufferedReader(isr);
+                                
         String sql = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-
 
         String[] commands = sql.split(";");
         for (String s : commands) {
