@@ -3,7 +3,7 @@
 #####
 
 from hec.script import Constants
-from hec.ensemble import JdbcEnsembleTimeSeriesDatabase
+from hec import JdbcTimeSeriesDatabase
 from hec.ensemble import EnsembleTimeSeries
 from hec.ensemble import TimeSeriesIdentifier
 from hec.ensemble import Ensemble
@@ -23,7 +23,9 @@ from hec.ensemble import Ensemble
 def initStateVariable(currentVariable, network):
 	# return Constants.TRUE if the initialization is successful and Constants.FALSE if it failed.  
 	# Returning Constants.FALSE will halt the compute.
-	db = JdbcEnsembleTimeSeriesDatabase("C:/project/FIRO_TSEnsembles/ResSim.db",False)
+	
+	
+	db = JdbcTimeSeriesDatabase("C:/project/FIRO_TSEnsembles/ResSim.db",False)
 	tsid = TimeSeriesIdentifier("Coyote.fake_forecast","flow")
 	ets = db.getEnsembleTimeSeries(tsid)  
 	currentVariable.varPut("EnsembleTS", ets)
@@ -127,7 +129,7 @@ def computeVolumes(ensemble, steps):
 
 
 def ensembleProcessing():
- 
+
   t = getZonedDateTime(currentRuntimestep)
  
   isFirst = not currentVariable.varExists("lastEnsembleTimestamp")
@@ -148,8 +150,8 @@ def ensembleProcessing():
   return R
  
 
-#tempValue = ensembleProcessing()
-tempValue = 1 
+tempValue = ensembleProcessing()
+#tempValue = 1 
 currentVariable.setValue(currentRuntimestep, tempValue)
 
 #####

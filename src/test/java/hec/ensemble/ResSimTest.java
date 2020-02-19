@@ -29,7 +29,7 @@ public class ResSimTest {
     public void simulateResSim() throws Exception
     {
 
-//        CreateResSimTestFile();
+        CreateResSimTestFile();
 
         String fn = "ResSimTest.db";
         File f = new File(fn);
