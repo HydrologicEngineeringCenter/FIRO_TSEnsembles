@@ -12,5 +12,6 @@ public abstract class EnsembleTimeSeriesDatabase {
 
     public abstract void write(EnsembleTimeSeries[] etsArray) throws Exception;
     public abstract void write(EnsembleTimeSeries ets) throws Exception;
+    public abstract TimeSeriesIdentifier[] getTimeSeriesIDs();
 
 }
