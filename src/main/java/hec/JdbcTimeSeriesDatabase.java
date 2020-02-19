@@ -9,27 +9,32 @@ import java.sql.*;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
 
+import javax.management.RuntimeErrorException;
+
 import hec.ensemble.*;
 import hec.paireddata.*;
+
 /**
  * Read/write Ensembles to a JDBC database
  */
 public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCloseable {
 
-
     private static String ensembleTableName = "ensemble";
     private static String ensembleTimeSeriesTableName = "ensemble_timeseries";
-
 
     private String FileName;
     Connection _connection;
 
+    PreparedStatement prefix_name_stmt = null;
+
     /**
      * @param database filename for database
-     * @param create   when true creates a new database (database file must not exist)
+     * @param create   when true creates a new database (database file must not
+     *                 exist)
      * @throws Exception
      */
     public JdbcTimeSeriesDatabase(String database, boolean create) throws Exception {
@@ -40,11 +45,11 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
         if (!f.exists() && !create)
             throw new FileNotFoundException(database);
 
-
         FileName = database;
         Properties prop = new Properties();
 
-        // prop.setProperty("shared_cache", "false"); // sqlite options (dangerous but faster)
+        // prop.setProperty("shared_cache", "false"); // sqlite options (dangerous but
+        // faster)
         // prop.setProperty("Synchronous","Off");
         // prop.setProperty("Pooling","True");
         // prop.setProperty("Journal Mode","Off");
@@ -53,6 +58,9 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
         _connection.setAutoCommit(false);
         if (create)
             createTables();
+
+        prefix_name_stmt = _connection.prepareStatement("select table_prefix from table_types where name = ?");
+
     }
 
     public void close() {
@@ -66,7 +74,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
 
     @Override
     public void write(EnsembleTimeSeries ets) throws Exception {
-        write(new EnsembleTimeSeries[]{ets});
+        write(new EnsembleTimeSeries[] { ets });
     }
 
     @Override
@@ -76,20 +84,20 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
         int timeseries_ensemble_collection_id = GetMaxID(ensembleTimeSeriesTableName);
         for (EnsembleTimeSeries ets : etsArray) {
             List<ZonedDateTime> issueDates = ets.getIssueDates();
-            InsertEnsembleCollection(++timeseries_ensemble_collection_id, ets.getTimeSeriesIdentifier(), ets.getUnits(), ets.getDataType(), ets.getVersion());
+            InsertEnsembleCollection(++timeseries_ensemble_collection_id, ets.getTimeSeriesIdentifier(), ets.getUnits(),
+                    ets.getDataType(), ets.getVersion());
             for (int i = 0; i < issueDates.size(); i++) {
                 ZonedDateTime t = issueDates.get(i);
                 Ensemble e = ets.getEnsemble(t);
                 float[][] data = e.getValues();
                 byte[] bytes = EnsembleCompression.Pack(data, compress);
                 InsertEnsemble(++timeseries_ensemble_id, timeseries_ensemble_collection_id, e.getIssueDate(),
-                        e.getStartDateTime(),
-                        data[0].length, data.length, compress, e.getInterval().getSeconds(), bytes);
+                        e.getStartDateTime(), data[0].length, data.length, compress, e.getInterval().getSeconds(),
+                        bytes);
             }
         }
         _connection.commit();
     }
-
 
     /**
      * read an EnsembleTimeSeries from the database
@@ -100,9 +108,8 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
 
     public EnsembleTimeSeries getEnsembleTimeSeries(TimeSeriesIdentifier timeseriesID) {
 
-         getIssueDates(timeseriesID);
-        String sql = "select * from " + ensembleTimeSeriesTableName
-                + " WHERE location = ? "
+        getIssueDates(timeseriesID);
+        String sql = "select * from " + ensembleTimeSeriesTableName + " WHERE location = ? "
                 + " AND parameter_name = ? ";
         try {
             PreparedStatement statement = _connection.prepareStatement(sql);
@@ -126,14 +133,13 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
      * @param issueDateEnd
      * @return
      */
-    public EnsembleTimeSeries getEnsembleTimeSeriesWithData(TimeSeriesIdentifier timeseriesID, ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
+    public EnsembleTimeSeries getEnsembleTimeSeriesWithData(TimeSeriesIdentifier timeseriesID,
+            ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
         EnsembleTimeSeries rval = getEnsembleTimeSeries(timeseriesID);
 
-        String sql = "select * from  view_ensemble "
-                + " WHERE issue_datetime  >= '" + DateUtility.formatDate(issueDateStart) + "' "
-                + " AND issue_datetime <= '" + DateUtility.formatDate(issueDateEnd) + " '"
-                + " AND location_name = ? "
-                + " AND parameter = ? ";
+        String sql = "select * from  view_ensemble " + " WHERE issue_datetime  >= '"
+                + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
+                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location_name = ? " + " AND parameter = ? ";
         sql += " order by issue_date";
 
         try {
@@ -197,13 +203,12 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
      * @param issueDateEnd
      * @return first Ensemble in the time range specified.
      */
-    public Ensemble getEnsemble(TimeSeriesIdentifier timeseriesID, ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
+    public Ensemble getEnsemble(TimeSeriesIdentifier timeseriesID, ZonedDateTime issueDateStart,
+            ZonedDateTime issueDateEnd) {
 
-        String sql = "select * from  view_ensemble "
-                + " WHERE issue_datetime  >= '" + DateUtility.formatDate(issueDateStart) + "' "
-                + " AND issue_datetime <= '" + DateUtility.formatDate(issueDateEnd) + " '"
-                + " AND location = ? "
-                + " AND parameter_name = ? ";
+        String sql = "select * from  view_ensemble " + " WHERE issue_datetime  >= '"
+                + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
+                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location = ? " + " AND parameter_name = ? ";
         sql += " order by issue_datetime";
 
         Ensemble rval = null;
@@ -240,16 +245,13 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
         return new Ensemble(issue_date, values, start_date, Duration.ofSeconds(interval_seconds));
     }
 
-
     private PreparedStatement ps_insertEnsembleCollection;
 
-    private void InsertEnsembleCollection(int id, TimeSeriesIdentifier timeseries_id, String units,
-                                          String data_type, String version) throws Exception {
+    private void InsertEnsembleCollection(int id, TimeSeriesIdentifier timeseries_id, String units, String data_type,
+            String version) throws Exception {
         if (ps_insertEnsembleCollection == null) {
-            String sql = "INSERT INTO " + ensembleTimeSeriesTableName + " ([id], [location], "
-                    + " [parameter_name], "
-                    + " [units], [data_type], [version]) VALUES "
-                    + "(?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO " + ensembleTimeSeriesTableName + " ([id], [location], " + " [parameter_name], "
+                    + " [units], [data_type], [version]) VALUES " + "(?, ?, ?, ?, ?, ?)";
             ps_insertEnsembleCollection = _connection.prepareStatement(sql);
         }
 
@@ -265,15 +267,12 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
     private PreparedStatement ps_insertEnsemble;
 
     private void InsertEnsemble(int id, int ensemble_timeseries_id, ZonedDateTime issue_datetime,
-                                ZonedDateTime start_datetime,
-                                int member_length, int member_count, String compression,
-                                long interval_seconds,
-                                byte[] byte_value_array) throws Exception {
+            ZonedDateTime start_datetime, int member_length, int member_count, String compression,
+            long interval_seconds, byte[] byte_value_array) throws Exception {
         if (ps_insertEnsemble == null) {
             String sql = "INSERT INTO " + ensembleTableName + " ([id], [ensemble_timeseries_id],[issue_datetime], "
                     + " [start_datetime], [member_length], [member_count], [compression], [interval_seconds], "
-                    + "[byte_value_array]) VALUES "
-                    + "(?, ?, ?, ?, ?, ?, ?, ?,? )";
+                    + "[byte_value_array]) VALUES " + "(?, ?, ?, ?, ?, ?, ?, ?,? )";
             ps_insertEnsemble = _connection.prepareStatement(sql);
         }
 
@@ -322,12 +321,9 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
         String sql = new String(Files.readAllBytes(Paths.get(getClass().getResource("/database.sql").toURI())));
 
         String[] commands = sql.split(";");
-        for (String s : commands) {            
+        for (String s : commands) {
             s = s.trim();
-            if (   s.isEmpty()
-                || s.startsWith("--") 
-                || s.startsWith("\r")
-                || s.startsWith("\n"))
+            if (s.isEmpty() || s.startsWith("--") || s.startsWith("\r") || s.startsWith("\n"))
                 continue;
 
             PreparedStatement cmd = _connection.prepareStatement(s);
@@ -337,12 +333,11 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
 
     }
 
-
     public TimeSeriesIdentifier[] getTimeSeriesIDs() {
 
         List<TimeSeriesIdentifier> rval = new ArrayList<>();
-        String sql = "select location, parameter_name from " + ensembleTimeSeriesTableName +
-                " order by location,parameter_name";
+        String sql = "select location, parameter_name from " + ensembleTimeSeriesTableName
+                + " order by location,parameter_name";
         try {
             PreparedStatement stmt = _connection.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
@@ -354,9 +349,8 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
         } catch (Exception e) {
             Logger.logError(e);
         }
-        return (TimeSeriesIdentifier[]) rval.toArray(new TimeSeriesIdentifier[0] );
+        return (TimeSeriesIdentifier[]) rval.toArray(new TimeSeriesIdentifier[0]);
     }
-
 
     @Override
     public int getCount(TimeSeriesIdentifier timeseriesID) {
@@ -378,8 +372,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
         List<ZonedDateTime> rval = new ArrayList<>();
         PreparedStatement p = null;
         try {
-            String sql = "SELECT issue_datetime from view_ensemble "
-                    + " Where location = ?  AND  parameter_name = ?";
+            String sql = "SELECT issue_datetime from view_ensemble " + " Where location = ?  AND  parameter_name = ?";
             p = _connection.prepareStatement(sql);
             p.setString(1, timeseriesID.location);
             p.setString(2, timeseriesID.parameter);
@@ -395,9 +388,100 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
         return rval;
     }
 
-    @Override
     public PairedData getPairedData(TimeSeriesIdentifier id) {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public PairedData getPairedData(String table_name) {
+        Statement get_table = null;
+
+        try {
+            String sql_table_table = getSQLTableName(table_name, "Paired Data");
+            PairedData pd = new PairedData(this, table_name);
+            get_table = _connection.createStatement();
+            ResultSet rs = get_table.executeQuery("select indep,dep from " + sql_table_table + " order by indep asc"); 
+            while( rs.next() ){
+                pd.addRow(rs.getDouble(1), rs.getDouble(2));
+            }
+            return pd;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (get_table != null)
+                try {
+                    get_table.close();
+                } catch (SQLException e) {                    
+                    e.printStackTrace();
+                }
+        }
+
+    }
+
+    @Override
+    public void write(PairedData table) {
+        Statement stmt = null;
+        PreparedStatement insert_pd = null;
+        try {
+            String sql_table_name = getSQLTableName(table.getName(), "Paired Data");
+
+            stmt = _connection.createStatement();
+            try {
+                stmt.execute("DROP TABLE " + sql_table_name);
+            } catch (SQLException err) {
+                if (!err.getMessage().contains("no such table")) {
+                    throw err;
+                }
+            }
+
+            stmt.execute("CREATE TABLE " + sql_table_name + "(" + " indep double, dep double)");
+
+            insert_pd = _connection.prepareStatement("insert into " + sql_table_name + "(indep,dep) values(?,?)");
+            final PreparedStatement final_insert_pd = insert_pd;
+            table.getAllValues((indep, dep) -> {
+                try {
+                    final_insert_pd.setDouble(1, indep.get(0));
+                    final_insert_pd.setDouble(2, dep.get(0));
+                    final_insert_pd.addBatch();
+                } catch (SQLException err) {
+                    throw new RuntimeException(err);
+                }
+            });
+
+            insert_pd.executeBatch();
+            _connection.commit();
+
+        } catch (RuntimeException err) {
+            throw err;
+        } catch (Exception err) {
+            throw new RuntimeException(err);
+        } finally {
+            try {
+                if( stmt!= null) stmt.close();
+            } catch (SQLException e) {                
+                e.printStackTrace();
+            }
+            try {
+                if( insert_pd!= null) insert_pd.close();
+            } catch (SQLException e) {                
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+
+    public String getSQLTableName(String catalog_name, String type) throws SQLException{
+
+        prefix_name_stmt.clearParameters();
+        prefix_name_stmt.setString(1,type);
+        ResultSet rs = prefix_name_stmt.executeQuery();
+        if( rs.next() ){
+             return rs.getString(1)+Base64.getEncoder().encodeToString(catalog_name.getBytes());
+        }
+        throw new TypeNotImplemented(type);        
+    }
+
+
 }

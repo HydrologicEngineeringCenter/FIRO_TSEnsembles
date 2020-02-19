@@ -2,7 +2,7 @@
 --drop table if exists ensemble;
 --drop view if exists view_ensemble;
 
-CREATE TABLE IF NOT EXISTS table_type(
+CREATE TABLE IF NOT EXISTS table_types(
   id integer not null primary key,
   name text,
   description text,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS table_type(
 CREATE TABLE IF NOT EXISTS catalog(
   id integer not null primary key,
   name text,
-  datatype int references table_type(id),
+  datatype int references table_types(id),
   units text
 );
 
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS paired_data_information(
   catalog_id int references catalog(id)
 );
 
-INSERT INTO table_type(name,description,table_prefix)
+INSERT INTO table_types(name,table_prefix,description)
   VALUES ('Paired Data', 'paired_data_','
   Simple paired data, can have any number of independant 
   variables, column names will be:
