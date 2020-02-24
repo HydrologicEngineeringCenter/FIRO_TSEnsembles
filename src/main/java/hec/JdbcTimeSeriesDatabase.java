@@ -27,6 +27,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     private static String ensembleTimeSeriesTableName = "ensemble_timeseries";
 
     private String FileName;
+    private String version;
     Connection _connection;
 
     PreparedStatement prefix_name_stmt = null;
@@ -67,6 +68,11 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     public void close() throws Exception {
         _connection.commit();
         _connection.close();
+    }
+
+    @Override
+    public String getVersion(){
+        return this.version;
     }
 
     @Override

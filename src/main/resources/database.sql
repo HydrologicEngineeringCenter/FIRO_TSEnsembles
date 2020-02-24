@@ -2,6 +2,13 @@
 --drop table if exists ensemble;
 --drop view if exists view_ensemble;
 
+CREATE TABLE version(
+  version text not null primary key
+);
+
+INSERT INTO version(version) values ('20200224');
+
+
 CREATE TABLE IF NOT EXISTS table_types(
   id integer not null primary key,
   name text,
