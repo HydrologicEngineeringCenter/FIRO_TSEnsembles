@@ -23,6 +23,11 @@ import hec.paireddata.*;
  */
 public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
+    public enum CREATION_MODE {
+        CREATE_NEW, CREATE_NEW_OR_OPEN_EXISTING_UPDATE, CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE, OPEN_EXISTING_UPDATE,
+        OPEN_EXISTING_NO_UPDATE;
+    }
+
     private static String ensembleTableName = "ensemble";
     private static String ensembleTimeSeriesTableName = "ensemble_timeseries";
 
@@ -38,16 +43,47 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
      *                 exist)
      * @throws Exception
      */
-    public JdbcTimeSeriesDatabase(String database, boolean create) throws Exception {
+    public JdbcTimeSeriesDatabase(String database, CREATION_MODE creation_mode) throws Exception {
         File f = new File(database);
-        if (f.exists() && create)
-            throw new FileAlreadyExistsException(database);
-
-        if (!f.exists() && !create)
-            throw new FileNotFoundException(database);
-
         FileName = database;
         Properties prop = new Properties();
+        boolean create = false;
+        boolean update = false;
+        switch (creation_mode) {
+            case CREATE_NEW: {
+                if (f.exists())
+                    throw new FileAlreadyExistsException(database);
+                create = true;
+                break;
+            }
+            case CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE: {
+                if (!f.exists())
+                    create = true;
+                break;
+            }
+            case CREATE_NEW_OR_OPEN_EXISTING_UPDATE: {
+                if (!f.exists())
+                    create = true;
+                update = true;
+                break;
+            }
+            case OPEN_EXISTING_NO_UPDATE: {
+                if (!f.exists())
+                    throw new FileNotFoundException(database);
+                break;
+            }
+            case OPEN_EXISTING_UPDATE: {
+                if (!f.exists())
+                    throw new FileNotFoundException(database);
+                update = true;
+                break;
+            }
+            default: {
+                throw new InvalidCreationMode(
+                        "A valid creation mode, as specified in the documentation must be provided.");
+            }
+
+        }
 
         // prop.setProperty("shared_cache", "false"); // sqlite options (dangerous but
         // faster)
@@ -58,10 +94,17 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         _connection = DriverManager.getConnection("jdbc:sqlite:" + FileName, prop);
         _connection.setAutoCommit(false);
         if (create)
-            createTables();
+            version = createTables();
+        else if (!create && update) {
+            version = updateTables();
+        }
 
         prefix_name_stmt = _connection.prepareStatement("select table_prefix from table_types where name = ?");
 
+    }
+
+    private String updateTables() {
+        return null;
     }
 
     @Override
@@ -71,7 +114,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     }
 
     @Override
-    public String getVersion(){
+    public String getVersion() {
         return this.version;
     }
 
@@ -319,7 +362,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         return rval;
     }
 
-    private void createTables() throws Exception {
+    private String createTables() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/database.sql");
         InputStreamReader isr = new InputStreamReader(is);
         BufferedReader reader = new BufferedReader(isr);
@@ -337,6 +380,15 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
             _connection.commit();
         }
 
+        try(Statement version_query = _connection.createStatement()){
+            ResultSet rs = version_query.executeQuery("select version from version");
+            String version = rs.getString(1);
+            return version;
+        } catch( SQLException err ){
+            return "20200101";
+        }
+
+        
     }
 
     @Override

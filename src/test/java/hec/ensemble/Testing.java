@@ -3,6 +3,7 @@ package hec.ensemble;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.sql.JDBCType;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -37,7 +38,7 @@ public class Testing {
 
             CsvEnsembleReader reader = new CsvEnsembleReader(CacheDir);
             EnsembleTimeSeries[] ets = reader.Read(name, t1, t2);
-            writeTime += ensembleWriter(fn, ets,create);
+            writeTime += ensembleWriter(fn, ets,JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE);
             if( create)
                 create=false; // just create database on first pass
         }
@@ -74,11 +75,11 @@ public class Testing {
      * initial: 420 seconds to write a file 8.17 gb in size
      */
 
-    private double ensembleWriter(String fn, EnsembleTimeSeries[] ets, boolean create)
+    private double ensembleWriter(String fn, EnsembleTimeSeries[] ets, JdbcTimeSeriesDatabase.CREATION_MODE creation_mode)
      throws Exception{
         //select id, issue_date,watershed, location_name, length(byte_value_array)  from timeseries_ensemble order by issue_date, watershed
         long start = System.currentTimeMillis();
-        try (JdbcTimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn,create)) {
+        try (JdbcTimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn,creation_mode)) {
             for (EnsembleTimeSeries e : ets) {
                 db.write(e);
             }
@@ -101,7 +102,7 @@ public class Testing {
 
         long start = System.currentTimeMillis();
         int count = 0;
-        try (JdbcTimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName,false)) {
+        try (JdbcTimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName,JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);){
             TimeSeriesIdentifier[] locations = db.getTimeSeriesIDs();
             for (TimeSeriesIdentifier tsid : locations) {
                 EnsembleTimeSeries ets = db.getEnsembleTimeSeriesWithData(tsid, t1,t2);

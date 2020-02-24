@@ -38,7 +38,7 @@ public class ResSimTest {
         // in initialization code somewhere.
         // database layer (base/interface ) = jdbc/sqlite instance
         DatabaseGenerator.createTestDatabase(fn, 2);
-        try (TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn, false);) {
+        try (TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn,JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);) {
             // InMemoryEnsembleTimeSeriesDatabase
 
             TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.FARC1F", "flow");
