@@ -39,10 +39,11 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     PreparedStatement prefix_name_stmt = null;
 
     /**
+     * constructor for JdbcTimeSeriesDatabase
+     *
      * @param database filename for database
-     * @param create   when true creates a new database (database file must not
-     *                 exist)
-     * @throws Exception
+     * @param creation_mode defines how to open, create, and update the @database
+     * @throws Exception fails quickly
      */
     public JdbcTimeSeriesDatabase(String database, CREATION_MODE creation_mode) throws Exception {
         File f = new File(database);
@@ -192,7 +193,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     /**
      * read an EnsembleTimeSeries from the database
      *
-     * @param timeseriesID
+     * @param timeseriesID TimeSeriesIdentifier
      * @return a lazy EnsembleTimeSeries (no ensembles are loaded)
      */
 
@@ -218,10 +219,10 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     /**
      * Gets EnsembleTimeSeries, loading ensembles into memory.
      *
-     * @param timeseriesID
-     * @param issueDateStart
-     * @param issueDateEnd
-     * @return
+     * @param timeseriesID TimeSeriesIdentifier
+     * @param issueDateStart starting DateTime
+     * @param issueDateEnd ending DateTime
+     * @return returns @EnsembleTimeSeries
      */
     public EnsembleTimeSeries getEnsembleTimeSeriesWithData(TimeSeriesIdentifier timeseriesID,
             ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
@@ -277,8 +278,8 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     /**
      * read an Ensemble from the database
      *
-     * @param timeseriesID
-     * @param issueDate
+     * @param timeseriesID TimeSeriesIdentifier
+     * @param issueDate ZonedDateTime
      * @return Ensemble at the issueDateStart
      */
     public Ensemble getEnsemble(TimeSeriesIdentifier timeseriesID, ZonedDateTime issueDate) {
@@ -288,9 +289,9 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     /**
      * read an Ensemble from the database
      *
-     * @param timeseriesID
-     * @param issueDateStart
-     * @param issueDateEnd
+     * @param timeseriesID  TimeSeriesIdentifier
+     * @param issueDateStart ZonedDateTime
+     * @param issueDateEnd ZonedDateTime
      * @return first Ensemble in the time range specified.
      */
     public Ensemble getEnsemble(TimeSeriesIdentifier timeseriesID, ZonedDateTime issueDateStart,

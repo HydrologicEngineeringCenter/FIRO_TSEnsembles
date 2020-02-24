@@ -21,3 +21,5 @@ test {
     useJUnitPlatform()
     jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
 }
+
+build {finalizedBy javadoc }

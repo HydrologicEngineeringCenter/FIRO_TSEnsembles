@@ -14,8 +14,11 @@ import java.util.zip.GZIPOutputStream;
     /**
      * UnPack a GZIP a byte array
      * returns an ensemble  (float[][])
-     * @param data
-     * @return
+     * @param data input byte array
+     * @param rowCount number of rows to unpack to
+     * @param columnCount number of columns to unpack to
+     * @param compression compression method ('gzip' is only method supported)
+     * @return ensemble data (each row is the same size)
      */
     public static float[][] UnPack(byte[] data, int rowCount, int columnCount, String compression)
     {
@@ -29,8 +32,12 @@ import java.util.zip.GZIPOutputStream;
     }
 
     /**
-     * Pack an float[]] ensemble into a byte array
-     * @return
+     * Pack an float[][] ensemble into a byte array
+     * if compression is not defined the data is not compressed.
+     *
+     * @param data float[][] array to be compressed
+     * @param compression method for compression
+     * @return float array compressed with input compression
      */
     public static byte[] Pack(float[][] data, String compression)
     {

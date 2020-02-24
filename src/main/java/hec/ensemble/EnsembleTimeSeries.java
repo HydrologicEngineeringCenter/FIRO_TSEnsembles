@@ -39,11 +39,11 @@ public class EnsembleTimeSeries
 
     /**
      * EnsembleTimeSeries constructor for use with a EnsembleDatabase
-     * @param db
-     * @param timeseriesID
-     * @param units
-     * @param dataType
-     * @param version
+     * @param db abstract TimeSeriesDatabase
+     * @param timeseriesID TimeSeriesIdentifier
+     * @param units units
+     * @param dataType dataType
+     * @param version version
      */
     public EnsembleTimeSeries(TimeSeriesDatabase db, TimeSeriesIdentifier timeseriesID, String units, String dataType, String version)
     {
@@ -95,12 +95,12 @@ public class EnsembleTimeSeries
      *             t       (requested date)
      *
      *  In the example above t2 will be returned
-     *  if  t2 + toleranceHours >= t
+     *  if  t2 + toleranceHours {@literal >}= t
      *
      *
      * @param t   request ensemble at date
      * @param toleranceHours allow toleranceHours back to match an issue date
-     * @return
+     * @return returns an ensemble
      */
     public Ensemble getEnsemble(ZonedDateTime t, int toleranceHours) {
 
@@ -146,8 +146,8 @@ public class EnsembleTimeSeries
     }
 
     /**
-     *
-     * @param issueDate
+     * determines if a forecast, with issue date,and tolerance exists
+     * @param issueDate issue date of forecast
      * @param hoursTolerance hours before t to check
      * @return true if an ensemble exists at or before time t
      */
