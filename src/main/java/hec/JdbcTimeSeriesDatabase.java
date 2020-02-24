@@ -421,6 +421,8 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
     private void runResourceSQLScript(String resource) {
         InputStream is = this.getClass().getResourceAsStream(resource);
+        if( is == null)
+            throw new RuntimeException("resource not found:"+resource);
         InputStreamReader isr = new InputStreamReader(is);
         BufferedReader reader = new BufferedReader(isr);
 
@@ -581,7 +583,15 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
     }
 
-    public String getSQLTableName(String catalog_name, String type) throws SQLException {
+    /**
+     * builds a table name using a prefix
+     *
+     * @param catalog_name name of object in catalog
+     * @param type datatype  as specified in table_type table.
+     * @return full table name for requested object
+     * @throws SQLException for undefined condition
+     */
+    private String getSQLTableName(String catalog_name, String type) throws SQLException {
 
         prefix_name_stmt.clearParameters();
         prefix_name_stmt.setString(1, type);
@@ -609,18 +619,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
     @Override
     public String getUpdateScript(String from, String to){
-        
-        InputStream update_file = this.getClass().getResourceAsStream("/update_" + from + "_to_"+to+".sql");
-        StringBuilder sb = new StringBuilder();
-        try( BufferedReader br = new BufferedReader( new InputStreamReader(update_file)); ){
-            String line = null;
-            while( (line = br.readLine()) != null ){
-                sb.append(line).append(System.lineSeparator());
-            }
-            return sb.toString();
-        }catch( IOException err ){
-            throw new RuntimeException("Error extracting defined resource information",err);
-        } 
+        return "/update_" + from + "_to_"+to+".sql";
 	}    
 
     private void updateFor20200101_to_20200224() {

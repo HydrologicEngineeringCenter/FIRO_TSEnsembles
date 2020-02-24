@@ -3,7 +3,6 @@ package hec.ensemble;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.sql.JDBCType;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
