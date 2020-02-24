@@ -27,7 +27,7 @@ public class PairedDataTest{
         ArrayList<Double> value = new ArrayList<>();
         value.add(1.0);
         assertEquals(2.0, table_from_db.rate(value), 0.01);
-        
+        db.close();
     }
 
 

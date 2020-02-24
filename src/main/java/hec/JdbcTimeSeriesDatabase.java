@@ -15,15 +15,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import javax.management.RuntimeErrorException;
-
 import hec.ensemble.*;
 import hec.paireddata.*;
 
 /**
  * Read/write Ensembles to a JDBC database
  */
-public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCloseable {
+public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
     private static String ensembleTableName = "ensemble";
     private static String ensembleTimeSeriesTableName = "ensemble_timeseries";
@@ -65,13 +63,10 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
 
     }
 
-    public void close() {
-        try {
-            _connection.commit();
-            _connection.close();
-        } catch (SQLException e) {
-            Logger.logError(e);
-        }
+    @Override
+    public void close() throws Exception {
+        _connection.commit();
+        _connection.close();
     }
 
     @Override
@@ -322,7 +317,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
         InputStream is = this.getClass().getResourceAsStream("/database.sql");
         InputStreamReader isr = new InputStreamReader(is);
         BufferedReader reader = new BufferedReader(isr);
-                                
+
         String sql = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
         String[] commands = sql.split(";");
@@ -407,8 +402,8 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
             String sql_table_table = getSQLTableName(table_name, "Paired Data");
             PairedData pd = new PairedData(this, table_name);
             get_table = _connection.createStatement();
-            ResultSet rs = get_table.executeQuery("select indep,dep from " + sql_table_table + " order by indep asc"); 
-            while( rs.next() ){
+            ResultSet rs = get_table.executeQuery("select indep,dep from " + sql_table_table + " order by indep asc");
+            while (rs.next()) {
                 pd.addRow(rs.getDouble(1), rs.getDouble(2));
             }
             return pd;
@@ -418,7 +413,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
             if (get_table != null)
                 try {
                     get_table.close();
-                } catch (SQLException e) {                    
+                } catch (SQLException e) {
                     e.printStackTrace();
                 }
         }
@@ -464,30 +459,30 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase implements AutoCl
             throw new RuntimeException(err);
         } finally {
             try {
-                if( stmt!= null) stmt.close();
-            } catch (SQLException e) {                
+                if (stmt != null)
+                    stmt.close();
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
             try {
-                if( insert_pd!= null) insert_pd.close();
-            } catch (SQLException e) {                
+                if (insert_pd != null)
+                    insert_pd.close();
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
 
     }
 
-
-    public String getSQLTableName(String catalog_name, String type) throws SQLException{
+    public String getSQLTableName(String catalog_name, String type) throws SQLException {
 
         prefix_name_stmt.clearParameters();
-        prefix_name_stmt.setString(1,type);
+        prefix_name_stmt.setString(1, type);
         ResultSet rs = prefix_name_stmt.executeQuery();
-        if( rs.next() ){
-             return rs.getString(1)+Base64.getEncoder().encodeToString(catalog_name.getBytes());
+        if (rs.next()) {
+            return rs.getString(1) + Base64.getEncoder().encodeToString(catalog_name.getBytes());
         }
-        throw new TypeNotImplemented(type);        
+        throw new TypeNotImplemented(type);
     }
-
 
 }
