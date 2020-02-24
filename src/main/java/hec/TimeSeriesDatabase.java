@@ -1,6 +1,8 @@
 package hec;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.io.*;
 import java.util.List;
 import hec.ensemble.*;
 import hec.paireddata.*;
@@ -17,4 +19,7 @@ public abstract class TimeSeriesDatabase implements AutoCloseable {
     public abstract void write(PairedData table);    
     public abstract TimeSeriesIdentifier[] getTimeSeriesIDs();
     public abstract String getVersion();
+    public abstract ArrayList<String> getVersions();            
+	public abstract String getUpdateScript(String from, String to);
+	
 }

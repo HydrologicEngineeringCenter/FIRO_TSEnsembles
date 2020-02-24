@@ -40,8 +40,13 @@ INSERT INTO table_types(name,table_prefix,description)
   where N and M are the number of independant and dependant
   values respectively
 
-  ');
-
+  '),
+  ('Ensemble Time Series',NULL, '
+    The original ensemble time series test.
+  
+  ')
+  ;
+  
 
 
 CREATE TABLE IF NOT EXISTS ensemble_timeseries
