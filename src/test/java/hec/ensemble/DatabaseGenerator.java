@@ -1,5 +1,7 @@
 package hec.ensemble;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -23,7 +25,7 @@ public class DatabaseGenerator {
 
         CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir);
         EnsembleTimeSeries[] ets = csvReader.Read("Kanektok", issueDate1, issueDate2);
-        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(filename, true);
+        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(filename, JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);
 
         db.write(ets);
         return db;
@@ -31,14 +33,14 @@ public class DatabaseGenerator {
     static public TimeSeriesDatabase create1997TestDatabase(String filename) throws Exception {
 
         int numberOfDates = 30;
-        String cacheDir = "c:/temp/hefs_cache";
+        Path cacheDir = Files.createTempDirectory("hefs_cache");
 
         ZonedDateTime issueDate1 = ZonedDateTime.of(2015, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
         ZonedDateTime issueDate2 = issueDate1.plusDays(numberOfDates);
 
-        CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir);
+        CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir.toString());
         EnsembleTimeSeries[] ets = csvReader.Read("RussianNapa", issueDate1, issueDate2);
-        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(filename, true);
+        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(filename, JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);
         ZonedDateTime startDateTime = ZonedDateTime.of(1996, 12, 24, 12, 0, 0, 0, ZoneId.of("GMT"));
 
          // modify start/issue dates/ location

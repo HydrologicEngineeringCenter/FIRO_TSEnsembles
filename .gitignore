@@ -1,6 +1,7 @@
 .classpath
 .project
 *.db
+!src/**/resources/database/*.db
 build/**
 .nb-gradle/**
 bin/**
