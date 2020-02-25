@@ -8,13 +8,12 @@ import java.time.ZonedDateTime;
  *
  * each time-series in the Ensemble has the same timestamps
  *
- *
  */
-
 public class Ensemble
   {
     private final Duration interval;
-    EnsembleTimeSeries parent = null;
+    protected EnsembleTimeSeries parent = null;
+
 
     public Ensemble(ZonedDateTime issueDate, float[][] values, ZonedDateTime startDate, Duration interval)
     {
@@ -65,6 +64,7 @@ public class Ensemble
      * ensemble data
      * row represents ensemble members
      * columns are time steps
+     * @return tow-dimensional zize float[][] (all rows are the same size)
      */
     public float[][] getValues() {
       return values;

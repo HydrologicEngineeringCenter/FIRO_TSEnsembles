@@ -15,14 +15,14 @@ public class DatabaseVersioning{
         File testdb = get_test_file("/database/ResSimTest_20200101.db");                
         try( TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(testdb.getCanonicalPath(), JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);){
             assertEquals( get_latest_version(db.getVersions()), db.getVersion() );
+        } catch( Exception err ){
+            fail(err);
         }
         
         testdb.delete();
     }
 
-
-
-    public File get_test_file( String test_database_resource ) throws Exception{
+    private File get_test_file( String test_database_resource ) throws Exception{
         InputStream testdb_stream = this.getClass().getResourceAsStream(test_database_resource);
         Path tmpdbfile = Files.createTempFile("updatetests", "db");
         FileOutputStream file = new FileOutputStream(tmpdbfile.toFile());

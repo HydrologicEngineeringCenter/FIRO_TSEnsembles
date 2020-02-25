@@ -1,7 +1,5 @@
 package hec.ensemble;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -33,7 +31,7 @@ public class DatabaseGenerator {
     static public TimeSeriesDatabase create1997TestDatabase(String filename) throws Exception {
 
         int numberOfDates = 30;
-        Path cacheDir = Files.createTempDirectory("hefs_cache");
+        String cacheDir = "c:/temp/hefs_cache"; // Karl's has 67 GB of ensemble data in this dir for experiments.
 
         ZonedDateTime issueDate1 = ZonedDateTime.of(2015, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
         ZonedDateTime issueDate2 = issueDate1.plusDays(numberOfDates);
