@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
-
+import java.util.List;
 
 
 public class DatabaseVersioning{
@@ -35,7 +35,7 @@ public class DatabaseVersioning{
         return tmpdbfile.toFile();
     }
 
-    public String get_latest_version( ArrayList<String> versions) throws Exception{        
+    private String get_latest_version( List<String> versions) throws Exception{
         return versions.get(versions.size()-1);
     }
 

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import hec.*;
 
@@ -102,7 +103,7 @@ public class Testing {
         long start = System.currentTimeMillis();
         int count = 0;
         try (JdbcTimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName,JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);){
-            TimeSeriesIdentifier[] locations = db.getTimeSeriesIDs();
+            List<TimeSeriesIdentifier> locations = db.getTimeSeriesIDs();
             for (TimeSeriesIdentifier tsid : locations) {
                 EnsembleTimeSeries ets = db.getEnsembleTimeSeriesWithData(tsid, t1,t2);
                 if( ets.getCount() ==0 )

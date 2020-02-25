@@ -17,9 +17,9 @@ public abstract class TimeSeriesDatabase implements AutoCloseable {
     public abstract void write(EnsembleTimeSeries[] etsArray) throws Exception;
     public abstract void write(EnsembleTimeSeries ets) throws Exception;	
     public abstract void write(PairedData table);    
-    public abstract TimeSeriesIdentifier[] getTimeSeriesIDs();
+    public abstract List<TimeSeriesIdentifier> getTimeSeriesIDs();
     public abstract String getVersion();
-    public abstract ArrayList<String> getVersions();            
+    public abstract List<String> getVersions();
 	public abstract String getUpdateScript(String from, String to);
 	
 }

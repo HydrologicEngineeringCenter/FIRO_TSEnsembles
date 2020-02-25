@@ -25,7 +25,7 @@ def initStateVariable(currentVariable, network):
 	# Returning Constants.FALSE will halt the compute.
 	
 	
-	db = JdbcTimeSeriesDatabase("C:/project/FIRO_TSEnsembles/ResSim.db",False)
+	db = JdbcTimeSeriesDatabase("C:/project/FIRO_TSEnsembles/ResSim.db",JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE)
 	tsid = TimeSeriesIdentifier("Coyote.fake_forecast","flow")
 	ets = db.getEnsembleTimeSeries(tsid)  
 	currentVariable.varPut("EnsembleTS", ets)

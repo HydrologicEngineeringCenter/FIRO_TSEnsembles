@@ -10,19 +10,17 @@ import hec.*;
 
 public class ResSimTest {
 
+    @Test
     public void CreateResSimTestFile() throws Exception {
-        String fn = "ResSim.db";
+        String fn = "CreateResSimTestFile.db";
         File f = new File(fn);
         f.delete();
 
         // get an ensembleTimeSeries from the database
         // in initialization code somewhere.
         // database layer (base/interface ) = jdbc/sqlite instance
-
-        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Coyote.fake_forecast", "flow");
-
-        // DatabaseGenerator.createTestDatabase(fn,20);
-        DatabaseGenerator.create1997TestDatabase(fn);
+         DatabaseGenerator.createTestDatabase(fn,20);
+         f.delete();
     }
 
     @Test

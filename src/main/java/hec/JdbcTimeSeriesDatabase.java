@@ -129,7 +129,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         } catch (SQLException e) {
             throw new RuntimeException("database operations failed at start of attempt to update", e);
         }
-        ArrayList<String> versions = getVersions();
+        List<String> versions = getVersions();
         for (String version : versions) {
             if (version.compareTo(this.getVersion()) > 0) {
                 String script = getUpdateScript(this.getVersion(), version);
@@ -443,7 +443,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
 
     @Override
-    public TimeSeriesIdentifier[] getTimeSeriesIDs() {
+    public List<TimeSeriesIdentifier> getTimeSeriesIDs() {
 
         List<TimeSeriesIdentifier> rval = new ArrayList<>();
         String sql = "select location, parameter_name from " + ensembleTimeSeriesTableName
@@ -459,7 +459,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         } catch (Exception e) {
             Logger.logError(e);
         }
-        return (TimeSeriesIdentifier[]) rval.toArray(new TimeSeriesIdentifier[0]);
+        return rval;
     }
 
     @Override
@@ -603,8 +603,8 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     }
 
     @Override
-    public ArrayList<String> getVersions(){
-    ArrayList<String> list = new ArrayList<String>();             
+    public List<String> getVersions(){
+    ArrayList<String> list = new ArrayList<String>();
         InputStream version_file = this.getClass().getResourceAsStream("/versions.txt");        
         try( BufferedReader br = new BufferedReader( new InputStreamReader(version_file))){
             String line = null;
