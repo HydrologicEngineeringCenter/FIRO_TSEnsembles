@@ -125,8 +125,7 @@ public class EnsembleTimeSeries
       }
 
     public Ensemble getEnsemble(ZonedDateTime t) {
-
-      return items.get(t);
+        return getEnsemble(t,0);
     }
 
     public String getUnits() {

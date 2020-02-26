@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import hec.*;
@@ -14,8 +15,6 @@ public class Testing {
 
     private static String CacheDir = "C:\\Temp\\hefs_cache";
     static String[] watershedNames = {"RussianNapa", "EastSierra", "FeatherYuba"};
-
-
 
     /**
      * write Time: 468.171 s
@@ -30,7 +29,7 @@ public class Testing {
 
         ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
         //ZonedDateTime t2 = ZonedDateTime.of(2018, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
-         ZonedDateTime t2 = t1.plusDays(3);
+        ZonedDateTime t2 = t1.plusDays(3);
         double writeTime = 0;
         double readTime = 0;
         boolean create=true;
@@ -49,23 +48,6 @@ public class Testing {
 
     }
 
-    /**
-     * Read Time: 205.362 s
-     * @throws Exception
-     */
-    //@Test
-    public void readAll() throws Exception {
-        String fn = "c:/temp/ensembleTester_copy.db";
-
-        ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
-        ZonedDateTime t2 = ZonedDateTime.of(2018, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
-        double readTime = 0;
-
-        readTime = ensembleReader(fn, t1, t2);
-
-        System.out.println("Read Time: " + readTime + " s");
-
-    }
 
     /**
      * ensembleWriter may be used to test
