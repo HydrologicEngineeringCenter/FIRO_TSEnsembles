@@ -34,7 +34,7 @@ public class ReadWriteEnsembleTest {
             etsList.add(ets);
             count += ets.getCount();
         }
-        String outputPath = "out_delete_me.db";
+        String outputPath = TestingPaths.instance.getTempDir()+"/out_delete_me.db";
         File f = new File(outputPath);
         f.delete();
         hec.JdbcTimeSeriesDatabase dbaseOut = new hec.JdbcTimeSeriesDatabase(outputPath, JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);

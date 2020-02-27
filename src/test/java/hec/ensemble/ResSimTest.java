@@ -1,67 +1,62 @@
 package hec.ensemble;
 
+import hec.JdbcTimeSeriesDatabase;
+import hec.TimeSeriesDatabase;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-
-import hec.*;
+import java.util.List;
 
 public class ResSimTest {
 
-    @Test
-    public void CreateResSimTestFile() throws Exception {
-        String fn = "CreateResSimTestFile.db";
-        File f = new File(fn);
-        f.delete();
-
-        // get an ensembleTimeSeries from the database
-        // in initialization code somewhere.
-        // database layer (base/interface ) = jdbc/sqlite instance
-         DatabaseGenerator.createTestDatabase(fn,20);
-         f.delete();
-    }
 
     @Test
     public void simulateResSim() throws Exception {
 
-        // CreateResSimTestFile();
-
-        String fn = "ResSimTest.db";
-        File f = new File(fn);
-        f.delete();
+        String fn ="src/test/resources/database/ResSim.db";
 
         // get an ensembleTimeSeries from the database
         // in initialization code somewhere.
         // database layer (base/interface ) = jdbc/sqlite instance
-        DatabaseGenerator.createTestDatabase(fn, 2);
-        try (TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn,JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);) {
+        try (TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn,JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);) {
             // InMemoryEnsembleTimeSeriesDatabase
 
-            TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.FARC1F", "flow");
+            TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Coyote.fake_forecast", "flow");
 
-            EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
-            if (ets == null)
+            EnsembleTimeSeriesReader reader = db.getEnsembleTimeSeriesReader(tsid);
+            if (reader == null)
                 throw new Exception("could not find " + tsid.toString());
             Object R = null; // Represents result of ResSim script processing an ensemble.
             // -- end initialization
 
-            Ensemble e = null;
+            List<ZonedDateTime> issueDates = reader.getIssueDates();
+            Ensemble e;
             // t represents ResSim timestep (RunTimeStep)
             ZoneId pst = ZoneId.of("America/Los_Angeles");
-            ZonedDateTime t = ZonedDateTime.of(2019, 12, 25, 0, 0, 0, 0, pst);
-            ZonedDateTime timeOfPreviousEnsemble = t;
+            ZonedDateTime t = issueDates.get(0);
             int numSteps = 168; // hourly time steps
-            int tolerance = 24; // require new ensemble at least every 24 hours
+            ZonedDateTime timeOfNextEnsemble = issueDates.get(0);
+            for (ZonedDateTime z: issueDates) { // find first forecast
+                if( z.compareTo(t) >0 )
+                    break;
+                timeOfNextEnsemble = z;
+
+            }
 
             for (int i = 0; i < numSteps; i++) {
 
                 // assuming issue_times might not be exactly regular.
-                if (i == 0 || (t.isAfter(timeOfPreviousEnsemble) && ets.issueDateExists(t, tolerance))) {
-                    e = ets.getEnsemble(t, tolerance);// gets nearest ensemble at or before time t
+                if (i == 0 || (t.equals(timeOfNextEnsemble) || t.isAfter(timeOfNextEnsemble))) {
+                    e = reader.getEnsemble(timeOfNextEnsemble);// gets nearest ensemble at or before time t
+                    ZonedDateTime issueDate =  e.getIssueDate();
+                    int idx = issueDates.indexOf(issueDate);
+                    if( idx+1  < issueDates.size())
+                        timeOfNextEnsemble = issueDates.get(idx+1);
+                    else
+                        System.out.println("no more ensembles...");
+
                     R = ProcessEnsemble(e);// process the new ensemble
-                    timeOfPreviousEnsemble = t;
                 }
 
                 // Do smart stuff with R
@@ -72,6 +67,7 @@ public class ResSimTest {
     }
 
     private Object ProcessEnsemble(Ensemble e) {
+        System.out.println("processing...");
         return new Object();
     }
 }

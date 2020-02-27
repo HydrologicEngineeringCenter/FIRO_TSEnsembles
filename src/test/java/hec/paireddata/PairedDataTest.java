@@ -1,5 +1,6 @@
 package hec.paireddata;
 
+import hec.ensemble.TestingPaths;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
@@ -12,9 +13,10 @@ public class PairedDataTest {
     @Test
     public void A_i1d1_is_written_to_the_database() throws Exception {
 
-        File file = new File("pairedtest.db");
+        String fileName= TestingPaths.instance.getTempDir()+"/"+"pairedtest.db";
+        File file = new File(fileName);
         file.delete();
-        try (TimeSeriesDatabase db = new JdbcTimeSeriesDatabase("pairedtest.db",
+        try (TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName,
                 JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);) {
 
             PairedData table = new PairedData("test|stage/flow");

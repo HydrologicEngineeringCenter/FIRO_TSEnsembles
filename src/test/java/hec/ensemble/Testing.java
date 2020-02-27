@@ -23,7 +23,8 @@ public class Testing {
      */
     @Test
     public void bulkTesting() throws Exception {
-        String fn = "c:/temp/ensembleTester.db";
+
+        String fn = TestingPaths.instance.getTempDir()+"/bulkTesting.db";
         File f = new File(fn);
         f.delete();
 
@@ -87,7 +88,7 @@ public class Testing {
         try (JdbcTimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName,JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);){
             List<TimeSeriesIdentifier> locations = db.getTimeSeriesIDs();
             for (TimeSeriesIdentifier tsid : locations) {
-                EnsembleTimeSeries ets = db.getEnsembleTimeSeriesWithData(tsid, t1,t2);
+                EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid, t1,t2);
                 if( ets.getCount() ==0 )
                     System.out.println("Warning no ensembles found at location '"+tsid+"'");
                 count += ets.getCount();

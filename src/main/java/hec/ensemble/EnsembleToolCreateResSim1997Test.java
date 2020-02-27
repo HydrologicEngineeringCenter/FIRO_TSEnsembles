@@ -3,6 +3,7 @@ package hec.ensemble;
 import hec.JdbcTimeSeriesDatabase;
 import hec.TimeSeriesDatabase;
 
+import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -25,8 +26,18 @@ public class EnsembleToolCreateResSim1997Test {
         create1997TestDatabase(args[0],args[1]);
     }
 
+    /**
+     * Read some data from 2015,  re-label as starting in 1996 for testing ResSim
+     * @param hefs_dir
+     * @param filename
+     * @return
+     * @throws Exception
+     */
     static private TimeSeriesDatabase create1997TestDatabase(String hefs_dir, String filename) throws Exception {
 
+        File f = new File(filename);
+        if( f.exists())
+           f.delete();
         int numberOfDates = 30;
         ZonedDateTime issueDate1 = ZonedDateTime.of(2015, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
         ZonedDateTime issueDate2 = issueDate1.plusDays(numberOfDates);
@@ -41,7 +52,7 @@ public class EnsembleToolCreateResSim1997Test {
         EnsembleTimeSeries a = ets[0]; // take first location
         List<ZonedDateTime> dates = a.getIssueDates();
 
-        EnsembleTimeSeries ets2 = new EnsembleTimeSeries(db,tsid,a.getUnits(),a.getDataType(),a.getVersion());
+        EnsembleTimeSeries ets2 = new EnsembleTimeSeries(tsid,a.getUnits(),a.getDataType(),a.getVersion());
         ZonedDateTime newIssueDate = startDateTime;
         for (int j = 0; j < a.getCount(); j++) {
             Ensemble e = a.getEnsemble(dates.get(j));

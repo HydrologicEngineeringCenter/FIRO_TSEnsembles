@@ -10,14 +10,9 @@ import hec.*;
 /**
  *  EnsembleTimeSeries is a collection of Ensembles over time
  *
- *  storage of data can be EnsembleTimeSeriesDatabase
- *  or in-memory (from csv files for example)
- *
  */
 public class EnsembleTimeSeries
   {
-
-    private TimeSeriesDatabase _db = null;
 
     private TimeSeriesIdentifier timeseriesID;
     private String units;
@@ -28,32 +23,9 @@ public class EnsembleTimeSeries
 
     public int getCount()
     {
-      if( _db == null)
       return items.size();
-      else
-        return _db.getCount(timeseriesID);
-
     }
 
-
-
-    /**
-     * EnsembleTimeSeries constructor for use with a EnsembleDatabase
-     * @param db abstract TimeSeriesDatabase
-     * @param timeseriesID TimeSeriesIdentifier
-     * @param units units
-     * @param dataType dataType
-     * @param version version
-     */
-    public EnsembleTimeSeries(TimeSeriesDatabase db, TimeSeriesIdentifier timeseriesID, String units, String dataType, String version)
-    {
-      this._db = db;
-      init(timeseriesID, units, dataType, version);
-      List<ZonedDateTime> times = db.getIssueDates(timeseriesID);
-      for (ZonedDateTime t: times ) {
-         items.put(t,null); // keep all Timestamps in memory, ensembles come from disk.
-      }
-    }
     public EnsembleTimeSeries(TimeSeriesIdentifier timeseriesID, String units, String dataType, String version)
     {
       init(timeseriesID,units,dataType,version);
@@ -66,8 +38,6 @@ public class EnsembleTimeSeries
       this.version = version;
       items = new TreeMap<>();
     }
-
-
 
     public void addEnsemble(ZonedDateTime issueDate, float[][] ensemble, ZonedDateTime startDate, Duration interval)
     {
@@ -87,45 +57,8 @@ public class EnsembleTimeSeries
       return rval;
     }
 
-    /**
-     * gets nearest ensemble at or before time t
-     *
-     *   t1 --- t2 --- t3  (issue dates in TreeMap)
-     *   t1 --- t2         (issue dates from floorKey )
-     *             t       (requested date)
-     *
-     *  In the example above t2 will be returned
-     *  if  t2 + toleranceHours {@literal >}= t
-     *
-     *
-     * @param t   request ensemble at date
-     * @param toleranceHours allow toleranceHours back to match an issue date
-     * @return returns an ensemble
-     */
-    public Ensemble getEnsemble(ZonedDateTime t, int toleranceHours) {
-
-      ZonedDateTime t2 = getNearestIssueDate(t,toleranceHours);
-      if( t2 == null)
-        return null;
-
-      if (_db != null){
-        return _db.getEnsemble(timeseriesID,t2); // from disk
-      }
-         
-
-       return items.get(t2);
-    }
-
-    private ZonedDateTime getNearestIssueDate(ZonedDateTime t, int toleranceHours)
-    {
-      ZonedDateTime t2 =  items.floorKey(t); //https://docs.oracle.com/javase/7/docs/api/java/util/TreeMap.html#floorEntry(K)
-      if( t2 != null && t2.plusHours(toleranceHours).compareTo(t) >=0)
-        return t2;
-      return null;
-      }
-
     public Ensemble getEnsemble(ZonedDateTime t) {
-        return getEnsemble(t,0);
+      return items.get(t);
     }
 
     public String getUnits() {
@@ -144,13 +77,4 @@ public class EnsembleTimeSeries
       return timeseriesID;
     }
 
-    /**
-     * determines if a forecast, with issue date,and tolerance exists
-     * @param issueDate issue date of forecast
-     * @param hoursTolerance hours before t to check
-     * @return true if an ensemble exists at or before time t
-     */
-    protected boolean issueDateExists(ZonedDateTime issueDate, int hoursTolerance) {
-      return getNearestIssueDate(issueDate,hoursTolerance)!= null;
-     }
   }
