@@ -26,9 +26,9 @@ build {finalizedBy javadoc }
 
 
 task runApp(type: JavaExec) {
-    main = 'hec.ensemble.EnsembleToolCreateResSim1997Test'
+    main = 'hec.ensemble.EnsembleUtility'
     classpath = sourceSets.main.runtimeClasspath
     jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
-    args = ["c:/temp/hefs_cache", "C:/project/FIRO_TSEnsembles/src/test/resources/database/ResSim.db"]
+    args = ["c:/temp/hefs_cache", "100","10","C:/temp/ResSim.db"]
 }
  
