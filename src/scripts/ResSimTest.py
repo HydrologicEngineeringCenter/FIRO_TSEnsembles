@@ -23,12 +23,16 @@ from hec.ensemble import Ensemble
 def initStateVariable(currentVariable, network):
 	# return Constants.TRUE if the initialization is successful and Constants.FALSE if it failed.  
 	# Returning Constants.FALSE will halt the compute.
-	
-	
-	db = JdbcTimeSeriesDatabase("C:/project/FIRO_TSEnsembles/ResSim.db",False)
+	run = network.getRssRun()
+	fileName = run.getDSSOutputFile()
+	print("hi",fileName)
+	db = JdbcTimeSeriesDatabase("C:/project/FIRO_TSEnsembles/src/test/resources/database/ResSim.db",JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE)
 	tsid = TimeSeriesIdentifier("Coyote.fake_forecast","flow")
-	ets = db.getEnsembleTimeSeries(tsid)  
-	currentVariable.varPut("EnsembleTS", ets)
+	reader = db.getEnsembleTimeSeriesReader(tsid)  
+	currentVariable.varPut("reader", reader)
+	issueDates = reader.getIssueDates()
+	currentVariable.varPut("issueDates", issueDates)
+	
 	return Constants.TRUE
 
 #####
@@ -37,6 +41,7 @@ def initStateVariable(currentVariable, network):
 
 from java.time import  ZoneId
 from java.time import  ZonedDateTime
+from hec.rss.lang import StopComputeException
 import math
 
 # This Script demonstrates using ensembles (FIRO_TSEnsembles.jar) within ResSim
@@ -49,24 +54,6 @@ import math
 # addjars ..\FIRO_TSEnsembles\build\libs
 
 
-# computeReleaseInfo reads an ensemble to determine reservoir release criteria
-#
-def computeReleaseInfo(t):
-  ets = currentVariable.varGet("EnsembleTS")
-  e = ets.getEnsemble(t, 25)  # 25 hours tolerance for forecast  
-
-  if e is None:
-    raise StopComputeException("Error: forecast not found for date: "+ t )
-    
-  print "ensemble loaded issueDate = ",e.getIssueDate()
-  issueDate = e.getIssueDate()
-  currentVariable.varPut("lastEnsembleTimestamp",issueDate)
-  currentVariable.varPut("nextEnsembleTimestamp",issueDate.plusDays(1))
-  data = computeVolumes(e,7*24) # compute 7 day volume from hourly data, for each ensemble member
-  index = indexToExceedanceLevel(data,50)  # interpolate/lookup 50% exceedance index to ensemble
-  e50percent = e.getValues()[index]
-  print "len(e50percent) = ",len(e50percent)
-  return t.getDayOfMonth() %2
   
   
 def getZonedDateTime(currentRuntimestep):
@@ -128,14 +115,63 @@ def computeVolumes(ensemble, steps):
 # where newValue is the value you want to set it to.
 
 
+
+# computeReleaseInfo reads an ensemble to determine reservoir release criteria
+#
+def computeReleaseInfo(t):
+  reader = currentVariable.varGet("reader")
+  timeOfNextEnsemble = currentVariable.varGet("timeOfNextEnsemble")
+#  print("timeOfNextEnsemble "+timeOfNextEnsemble.toString())
+  e = reader.getEnsemble(timeOfNextEnsemble) 
+
+  if e is None:
+    raise StopComputeException("Error: forecast not found for date: "+ t.toString() )
+    
+  #print "ensemble loaded issueDate = ",e.getIssueDate()
+  issueDate = e.getIssueDate()
+  issueDates = currentVariable.varGet("issueDates")
+  idx = issueDates.indexOf(issueDate)
+  if( idx+1  < issueDates.size()):
+    timeOfNextEnsemble = issueDates.get(idx+1)
+  else:
+    print("no more ensembles...")
+  
+  currentVariable.varPut("timeOfNextEnsemble",timeOfNextEnsemble)
+  data = computeVolumes(e,7*24) # compute 7 day volume from hourly data, for each ensemble member
+  index = indexToExceedanceLevel(data,50)  # interpolate/lookup 50% exceedance index to ensemble
+  e50percent = e.getValues()[index]
+  print "len(e50percent) = ",len(e50percent)
+  return t.getDayOfMonth() %2
+
+# find an ensemble forecast that can be used with the model time stamp t
+def getDateTimeForFirstEnsemble(t):
+  issueDates = currentVariable.varGet("issueDates")
+  timeOfNextEnsemble = issueDates.get(0)
+  for z in issueDates:
+    if z.compareTo(t) >0:
+      break
+    timeOfNextEnsemble = z
+
+  return timeOfNextEnsemble
+
+            
+
 def ensembleProcessing():
 
   t = getZonedDateTime(currentRuntimestep)
  
-  isFirst = not currentVariable.varExists("lastEnsembleTimestamp")
-  nextEnsembleTimestamp = currentVariable.varGet("nextEnsembleTimestamp")
+  isFirst = not currentVariable.varExists("timeOfNextEnsemble")
+  
+  if isFirst:
+	timeOfNextEnsemble = getDateTimeForFirstEnsemble(t)
+	
+  else:
+    timeOfNextEnsemble = currentVariable.varGet("timeOfNextEnsemble")
 
-  if isFirst or t.isEqual(nextEnsembleTimestamp) or t.isAfter(nextEnsembleTimestamp) :
+  currentVariable.varPut("timeOfNextEnsemble",timeOfNextEnsemble)
+  #print("t="+t.toString())
+  #print("timeOfNextEnsemble = "+timeOfNextEnsemble.toString())
+  if isFirst or t.isEqual(timeOfNextEnsemble) or t.isAfter(timeOfNextEnsemble) :
   #if isFirst or tnextEnsembleTimestamp.isAfter(t) :
     R = computeReleaseInfo(t)
     currentVariable.varPut("ReleaseInfo",R)

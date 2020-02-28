@@ -47,12 +47,13 @@ class RfcCsvFileTest {
     public void importCsvToDatabase() {
         try {
 
-            String fn = "test.db";
+            String fn = TestingPaths.instance.getTempDir()+"/importCsvToDatabase.db";
             File f = new File(fn);
             f.delete();
 
-            TimeSeriesDatabase db  = DatabaseGenerator.createTestDatabase(fn,1);
-            // --- READ
+            DatabaseGenerator.createTestDatabase(fn,1);
+            TimeSeriesDatabase db  =new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+                    // --- READ
             TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2","flow");
             EnsembleTimeSeries ets =  db.getEnsembleTimeSeries(tsid);
             List<ZonedDateTime> issueDates = ets.getIssueDates();

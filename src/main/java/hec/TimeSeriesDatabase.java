@@ -11,15 +11,16 @@ public abstract class TimeSeriesDatabase implements AutoCloseable {
 
     public abstract Ensemble getEnsemble(TimeSeriesIdentifier timeseriesID, ZonedDateTime issue_time);    
     public abstract EnsembleTimeSeries getEnsembleTimeSeries(TimeSeriesIdentifier timeseriesID);
+    public abstract EnsembleTimeSeriesReader getEnsembleTimeSeriesReader(TimeSeriesIdentifier timeseriesID);
     public abstract PairedData getPairedData(String string);
     public abstract int getCount(TimeSeriesIdentifier timeseriesID);
-    public abstract List<ZonedDateTime> getIssueDates(TimeSeriesIdentifier timeseriesID);
+    public abstract List<ZonedDateTime> getEnsembleIssueDates(TimeSeriesIdentifier timeseriesID);
     public abstract void write(EnsembleTimeSeries[] etsArray) throws Exception;
     public abstract void write(EnsembleTimeSeries ets) throws Exception;	
     public abstract void write(PairedData table);    
-    public abstract TimeSeriesIdentifier[] getTimeSeriesIDs();
+    public abstract List<TimeSeriesIdentifier> getTimeSeriesIDs();
     public abstract String getVersion();
-    public abstract ArrayList<String> getVersions();            
+    public abstract List<String> getVersions();
 	public abstract String getUpdateScript(String from, String to);
 	
 }

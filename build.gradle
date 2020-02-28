@@ -23,3 +23,12 @@ test {
 }
 
 build {finalizedBy javadoc }
+
+
+task runApp(type: JavaExec) {
+    main = 'hec.ensemble.EnsembleToolCreateResSim1997Test'
+    classpath = sourceSets.main.runtimeClasspath
+    jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
+    args = ["c:/temp/hefs_cache", "C:/project/FIRO_TSEnsembles/src/test/resources/database/ResSim.db"]
+}
+ 

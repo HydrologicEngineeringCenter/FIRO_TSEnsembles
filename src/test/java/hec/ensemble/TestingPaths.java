@@ -20,6 +20,10 @@ public class TestingPaths {
         String rval =  f.getParent();
         return rval;
     }
+    public String getTempDir()
+    {
+        return System.getProperty("java.io.tmpdir");
+    }
 
 
 }

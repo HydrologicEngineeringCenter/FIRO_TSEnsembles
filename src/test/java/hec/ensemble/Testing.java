@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import hec.*;
 
@@ -14,8 +16,6 @@ public class Testing {
     private static String CacheDir = "C:\\Temp\\hefs_cache";
     static String[] watershedNames = {"RussianNapa", "EastSierra", "FeatherYuba"};
 
-
-
     /**
      * write Time: 468.171 s
      *
@@ -23,13 +23,14 @@ public class Testing {
      */
     @Test
     public void bulkTesting() throws Exception {
-        String fn = "c:/temp/ensembleTester.db";
+
+        String fn = TestingPaths.instance.getTempDir()+"/bulkTesting.db";
         File f = new File(fn);
         f.delete();
 
         ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
         //ZonedDateTime t2 = ZonedDateTime.of(2018, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
-         ZonedDateTime t2 = t1.plusDays(3);
+        ZonedDateTime t2 = t1.plusDays(3);
         double writeTime = 0;
         double readTime = 0;
         boolean create=true;
@@ -48,23 +49,6 @@ public class Testing {
 
     }
 
-    /**
-     * Read Time: 205.362 s
-     * @throws Exception
-     */
-    //@Test
-    public void readAll() throws Exception {
-        String fn = "c:/temp/ensembleTester_copy.db";
-
-        ZonedDateTime t1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
-        ZonedDateTime t2 = ZonedDateTime.of(2018, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
-        double readTime = 0;
-
-        readTime = ensembleReader(fn, t1, t2);
-
-        System.out.println("Read Time: " + readTime + " s");
-
-    }
 
     /**
      * ensembleWriter may be used to test
@@ -102,9 +86,9 @@ public class Testing {
         long start = System.currentTimeMillis();
         int count = 0;
         try (JdbcTimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName,JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);){
-            TimeSeriesIdentifier[] locations = db.getTimeSeriesIDs();
+            List<TimeSeriesIdentifier> locations = db.getTimeSeriesIDs();
             for (TimeSeriesIdentifier tsid : locations) {
-                EnsembleTimeSeries ets = db.getEnsembleTimeSeriesWithData(tsid, t1,t2);
+                EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid, t1,t2);
                 if( ets.getCount() ==0 )
                     System.out.println("Warning no ensembles found at location '"+tsid+"'");
                 count += ets.getCount();

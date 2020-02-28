@@ -6,7 +6,7 @@ CREATE TABLE version(
   version text not null primary key
 );
 
-INSERT INTO version(version) values ('20200224');
+INSERT INTO version(version) values ('20200227');
 
 
 CREATE TABLE IF NOT EXISTS table_types(
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS ensemble
 
 
 CREATE view IF NOT EXISTS  view_ensemble  AS
-Select ETS.id as ensemble_timeseries_id, location,parameter_name,units,version, issue_datetime, start_datetime, 
+Select ETS.id as ensemble_timeseries_id, location,parameter_name,data_type,units,version, issue_datetime, start_datetime,
 member_length, member_count, compression, interval_seconds, byte_value_array
   from ensemble_timeseries ETS join  ensemble E
 on  E.ensemble_timeseries_id = ETS.id;

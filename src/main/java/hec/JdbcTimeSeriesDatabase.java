@@ -129,15 +129,15 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         } catch (SQLException e) {
             throw new RuntimeException("database operations failed at start of attempt to update", e);
         }
-        ArrayList<String> versions = getVersions();
+        List<String> versions = getVersions();
         for (String version : versions) {
             if (version.compareTo(this.getVersion()) > 0) {
                 String script = getUpdateScript(this.getVersion(), version);
                 runResourceSQLScript(script);
                 if (version.equals("20200224")) {
                     updateFor20200101_to_20200224();
-                    
-
+                }else if (version.equals("20200227")) {
+                    updateFor20200224_to_20200227();
                 }
 
             }
@@ -150,6 +150,8 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         
         return versions.get(versions.size()-1);
     }
+
+
 
 
     @Override
@@ -190,30 +192,22 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         _connection.commit();
     }
 
+
+    @Override
+    public EnsembleTimeSeriesReader getEnsembleTimeSeriesReader(TimeSeriesIdentifier timeseriesID) {
+        return new EnsembleTimeSeriesReader(this,timeseriesID);
+    }
+
     /**
-     * read an EnsembleTimeSeries from the database
+     * Gets EnsembleTimeSeries, loading ensembles into memory
      *
      * @param timeseriesID TimeSeriesIdentifier
-     * @return a lazy EnsembleTimeSeries (no ensembles are loaded)
+     * @return returns @EnsembleTimeSeries
      */
-
     public EnsembleTimeSeries getEnsembleTimeSeries(TimeSeriesIdentifier timeseriesID) {
-
-        getIssueDates(timeseriesID);
-        String sql = "select * from " + ensembleTimeSeriesTableName + " WHERE location = ? "
+        String sql = "select * from view_ensemble WHERE location = ? "
                 + " AND parameter_name = ? ";
-        try {
-            PreparedStatement statement = _connection.prepareStatement(sql);
-            statement.setString(1, timeseriesID.location);
-            statement.setString(2, timeseriesID.parameter);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                return getEnsembleTimeSeriesWithData(rs, true);
-            }
-        } catch (Exception e) {
-            Logger.logError(e.getMessage());
-        }
-        return null;
+        return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
     }
 
     /**
@@ -224,15 +218,19 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
      * @param issueDateEnd ending DateTime
      * @return returns @EnsembleTimeSeries
      */
-    public EnsembleTimeSeries getEnsembleTimeSeriesWithData(TimeSeriesIdentifier timeseriesID,
+    public EnsembleTimeSeries getEnsembleTimeSeries(TimeSeriesIdentifier timeseriesID,
             ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
-        EnsembleTimeSeries rval = getEnsembleTimeSeries(timeseriesID);
 
         String sql = "select * from  view_ensemble " + " WHERE issue_datetime  >= '"
                 + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
-                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location_name = ? " + " AND parameter = ? ";
-        sql += " order by issue_date";
+                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location = ? " + " AND parameter_name = ? ";
+        sql += " order by issue_datetime";
 
+        return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
+    }
+
+    private EnsembleTimeSeries readEnsembleTimeSeriesFromDB(TimeSeriesIdentifier timeseriesID, String sql) {
+        EnsembleTimeSeries rval =null;
         try {
             PreparedStatement statement = _connection.prepareStatement(sql);
             statement.setString(1, timeseriesID.location);
@@ -245,7 +243,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
                 int ensemble_timeseries_id = rs.getInt("ensemble_timeseries_id");
                 // first pass get the location,parameter_name, units, and data_type
                 if (firstRow) {
-                    rval = getEnsembleTimeSeriesWithData(rs, false);
+                    rval = createEnsembleTimeSeries(rs);
                     firstRow = false;
                 }
                 Ensemble e = getEnsemble(rs);
@@ -257,7 +255,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         return rval;
     }
 
-    private EnsembleTimeSeries getEnsembleTimeSeriesWithData(ResultSet rs, boolean lazy) throws SQLException {
+    private EnsembleTimeSeries createEnsembleTimeSeries(ResultSet rs) throws SQLException {
 
         String location = rs.getString("location");
         String parameter = rs.getString("parameter_name");
@@ -266,11 +264,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         String version = rs.getString("version");
         TimeSeriesIdentifier tsid = new TimeSeriesIdentifier(location, parameter);
 
-        EnsembleTimeSeries rval;
-        if (lazy)
-            rval = new EnsembleTimeSeries(this, tsid, units, data_type, version);
-        else
-            rval = new EnsembleTimeSeries(tsid, units, data_type, version);
+        EnsembleTimeSeries rval = new EnsembleTimeSeries(tsid, units, data_type, version);
 
         return rval;
     }
@@ -443,7 +437,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
 
     @Override
-    public TimeSeriesIdentifier[] getTimeSeriesIDs() {
+    public List<TimeSeriesIdentifier> getTimeSeriesIDs() {
 
         List<TimeSeriesIdentifier> rval = new ArrayList<>();
         String sql = "select location, parameter_name from " + ensembleTimeSeriesTableName
@@ -459,7 +453,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         } catch (Exception e) {
             Logger.logError(e);
         }
-        return (TimeSeriesIdentifier[]) rval.toArray(new TimeSeriesIdentifier[0]);
+        return rval;
     }
 
     @Override
@@ -478,7 +472,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     }
 
     @Override
-    public List<ZonedDateTime> getIssueDates(TimeSeriesIdentifier timeseriesID) {
+    public List<ZonedDateTime> getEnsembleIssueDates(TimeSeriesIdentifier timeseriesID) {
         List<ZonedDateTime> rval = new ArrayList<>();
         PreparedStatement p = null;
         try {
@@ -603,8 +597,8 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     }
 
     @Override
-    public ArrayList<String> getVersions(){
-    ArrayList<String> list = new ArrayList<String>();             
+    public List<String> getVersions(){
+    ArrayList<String> list = new ArrayList<String>();
         InputStream version_file = this.getClass().getResourceAsStream("/versions.txt");        
         try( BufferedReader br = new BufferedReader( new InputStreamReader(version_file))){
             String line = null;
@@ -679,6 +673,9 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
                             }
                         } 
                     }
+    }
+    private void updateFor20200224_to_20200227() {
+
     }
 
 }
