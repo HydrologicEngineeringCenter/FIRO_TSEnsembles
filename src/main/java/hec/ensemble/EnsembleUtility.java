@@ -44,7 +44,7 @@ public class EnsembleUtility {
         File f = new File(filename);
         if( f.exists())
            f.delete();
-        ZonedDateTime issueDate1 = ZonedDateTime.of(2015, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+        ZonedDateTime issueDate1 = ZonedDateTime.of(2015, 1, 1, 12, 0, 0, 0, ZoneId.of("GMT"));
         ZonedDateTime issueDate2 = issueDate1.plusDays(numberOfDates);
 
         CsvEnsembleReader csvReader = new CsvEnsembleReader(hefs_dir);
