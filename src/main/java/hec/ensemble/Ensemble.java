@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 
 /**
- * Ensemble is an array of time-series data
+ * an Ensemble is an array of time-series data
  *
  * each time-series in the Ensemble has the same timestamps
  *
@@ -32,7 +32,12 @@ public class Ensemble
       return values[0].length;
   }
 
-    public ZonedDateTime[] getTimeStamps() {
+    /**
+     * Computes an array of ZonedDateTime based on the
+     * interval and startDateTime of the ensemble.
+     * @return returns array of ZonedDateTime
+     */
+    public ZonedDateTime[] startDateTime() {
 
       ZonedDateTime[] rval = new ZonedDateTime[getTimeCount()];
       ZonedDateTime t = startDateTime;

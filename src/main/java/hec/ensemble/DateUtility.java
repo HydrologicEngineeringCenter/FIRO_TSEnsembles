@@ -13,6 +13,11 @@ public class DateUtility {
 
     private static DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
+    /**
+     * Converts from ISO format String to ZonedDateTime
+     * @param dt ISO date formatted string
+     * @return returns ZonedDateTime
+     */
     public static ZonedDateTime parseDateTime(String dt)
     {
         ZonedDateTime zdt = ZonedDateTime.parse(dt, formatter);
@@ -20,7 +25,7 @@ public class DateUtility {
     }
 
     /**
-     * Formats ZonedDateTime into ISO_DATE_TIME
+     * Formats ZonedDateTime into ISO_DATE_TIME String
      * @param t input ZonedDateTime
      * @return formatted string
      */

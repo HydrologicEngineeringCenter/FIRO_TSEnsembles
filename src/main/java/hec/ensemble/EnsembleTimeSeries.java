@@ -39,17 +39,30 @@ public class EnsembleTimeSeries
       items = new TreeMap<>();
     }
 
+    /**
+     * addEnsemble adds a new Ensemble to this in-memory collection
+     * @param issueDate issueDate of Ensemble
+     * @param ensemble  data values
+     * @param startDate startingDate for this ensemble.
+     * @param interval time-step (Duration) between values
+     */
     public void addEnsemble(ZonedDateTime issueDate, float[][] ensemble, ZonedDateTime startDate, Duration interval)
     {
       Ensemble e = new Ensemble(issueDate,ensemble,startDate, interval);
       addEnsemble(e);
     }
-
+    /**
+     * addEnsemble adds a new Ensemble to this in-memory collection
+     */
     public void addEnsemble(Ensemble ensemble) {
       ensemble.parent = this;
       items.put(ensemble.getIssueDate(),ensemble);
     }
 
+    /**
+     * getIssueDates computes a list of ZonedDateTimes in this collection
+     * @return returns an array of ZonedDateTime
+     */
     public List<ZonedDateTime> getIssueDates() {
       // convert from map to a List<>
       List<ZonedDateTime> rval = new ArrayList<>(items.size());
@@ -57,8 +70,13 @@ public class EnsembleTimeSeries
       return rval;
     }
 
-    public Ensemble getEnsemble(ZonedDateTime t) {
-      return items.get(t);
+    /**
+     * Returns an specified ensemble from this im-memory collection
+     * @param issueDate date used to lookup ensemble to reutrn.
+     * @return an Ensemble
+     */
+    public Ensemble getEnsemble(ZonedDateTime issueDate) {
+      return items.get(issueDate);
     }
 
     public String getUnits() {
