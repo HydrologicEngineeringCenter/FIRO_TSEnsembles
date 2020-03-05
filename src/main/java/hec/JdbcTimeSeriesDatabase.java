@@ -204,10 +204,29 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
      * @param timeseriesID TimeSeriesIdentifier
      * @return returns @EnsembleTimeSeries
      */
+    @Override
     public EnsembleTimeSeries getEnsembleTimeSeries(TimeSeriesIdentifier timeseriesID) {
         String sql = "select * from view_ensemble WHERE location = ? "
                 + " AND parameter_name = ? ";
         return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
+    }
+
+    @Override
+    public EnsembleTimeSeries getEnsembleTimeSeriesMetaData(TimeSeriesIdentifier timeseriesID) {
+        String sql = "select * from " +ensembleTimeSeriesTableName+ " WHERE location = ? "
+                + " AND parameter_name = ? ";
+        EnsembleTimeSeries rval =null;
+        try {
+            PreparedStatement statement = _connection.prepareStatement(sql);
+            statement.setString(1, timeseriesID.location);
+            statement.setString(2, timeseriesID.parameter);
+            ResultSet rs = statement.executeQuery();
+            rval = createEnsembleTimeSeries(rs);
+        } catch (Exception e) {
+            Logger.logError(e.getMessage());
+        }
+
+        return rval;
     }
 
     /**

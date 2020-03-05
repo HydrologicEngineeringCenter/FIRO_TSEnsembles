@@ -5,13 +5,12 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
-import hec.*;
 
 /**
  *  EnsembleTimeSeries is a collection of Ensembles over time
  *
  */
-public class EnsembleTimeSeries
+public class EnsembleTimeSeries implements IEnsembleTimeSeries
   {
 
     private TimeSeriesIdentifier timeseriesID;
@@ -53,6 +52,7 @@ public class EnsembleTimeSeries
     }
     /**
      * addEnsemble adds a new Ensemble to this in-memory collection
+     * @param ensemble ensemble to add
      */
     public void addEnsemble(Ensemble ensemble) {
       ensemble.parent = this;
