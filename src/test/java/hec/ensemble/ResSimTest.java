@@ -24,13 +24,13 @@ public class ResSimTest {
 
             TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Coyote.fake_forecast", "flow");
 
-            EnsembleTimeSeriesReader reader = db.getEnsembleTimeSeriesReader(tsid);
-            if (reader == null)
+            EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
+            if (ets == null)
                 throw new Exception("could not find " + tsid.toString());
             Object R = null; // Represents result of ResSim script processing an ensemble.
             // -- end initialization
 
-            List<ZonedDateTime> issueDates = reader.getIssueDates();
+            List<ZonedDateTime> issueDates = ets.getIssueDates();
             Ensemble e;
             // t represents ResSim timestep (RunTimeStep)
             ZoneId pst = ZoneId.of("America/Los_Angeles");
@@ -48,7 +48,7 @@ public class ResSimTest {
 
                 // assuming issue_times might not be exactly regular.
                 if (i == 0 || (t.equals(timeOfNextEnsemble) || t.isAfter(timeOfNextEnsemble))) {
-                    e = reader.getEnsemble(timeOfNextEnsemble);// gets nearest ensemble at or before time t
+                    e = ets.getEnsemble(timeOfNextEnsemble);// gets nearest ensemble at or before time t
                     ZonedDateTime issueDate =  e.getIssueDate();
                     int idx = issueDates.indexOf(issueDate);
                     if( idx+1  < issueDates.size())

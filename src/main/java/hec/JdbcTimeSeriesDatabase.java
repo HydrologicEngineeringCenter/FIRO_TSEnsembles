@@ -193,17 +193,13 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     }
 
 
-    @Override
-    public EnsembleTimeSeriesReader getEnsembleTimeSeriesReader(TimeSeriesIdentifier timeseriesID) {
-        return new EnsembleTimeSeriesReader(this,timeseriesID);
-    }
-
     /**
      * Gets EnsembleTimeSeries, loading ensembles into memory
      *
      * @param timeseriesID TimeSeriesIdentifier
      * @return returns @EnsembleTimeSeries
      */
+    @Override
     public EnsembleTimeSeries getEnsembleTimeSeries(TimeSeriesIdentifier timeseriesID) {
         String sql = "select * from view_ensemble WHERE location = ? "
                 + " AND parameter_name = ? ";

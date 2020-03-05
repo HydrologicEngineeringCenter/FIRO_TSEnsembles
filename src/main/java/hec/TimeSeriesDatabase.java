@@ -11,7 +11,6 @@ public abstract class TimeSeriesDatabase implements AutoCloseable {
 
     public abstract Ensemble getEnsemble(TimeSeriesIdentifier timeseriesID, ZonedDateTime issue_time);    
     public abstract EnsembleTimeSeries getEnsembleTimeSeries(TimeSeriesIdentifier timeseriesID);
-    public abstract EnsembleTimeSeriesReader getEnsembleTimeSeriesReader(TimeSeriesIdentifier timeseriesID);
     public abstract PairedData getPairedData(String string);
     public abstract int getCount(TimeSeriesIdentifier timeseriesID);
     public abstract List<ZonedDateTime> getEnsembleIssueDates(TimeSeriesIdentifier timeseriesID);
@@ -22,5 +21,6 @@ public abstract class TimeSeriesDatabase implements AutoCloseable {
     public abstract String getVersion();
     public abstract List<String> getVersions();
 	public abstract String getUpdateScript(String from, String to);
-	
+
+
 }

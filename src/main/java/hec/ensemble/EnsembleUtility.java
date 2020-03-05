@@ -94,17 +94,20 @@ public class EnsembleUtility {
         int count = 0;
         for(TimeSeriesIdentifier tsid: locations) {
             System.out.println(tsid.toString());
-            EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
-            for (ZonedDateTime t: ets.getIssueDates()){
-                Ensemble e = ets.getEnsemble(t);
+            EnsembleTimeSeries etsr = db.getEnsembleTimeSeries(tsid);
+            EnsembleTimeSeries modifiedEts = new EnsembleTimeSeries(tsid,
+                    etsr.getUnits(),etsr.getDataType(),etsr.getVersion());
+
+            for( Ensemble e : etsr){
                 for(float[] v : e.getValues()){
                     for (int i = 0; i <v.length ; i++) {
                         v[i] = v[i]+10 ;// offset by 10
                     }
                 }
+                modifiedEts.addEnsemble(e);
+                count ++;
             }
-            etsList.add(ets);
-            count += ets.getCount();
+            etsList.add(modifiedEts);
         }
 
         long endTime = System.nanoTime();
