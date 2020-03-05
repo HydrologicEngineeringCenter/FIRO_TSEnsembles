@@ -94,7 +94,7 @@ public class EnsembleUtility {
         int count = 0;
         for(TimeSeriesIdentifier tsid: locations) {
             System.out.println(tsid.toString());
-            EnsembleTimeSeriesReader etsr = db.getEnsembleTimeSeriesReader(tsid);
+            EnsembleTimeSeries etsr = db.getEnsembleTimeSeries(tsid);
             EnsembleTimeSeries modifiedEts = new EnsembleTimeSeries(tsid,
                     etsr.getUnits(),etsr.getDataType(),etsr.getVersion());
 

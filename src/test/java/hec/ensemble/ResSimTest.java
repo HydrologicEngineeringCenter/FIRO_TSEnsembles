@@ -24,7 +24,7 @@ public class ResSimTest {
 
             TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Coyote.fake_forecast", "flow");
 
-            EnsembleTimeSeriesReader reader = db.getEnsembleTimeSeriesReader(tsid);
+            EnsembleTimeSeries reader = db.getEnsembleTimeSeries(tsid);
             if (reader == null)
                 throw new Exception("could not find " + tsid.toString());
             Object R = null; // Represents result of ResSim script processing an ensemble.

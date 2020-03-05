@@ -3,6 +3,7 @@ package hec.ensemble;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -10,7 +11,7 @@ import java.util.TreeMap;
  *  EnsembleTimeSeries is a collection of Ensembles over time
  *
  */
-public class EnsembleTimeSeries implements IEnsembleTimeSeries
+public class EnsembleTimeSeries implements  Iterable<Ensemble>,IEnsembleTimeSeries
   {
 
     private TimeSeriesIdentifier timeseriesID;
@@ -95,4 +96,8 @@ public class EnsembleTimeSeries implements IEnsembleTimeSeries
       return timeseriesID;
     }
 
+    @Override
+    public Iterator<Ensemble> iterator() {
+      return new EnsembleTimeSeriesIterator(this);
+    }
   }

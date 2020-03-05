@@ -1,27 +1,20 @@
 package hec.ensemble;
 
-import hec.TimeSeriesDatabase;
-
 import java.time.ZonedDateTime;
 import java.util.Iterator;
-import java.util.List;
 
 /**
- * EnsembleTimeSeriesIterator is used to iterate over ensembles in a TimeSeriesDatabase
- * EnsembleTimeSeriesReader is used to create an EnsembleTimeSeriesIterator
+ * EnsembleTimeSeriesIterator is used to iterate over ensembles in a EnsembleTimeSeries
  * */
 public class EnsembleTimeSeriesIterator implements Iterator<Ensemble> {
 
-    TimeSeriesDatabase _db;
-    TimeSeriesIdentifier tsid;
-    List<ZonedDateTime> issueDates;
-    Iterator<ZonedDateTime> _iterator;
-    public EnsembleTimeSeriesIterator(TimeSeriesDatabase db, TimeSeriesIdentifier tsid)
+    private Iterator<ZonedDateTime> _iterator;
+    private EnsembleTimeSeries ets;
+
+    public EnsembleTimeSeriesIterator(EnsembleTimeSeries ets)
     {
-    _db = db;
-    this.tsid = tsid;
-    issueDates = _db.getEnsembleIssueDates(tsid);
-    _iterator = issueDates.iterator();
+      this.ets = ets;
+      _iterator = ets.getIssueDates().iterator();
     }
 
     @Override
@@ -32,6 +25,6 @@ public class EnsembleTimeSeriesIterator implements Iterator<Ensemble> {
     @Override
     public Ensemble next() {
        ZonedDateTime t = _iterator.next();
-        return _db.getEnsemble(tsid,t);
+        return ets.getEnsemble(t);
     }
 }
