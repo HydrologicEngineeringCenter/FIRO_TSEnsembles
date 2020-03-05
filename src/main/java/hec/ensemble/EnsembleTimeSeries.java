@@ -11,7 +11,7 @@ import java.util.TreeMap;
  *  EnsembleTimeSeries is a collection of Ensembles over time
  *
  */
-public class EnsembleTimeSeries implements  Iterable<Ensemble>,IEnsembleTimeSeries
+public class EnsembleTimeSeries implements  Iterable<Ensemble> 
   {
 
     private TimeSeriesIdentifier timeseriesID;
