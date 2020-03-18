@@ -1,4 +1,4 @@
-package hec.ui;
+package hec.ensemble.ui;
 
 import hec.JdbcTimeSeriesDatabase;
 import hec.ensemble.TimeSeriesIdentifier;

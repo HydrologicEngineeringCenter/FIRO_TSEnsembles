@@ -1,4 +1,4 @@
- package hec.ui;
+ package hec.ensemble.ui;
 
  import javax.swing.*;
  import javax.swing.event.ListSelectionEvent;
