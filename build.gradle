@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'jacoco' // code coverage
 }
 
 repositories {
@@ -20,6 +21,7 @@ dependencies {
 test {
     useJUnitPlatform()
     jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
+    finalizedBy jacocoTestReport
 }
 
 build {finalizedBy javadoc }
@@ -37,4 +39,10 @@ task runEnsembleMetrics(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
     args = ["c:/temp/hefs_cache", "100","10","C:/temp/ResSim.db"]
+}
+
+jacocoTestReport {
+    reports{
+        xml.enabled true
+    }
 }
