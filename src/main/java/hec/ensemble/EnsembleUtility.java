@@ -57,9 +57,9 @@ public class EnsembleUtility {
         List<EnsembleTimeSeries> outList = new ArrayList<EnsembleTimeSeries>();
         for (int i = 0; i <Math.min(ets.length,numLocations) ; i++) {
             EnsembleTimeSeries a = ets[i];
-            TimeSeriesIdentifier tsid = a.getTimeSeriesIdentifier();
+            EnsembleIdentifier tsid = a.getTimeSeriesIdentifier();
             if( i == 0) {
-                tsid = new TimeSeriesIdentifier("Coyote.fake_forecast","flow");
+                tsid = new EnsembleIdentifier("Coyote.fake_forecast","flow");
             }
             List<ZonedDateTime> dates = a.getIssueDates();
 
@@ -88,11 +88,11 @@ public class EnsembleUtility {
     static void readModifyWrite(String fileName) throws Exception {
         long startTime = System.nanoTime();
         TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
-        List<TimeSeriesIdentifier> locations = db.getTimeSeriesIDs();
+        List<EnsembleIdentifier> locations = db.getTimeSeriesIDs();
 
         ArrayList<EnsembleTimeSeries> etsList = new ArrayList<>();
         int count = 0;
-        for(TimeSeriesIdentifier tsid: locations) {
+        for(EnsembleIdentifier tsid: locations) {
             System.out.println(tsid.toString());
             EnsembleTimeSeries etsr = db.getEnsembleTimeSeries(tsid);
             EnsembleTimeSeries modifiedEts = new EnsembleTimeSeries(tsid,

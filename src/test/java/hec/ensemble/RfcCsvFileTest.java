@@ -54,7 +54,7 @@ class RfcCsvFileTest {
             DatabaseGenerator.createTestDatabase(fn,1);
             TimeSeriesDatabase db  =new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
                     // --- READ
-            TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2","flow");
+            EnsembleIdentifier tsid = new EnsembleIdentifier("Kanektok.SCRN2","flow");
             EnsembleTimeSeries ets =  db.getEnsembleTimeSeries(tsid);
             List<ZonedDateTime> issueDates = ets.getIssueDates();
             Ensemble e = db.getEnsemble(tsid, issueDates.get(0));

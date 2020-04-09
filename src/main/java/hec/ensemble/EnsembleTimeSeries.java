@@ -14,7 +14,7 @@ import java.util.TreeMap;
 public class EnsembleTimeSeries implements  Iterable<Ensemble> 
   {
 
-    private TimeSeriesIdentifier timeseriesID;
+    private EnsembleIdentifier timeseriesID;
     private String units;
     private String dataType;
     private String version;
@@ -26,12 +26,12 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       return items.size();
     }
 
-    public EnsembleTimeSeries(TimeSeriesIdentifier timeseriesID, String units, String dataType, String version)
+    public EnsembleTimeSeries(EnsembleIdentifier timeseriesID, String units, String dataType, String version)
     {
       init(timeseriesID,units,dataType,version);
     }
 
-    private void init(TimeSeriesIdentifier timeseriesID, String units, String dataType, String version) {
+    private void init(EnsembleIdentifier timeseriesID, String units, String dataType, String version) {
       this.timeseriesID = timeseriesID;
       this.units = units;
       this.dataType = dataType;
@@ -92,7 +92,7 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       return version;
     }
 
-    public TimeSeriesIdentifier getTimeSeriesIdentifier() {
+    public EnsembleIdentifier getTimeSeriesIdentifier() {
       return timeseriesID;
     }
 

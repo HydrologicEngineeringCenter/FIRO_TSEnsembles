@@ -22,7 +22,7 @@ public class ResSimTest {
         try (TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn,JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);) {
             // InMemoryEnsembleTimeSeriesDatabase
 
-            TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Coyote.fake_forecast", "flow");
+            EnsembleIdentifier tsid = new EnsembleIdentifier("Coyote.fake_forecast", "flow");
 
             EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
             if (ets == null)

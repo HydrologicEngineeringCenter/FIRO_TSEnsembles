@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import hec.ensemble.*;
 import hec.paireddata.*;
+import hec.timeseries.TimeSeries;
 
 /**
  * Read/write Ensembles to a JDBC database
@@ -41,7 +42,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     /**
      * constructor for JdbcTimeSeriesDatabase
      *
-     * @param database filename for database
+     * @param database      filename for database
      * @param creation_mode defines how to open, create, and update the @database
      * @throws Exception fails quickly
      */
@@ -100,7 +101,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         else if (!create && update) {
             this.version = getCurrentVersionFromDB();
             version = updateTables();
-        } else if( !create && !update){
+        } else if (!create && !update) {
             this.version = getCurrentVersionFromDB();
         }
 
@@ -108,16 +109,15 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
     }
 
-    private String getCurrentVersionFromDB(){
-        try(Statement version_query = _connection.createStatement()){
+    private String getCurrentVersionFromDB() {
+        try (Statement version_query = _connection.createStatement()) {
             ResultSet rs = version_query.executeQuery("select version from version");
-            String version = rs.getString(1);            
+            String version = rs.getString(1);
             return version;
-        } catch( SQLException err ){
+        } catch (SQLException err) {
             return "20200101";
-        }        
+        }
     }
-
 
     private String updateTables() {
         /**
@@ -132,12 +132,16 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         List<String> versions = getVersions();
         for (String version : versions) {
             if (version.compareTo(this.getVersion()) > 0) {
-                String script = getUpdateScript(this.getVersion(), version);
-                runResourceSQLScript(script);
+                String script = getUpdateScript(this.getVersion(), version);                
                 if (version.equals("20200224")) {
+                    runResourceSQLScript(script);
                     updateFor20200101_to_20200224();
-                }else if (version.equals("20200227")) {
+                } else if (version.equals("20200227")) {
+                    runResourceSQLScript(script);
                     updateFor20200224_to_20200227();
+                } else if( version.equals("20200227")){
+                    runResourceSQLScript(script);
+                    updateFor20200227_to_20200409();
                 }
 
             }
@@ -147,12 +151,9 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
                 throw new RuntimeException("unable to commit changes after running all update scripts", e);
             }
         }
-        
-        return versions.get(versions.size()-1);
+
+        return versions.get(versions.size() - 1);
     }
-
-
-
 
     @Override
     public void close() throws Exception {
@@ -192,7 +193,6 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         _connection.commit();
     }
 
-
     /**
      * Gets EnsembleTimeSeries, loading ensembles into memory
      *
@@ -200,22 +200,21 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
      * @return returns @EnsembleTimeSeries
      */
     @Override
-    public EnsembleTimeSeries getEnsembleTimeSeries(TimeSeriesIdentifier timeseriesID) {
-        String sql = "select * from view_ensemble WHERE location = ? "
-                + " AND parameter_name = ? ";
+    public EnsembleTimeSeries getEnsembleTimeSeries(EnsembleIdentifier timeseriesID) {
+        String sql = "select * from view_ensemble WHERE location = ? " + " AND parameter_name = ? ";
         return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
     }
 
     /**
      * Gets EnsembleTimeSeries, loading ensembles into memory.
      *
-     * @param timeseriesID TimeSeriesIdentifier
+     * @param timeseriesID   TimeSeriesIdentifier
      * @param issueDateStart starting DateTime
-     * @param issueDateEnd ending DateTime
+     * @param issueDateEnd   ending DateTime
      * @return returns @EnsembleTimeSeries
      */
-    public EnsembleTimeSeries getEnsembleTimeSeries(TimeSeriesIdentifier timeseriesID,
-            ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
+    public EnsembleTimeSeries getEnsembleTimeSeries(EnsembleIdentifier timeseriesID, ZonedDateTime issueDateStart,
+            ZonedDateTime issueDateEnd) {
 
         String sql = "select * from  view_ensemble " + " WHERE issue_datetime  >= '"
                 + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
@@ -225,8 +224,8 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
     }
 
-    private EnsembleTimeSeries readEnsembleTimeSeriesFromDB(TimeSeriesIdentifier timeseriesID, String sql) {
-        EnsembleTimeSeries rval =null;
+    private EnsembleTimeSeries readEnsembleTimeSeriesFromDB(EnsembleIdentifier timeseriesID, String sql) {
+        EnsembleTimeSeries rval = null;
         try {
             PreparedStatement statement = _connection.prepareStatement(sql);
             statement.setString(1, timeseriesID.location);
@@ -258,7 +257,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         String units = rs.getString("units");
         String data_type = rs.getString("data_type");
         String version = rs.getString("version");
-        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier(location, parameter);
+        EnsembleIdentifier tsid = new EnsembleIdentifier(location, parameter);
 
         EnsembleTimeSeries rval = new EnsembleTimeSeries(tsid, units, data_type, version);
 
@@ -269,22 +268,22 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
      * read an Ensemble from the database
      *
      * @param timeseriesID TimeSeriesIdentifier
-     * @param issueDate ZonedDateTime
+     * @param issueDate    ZonedDateTime
      * @return Ensemble at the issueDateStart
      */
-    public Ensemble getEnsemble(TimeSeriesIdentifier timeseriesID, ZonedDateTime issueDate) {
+    public Ensemble getEnsemble(EnsembleIdentifier timeseriesID, ZonedDateTime issueDate) {
         return getEnsemble(timeseriesID, issueDate, issueDate);
     }
 
     /**
      * read an Ensemble from the database
      *
-     * @param timeseriesID  TimeSeriesIdentifier
+     * @param timeseriesID   TimeSeriesIdentifier
      * @param issueDateStart ZonedDateTime
-     * @param issueDateEnd ZonedDateTime
+     * @param issueDateEnd   ZonedDateTime
      * @return first Ensemble in the time range specified.
      */
-    public Ensemble getEnsemble(TimeSeriesIdentifier timeseriesID, ZonedDateTime issueDateStart,
+    public Ensemble getEnsemble(EnsembleIdentifier timeseriesID, ZonedDateTime issueDateStart,
             ZonedDateTime issueDateEnd) {
 
         String sql = "select * from  view_ensemble " + " WHERE issue_datetime  >= '"
@@ -328,7 +327,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
     private PreparedStatement ps_insertEnsembleCollection;
 
-    private void InsertEnsembleCollection(int id, TimeSeriesIdentifier timeseries_id, String units, String data_type,
+    private void InsertEnsembleCollection(int id, EnsembleIdentifier timeseries_id, String units, String data_type,
             String version) throws Exception {
         if (ps_insertEnsembleCollection == null) {
             String sql = "INSERT INTO " + ensembleTimeSeriesTableName + " ([id], [location], " + " [parameter_name], "
@@ -400,19 +399,19 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     private String createTables() throws Exception {
         runResourceSQLScript("/database.sql");
         _connection.commit();
-        try(Statement version_query = _connection.createStatement()){
+        try (Statement version_query = _connection.createStatement()) {
             ResultSet rs = version_query.executeQuery("select version from version");
             String version = rs.getString(1);
             return version;
-        } catch( SQLException err ){
+        } catch (SQLException err) {
             return "20200101";
-        }        
+        }
     }
 
     private void runResourceSQLScript(String resource) {
         InputStream is = this.getClass().getResourceAsStream(resource);
-        if( is == null)
-            throw new RuntimeException("resource not found:"+resource);
+        if (is == null)
+            throw new RuntimeException("resource not found:" + resource);
         InputStreamReader isr = new InputStreamReader(is);
         BufferedReader reader = new BufferedReader(isr);
 
@@ -423,19 +422,18 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
             s = s.trim();
             if (s.isEmpty() || s.startsWith("--") || s.startsWith("\r") || s.startsWith("\n"))
                 continue;
-            try(PreparedStatement cmd = _connection.prepareStatement(s);){
-                cmd.execute();                
+            try (PreparedStatement cmd = _connection.prepareStatement(s);) {
+                cmd.execute();
             } catch (SQLException e) {
-                throw new RuntimeException("unable to run update script "+resource,e);
+                throw new RuntimeException("unable to run update script " + resource, e);
             }
         }
     }
 
-
     @Override
-    public List<TimeSeriesIdentifier> getTimeSeriesIDs() {
+    public List<EnsembleIdentifier> getTimeSeriesIDs() {
 
-        List<TimeSeriesIdentifier> rval = new ArrayList<>();
+        List<EnsembleIdentifier> rval = new ArrayList<>();
         String sql = "select location, parameter_name from " + ensembleTimeSeriesTableName
                 + " order by location,parameter_name";
         try {
@@ -443,7 +441,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
             ResultSet rs = stmt.executeQuery();
             // loop through the result set
             while (rs.next()) {
-                TimeSeriesIdentifier tsid = new TimeSeriesIdentifier(rs.getString(1), rs.getString(2));
+                EnsembleIdentifier tsid = new EnsembleIdentifier(rs.getString(1), rs.getString(2));
                 rval.add(tsid);
             }
         } catch (Exception e) {
@@ -453,7 +451,12 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     }
 
     @Override
-    public int getCount(TimeSeriesIdentifier timeseriesID) {
+    public List<Identifier> getTimeSeriesIDs2(){
+        return null;
+    }
+
+    @Override
+    public int getCount(EnsembleIdentifier timeseriesID) {
         PreparedStatement p = null;
         try {
             String sql = "SELECT count(issue_datetime) from view_ensemble "
@@ -468,7 +471,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     }
 
     @Override
-    public List<ZonedDateTime> getEnsembleIssueDates(TimeSeriesIdentifier timeseriesID) {
+    public List<ZonedDateTime> getEnsembleIssueDates(EnsembleIdentifier timeseriesID) {
         List<ZonedDateTime> rval = new ArrayList<>();
         PreparedStatement p = null;
         try {
@@ -488,7 +491,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         return rval;
     }
 
-    public PairedData getPairedData(TimeSeriesIdentifier id) {
+    public PairedData getPairedData(EnsembleIdentifier id) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -577,7 +580,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
      * builds a table name using a prefix
      *
      * @param catalog_name name of object in catalog
-     * @param type datatype  as specified in table_type table.
+     * @param type         datatype as specified in table_type table.
      * @return full table name for requested object
      * @throws SQLException for undefined condition
      */
@@ -593,85 +596,104 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     }
 
     @Override
-    public List<String> getVersions(){
-    ArrayList<String> list = new ArrayList<String>();
-        InputStream version_file = this.getClass().getResourceAsStream("/versions.txt");        
-        try( BufferedReader br = new BufferedReader( new InputStreamReader(version_file))){
+    public List<String> getVersions() {
+        ArrayList<String> list = new ArrayList<String>();
+        InputStream version_file = this.getClass().getResourceAsStream("/versions.txt");
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(version_file))) {
             String line = null;
-            while( (line = br.readLine()) != null ){
+            while ((line = br.readLine()) != null) {
                 list.add(line);
             }
             return list;
-        } catch( IOException err ){
-            throw new RuntimeException("Error extracting defined resource information",err);
-        }        
+        } catch (IOException err) {
+            throw new RuntimeException("Error extracting defined resource information", err);
+        }
     }
 
     @Override
-    public String getUpdateScript(String from, String to){
-        return "/update_" + from + "_to_"+to+".sql";
-	}    
+    public String getUpdateScript(String from, String to) {
+        return "/update_" + from + "_to_" + to + ".sql";
+    }
 
     private void updateFor20200101_to_20200224() {
         // need to loop through and move the ensembles into the catalog
-                    // and then update the catalog id in the ensemble
-                    ResultSet rs = null;
-                    ResultSet rs_inner = null;
-                    try (PreparedStatement insert_catalog = _connection
-                            .prepareStatement("insert into catalog(name,datatype,units) values (?,?,?)");
-                        PreparedStatement get_new_catalog_entry = _connection.prepareStatement(
-                            "select id from catalog where name = ?");
-                        PreparedStatement update_ensemble = _connection
-                           .prepareStatement("update ensemble_timeseries set catalog_id=? where id=?");
-                        PreparedStatement select_ensembles = _connection.prepareStatement(
-                                  "select id,location,parameter_name,units from ensemble_timeseries");) {
-                        
-                        
-                        rs = select_ensembles.executeQuery();
-                        while (rs.next()) {
-                            int ensemble_id = rs.getInt("id");
-                            String location = rs.getString("location");
-                            String parameter_name = rs.getString("parameter_name");
-                            String units = rs.getString("units");
-                            String name = location + "/" + parameter_name;
+        // and then update the catalog id in the ensemble
+        ResultSet rs = null;
+        ResultSet rs_inner = null;
+        try (PreparedStatement insert_catalog = _connection
+                .prepareStatement("insert into catalog(name,datatype,units) values (?,?,?)");
+                PreparedStatement get_new_catalog_entry = _connection
+                        .prepareStatement("select id from catalog where name = ?");
+                PreparedStatement update_ensemble = _connection
+                        .prepareStatement("update ensemble_timeseries set catalog_id=? where id=?");
+                PreparedStatement select_ensembles = _connection
+                        .prepareStatement("select id,location,parameter_name,units from ensemble_timeseries");) {
 
-                            insert_catalog.setString(1,name);
-                            insert_catalog.setString(2,"Ensemble Time Series");
-                            insert_catalog.setString(3,units);
-                            insert_catalog.execute();
+            rs = select_ensembles.executeQuery();
+            while (rs.next()) {
+                int ensemble_id = rs.getInt("id");
+                String location = rs.getString("location");
+                String parameter_name = rs.getString("parameter_name");
+                String units = rs.getString("units");
+                String name = location + "/" + parameter_name;
 
-                            get_new_catalog_entry.setString(1,name);
-                            rs_inner = get_new_catalog_entry.executeQuery();
-                            if( !rs_inner.next() ) throw new UpdateFailure("Update failed, entry "+name+" was not successfully moved to the catalog", null);
+                insert_catalog.setString(1, name);
+                insert_catalog.setString(2, "Ensemble Time Series");
+                insert_catalog.setString(3, units);
+                insert_catalog.execute();
 
-                            int catalog_id = rs_inner.getInt("id");
-                            update_ensemble.setInt(1,catalog_id);
-                            update_ensemble.setInt(2,ensemble_id);
-                            update_ensemble.execute();
+                get_new_catalog_entry.setString(1, name);
+                rs_inner = get_new_catalog_entry.executeQuery();
+                if (!rs_inner.next())
+                    throw new UpdateFailure(
+                            "Update failed, entry " + name + " was not successfully moved to the catalog", null);
 
-                        }
+                int catalog_id = rs_inner.getInt("id");
+                update_ensemble.setInt(1, catalog_id);
+                update_ensemble.setInt(2, ensemble_id);
+                update_ensemble.execute();
 
-                    } catch (SQLException err) {
-                        throw new UpdateFailure("Unable to update database", err);
-                    } finally {
-                        if (rs != null) {
-                            try {
-                                rs.close();
-                            } catch (SQLException e) {
-                                throw new RuntimeException("A ResultSet could not be closed after finishing database update", e);
-                            }
-                        } 
-                        if (rs_inner != null) {
-                            try {
-                                rs_inner.close();
-                            } catch (SQLException e) {
-                                throw new RuntimeException("A ResultSet could not be closed after finishing database update", e);
-                            }
-                        } 
-                    }
+            }
+
+        } catch (SQLException err) {
+            throw new UpdateFailure("Unable to update database", err);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException("A ResultSet could not be closed after finishing database update", e);
+                }
+            }
+            if (rs_inner != null) {
+                try {
+                    rs_inner.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException("A ResultSet could not be closed after finishing database update", e);
+                }
+            }
+        }
     }
+
     private void updateFor20200224_to_20200227() {
 
+    }
+
+    private void updateFor20200227_to_20200409(){
+
+    }
+
+
+    @Override
+    public void write(TimeSeries timeseries){
+
+    }
+
+
+    @Override
+    public TimeSeries getTimeSeries(String name, ZonedDateTime start, ZonedDateTime end) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

@@ -97,7 +97,7 @@ public class CsvEnsembleReader {
                         ets = locationMap.get(locName);
                     }
                     else {
-                        TimeSeriesIdentifier tsid= new TimeSeriesIdentifier(watershedName+"."+locName,"flow");
+                        EnsembleIdentifier tsid= new EnsembleIdentifier(watershedName+"."+locName,"flow");
                         ets = new EnsembleTimeSeries(tsid, "","",csv.FileName);
                         locationMap.put(locName, ets);
                     }
