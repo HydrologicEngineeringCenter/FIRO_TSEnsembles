@@ -11,10 +11,12 @@ public interface Identifier {
      * @return String that is unique over all time series
      */
     public abstract String catalogName();
+    
+    public abstract boolean equals(Object other);   
+
     /**
      * 
-     * @return friend name for the current system
+     * @return String identify the type of data to the database system
      */
-    public abstract String toString();
-    public abstract boolean equals(Object other);    
+    public String datatype(); 
 }

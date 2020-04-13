@@ -46,10 +46,8 @@ public class RegularIntervalTest {
             assertEquals(1,ts.valueAt(0));
             db.write(ts);
 
-
-
-
             List<Identifier> catalog = db.getTimeSeriesIDs2();
+            assertNotNull( catalog );
             assertTrue( catalog.contains( ts.identifier() ) );
 
             TimeSeries from_db =  db.getTimeSeries(ts.identifier().catalogName(),ts.firstTime(), ts.lastTime() );

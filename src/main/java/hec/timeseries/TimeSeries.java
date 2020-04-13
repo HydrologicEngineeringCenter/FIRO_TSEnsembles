@@ -2,7 +2,9 @@ package hec.timeseries;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
-import hec.Identifier;
+import java.util.List;
+
+import hec.exceptions.*;
 /**
  * A function that will peform some computation 
  * on the provided value
@@ -54,9 +56,21 @@ public interface TimeSeries {
      * @return The Time Series itself
      */
     public TimeSeries addRow( ZonedDateTime time, double value);
-    public double valueAtTime(ZonedDateTime time );
-    public double valueAt( int index );
-    public double timeAt( int index );
+
+    /**
+     * 
+     * @return the number of values contained in this time series object
+     */
+    public int numberValues();
+
+    /**
+     * 
+     * @param time
+     * @return value at the associated time
+     */
+    public double valueAt(ZonedDateTime time ) throws NoValue;
+    public double valueAt( int index ) throws NoValue;
+    public ZonedDateTime timeAt( int index ) throws NoValue;
     /**
      * 
      * @param row_function function applied to this row
@@ -69,8 +83,28 @@ public interface TimeSeries {
      * @param window
      * @return a new TimeSeries built from the outputs of row_function.end();
      */
-    public TimeSeries applyFunction( WindowFunction row_function, AggregateWindow window );    
+    public TimeSeries applyFunction( WindowFunction row_function, AggregateWindow window );   
+    
+    /**
+     * 
+     * @return ZoneDateTime object representing the first value in the retrieved time window
+     */
     public ZonedDateTime firstTime();
+
+    /**
+     * @return ZonedDateDate object representing the last value in the retrieved time window
+     */
     public ZonedDateTime lastTime();
+
+    /**
+     * 
+     * @return TimeSeriesIdentifier object that can uniquely identify this TimeSeries in the catalog
+     */
     public TimeSeriesIdentifier identifier();
+
+    /**
+     * 
+     * @return A list of the particular type of column this timeseries requires
+     */
+    public List<String> columns();
 }

@@ -3,21 +3,27 @@ package hec.paireddata;
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
+import hec.Identifier;
 import hec.TimeSeriesDatabase;
 
-public class PairedData {
-    private String table_name = null;
+public class PairedData {    
+    private PairedDataIdentifier pd_identifier = null;
     private TimeSeriesDatabase database = null;
     private ArrayList<Double> indeps = new ArrayList<>();
     private ArrayList<Double> deps = new ArrayList<>();
-
-    public PairedData(TimeSeriesDatabase db, String table_name) {
+    
+    public PairedData(TimeSeriesDatabase db, PairedDataIdentifier identifier) {
         this.database = db;
-        this.table_name = table_name;    
+        this.pd_identifier = identifier;
+         
     }
 
-    public PairedData(String table_name) {
-        this.table_name = table_name;        
+    public PairedData(PairedDataIdentifier identifier) {
+        this.pd_identifier = identifier;
+    }
+
+    public PairedDataIdentifier identifier(){
+        return this.pd_identifier;
     }
 
     public void addRow(double indep, double dep) {
@@ -40,7 +46,7 @@ public class PairedData {
     }
 
     public String getName(){
-        return this.table_name;
+        return this.pd_identifier.toString();
     }
 
     public void getAllValues( BiConsumer<  ArrayList<Double>, ArrayList<Double> > yield){

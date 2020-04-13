@@ -11,6 +11,7 @@ import java.sql.*;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
@@ -497,12 +498,12 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     }
 
     @Override
-    public PairedData getPairedData(String table_name) {
+    public PairedData getPairedData(PairedDataIdentifier pdIdentifier) {
         Statement get_table = null;
 
         try {
-            String sql_table_table = getSQLTableName(table_name, "Paired Data");
-            PairedData pd = new PairedData(this, table_name);
+            String sql_table_table = getSQLTableName(pdIdentifier);
+            PairedData pd = new PairedData(this, pdIdentifier);
             get_table = _connection.createStatement();
             ResultSet rs = get_table.executeQuery("select indep,dep from " + sql_table_table + " order by indep asc");
             while (rs.next()) {
@@ -527,7 +528,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         Statement stmt = null;
         PreparedStatement insert_pd = null;
         try {
-            String sql_table_name = getSQLTableName(table.getName(), "Paired Data");
+            String sql_table_name = getSQLTableName(table.identifier());
 
             stmt = _connection.createStatement();
             try {
@@ -584,17 +585,20 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
      * @return full table name for requested object
      * @throws SQLException for undefined condition
      */
-    private String getSQLTableName(String catalog_name, String type) throws SQLException {
+    private String getSQLTableName(Identifier identifier) throws SQLException {
 
         prefix_name_stmt.clearParameters();
-        prefix_name_stmt.setString(1, type);
+        prefix_name_stmt.setString(1, identifier.datatype());
         ResultSet rs = prefix_name_stmt.executeQuery();
         if (rs.next()) {
-            return rs.getString(1) + Base64.getEncoder().encodeToString(catalog_name.getBytes());
+            return rs.getString(1) + Base64.getEncoder().encodeToString(identifier.catalogName().getBytes());
         }
-        throw new TypeNotImplemented(type);
+        throw new TypeNotImplemented(identifier.datatype());
     }
 
+    /**
+     * @return a simple list of all of the possible versions
+     */
     @Override
     public List<String> getVersions() {
         ArrayList<String> list = new ArrayList<String>();
@@ -615,6 +619,9 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         return "/update_" + from + "_to_" + to + ".sql";
     }
 
+    /**
+     * Handles moving certain into the new catalog table
+     */
     private void updateFor20200101_to_20200224() {
         // need to loop through and move the ensembles into the catalog
         // and then update the catalog id in the ensemble
@@ -685,7 +692,18 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
 
     @Override
-    public void write(TimeSeries timeseries){
+    public void write(TimeSeries timeseries) throws Exception{
+
+        String table_name = this.getSQLTableName(timeseries.identifier());
+        if( !table_exists(table_name)){
+            try(Statement stmt = _connection.createStatement() ){
+                StringBuilder create_string = new StringBuilder("CREATE TABLE ");
+                create_string.append(table_name).append("( ");                
+                create_string.append(String.join(",",timeseries.columns()));
+                create_string.append("UNIQUE(").append(String.join(",",timeseries.columns())).append(")");
+                create_string.append(")");                             
+            }
+        }        
 
     }
 
@@ -694,6 +712,19 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     public TimeSeries getTimeSeries(String name, ZonedDateTime start, ZonedDateTime end) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+
+    private boolean table_exists(String tablename) throws SQLException{
+        ResultSet rs = null;
+        try(PreparedStatement checktable = this._connection.prepareStatement("select * from " + tablename + " LIMIT 1")){
+            rs = checktable.executeQuery();
+            return true;
+        } catch(SQLException ex ){
+            return false;
+        }finally{
+            if( rs!=null) rs.close();
+        }        
     }
 
 }

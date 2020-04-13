@@ -49,16 +49,22 @@ public class TimeSeriesIdentifier implements Identifier{
             );
     }
 
-    Duration interval(){
+    public Duration interval(){
         return interval;
     }
 
-    Duration duration(){
+    public Duration duration(){
         return duration;
     }
 
-    String units(){
+    public String units(){
         return units;
     }
+    
+    @Override
+    public String datatype(){
+        return datatype;
+    }
+    
     
 }

@@ -24,5 +24,9 @@ public class EnsembleIdentifier implements Identifier {
                     .append("|").append(location)
                     .append("/").append(parameter).toString();
     }
+
+    public String datatype(){
+        return this.datatype();
+    }
     
 }
