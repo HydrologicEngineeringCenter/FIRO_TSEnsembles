@@ -27,6 +27,11 @@ public class RegularIntervalTimeSeries implements TimeSeries {
 
     }
 
+    public RegularIntervalTimeSeries(TimeSeriesIdentifier identifier){
+        this.identifier = identifier;
+        this.values = new ArrayList<>();
+    }
+
     /**
      * Adds a row to the data, using the provided time to sort the data If you
      * provide a value at a time that skips what is in the timeseries already the
@@ -80,13 +85,20 @@ public class RegularIntervalTimeSeries implements TimeSeries {
     }
 
     @Override
-    public TimeSeries applyFunction(TimeSliceFunction row_function) {
+    public void applyFunction(TimeSliceFunction row_function) throws Exception{
+        for( int i = 0; i < values.size(); i++){
+            row_function.apply(timeAt(i), values.get(i));
+        }
+    }
+    @Override
+    public TimeSeries applyFunction(TimeSliceFunction row_function, TimeSeriesIdentifier newTs)throws Exception {
+        
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public TimeSeries applyFunction(WindowFunction row_function, AggregateWindow window) {
+    public TimeSeries applyFunction(WindowFunction row_function, AggregateWindow window)throws Exception {
         // TODO Auto-generated method stub
         return null;
     }
@@ -132,4 +144,12 @@ public class RegularIntervalTimeSeries implements TimeSeries {
         columns.add("value double");
         return columns;
     }
+
+    @Override
+    public String subtype() {
+        // TODO Auto-generated method stub
+        return "RegularSimple";
+    }
+
+	
 }

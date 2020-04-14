@@ -11,7 +11,7 @@ import hec.Identifier;
 public class TimeSeriesIdentifier implements Identifier{
     public String name;
     public String units;
-    public final String datatype = "timeseries";
+    public final String datatype = "Time Series";
     public Duration interval;
     public Duration duration;
 
@@ -20,6 +20,15 @@ public class TimeSeriesIdentifier implements Identifier{
         this.duration = duration;
         this.interval = interval;
         this.units = units;
+    }
+
+    
+    public static Identifier fromCatalogEntry(String name, String meta_info){
+        String parts[] = meta_info.split("\\.");
+        Duration interval = Duration.parse(parts[0]);
+        Duration duration = Duration.parse(parts[1]);
+        String units = parts[2];
+        return new TimeSeriesIdentifier(name, interval, duration, units);        
     }
 
     @Override

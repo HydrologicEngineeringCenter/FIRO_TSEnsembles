@@ -19,4 +19,13 @@ public interface Identifier {
      * @return String identify the type of data to the database system
      */
     public String datatype(); 
+
+    /**
+     * This is here to let implementers of new identifiers that they will
+     * need a function that does this
+     * @return Identifier object built from the name,meta_info catalog pair
+     */
+    public static Identifier fromCatalogEntry( String name, String meta_info){
+        throw new RuntimeException("This method should be called only on subclasses");
+    };
 }

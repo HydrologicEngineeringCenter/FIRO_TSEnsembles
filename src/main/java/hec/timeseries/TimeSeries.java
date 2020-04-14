@@ -1,43 +1,9 @@
 package hec.timeseries;
 
-import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.List;
 
 import hec.exceptions.*;
-/**
- * A function that will peform some computation 
- * on the provided value
- * 
- * @param time The current time for this row
- * @param value The for this row
- * @return double the result of this function
- */
-interface TimeSliceFunction{
-    public double apply( ZonedDateTime time, double value );    
-}
-
-/**
- * A set of function that allow organizing computations 
- * over a static or moving window
- */
-interface WindowFunction{
-    public void start(ZonedDateTime start_of_window_time);
-    public void apply_slice(ZonedDateTime time, double value);
-    public double end( ZonedDateTime end_of_window_time);
-}
-
-/**
- * 
- */
-interface AggregateWindow{
-    public boolean isStart(ZonedDateTime time);
-    public boolean isEnd(ZonedDateTime time);
-    public boolean running();
-    public Duration interval();
-}
-
-
 /**
  * Object to access data in a time series
  * At this level the distriction between regular and irregular is ignored.
@@ -76,14 +42,20 @@ public interface TimeSeries {
      * @param row_function function applied to this row
      * @return a new TimeSeries built from the output of the row function
      */
-    public TimeSeries applyFunction( TimeSliceFunction row_function );
+    public TimeSeries applyFunction( TimeSliceFunction row_function, TimeSeriesIdentifier newTs ) throws Exception;
+
+    /**
+     * Applies a function over the whole timewindow without building a new timeseries
+     * @param row_function
+     */
+    public void applyFunction( TimeSliceFunction row_function ) throws Exception;
     /**
      * 
      * @param row_function
      * @param window
      * @return a new TimeSeries built from the outputs of row_function.end();
      */
-    public TimeSeries applyFunction( WindowFunction row_function, AggregateWindow window );   
+    public TimeSeries applyFunction( WindowFunction row_function, AggregateWindow window )throws Exception;   
     
     /**
      * 
@@ -107,4 +79,9 @@ public interface TimeSeries {
      * @return A list of the particular type of column this timeseries requires
      */
     public List<String> columns();
+
+    /**
+     * @return Unique Identifier for the type of time series
+     */
+    public String subtype();
 }

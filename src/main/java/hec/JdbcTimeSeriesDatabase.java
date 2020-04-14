@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.FileAlreadyExistsException;
+import java.security.MessageDigest;
 import java.sql.*;
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -17,9 +18,15 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import javax.naming.directory.InvalidAttributesException;
+import javax.xml.bind.DatatypeConverter;
+
 import hec.ensemble.*;
+import hec.exceptions.TimeSeriesNotFound;
 import hec.paireddata.*;
+import hec.timeseries.RegularIntervalTimeSeries;
 import hec.timeseries.TimeSeries;
+import hec.timeseries.TimeSeriesIdentifier;
 
 /**
  * Read/write Ensembles to a JDBC database
@@ -133,14 +140,14 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         List<String> versions = getVersions();
         for (String version : versions) {
             if (version.compareTo(this.getVersion()) > 0) {
-                String script = getUpdateScript(this.getVersion(), version);                
+                String script = getUpdateScript(this.getVersion(), version);
                 if (version.equals("20200224")) {
                     runResourceSQLScript(script);
                     updateFor20200101_to_20200224();
                 } else if (version.equals("20200227")) {
                     runResourceSQLScript(script);
                     updateFor20200224_to_20200227();
-                } else if( version.equals("20200227")){
+                } else if (version.equals("20200227")) {
                     runResourceSQLScript(script);
                     updateFor20200227_to_20200409();
                 }
@@ -452,8 +459,32 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     }
 
     @Override
-    public List<Identifier> getTimeSeriesIDs2(){
-        return null;
+    public List<Identifier> getTimeSeriesIDs2() {
+        ArrayList<Identifier> catalog = new ArrayList<>();
+        ResultSet rs = null;
+        try (PreparedStatement select_catalog = _connection
+                .prepareStatement("select datatype,name,meta_info from catalog");) {
+            rs = select_catalog.executeQuery();
+            while(rs.next()){
+                String datatype = rs.getString(1);
+                String name = rs.getString(2);
+                String meta_info = rs.getString(3);
+                if( "Time Series".equals(datatype)){                    
+                    catalog.add(TimeSeriesIdentifier.fromCatalogEntry(name,meta_info));
+                }
+            }
+            return catalog;
+        } catch (Exception err) {
+            throw new RuntimeException("Failed to retrieve catalog, this likely means your database is corrupted", err);
+        } finally {
+            if (rs != null)
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace(System.err);                    
+                }
+        }
+
     }
 
     @Override
@@ -490,15 +521,10 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
             Logger.logError(e);
         }
         return rval;
-    }
-
-    public PairedData getPairedData(EnsembleIdentifier id) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    }    
 
     @Override
-    public PairedData getPairedData(PairedDataIdentifier pdIdentifier) {
+    public PairedData getPairedData(PairedDataIdentifier pdIdentifier) throws Exception {
         Statement get_table = null;
 
         try {
@@ -585,13 +611,16 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
      * @return full table name for requested object
      * @throws SQLException for undefined condition
      */
-    private String getSQLTableName(Identifier identifier) throws SQLException {
+    private String getSQLTableName(Identifier identifier) throws Exception {
 
         prefix_name_stmt.clearParameters();
         prefix_name_stmt.setString(1, identifier.datatype());
         ResultSet rs = prefix_name_stmt.executeQuery();
         if (rs.next()) {
-            return rs.getString(1) + Base64.getEncoder().encodeToString(identifier.catalogName().getBytes());
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            md5.update(identifier.catalogName().getBytes());
+            byte digest[] = md5.digest();
+            return rs.getString(1) + DatatypeConverter.printHexBinary(digest);
         }
         throw new TypeNotImplemented(identifier.datatype());
     }
@@ -693,25 +722,108 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
     @Override
     public void write(TimeSeries timeseries) throws Exception{
-
+        String id_parts[] = timeseries.identifier().catalogName().split("\\|");
+        String type = id_parts[0];
+        String name = id_parts[1];
+        String meta = id_parts[2];
+        this._connection.setAutoCommit(false);
         String table_name = this.getSQLTableName(timeseries.identifier());
         if( !table_exists(table_name)){
-            try(Statement stmt = _connection.createStatement() ){
-                StringBuilder create_string = new StringBuilder("CREATE TABLE ");
-                create_string.append(table_name).append("( ");                
-                create_string.append(String.join(",",timeseries.columns()));
-                create_string.append("UNIQUE(").append(String.join(",",timeseries.columns())).append(")");
-                create_string.append(")");                             
+            try(
+                Statement stmt = _connection.createStatement();
+                PreparedStatement insert_catalog = _connection.prepareStatement(
+                        "insert into catalog(datatype,name,meta_info) values (?,?,?)"
+                    );   
+                PreparedStatement select_catalog_id = _connection.prepareStatement(
+                        "select id from catalog where datatype = ? and name = ? and meta_info = ?"
+                );
+                PreparedStatement insert_ts_info = _connection.prepareStatement(
+                        "insert into timeseries_information(catalog_id,subtype) values (?,?)"
+                );
+                ){
+                String create_sql = 
+                    String.format(
+                        TimeSeriesStorage.tableCreateFor(timeseries.subtype()),
+                        table_name
+                    );
+                stmt.execute(create_sql);
+
+                insert_catalog.setString(1,type);
+                insert_catalog.setString(2,name);
+                insert_catalog.setString(3,meta);
+                insert_catalog.execute();
+
+                select_catalog_id.setString(1,type);
+                select_catalog_id.setString(2,name);
+                select_catalog_id.setString(3,meta);
+                ResultSet rs = select_catalog_id.executeQuery();
+                if (!rs.next()){
+                    throw new SQLException("unable to retrieve the catalog entry we just inserted, TimeSeries write failed");
+                }
+
+                int catalog_id = rs.getInt(1);
+                rs.close();
+                insert_ts_info.setInt(1,catalog_id);
+                insert_ts_info.setString(2,timeseries.subtype());
+                insert_ts_info.execute();
             }
         }        
-
+        if( timeseries instanceof RegularIntervalTimeSeries )
+            TimeSeriesStorage.write(this._connection, table_name, (RegularIntervalTimeSeries)timeseries);
+        else
+            throw new TypeNotImplemented("This database file cannot store a timeseries of type "
+                                         + timeseries.getClass().getName()
+                                         + " either let the file update or choose a different timeseries class");
+        _connection.commit(); 
+        _connection.setAutoCommit(false);
+        
     }
 
 
     @Override
-    public TimeSeries getTimeSeries(String name, ZonedDateTime start, ZonedDateTime end) {
-        // TODO Auto-generated method stub
-        return null;
+    public TimeSeries getTimeSeries(TimeSeriesIdentifier identifier, ZonedDateTime start, ZonedDateTime end) throws Exception{
+        String tablename = getSQLTableName(identifier);        
+        
+        String parts[] = identifier.catalogName().split("\\|");
+        String datatype = parts[0];
+        String name = parts[1];
+        String meta = parts[2];
+
+        try(
+            PreparedStatement select_catalog_id = _connection.prepareStatement(
+                "select id from catalog where datatype = ? and name = ? and meta_info = ?"
+        );
+            PreparedStatement select_ts_info = _connection.prepareStatement(
+                "select subtype from timeseries_information where catalog_id=?")
+        ){
+
+            select_catalog_id.setString(1,datatype);
+            select_catalog_id.setString(2,name);
+            select_catalog_id.setString(3,meta);
+            ResultSet rs = select_catalog_id.executeQuery();
+            if( !rs.next() ) throw new TimeSeriesNotFound(identifier.catalogName());
+
+            int catalog_id = rs.getInt(1); rs.close();
+
+            select_ts_info.setInt(1,catalog_id);
+            rs = select_ts_info.executeQuery();
+            if( !rs.next() ){
+                throw new InvalidAttributesException("time series "
+                                                    + identifier.catalogName() 
+                                                    + " has a catalog entry but no timeseries info that is required."
+                                                    + " It is possible your database is corrupted");
+            }
+            String subtype = rs.getString(1);
+            if( "RegularSimple".equals(subtype)){
+                return TimeSeriesStorage.readRegularSimple(this._connection,identifier,tablename,subtype,start,end);
+            } else {
+                throw new TypeNotImplemented("Code to read " + subtype + " is not implemented");
+            }
+
+            
+        } catch( Exception err ){
+            throw err;
+        }        
     }
 
 

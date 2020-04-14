@@ -20,17 +20,22 @@ CREATE TABLE IF NOT EXISTS catalog(
   id integer not null primary key,
   name text,
   datatype int references table_types(id),
-  units text
+  meta_info text,
+  UNIQUE(name,datatype,meta_info)
 );
 
-
+CREATE TABLE IF NOT EXISTS timeseries_information(
+  catalog_id INTEGER NOT NULL REFERENCES catalog(id),
+  subtype text
+);
 
 CREATE TABLE IF NOT EXISTS paired_data_information(
   catalog_id int references catalog(id)
 );
 
 INSERT INTO table_types(name,table_prefix,description)
-  VALUES ('Paired Data', 'paired_data_','
+  VALUES 
+  ('Paired Data', 'paired_data_','
   Simple paired data, can have any number of independant 
   variables, column names will be:
   indep1[,indepN]* dep1[,depM]*
@@ -44,6 +49,12 @@ INSERT INTO table_types(name,table_prefix,description)
   ('Ensemble Time Series',NULL, '
     The original ensemble time series test.
   
+  '),
+  ('Time Series','timeseries_','
+  Any TimeSeries Data. Various objects will be stored in different way.
+  
+  The timeseries information table contains a further description of 
+  how this timeseries is actually stored.  
   ')
   ;
   

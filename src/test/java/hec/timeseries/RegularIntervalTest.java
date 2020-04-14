@@ -4,10 +4,7 @@ import hec.ensemble.TestingPaths;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import hec.*;
@@ -50,10 +47,12 @@ public class RegularIntervalTest {
             assertNotNull( catalog );
             assertTrue( catalog.contains( ts.identifier() ) );
 
-            TimeSeries from_db =  db.getTimeSeries(ts.identifier().catalogName(),ts.firstTime(), ts.lastTime() );
+            TimeSeries from_db = db.getTimeSeries(ts.identifier(),
+                                                  ts.firstTime(),
+                                                  ts.lastTime() );
 
             assertNotNull( from_db );
-            assertEquals( 1, from_db.valueAt(1) );
+            assertEquals( 1, from_db.valueAt(0) );
 
         }
 
