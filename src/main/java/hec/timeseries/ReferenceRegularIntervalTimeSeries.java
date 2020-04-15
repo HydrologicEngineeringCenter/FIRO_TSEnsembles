@@ -16,18 +16,18 @@ import java.util.List;
  * @author Michael Neilson &lt;michael.a.neilson@usace.army.mil&gt;
  * @version 20200409
  */
-public class RegularIntervalTimeSeries implements TimeSeries {
+public class ReferenceRegularIntervalTimeSeries implements TimeSeries {
     private ZonedDateTime start = null;
     private ArrayList<Double> values;
     private TimeSeriesIdentifier identifier;
 
-    public RegularIntervalTimeSeries(String name, Duration interval, Duration duration, String units) {
+    public ReferenceRegularIntervalTimeSeries(String name, Duration interval, Duration duration, String units) {
         this.identifier = new TimeSeriesIdentifier(name, interval, duration, units);
         this.values = new ArrayList<>();
 
     }
 
-    public RegularIntervalTimeSeries(TimeSeriesIdentifier identifier){
+    public ReferenceRegularIntervalTimeSeries(TimeSeriesIdentifier identifier){
         this.identifier = identifier;
         this.values = new ArrayList<>();
     }
