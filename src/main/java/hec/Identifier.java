@@ -23,6 +23,8 @@ public interface Identifier {
     /**
      * This is here to let implementers of new identifiers that they will
      * need a function that does this
+     * @param name catalog name entry
+     * @param meta_info catalog meta info block
      * @return Identifier object built from the name,meta_info catalog pair
      */
     public static Identifier fromCatalogEntry( String name, String meta_info){
