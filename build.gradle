@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'jacoco' // code coverage    
+    id 'jacoco' // code coverage
 }
 
 repositories {
@@ -46,7 +46,7 @@ sourceSets{
             srcDir "$projectDir/src/perf/java"
             
             compileClasspath += sourceSets.main.output + sourceSets.test.output
-            runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+            runtimeClasspath += output + sourceSets.main.output + sourceSets.test.output
         }
         resources.srcDir "$projectDir/src/perf/resource"
     }
@@ -74,9 +74,9 @@ dependencies {
 }
 
 task perfTest(type: Test){
+    useJUnitPlatform()
     testClassesDirs = sourceSets.perfTest.output.classesDirs
-    classpath = sourceSets.perfTest.runtimeClasspath
+    classpath += sourceSets.perfTest.runtimeClasspath
     outputs.upToDateWhen {false}
+    mustRunAfter test
 }
-check.dependsOn perfTest
-perfTest.mustRunAfter test

@@ -1,5 +1,4 @@
-package hec.timeseries;
-
+package hec;
 import hec.ensemble.TestingPaths;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,7 +13,13 @@ import hec.TestFixtures;
 public class TimeSeriesReadWriteTests {
 
     @Test
-    public void measure_write_and_read_performance(){
+    public void measure_write_and_read_performance() throws Exception{     
+        // generate test data
+
+        // write test data
+
+        // read test data
+
         fail("not yet implemented");
     }
     
