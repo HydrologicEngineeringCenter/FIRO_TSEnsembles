@@ -24,7 +24,7 @@ import javax.xml.bind.DatatypeConverter;
 import hec.ensemble.*;
 import hec.exceptions.TimeSeriesNotFound;
 import hec.paireddata.*;
-import hec.timeseries.RegularIntervalTimeSeries;
+import hec.timeseries.ReferenceRegularIntervalTimeSeries;
 import hec.timeseries.TimeSeries;
 import hec.timeseries.TimeSeriesIdentifier;
 
@@ -768,8 +768,8 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
                 insert_ts_info.execute();
             }
         }        
-        if( timeseries instanceof RegularIntervalTimeSeries )
-            TimeSeriesStorage.write(this._connection, table_name, (RegularIntervalTimeSeries)timeseries);
+        if( timeseries instanceof ReferenceRegularIntervalTimeSeries )
+            TimeSeriesStorage.write(this._connection, table_name, (ReferenceRegularIntervalTimeSeries)timeseries);
         else
             throw new TypeNotImplemented("This database file cannot store a timeseries of type "
                                          + timeseries.getClass().getName()

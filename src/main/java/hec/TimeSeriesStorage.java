@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 
-import hec.timeseries.RegularIntervalTimeSeries;
+import hec.timeseries.ReferenceRegularIntervalTimeSeries;
 import hec.timeseries.TimeSeries;
 import hec.timeseries.TimeSeriesIdentifier;
 
@@ -21,7 +21,7 @@ public class TimeSeriesStorage {
 
     public static final String rts_table_def = "CREATE TABLE %s(datetime bigint, value double, UNIQUE(datetime,value))";
 
-	public static void write(Connection connection, String table_name, RegularIntervalTimeSeries rts) throws Exception{
+	public static void write(Connection connection, String table_name, ReferenceRegularIntervalTimeSeries rts) throws Exception{
             try(
                 PreparedStatement stmt = connection.prepareStatement("insert or replace into " + table_name + "(datetime,value) values (?,?)")
                 ){
@@ -49,7 +49,7 @@ public class TimeSeriesStorage {
                                             ZonedDateTime end) 
                                             throws Exception
     {
-        RegularIntervalTimeSeries ts = new RegularIntervalTimeSeries(identifier);
+        ReferenceRegularIntervalTimeSeries ts = new ReferenceRegularIntervalTimeSeries(identifier);
 
         try(
             PreparedStatement select_data = connection.prepareStatement(

@@ -42,7 +42,7 @@ public class TestFixtures {
                     }
                 }
 
-                TimeSeries ts = new RegularIntervalTimeSeries(name, Duration.parse(interval), Duration.parse(duration), units);
+                TimeSeries ts = new ReferenceRegularIntervalTimeSeries(name, Duration.parse(interval), Duration.parse(duration), units);
                 String line = null;
                 while( (line = test_data_stream.readLine() ) != null ){
                     String parts[] = line.split(",");
