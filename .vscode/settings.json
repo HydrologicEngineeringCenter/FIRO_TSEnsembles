@@ -1,5 +1,5 @@
 {
     "coverage-gutters.coverageReportFileName": "build/jacoco/**/index.html",
-    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.configuration.updateBuildConfiguration": "disabled",
     "coverage-gutters.xmlname": "build/reports/jacoco/test/jacocoTestReport.xml"
 }

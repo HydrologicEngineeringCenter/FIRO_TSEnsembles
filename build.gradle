@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'jacoco' // code coverage
+    id 'jacoco' // code coverage    
 }
 
 repositories {
@@ -8,14 +8,6 @@ repositories {
         url "https://www.hec.usace.army.mil/nexus/repository/maven-public/"
     }
     mavenCentral()
-}
-
-dependencies {
-    runtimeOnly 'org.xerial:sqlite-jdbc:3.30.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.4.0'
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.4.0"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.4.0"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.4.0"
 }
 
 test {
@@ -46,3 +38,45 @@ jacocoTestReport {
         xml.enabled true
     }
 }
+
+// setup for performance tests
+sourceSets{
+    perfTest {
+        java {
+            srcDir "$projectDir/src/perf/java"
+            
+            compileClasspath += sourceSets.main.output + sourceSets.test.output
+            runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+        }
+        resources.srcDir "$projectDir/src/perf/resource"
+    }
+    
+}
+
+configurations {
+    perfTestCompile.extendsFrom testCompile
+    perfTestImplementation.extendsFrom testImplementation
+    perfTestRuntime.extendsFrom testRuntime
+}
+
+dependencies {
+    runtimeOnly 'org.xerial:sqlite-jdbc:3.30.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.4.0'
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.4.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.4.0"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.4.0"
+
+    perfTestImplementation 'org.junit.jupiter:junit-jupiter:5.4.0'
+    perfTestRuntimeOnly "org.junit.platform:junit-platform-launcher:1.4.0"
+    perfTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.4.0"
+    perfTestRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.4.0"
+    
+}
+
+task perfTest(type: Test){
+    testClassesDirs = sourceSets.perfTest.output.classesDirs
+    classpath = sourceSets.perfTest.runtimeClasspath
+    outputs.upToDateWhen {false}
+}
+check.dependsOn perfTest
+perfTest.mustRunAfter test
