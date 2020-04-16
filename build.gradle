@@ -54,5 +54,6 @@ task perfTest(type: Test){
     useJUnitPlatform()
     exclude "hec/**"
     include "performance/**"
+    outputs.upToDateWhen {false}
     mustRunAfter test
 }
