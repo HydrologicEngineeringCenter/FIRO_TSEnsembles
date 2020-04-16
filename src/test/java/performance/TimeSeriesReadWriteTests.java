@@ -1,4 +1,4 @@
-package hec;
+package performance;
 import hec.ensemble.TestingPaths;
 import hec.timeseries.ReferenceRegularIntervalTimeSeries;
 import hec.timeseries.TimeSeries;
@@ -24,7 +24,7 @@ public class TimeSeriesReadWriteTests {
         // generate test data  
         ZonedDateTime gen_start = ZonedDateTime.now();      
         ZonedDateTime start = ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
-        ZonedDateTime end = start.plusYears(40000);
+        ZonedDateTime end = start.plusYears(10000);
         Duration interval = Duration.parse("P1D");
         TimeSeriesIdentifier ts_id = new TimeSeriesIdentifier(
                                             "TestTS",
