@@ -1,5 +1,11 @@
 {
     "coverage-gutters.coverageReportFileName": "build/jacoco/**/index.html",
     "java.configuration.updateBuildConfiguration": "disabled",
-    "coverage-gutters.xmlname": "build/reports/jacoco/test/jacocoTestReport.xml"
+    "coverage-gutters.xmlname": "build/reports/jacoco/test/jacocoTestReport.xml",
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    }
 }

@@ -19,17 +19,23 @@ import hec.timeseries.TimeSeriesIdentifier;
  */
 public class TimeSeriesStorage {
 
-    public static final String rts_table_def = "CREATE TABLE %s(datetime bigint, value double, UNIQUE(datetime,value))";
+    public static final String rts_table_def = "CREATE TABLE %s(datetime bigint primary key, value double)";
 
 	public static void write(Connection connection, String table_name, ReferenceRegularIntervalTimeSeries rts) throws Exception{
             try(
                 PreparedStatement stmt = connection.prepareStatement("insert or replace into " + table_name + "(datetime,value) values (?,?)")
                 ){
+                int MAX_BATCH = 10000;
+                int num_processed[] = {0};
                 rts.applyFunction( (time, value) -> {
                     if( value != Double.NEGATIVE_INFINITY){
                         stmt.setLong(1, time.toEpochSecond());
                         stmt.setDouble(2, value);
                         stmt.addBatch();
+                        num_processed[0] += 1;
+                    }
+                    if( num_processed[0] % MAX_BATCH == 0 ){
+                        stmt.executeBatch();
                     }
                     return Double.NEGATIVE_INFINITY;
                 });
