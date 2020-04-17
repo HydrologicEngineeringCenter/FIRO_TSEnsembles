@@ -77,7 +77,9 @@ public class TimeSeriesStorage {
     }
 
 	public static String tableCreateFor(String subtype) {
-        if( "RegularSimple".equals(subtype)){
+        if( ReferenceRegularIntervalTimeSeries.DATABASE_TYPE_NAME
+            .equals(subtype)
+        ){
             return rts_table_def;
         } else {
             return null;

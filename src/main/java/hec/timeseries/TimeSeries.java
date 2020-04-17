@@ -86,13 +86,7 @@ public interface TimeSeries {
      * 
      * @return TimeSeriesIdentifier object that can uniquely identify this TimeSeries in the catalog
      */
-    public TimeSeriesIdentifier identifier();
-
-    /**
-     * 
-     * @return A list of the particular type of column this timeseries requires
-     */
-    public List<String> columns();
+    public TimeSeriesIdentifier identifier();    
 
     /**
      * @return Unique Identifier for the type of time series

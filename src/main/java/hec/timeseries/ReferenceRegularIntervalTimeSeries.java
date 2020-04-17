@@ -17,6 +17,7 @@ import java.util.List;
  * @version 20200409
  */
 public class ReferenceRegularIntervalTimeSeries implements TimeSeries {
+    public static final String DATABASE_TYPE_NAME = "RegularSimple";
     private ZonedDateTime start = null;
     private ArrayList<Double> values;
     private TimeSeriesIdentifier identifier;
@@ -135,20 +136,12 @@ public class ReferenceRegularIntervalTimeSeries implements TimeSeries {
     public int numberValues() {
         // TODO Auto-generated method stub
         return this.values.size();
-    }
-
-    @Override
-    public List<String> columns() {        
-        ArrayList<String> columns = new ArrayList<>();
-        columns.add("datetime long");
-        columns.add("value double");
-        return columns;
-    }
+    }    
 
     @Override
     public String subtype() {
         // TODO Auto-generated method stub
-        return "RegularSimple";
+        return ReferenceRegularIntervalTimeSeries.DATABASE_TYPE_NAME;
     }
 
 	

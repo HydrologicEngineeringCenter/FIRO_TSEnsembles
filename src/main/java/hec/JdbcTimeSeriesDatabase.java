@@ -814,7 +814,9 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
                                                     + " It is possible your database is corrupted");
             }
             String subtype = rs.getString(1);
-            if( "RegularSimple".equals(subtype)){
+            if( ReferenceRegularIntervalTimeSeries.DATABASE_TYPE_NAME
+                .equals(subtype) 
+            ){
                 return TimeSeriesStorage.readRegularSimple(this._connection,identifier,tablename,subtype,start,end);
             } else {
                 throw new TypeNotImplemented("Code to read " + subtype + " is not implemented");
