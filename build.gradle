@@ -55,5 +55,18 @@ task perfTest(type: Test){
     exclude "hec/**"
     include "performance/**"
     outputs.upToDateWhen {false}
+
+    jvmArgs += ["-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"]
+
+    def jfrOptions = [
+              defaultrecording: true,
+              dumponexit      : true,
+              dumponexitpath  : "${project.buildDir}/dumponexit.jfr",
+              globalbuffersize: '10M',
+              disk            : true,
+              settings        : "${System.getProperty("java.home")}/lib/jfr/profile.jfc".toString()        
+    ]
+
+    jvmArgs += ["-XX:FlightRecorderOptions=${jfrOptions.collect { k, v -> "$k=$v".toString() }.join(',')}"]
     mustRunAfter test
 }
