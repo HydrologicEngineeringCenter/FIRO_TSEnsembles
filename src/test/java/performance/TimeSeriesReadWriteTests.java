@@ -24,7 +24,7 @@ public class TimeSeriesReadWriteTests {
         // generate test data  
         ZonedDateTime gen_start = ZonedDateTime.now();      
         ZonedDateTime start = ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
-        ZonedDateTime end = start.plusYears(10000);
+        ZonedDateTime end = start.plusYears(40000);
         Duration interval = Duration.parse("P1D");
         TimeSeriesIdentifier ts_id = new TimeSeriesIdentifier(
                                             "TestTS",
@@ -37,8 +37,9 @@ public class TimeSeriesReadWriteTests {
                                 ts_id
                             );                            
         ZonedDateTime current = start;
+        java.util.SplittableRandom rng = new java.util.SplittableRandom();
         while( current.isBefore(end)){
-            reference_ts.addRow(current, Math.random()*1000);
+            reference_ts.addRow(current, rng.nextDouble()*1000);
             current = current.plusDays(interval.toDays());
         }
         int halfway_point = (int)reference_ts.numberValues()/2;
