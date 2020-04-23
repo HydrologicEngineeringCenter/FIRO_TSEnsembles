@@ -53,11 +53,7 @@ public class ReferenceRegularIntervalTimeSeries implements TimeSeries {
             start = time.withZoneSameInstant(ZoneId.of("UTC"));
             values.add(value);
             return this;
-        } else if (time.isBefore(start)) {
-            start = time;
-            values.add(0, value);
-            return this;
-        }
+        } 
         int index = this.indexAt(time);
         if (index == values.size()) {
             values.add(value);
@@ -78,9 +74,8 @@ public class ReferenceRegularIntervalTimeSeries implements TimeSeries {
     }
 
     @Override
-    public double valueAt(ZonedDateTime time) {
-        // TODO Auto-generated method stub
-        return 0;
+    public double valueAt(ZonedDateTime time) {        
+        return valueAt(indexAt(time));
     }
 
     @Override
@@ -95,15 +90,21 @@ public class ReferenceRegularIntervalTimeSeries implements TimeSeries {
         }
     }
     @Override
-    public TimeSeries applyFunction(TimeSliceFunction row_function, TimeSeriesIdentifier newTs)throws Exception {
-        
-        // TODO Auto-generated method stub
-        return null;
+    public TimeSeries applyFunction(TimeSliceFunction row_function, TimeSeriesIdentifier newTsId)throws Exception {
+        TimeSeries new_ts = new ReferenceRegularIntervalTimeSeries(newTsId);
+        for( int i = 0; i < values.size(); i++){
+            ZonedDateTime time = timeAt(i);
+            double output_value = row_function.apply( time, values.get(i) );
+            if( output_value != Double.NEGATIVE_INFINITY ){
+                new_ts.addRow(time,output_value);
+            }
+        }
+        return new_ts;
     }
 
     @Override
     public TimeSeries applyFunction(WindowFunction row_function, AggregateWindow window)throws Exception {
-        // TODO Auto-generated method stub
+        
         return null;
     }
 
