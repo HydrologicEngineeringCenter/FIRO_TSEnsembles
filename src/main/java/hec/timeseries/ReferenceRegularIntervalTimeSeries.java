@@ -2,7 +2,9 @@ package hec.timeseries;
 
 import java.time.Duration;
 import java.time.Period;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,15 +41,16 @@ public class ReferenceRegularIntervalTimeSeries implements TimeSeries {
      * inner values will be automatically filled in
      * 
      * @param time  provided time, will be converted to UTC for storage and
-     *              computations
+     *              computations, if a daylight savings aware timezone is use and 
+     *              you are providing data you will get incorrect results
      * @param value value for the provided time. Double.NEGATIVE_INFINITY will be
      *              treated as a "missing" value
-     * @return returns the timeseries object
+     * @return returns the timeseries object     
      */
     @Override
-    public TimeSeries addRow(ZonedDateTime time, double value) {
+    public TimeSeries addRow(ZonedDateTime time, double value) {                
         if (start == null) {
-            start = time;
+            start = time.withZoneSameInstant(ZoneId.of("UTC"));
             values.add(value);
             return this;
         } else if (time.isBefore(start)) {
@@ -106,25 +109,28 @@ public class ReferenceRegularIntervalTimeSeries implements TimeSeries {
 
     @Override
     public ZonedDateTime timeAt(int index) {
-        return this.start.plusSeconds(identifier.interval().getSeconds() * index);
+        return this.start.plus(this.identifier.interval().multipliedBy(index));
     }
 
     private int indexAt(ZonedDateTime time) {
-        Duration start_to_time = Duration.between(start, time);
-        int index = (int) (start_to_time.getSeconds() / this.identifier.interval().getSeconds());
-        return index;
+        if( identifier.interval().toDays() >= 1 ){
+            return (int)ChronoUnit.DAYS.between(start,time);
+        } else {
+            Duration start_to_time = Duration.between(start, time);        
+
+            int index = (int) (start_to_time.getSeconds() / this.identifier.interval().getSeconds());
+            return index;
+        }        
     }
 
     @Override
-    public ZonedDateTime firstTime() {
-        // TODO Auto-generated method stub
+    public ZonedDateTime firstTime() {        
         return start;
     }
 
     @Override
-    public ZonedDateTime lastTime() {
-        // TODO Auto-generated method stub
-        return start.plusSeconds(identifier.interval().getSeconds() * values.size());
+    public ZonedDateTime lastTime() {        
+        return start.plus(identifier.interval().multipliedBy(values.size()));
     }
 
     @Override
@@ -133,14 +139,12 @@ public class ReferenceRegularIntervalTimeSeries implements TimeSeries {
     }
 
     @Override
-    public int numberValues() {
-        // TODO Auto-generated method stub
+    public int numberValues() {        
         return this.values.size();
     }    
 
     @Override
-    public String subtype() {
-        // TODO Auto-generated method stub
+    public String subtype() {        
         return ReferenceRegularIntervalTimeSeries.DATABASE_TYPE_NAME;
     }
 

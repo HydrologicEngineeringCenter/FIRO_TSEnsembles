@@ -5,10 +5,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.time.*;
 import java.util.List;
 
 import hec.*;
 import hec.TestFixtures;
+import hec.timeseries.*;
 
 public class RegularIntervalTest {
 
@@ -59,5 +61,23 @@ public class RegularIntervalTest {
         //fail("test not yet implemented");
     }
 
+    @Test
+    public void daily_intervals_return_expected_times(){
+        TimeSeriesIdentifier ts_id = new TimeSeriesIdentifier("TestTS", Duration.parse("P1D"), Duration.parse("PT0S"), "ac-ft");
+        TimeSeries ts = new ReferenceRegularIntervalTimeSeries(ts_id);
+        ts.addRow( ZonedDateTime.of(2020,3,7,0,0,0,0,ZoneId.of("GMT-08:00")), 1.0);
+        ts.addRow( ZonedDateTime.of(2020,3,8,0,0,0,0,ZoneId.of("GMT-08:00")), 2.0);
+        ts.addRow( ZonedDateTime.of(2020,3,9,0,0,0,0,ZoneId.of("GMT-08:00")), 3.0);
+
+        ZonedDateTime midnight_local_8th = ts.timeAt(1).withZoneSameInstant(ZoneId.of("UTC"));
+        assertEquals(2.0, ts.valueAt(1));
+        assertEquals(9, midnight_local_8th.getDayOfMonth() );
+        assertEquals(8, midnight_local_8th.getHour() );
+
+        ZonedDateTime midnight_local_9th = ts.timeAt(2).withZoneSameInstant(ZoneId.of("UTC"));
+        assertEquals(3.0, ts.valueAt(2));
+        assertEquals(10, midnight_local_9th.getDayOfMonth() );
+        assertEquals(8, midnight_local_9th.getHour() );
+    }
 
 }
