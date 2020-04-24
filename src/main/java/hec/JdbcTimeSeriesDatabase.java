@@ -139,21 +139,25 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         }
         List<String> versions = getVersions();        
         for (String next_version : versions) {
-            if (version.compareTo(this.getVersion()) > 0) {
+            if (next_version.compareTo(this.getVersion()) > 0) {
                 String script = getUpdateScript(this.getVersion(), next_version);
                 if (next_version.equals("20200224")) {
                     runResourceSQLScript(script);
                     updateFor20200101_to_20200224();
+                    this.version = next_version;
                 } else if (next_version.equals("20200227")) {
                     runResourceSQLScript(script);
                     updateFor20200224_to_20200227();
+                    this.version = next_version;
                 } else if (next_version.equals("20200227")) {
                     runResourceSQLScript(script);
                     updateFor20200227_to_20200409();
+                    this.version = next_version;
                 }
 
             }
             try {
+                
                 _connection.commit();
             } catch (SQLException e) {
                 throw new RuntimeException("unable to commit changes after running all update scripts", e);
