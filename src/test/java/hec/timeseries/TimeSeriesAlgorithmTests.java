@@ -14,7 +14,9 @@ import hec.*;
 import hec.TestFixtures;
 
 
-public class TestSeriesAlgorithmTests {
+public class TimeSeriesAlgorithmTests { 
+    TestFixtures fixtures = new TestFixtures();
+    
     @Test
     public void a_new_timeseries_can_be_generated_from_an_apply() throws Exception{
         TimeSeriesIdentifier ts_id = new TimeSeriesIdentifier("TestTS", Duration.parse("P1D"), Duration.parse("PT0S"), "ac-ft");
