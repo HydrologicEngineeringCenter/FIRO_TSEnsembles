@@ -137,17 +137,17 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         } catch (SQLException e) {
             throw new RuntimeException("database operations failed at start of attempt to update", e);
         }
-        List<String> versions = getVersions();
-        for (String version : versions) {
+        List<String> versions = getVersions();        
+        for (String next_version : versions) {
             if (version.compareTo(this.getVersion()) > 0) {
-                String script = getUpdateScript(this.getVersion(), version);
-                if (version.equals("20200224")) {
+                String script = getUpdateScript(this.getVersion(), next_version);
+                if (next_version.equals("20200224")) {
                     runResourceSQLScript(script);
                     updateFor20200101_to_20200224();
-                } else if (version.equals("20200227")) {
+                } else if (next_version.equals("20200227")) {
                     runResourceSQLScript(script);
                     updateFor20200224_to_20200227();
-                } else if (version.equals("20200227")) {
+                } else if (next_version.equals("20200227")) {
                     runResourceSQLScript(script);
                     updateFor20200227_to_20200409();
                 }
