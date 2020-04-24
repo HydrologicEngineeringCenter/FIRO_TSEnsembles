@@ -50,11 +50,11 @@ public interface TimeSeries {
     /**
      * 
      * @param row_function function applied to this row
-     * @param newTs Identifier for a new timeseries that will be created
+     * @param newTsId Identifier for a new timeseries that will be created
      * @return a new TimeSeries built from the output of the row function
      * @throws Exception if the user supplied function doesn't handle errors this library will bail
      */
-    public TimeSeries applyFunction( TimeSliceFunction row_function, TimeSeriesIdentifier newTs ) throws Exception;
+    public TimeSeries applyFunction( TimeSliceFunction row_function, TimeSeriesIdentifier newTsId ) throws Exception;
 
     /**
      * Applies a function over the whole timewindow without building a new timeseries
@@ -65,11 +65,12 @@ public interface TimeSeries {
     /**
      * 
      * @param row_function function to call
-     * @param window object that controls moving through the timeseries
+     * @param window object that controls when the window starts and ends
+     * @param newTSId TimeSeries name to use for the output time series
      * @return a new TimeSeries built from the outputs of row_function.end();
      * @throws Exception if the user supplied function doesn't handle errors this library will bail
      */
-    public TimeSeries applyFunction( WindowFunction row_function, AggregateWindow window )throws Exception;   
+    public TimeSeries applyFunction( WindowFunction row_function, AggregateWindow window, TimeSeriesIdentifier newTsId )throws Exception;   
     
     /**
      * 

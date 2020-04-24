@@ -103,9 +103,26 @@ public class ReferenceRegularIntervalTimeSeries implements TimeSeries {
     }
 
     @Override
-    public TimeSeries applyFunction(WindowFunction row_function, AggregateWindow window)throws Exception {
-        
-        return null;
+    public TimeSeries applyFunction(WindowFunction row_function, AggregateWindow window, TimeSeriesIdentifier newTsId)throws Exception {
+        TimeSeries new_ts = new ReferenceRegularIntervalTimeSeries(newTsId);
+        for( int i = 0; i < values.size(); i++){
+            ZonedDateTime time = timeAt(i);
+            
+            if( window.isEnd(time)){
+                row_function.apply_slice(time, values.get(i));
+                double output_value = row_function.end(time);
+                if( output_value != Double.NEGATIVE_INFINITY ){
+                    new_ts.addRow(time,output_value);
+                } 
+            }
+            if( window.isStart(time)){
+                row_function.start(time);
+            }
+            
+            row_function.apply_slice(time, values.get(i));
+            
+        }
+        return new_ts;        
     }
 
     @Override

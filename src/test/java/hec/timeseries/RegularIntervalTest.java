@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.time.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -174,6 +175,70 @@ public class RegularIntervalTest {
         assertEquals(source_ts.firstTime().plusDays(1), difference_ts.firstTime() );
         assertEquals(1, difference_ts.valueAt(0));
 
+    }
+
+    @Test
+    public void total_calculation_calculates_all_sums() throws Exception {
+        TimeSeries source_ts = fixtures.load_regular_time_series_data("/timeseries_data/regular_1hour_1month.csv");
+        assertNotNull(source_ts);
+
+        TimeSeriesIdentifier total_ts_id = new TimeSeriesIdentifier("Totals", Duration.parse("PT1H"), Duration.parse("PT1H"), "raw");
+        WindowFunction row_function = new WindowFunction(){
+            ArrayList<Double> values_in_window = new ArrayList<>();            
+            @Override
+            public void start(ZonedDateTime start_of_window_time) {                                
+                values_in_window.clear();
+            }
+        
+            @Override
+            public double end(ZonedDateTime end_of_window_time) {
+                if( values_in_window.size() > 14 ){
+                    Double total = values_in_window.stream().reduce(0.0, (subtotal, current) -> subtotal + current );                
+                    return total.doubleValue();
+                } else {
+                    return Double.NEGATIVE_INFINITY;
+                }                
+            }
+        
+            @Override
+            public void apply_slice(ZonedDateTime time, double value) {                
+                values_in_window.add(value);
+            }
+        };
+
+        AggregateWindow window_function = new AggregateWindow(){
+            ZonedDateTime start = null;
+            @Override
+            public boolean running() {                
+                return false;
+            }
+        
+            @Override
+            public boolean isStart(ZonedDateTime time) {
+                boolean the_return = start == null && time.getHour() == 0;                
+                start = time;
+                return the_return;
+            }
+        
+            @Override
+            public boolean isEnd(ZonedDateTime time) {                
+                return start != null && !time.isEqual(start) && time.getHour() == 0;
+            }
+        
+            @Override
+            public Duration interval() {                
+                return Duration.parse("P1D");
+            }
+        };
+        TimeSeries total_ts = source_ts.applyFunction(
+            row_function, 
+            window_function,
+            total_ts_id
+        );
+        assertNotNull(total_ts);
+        assertTrue( total_ts.numberValues() > 0 );
+        assertEquals(325, total_ts.valueAt(0));
+        assertTrue(ZonedDateTime.parse("2020-01-02T00:00:00+00:00").isEqual(total_ts.firstTime()));
     }
 
 }
