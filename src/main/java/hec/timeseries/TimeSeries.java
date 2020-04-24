@@ -66,7 +66,7 @@ public interface TimeSeries {
      * 
      * @param row_function function to call
      * @param window object that controls when the window starts and ends
-     * @param newTSId TimeSeries name to use for the output time series
+     * @param newTsId TimeSeries name to use for the output time series
      * @return a new TimeSeries built from the outputs of row_function.end();
      * @throws Exception if the user supplied function doesn't handle errors this library will bail
      */
