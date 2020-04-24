@@ -11,18 +11,35 @@ import java.io.File;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
-import java.util.List;
 
 import hec.*;
-import hec.TestFixtures;
 
+class Measure{
+    public String name;    
+    public double write_time;
+    public double read_time;
+    public double file_size;
+    
+    public Measure(String name ){
+        this.name = name;
+    }
+
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(name).append(" Took:").append(System.lineSeparator());
+        sb.append("Write: ").append(write_time).append(" milliseconds").append(System.lineSeparator());
+        sb.append("Read:  ").append(read_time).append(" milliseconds").append(System.lineSeparator());
+        sb.append("Size:  ").append(String.format("%.04f",file_size/1024/1024)).append(System.lineSeparator());
+        return sb.toString();
+    }
+}
 
 public class TimeSeriesReadWriteTests {
 
     @Test
-    public void measure_write_and_read_performance_5000_years() throws Exception{     
+    public void measure_and_compare_regular_interval_time_series() throws Exception{        
         // generate test data  
-        ZonedDateTime gen_start = ZonedDateTime.now();      
+        long gen_start = System.currentTimeMillis();
         ZonedDateTime start = ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
         ZonedDateTime end = start.plusYears(40000);
         Duration interval = Duration.parse("P1D");
@@ -36,44 +53,47 @@ public class TimeSeriesReadWriteTests {
         TimeSeries reference_ts = new ReferenceRegularIntervalTimeSeries(
                                 ts_id
                             );                            
-        ZonedDateTime current = start;
         java.util.SplittableRandom rng = new java.util.SplittableRandom();
+        ZonedDateTime current = start;
         while( current.isBefore(end)){
             reference_ts.addRow(current, rng.nextDouble()*1000);
             current = current.plusDays(interval.toDays());
         }
-        int halfway_point = (int)reference_ts.numberValues()/2;
-        double halfway_value = reference_ts.valueAt(halfway_point);
-        ZonedDateTime half_way_time = reference_ts.timeAt((halfway_point));
-        System.out.println(reference_ts.numberValues());
-        ZonedDateTime gen_end = ZonedDateTime.now();
-        long time_to_gen = gen_end.toEpochSecond() - gen_start.toEpochSecond();
-        System.out.println("Generation to " + time_to_gen + " seconds");
-        // write test data
+        
+        //System.out.println(reference_ts.numberValues());
+        long gen_end = System.currentTimeMillis();
+        System.out.println("Data Generation took " + (gen_end - gen_start) + " milliseconds");
+        Measure reference_measure = measure_write_and_read_performance(reference_ts, "Reference Regular",start,end);
 
+        System.out.println(reference_measure);
+    }
+
+    
+    public Measure measure_write_and_read_performance(TimeSeries theData, String setname, ZonedDateTime start, ZonedDateTime end) throws Exception{     
+        Measure measure = new Measure(setname);
+        int halfway_point = (int)theData.numberValues()/2;
+        double halfway_value = theData.valueAt(halfway_point);
+        ZonedDateTime half_way_time = theData.timeAt((halfway_point));
         
         String fileName= TestingPaths.instance.getTempDir()+"/"+"timeseriestest.db";
 
         File file = new File(fileName);
-        file.delete();
-        long time_to_write_reference = Long.MIN_VALUE;
-        long time_to_read_reference = Long.MIN_VALUE;
+        file.delete();        
         try (TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName,
                 JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);
                 
-            ) {            
-                System.out.println("Writing Data");
-                ZonedDateTime write_start = ZonedDateTime.now();
-                db.write(reference_ts);
-                ZonedDateTime write_end = ZonedDateTime.now();
-                System.out.println("Done Writing Data");
-                time_to_write_reference = write_end.toEpochSecond() - write_start.toEpochSecond();
-                System.out.println("Writing took " + time_to_write_reference + " seconds");
-                reference_ts = null; // free up memory;
+            ) {                            
+                long write_start = System.currentTimeMillis();
+                db.write(theData);
+                long write_end = System.currentTimeMillis();
+                measure.file_size = file.length();                
+                measure.write_time = write_end - write_start;
+                System.out.println("Writing took " + measure.write_time + " ms");
+                //theData = null; // free up memory;
                 System.gc();
                 System.out.println("Reading Data");
-                ZonedDateTime read_start =ZonedDateTime.now();
-                TimeSeries read_ts = db.getTimeSeries(ts_id,start,end);
+                long read_start = System.currentTimeMillis();
+                TimeSeries read_ts = db.getTimeSeries(theData.identifier(),start,end);
 
                 double read_halfway_value = read_ts.valueAt(halfway_point);
                 ZonedDateTime read_halfway_time = read_ts.timeAt(halfway_point);
@@ -81,17 +101,19 @@ public class TimeSeriesReadWriteTests {
                 assertEquals( halfway_value, read_halfway_value, .01);
                 assertTrue( read_halfway_time.isEqual(half_way_time));
 
-                ZonedDateTime read_end = ZonedDateTime.now();
-                time_to_read_reference = read_end.toEpochSecond()  - read_start.toEpochSecond();
-                System.out.println("Reading took " + time_to_read_reference + " seconds");
+                long read_end = System.currentTimeMillis();
+                measure.read_time = read_end - read_start;
+                System.out.println("Reading took " + measure.read_time + " ms");
                 System.out.println("Done Reading Data");
+                System.out.println("File was " + measure.file_size/1024/1024  + " MB");
+                return measure;
             }
         catch( Exception err )
         {
             err.printStackTrace();            
         }                
 
-        
+        return null;
     }
     
 

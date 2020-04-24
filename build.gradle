@@ -56,7 +56,7 @@ task perfTest(type: Test){
     include "performance/**"
     outputs.upToDateWhen {false}
 
-    jvmArgs += ["-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"]
+    jvmArgs += ["-Xms2048M","-Xmx2048m","-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"]
 
     def jfrOptions = [
               defaultrecording: true,
