@@ -2,6 +2,7 @@ package hec;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
 import java.time.ZonedDateTime;
 import java.time.Duration;
 
@@ -13,7 +14,7 @@ import hec.timeseries.*;
  */
 public class TestFixtures {
 
-    public TimeSeries load_regular_time_series_data(String resource) throws Exception{
+    public TimeSeries load_regular_time_series_data(String resource, Class ts_class_name) throws Exception{
 
         try( BufferedReader test_data_stream = new BufferedReader( 
                                                     new InputStreamReader(
@@ -41,8 +42,10 @@ public class TestFixtures {
                         duration = val;
                     }
                 }
-
-                TimeSeries ts = new ReferenceRegularIntervalTimeSeries(name, Duration.parse(interval), Duration.parse(duration), units);
+                TimeSeriesIdentifier ts_id = new TimeSeriesIdentifier(name, Duration.parse(interval), Duration.parse(duration), units);
+                Constructor<TimeSeries> ts_class_constructor = ts_class_name.getConstructor(TimeSeriesIdentifier.class);
+                TimeSeries ts = ts_class_constructor.newInstance(ts_id);
+                
                 String line = null;
                 while( (line = test_data_stream.readLine() ) != null ){
                     String parts[] = line.split(",");

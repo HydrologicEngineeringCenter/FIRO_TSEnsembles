@@ -2,13 +2,18 @@ package hec.timeseries;
 
 import hec.ensemble.TestingPaths;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import hec.*;
 import hec.TestFixtures;
@@ -17,10 +22,21 @@ import hec.TestFixtures;
 public class TimeSeriesAlgorithmTests { 
     TestFixtures fixtures = new TestFixtures();
     
-    @Test
-    public void a_new_timeseries_can_be_generated_from_an_apply() throws Exception{
+    private static Stream<Class> timeseries_class_list() {
+        return Stream.of(ReferenceRegularIntervalTimeSeries.class, BlockedRegularIntervalTimeSeries.class);
+    }
+
+    private static TimeSeries create_class_instance(Class ts_class_type, TimeSeriesIdentifier ts_id)
+            throws Exception {
+        Constructor<TimeSeries> ts_class_constructor = ts_class_type.getConstructor(TimeSeriesIdentifier.class);
+        return ts_class_constructor.newInstance(ts_id);
+    }
+
+    @ParameterizedTest
+    @MethodSource("timeseries_class_list")
+    public void a_new_timeseries_can_be_generated_from_an_apply(Class ts_class_type) throws Exception{
         TimeSeriesIdentifier ts_id = new TimeSeriesIdentifier("TestTS", Duration.parse("P1D"), Duration.parse("PT0S"), "ac-ft");
-        TimeSeries source_ts = new ReferenceRegularIntervalTimeSeries(ts_id);
+        TimeSeries source_ts = create_class_instance(ts_class_type, ts_id);
         source_ts.addRow( ZonedDateTime.of(2020,3,7,0,0,0,0,ZoneId.of("GMT-08:00")), 1.0);
         source_ts.addRow( ZonedDateTime.of(2020,3,8,0,0,0,0,ZoneId.of("GMT-08:00")), 2.0);
         source_ts.addRow( ZonedDateTime.of(2020,3,9,0,0,0,0,ZoneId.of("GMT-08:00")), 3.0);
@@ -57,9 +73,10 @@ public class TimeSeriesAlgorithmTests {
 
     }
 
-    @Test
-    public void total_calculation_calculates_all_sums() throws Exception {
-        TimeSeries source_ts = fixtures.load_regular_time_series_data("/timeseries_data/regular_1hour_1month.csv");
+    @ParameterizedTest
+    @MethodSource("timeseries_class_list")
+    public void total_calculation_calculates_all_sums(Class ts_class_type) throws Exception {
+        TimeSeries source_ts = fixtures.load_regular_time_series_data("/timeseries_data/regular_1hour_1month.csv", ts_class_type);
         assertNotNull(source_ts);
 
         TimeSeriesIdentifier total_ts_id = new TimeSeriesIdentifier("Totals", Duration.parse("PT1H"), Duration.parse("PT1H"), "raw");

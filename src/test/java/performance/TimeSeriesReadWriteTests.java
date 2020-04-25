@@ -1,15 +1,21 @@
 package performance;
+
 import hec.ensemble.TestingPaths;
 import hec.timeseries.ReferenceRegularIntervalTimeSeries;
 import hec.timeseries.TimeSeries;
 import hec.timeseries.TimeSeriesIdentifier;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.stream.Stream;
 import java.time.ZoneId;
 
 import hec.*;
@@ -67,7 +73,6 @@ public class TimeSeriesReadWriteTests {
 
         System.out.println(reference_measure);
     }
-
     
     public Measure measure_write_and_read_performance(TimeSeries theData, String setname, ZonedDateTime start, ZonedDateTime end) throws Exception{     
         Measure measure = new Measure(setname);
