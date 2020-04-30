@@ -1,6 +1,7 @@
 package performance;
 
 import hec.ensemble.TestingPaths;
+import hec.timeseries.BlockedRegularIntervalTimeSeries;
 import hec.timeseries.ReferenceRegularIntervalTimeSeries;
 import hec.timeseries.TimeSeries;
 import hec.timeseries.TimeSeriesIdentifier;
@@ -58,11 +59,17 @@ public class TimeSeriesReadWriteTests {
 
         TimeSeries reference_ts = new ReferenceRegularIntervalTimeSeries(
                                 ts_id
-                            );                            
+                            );          
+        TimeSeries blocked_ts = new BlockedRegularIntervalTimeSeries(
+                                ts_id
+                            );
+                          
         java.util.SplittableRandom rng = new java.util.SplittableRandom();
         ZonedDateTime current = start;
         while( current.isBefore(end)){
-            reference_ts.addRow(current, rng.nextDouble()*1000);
+            double value = rng.nextDouble()*1000;
+            reference_ts.addRow(current, value);
+            blocked_ts.addRow(current, value);            
             current = current.plusDays(interval.toDays());
         }
         
@@ -70,8 +77,10 @@ public class TimeSeriesReadWriteTests {
         long gen_end = System.currentTimeMillis();
         System.out.println("Data Generation took " + (gen_end - gen_start) + " milliseconds");
         Measure reference_measure = measure_write_and_read_performance(reference_ts, "Reference Regular",start,end);
+        Measure blocked_measure = measure_write_and_read_performance(blocked_ts,"Blocked Regular",start,end);
 
         System.out.println(reference_measure);
+        System.out.println(blocked_measure);
     }
     
     public Measure measure_write_and_read_performance(TimeSeries theData, String setname, ZonedDateTime start, ZonedDateTime end) throws Exception{     
@@ -80,7 +89,7 @@ public class TimeSeriesReadWriteTests {
         double halfway_value = theData.valueAt(halfway_point);
         ZonedDateTime half_way_time = theData.timeAt((halfway_point));
         
-        String fileName= TestingPaths.instance.getTempDir()+"/"+"timeseriestest.db";
+        String fileName= TestingPaths.instance.getTempDir()+"/"+"timeseriesperftest.db";
 
         File file = new File(fileName);
         file.delete();        

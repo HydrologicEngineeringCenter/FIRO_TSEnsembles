@@ -56,7 +56,7 @@ INSERT INTO table_types(name,table_prefix,description)
   The timeseries information table contains a further description of 
   how this timeseries is actually stored.  
   ')
-  ;
+;
   
 
 

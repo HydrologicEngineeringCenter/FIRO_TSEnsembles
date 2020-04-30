@@ -54,8 +54,7 @@ public class RegularIntervalTest {
         File file = new File(fileName);
         file.delete();
         try (TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName,
-                JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);
-                
+                JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);                
             ) {            
 
             TimeSeries ts = fixtures.load_regular_time_series_data("/timeseries_data/regular_1hour_1month.csv", ts_class_type);

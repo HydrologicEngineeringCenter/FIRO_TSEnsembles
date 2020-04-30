@@ -24,6 +24,7 @@ import javax.xml.bind.DatatypeConverter;
 import hec.ensemble.*;
 import hec.exceptions.TimeSeriesNotFound;
 import hec.paireddata.*;
+import hec.timeseries.BlockedRegularIntervalTimeSeries;
 import hec.timeseries.ReferenceRegularIntervalTimeSeries;
 import hec.timeseries.TimeSeries;
 import hec.timeseries.TimeSeriesIdentifier;
@@ -772,7 +773,9 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
                 insert_ts_info.execute();
             }
         }        
-        if( timeseries instanceof ReferenceRegularIntervalTimeSeries )
+        if(       timeseries instanceof BlockedRegularIntervalTimeSeries ){
+            TimeSeriesStorage.write(this._connection, table_name, (BlockedRegularIntervalTimeSeries)timeseries);
+        }else if( timeseries instanceof ReferenceRegularIntervalTimeSeries )
             TimeSeriesStorage.write(this._connection, table_name, (ReferenceRegularIntervalTimeSeries)timeseries);
         else
             throw new TypeNotImplemented("This database file cannot store a timeseries of type "
@@ -818,8 +821,10 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
                                                     + " It is possible your database is corrupted");
             }
             String subtype = rs.getString(1);
-            if( ReferenceRegularIntervalTimeSeries.DATABASE_TYPE_NAME
-                .equals(subtype) 
+            if( BlockedRegularIntervalTimeSeries.DATABASE_TYPE_NAME.equals(subtype) 
+            ){
+                return TimeSeriesStorage.readBlockedRegular(this._connection,identifier,tablename,subtype,start,end);
+            } else if( ReferenceRegularIntervalTimeSeries.DATABASE_TYPE_NAME.equals(subtype) 
             ){
                 return TimeSeriesStorage.readRegularSimple(this._connection,identifier,tablename,subtype,start,end);
             } else {
