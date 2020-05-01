@@ -8,6 +8,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import hec.TimeSeriesStorage;
+import hec.timeseries.storage.ReferenceStorage;
+
 /**
  * Object to hold basic regular interval timeseries data This version does not
  * care about performance.
@@ -18,13 +21,20 @@ import java.util.List;
  * @author Michael Neilson &lt;michael.a.neilson@usace.army.mil&gt;
  * @version 20200409
  */
-public class ReferenceRegularIntervalTimeSeries implements TimeSeries {
+public class ReferenceRegularIntervalTimeSeries extends TimeSeries {
     public static final String DATABASE_TYPE_NAME = "RegularSimple";
     private ZonedDateTime start = null;
     private ArrayList<Double> values;
     private TimeSeriesIdentifier identifier;
 
     public ReferenceRegularIntervalTimeSeries(TimeSeriesIdentifier identifier){
+        super(new ReferenceStorage());
+        this.identifier = identifier;
+        this.values = new ArrayList<>();
+    }
+
+    protected ReferenceRegularIntervalTimeSeries(TimeSeriesIdentifier identifier, TimeSeriesStorage strategy){
+        super(strategy);
         this.identifier = identifier;
         this.values = new ArrayList<>();
     }

@@ -733,6 +733,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         String meta = id_parts[2];
         this._connection.setAutoCommit(false);
         String table_name = this.getSQLTableName(timeseries.identifier());
+        TimeSeriesStorage storageStrategy = timeseries.storageStrategy();
         if( !table_exists(table_name)){
             try(
                 Statement stmt = _connection.createStatement();
@@ -748,7 +749,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
                 ){
                 String create_sql = 
                     String.format(
-                        TimeSeriesStorage.tableCreateFor(timeseries.subtype()),
+                        storageStrategy.tableCreate(),
                         table_name
                     );
                 stmt.execute(create_sql);
@@ -773,14 +774,9 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
                 insert_ts_info.execute();
             }
         }        
-        if(       timeseries instanceof BlockedRegularIntervalTimeSeries ){
-            TimeSeriesStorage.write(this._connection, table_name, (BlockedRegularIntervalTimeSeries)timeseries);
-        }else if( timeseries instanceof ReferenceRegularIntervalTimeSeries )
-            TimeSeriesStorage.write(this._connection, table_name, (ReferenceRegularIntervalTimeSeries)timeseries);
-        else
-            throw new TypeNotImplemented("This database file cannot store a timeseries of type "
-                                         + timeseries.getClass().getName()
-                                         + " either let the file update or choose a different timeseries class");
+                
+        storageStrategy.write(this._connection, table_name, timeseries);
+        
         _connection.commit(); 
         _connection.setAutoCommit(false);
         
@@ -821,16 +817,8 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
                                                     + " It is possible your database is corrupted");
             }
             String subtype = rs.getString(1);
-            if( BlockedRegularIntervalTimeSeries.DATABASE_TYPE_NAME.equals(subtype) 
-            ){
-                return TimeSeriesStorage.readBlockedRegular(this._connection,identifier,tablename,subtype,start,end);
-            } else if( ReferenceRegularIntervalTimeSeries.DATABASE_TYPE_NAME.equals(subtype) 
-            ){
-                return TimeSeriesStorage.readRegularSimple(this._connection,identifier,tablename,subtype,start,end);
-            } else {
-                throw new TypeNotImplemented("Code to read " + subtype + " is not implemented");
-            }
-
+            TimeSeriesStorage storageStrategy = TimeSeriesStorage.strategyFor(subtype);
+            return storageStrategy.read(this._connection,identifier,tablename,subtype,start,end);
             
         } catch( Exception err ){
             throw err;
