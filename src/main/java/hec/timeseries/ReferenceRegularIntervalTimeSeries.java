@@ -24,12 +24,6 @@ public class ReferenceRegularIntervalTimeSeries implements TimeSeries {
     private ArrayList<Double> values;
     private TimeSeriesIdentifier identifier;
 
-    public ReferenceRegularIntervalTimeSeries(String name, Duration interval, Duration duration, String units) {
-        this.identifier = new TimeSeriesIdentifier(name, interval, duration, units);
-        this.values = new ArrayList<>();
-
-    }
-
     public ReferenceRegularIntervalTimeSeries(TimeSeriesIdentifier identifier){
         this.identifier = identifier;
         this.values = new ArrayList<>();
