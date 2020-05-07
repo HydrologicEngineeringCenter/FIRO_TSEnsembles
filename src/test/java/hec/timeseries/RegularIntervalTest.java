@@ -2,6 +2,7 @@ package hec.timeseries;
 
 import hec.ensemble.TestingPaths;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -9,7 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.time.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import hec.*;
@@ -27,6 +30,20 @@ public class RegularIntervalTest {
             throws Exception {
         Constructor<TimeSeries> ts_class_constructor = ts_class_type.getConstructor(TimeSeriesIdentifier.class);
         return ts_class_constructor.newInstance(ts_id);
+    }
+
+    private static Stream<Arguments> class_and_resource_list() throws Exception{
+        TestFixtures fix = new TestFixtures();
+        ArrayList<String> resource_files = fix.load_lines("/timeseries_data/list_of_files.txt");
+        ArrayList<Class> classes = (ArrayList<Class>) timeseries_class_list().collect(Collectors.toList());
+        
+        ArrayList<Arguments> args = new ArrayList<>();
+        for( Class c: classes){
+            for( String file: resource_files ){
+                args.add(Arguments.of(c,file));
+            }
+        }
+        return args.stream();
     }
 
     @ParameterizedTest
@@ -77,9 +94,12 @@ public class RegularIntervalTest {
     public void daily_intervals_return_expected_times(Class ts_class_type) throws Exception{
         TimeSeriesIdentifier ts_id = new TimeSeriesIdentifier("TestTS", Duration.parse("P1D"), Duration.parse("PT0S"), "ac-ft");
         TimeSeries ts = create_class_instance(ts_class_type, ts_id);
-        ts.addRow( ZonedDateTime.of(2020,3,7,0,0,0,0,ZoneId.of("GMT-08:00")), 1.0);
-        ts.addRow( ZonedDateTime.of(2020,3,8,0,0,0,0,ZoneId.of("GMT-08:00")), 2.0);
-        ts.addRow( ZonedDateTime.of(2020,3,9,0,0,0,0,ZoneId.of("GMT-08:00")), 3.0);
+        ZonedDateTime origFirst = ZonedDateTime.of(2020,3,7,0,0,0,0,ZoneId.of("GMT-08:00"));
+        ZonedDateTime origMiddle = ZonedDateTime.of(2020,3,8,0,0,0,0,ZoneId.of("GMT-08:00"));
+        ZonedDateTime origLast = ZonedDateTime.of(2020,3,9,0,0,0,0,ZoneId.of("GMT-08:00"));
+        ts.addRow( origFirst, 1.0);
+        ts.addRow( origMiddle, 2.0);
+        ts.addRow( origLast, 3.0);
 
         ZonedDateTime midnight_original_8th = ts.timeAt(1);
         ZonedDateTime  midnight_local_8th = midnight_original_8th.withZoneSameInstant(ZoneId.of("UTC"));
@@ -93,6 +113,10 @@ public class RegularIntervalTest {
         assertEquals(8, midnight_local_9th.getHour() );
 
         assertEquals(3.0, ts.valueAt(midnight_local_9th));
+        assertTrue( origFirst.isEqual(ts.firstTime()) );
+        ZonedDateTime calculatedLast = ts.lastTime();
+        assertTrue( origLast.isEqual(calculatedLast) );  
+        assertEquals( 3.0, ts.valueAt(origLast) );      
     }
 
     @ParameterizedTest
@@ -147,5 +171,53 @@ public class RegularIntervalTest {
         assertTrue(exception.getMessage().contains("inserting data before"));
 
     }
+
+
+    @ParameterizedTest
+    @MethodSource("class_and_resource_list")
+    public void test_all_forms_of_data( Class ts_class_type, String resource ) throws Exception {
+        String fileName= TestingPaths.instance.getTempDir()+"/"+"timeseriestest.db";
+
+        File file = new File(fileName);
+        file.delete();
+        try (TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName,
+                JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);                
+            ) {            
+
+            TimeSeries ts = fixtures.load_regular_time_series_data(resource, ts_class_type);
+            
+            assertNotNull(ts);                        
+            assertEquals(1,ts.valueAt(0));
+
+            ZonedDateTime firstTime = ts.firstTime();
+            double firstValue = ts.valueAt(firstTime);
+            int middle = (int)ts.numberValues()/2;
+            ZonedDateTime middleTime = ts.timeAt(middle);
+            double middleValue = ts.valueAt(middle);
+            ZonedDateTime lastTime = ts.lastTime();
+            double lastValue = ts.valueAt(lastTime);
+
+            db.write(ts);
+
+            List<Identifier> catalog = db.getTimeSeriesIDs2();
+            assertNotNull( catalog );
+            assertTrue( catalog.contains( ts.identifier() ) );
+
+            TimeSeries from_db = db.getTimeSeries(ts.identifier(),
+                                                  ts.firstTime(),
+                                                  ts.lastTime() );
+            assertEquals( ts.numberValues(), from_db.numberValues() );
+            assertNotNull( from_db );
+            assertEquals( firstValue, from_db.valueAt(0) );
+            assertEquals( middleValue, from_db.valueAt(middle));
+            assertEquals( lastValue, from_db.valueAt(lastTime));
+            
+            assertTrue( firstTime.isEqual(from_db.firstTime()));
+            assertTrue( middleTime.isEqual(from_db.timeAt(middle)));
+            assertTrue( lastTime.isEqual( from_db.lastTime()));
+
+        }
+    }
+
 
 }

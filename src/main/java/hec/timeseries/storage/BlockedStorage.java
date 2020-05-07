@@ -119,8 +119,10 @@ public class BlockedStorage implements TimeSeriesStorage {
         return block_start_zdt.plus( interval.multipliedBy(idx));
     }
 
-    public static int block_size( Duration interval ){
-        int size = (int)(366*86400 / interval.getSeconds()); //seconds in a leapyear / interval
+    public static int block_size(  long block_start, Duration interval ){
+        ZonedDateTime leapcheck = ZonedDateTime.ofInstant(Instant.ofEpochSecond(block_start), ZoneId.of("UTC"));
+        int days = leapcheck.toLocalDate().isLeapYear() ? 366 : 365;
+        int size = (int)(days*86400 / interval.getSeconds()); //seconds in a leapyear / interval
         return size;
     }
 
@@ -129,8 +131,8 @@ public class BlockedStorage implements TimeSeriesStorage {
         if( block_rs.next ()) {
             block = convert_block( block_rs.getBytes(1) );
             block.start_date_time = block_start;
-        } else {
-            block = new Block( block_size(identifier.interval() ));
+        } else {            
+            block = new Block( block_size(block_start,identifier.interval() ));
             block.start_date_time = block_start;
             block.reset();
         }

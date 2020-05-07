@@ -1,0 +1,4 @@
+/timeseries_data/regular_1Day_1Year_inclusive_leapyear.csv
+/timeseries_data/regular_1Day_1Year_inclusive_nonleapyear.csv
+/timeseries_data/regular_1hour_1month.csv
+/timeseries_data/regular_15minutes_1day_inclusive.csv

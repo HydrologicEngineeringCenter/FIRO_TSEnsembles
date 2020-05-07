@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.time.Duration;
 
 import hec.timeseries.*;
@@ -13,6 +14,22 @@ import hec.timeseries.*;
  * @author Michael Neilson <michael.a.neilson@usace.army.mil>
  */
 public class TestFixtures {
+
+    public ArrayList<String> load_lines(String resource_file) throws Exception{
+        try(BufferedReader file = new BufferedReader(
+                                        new InputStreamReader(
+                                            getClass().getResourceAsStream(resource_file)
+                                        )
+                                    );               
+            ){
+                ArrayList<String> lines = new ArrayList<>();
+                String line = null;
+                while( (line = file.readLine()) != null ){
+                    lines.add(line.trim());
+                }
+                return lines;
+            }
+    }
 
     public TimeSeries load_regular_time_series_data(String resource, Class ts_class_name) throws Exception{
 

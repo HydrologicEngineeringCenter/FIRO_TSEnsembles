@@ -152,7 +152,7 @@ public class ReferenceRegularIntervalTimeSeries extends TimeSeries {
 
     @Override
     public ZonedDateTime lastTime() {        
-        return start.plus(identifier.interval().multipliedBy(values.size()));
+        return timeAt(values.size()-1);
     }
 
     @Override
