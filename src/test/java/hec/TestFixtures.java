@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 import java.time.Duration;
 
 import hec.timeseries.*;
@@ -14,6 +15,16 @@ import hec.timeseries.*;
  * @author Michael Neilson <michael.a.neilson@usace.army.mil>
  */
 public class TestFixtures {
+
+    public static Stream<Class> timeseries_class_list() {
+        return Stream.of(ReferenceRegularIntervalTimeSeries.class, BlockedRegularIntervalTimeSeries.class);
+    }
+
+    public static TimeSeries create_class_instance(Class ts_class_type, TimeSeriesIdentifier ts_id)
+            throws Exception {
+        Constructor<TimeSeries> ts_class_constructor = ts_class_type.getConstructor(TimeSeriesIdentifier.class);
+        return ts_class_constructor.newInstance(ts_id);
+    }
 
     public ArrayList<String> load_lines(String resource_file) throws Exception{
         try(BufferedReader file = new BufferedReader(

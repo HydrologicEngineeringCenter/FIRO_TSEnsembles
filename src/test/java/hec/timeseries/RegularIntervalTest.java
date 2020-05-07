@@ -22,20 +22,10 @@ public class RegularIntervalTest {
 
     TestFixtures fixtures = new TestFixtures();
 
-    private static Stream<Class> timeseries_class_list() {
-        return Stream.of(ReferenceRegularIntervalTimeSeries.class, BlockedRegularIntervalTimeSeries.class);
-    }
-
-    private static TimeSeries create_class_instance(Class ts_class_type, TimeSeriesIdentifier ts_id)
-            throws Exception {
-        Constructor<TimeSeries> ts_class_constructor = ts_class_type.getConstructor(TimeSeriesIdentifier.class);
-        return ts_class_constructor.newInstance(ts_id);
-    }
-
     private static Stream<Arguments> class_and_resource_list() throws Exception{
         TestFixtures fix = new TestFixtures();
         ArrayList<String> resource_files = fix.load_lines("/timeseries_data/list_of_files.txt");
-        ArrayList<Class> classes = (ArrayList<Class>) timeseries_class_list().collect(Collectors.toList());
+        ArrayList<Class> classes = (ArrayList<Class>) TestFixtures.timeseries_class_list().collect(Collectors.toList());
         
         ArrayList<Arguments> args = new ArrayList<>();
         for( Class c: classes){
@@ -47,7 +37,7 @@ public class RegularIntervalTest {
     }
 
     @ParameterizedTest
-    @MethodSource("timeseries_class_list")
+    @MethodSource("hec.TestFixtures#timeseries_class_list")
     public void test_create_timeseries_from_resource(Class ts_class_type) throws Exception {
 
         TimeSeries ts = fixtures.load_regular_time_series_data("/timeseries_data/regular_15minutes_1day_inclusive.csv",ts_class_type);
@@ -58,7 +48,7 @@ public class RegularIntervalTest {
 
 
     @ParameterizedTest
-    @MethodSource("timeseries_class_list")
+    @MethodSource("hec.TestFixtures#timeseries_class_list")
     public void timeseries_data_is_inserted_and_can_be_read_back(Class ts_class_type) throws Exception{
         String fileName= TestingPaths.instance.getTempDir()+"/"+"timeseriestest.db";
 
@@ -90,10 +80,10 @@ public class RegularIntervalTest {
     }
 
     @ParameterizedTest
-    @MethodSource("timeseries_class_list")
+    @MethodSource("hec.TestFixtures#timeseries_class_list")
     public void daily_intervals_return_expected_times(Class ts_class_type) throws Exception{
         TimeSeriesIdentifier ts_id = new TimeSeriesIdentifier("TestTS", Duration.parse("P1D"), Duration.parse("PT0S"), "ac-ft");
-        TimeSeries ts = create_class_instance(ts_class_type, ts_id);
+        TimeSeries ts = TestFixtures.create_class_instance(ts_class_type, ts_id);
         ZonedDateTime origFirst = ZonedDateTime.of(2020,3,7,0,0,0,0,ZoneId.of("GMT-08:00"));
         ZonedDateTime origMiddle = ZonedDateTime.of(2020,3,8,0,0,0,0,ZoneId.of("GMT-08:00"));
         ZonedDateTime origLast = ZonedDateTime.of(2020,3,9,0,0,0,0,ZoneId.of("GMT-08:00"));
@@ -120,10 +110,10 @@ public class RegularIntervalTest {
     }
 
     @ParameterizedTest
-    @MethodSource("timeseries_class_list")
+    @MethodSource("hec.TestFixtures#timeseries_class_list")
     public void missing_values_are_filled_in_between_the_current_last_and_new(Class ts_class_type) throws Exception{
         TimeSeriesIdentifier ts_id = new TimeSeriesIdentifier("TestMissingFill", Duration.parse("PT1H"), Duration.parse("PT0S"), "cfs");
-        TimeSeries ts = create_class_instance(ts_class_type, ts_id);
+        TimeSeries ts = TestFixtures.create_class_instance(ts_class_type, ts_id);
         ZonedDateTime first_time = ZonedDateTime.of( 2020,4,23,0,0,0,0,ZoneId.of("UTC"));
         ZonedDateTime end_time = ZonedDateTime.of( 2020,4,23,23,0,0,0,ZoneId.of("UTC"));
         ZonedDateTime middle_time = first_time.plusHours(12);
@@ -153,14 +143,14 @@ public class RegularIntervalTest {
     }
 
     @ParameterizedTest
-    @MethodSource("timeseries_class_list")
+    @MethodSource("hec.TestFixtures#timeseries_class_list")
     public void values_at_times_before_current_start_are_prevented(Class ts_class_type) throws Exception{
         Exception exception = 
             assertThrows(
                 RuntimeException.class,
                 () -> {
                 TimeSeriesIdentifier ts_id = new TimeSeriesIdentifier("TestMissingFill", Duration.parse("PT1H"), Duration.parse("PT0S"), "cfs");
-                TimeSeries ts = create_class_instance(ts_class_type, ts_id);
+                TimeSeries ts = TestFixtures.create_class_instance(ts_class_type, ts_id);
                 ZonedDateTime first_time = ZonedDateTime.of( 2020,4,23,0,0,0,0,ZoneId.of("UTC"));
                 ZonedDateTime time_before_first = first_time.minusHours(5);
                 final double FIRST_VALUE= 1.0;
