@@ -5,7 +5,10 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Stream;
+
+
 import java.time.Duration;
 
 import hec.timeseries.*;
@@ -65,7 +68,8 @@ public class TestFixtures {
                     } else if( "units".equalsIgnoreCase(key)){
                         units = val;
                     } else if( "name".equalsIgnoreCase(key)){
-                        name = val;
+                        // name might have a : in it, rebuild
+                        name = String.join(":",Arrays.copyOfRange(key_val, 1, key_val.length));
                     } else if( "duration".equalsIgnoreCase(key)){
                         duration = val;
                     }

@@ -1,4 +1,4 @@
-interval: PT1H, units: cfs, name: FlowAtPoint.1
+interval: PT1H, units: cfs, name: FlowAtPoint.C:1
 2020-02-06T06:00:00+00:00,0.0000
 2020-02-06T07:00:00+00:00,1.6151
 2020-02-06T08:00:00+00:00,8.4858

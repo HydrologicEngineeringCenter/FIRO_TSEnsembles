@@ -2,7 +2,7 @@ CREATE TABLE version(
   version text not null primary key
 );
 
-INSERT INTO version(version) values ('20200224');
+INSERT INTO version(version) values ('20200507');
 
 
 CREATE TABLE IF NOT EXISTS table_types(
@@ -38,7 +38,11 @@ INSERT INTO table_types(name,table_prefix,description)
   ('Ensemble Time Series',NULL, '
     The original ensemble time series test.
   
-  ');
+  '),
+  ('Collection','collection','
+  
+  ')
+  ;
 
 alter table ensemble_timeseries add column catalog_id int references catalog(id);
 

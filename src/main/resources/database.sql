@@ -55,10 +55,26 @@ INSERT INTO table_types(name,table_prefix,description)
   
   The timeseries information table contains a further description of 
   how this timeseries is actually stored.  
-  ')
+  '),
+  (
+    'Collection','collection_',
+    'A grouping of objects within this database. 
+    Often the same datatype, such as timeseries. 
+    However, this is not a requirement'    
+  )
 ;
   
+CREATE TABLE IF NOT EXISTS collection_information(
+  catalog_id integer not null primary key,
+  name text unique,
+  subtype text
+);
 
+CREATE TABLE IF NOT EXISTS collections(
+  collection_id integer references collection_information(catalog_id),
+  catalog_id integer references catalog(id),
+  UNIQUE(collection_id,catalog_id)
+);
 
 CREATE TABLE IF NOT EXISTS ensemble_timeseries
       ( id integer not null primary key,
@@ -91,3 +107,9 @@ Select ETS.id as ensemble_timeseries_id, location,parameter_name,data_type,units
 member_length, member_count, compression, interval_seconds, byte_value_array
   from ensemble_timeseries ETS join  ensemble E
 on  E.ensemble_timeseries_id = ETS.id;
+
+CREATE VIEW IF NOT EXISTS view_catalog AS
+select id, 
+       datatype || '|' || name || '|' || meta_info as entry
+from
+      catalog;

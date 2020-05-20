@@ -21,6 +21,10 @@ import java.util.stream.Collectors;
 import javax.naming.directory.InvalidAttributesException;
 import javax.xml.bind.DatatypeConverter;
 
+import hec.collections.Collection;
+import hec.collections.CollectionIdentifier;
+import hec.collections.TimeSeriesCollection;
+import hec.collections.storage.CollectionStorage;
 import hec.ensemble.*;
 import hec.exceptions.TimeSeriesNotFound;
 import hec.paireddata.*;
@@ -138,7 +142,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         } catch (SQLException e) {
             throw new RuntimeException("database operations failed at start of attempt to update", e);
         }
-        List<String> versions = getVersions();        
+        List<String> versions = getVersions();
         for (String next_version : versions) {
             if (next_version.compareTo(this.getVersion()) > 0) {
                 String script = getUpdateScript(this.getVersion(), next_version);
@@ -158,7 +162,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
             }
             try {
-                
+
                 _connection.commit();
             } catch (SQLException e) {
                 throw new RuntimeException("unable to commit changes after running all update scripts", e);
@@ -470,12 +474,12 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         try (PreparedStatement select_catalog = _connection
                 .prepareStatement("select datatype,name,meta_info from catalog");) {
             rs = select_catalog.executeQuery();
-            while(rs.next()){
+            while (rs.next()) {
                 String datatype = rs.getString(1);
                 String name = rs.getString(2);
                 String meta_info = rs.getString(3);
-                if( "Time Series".equals(datatype)){                    
-                    catalog.add(TimeSeriesIdentifier.fromCatalogEntry(name,meta_info));
+                if ("Time Series".equals(datatype)) {
+                    catalog.add(TimeSeriesIdentifier.fromCatalogEntry(name, meta_info));
                 }
             }
             return catalog;
@@ -486,7 +490,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
                 try {
                     rs.close();
                 } catch (SQLException e) {
-                    e.printStackTrace(System.err);                    
+                    e.printStackTrace(System.err);
                 }
         }
 
@@ -526,7 +530,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
             Logger.logError(e);
         }
         return rval;
-    }    
+    }
 
     @Override
     public PairedData getPairedData(PairedDataIdentifier pdIdentifier) throws Exception {
@@ -720,13 +724,12 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
     }
 
-    private void updateFor20200227_to_20200409(){
+    private void updateFor20200227_to_20200409() {
 
     }
 
-
     @Override
-    public void write(TimeSeries timeseries) throws Exception{
+    public void write(TimeSeries timeseries) throws Exception {
         String id_parts[] = timeseries.identifier().catalogName().split("\\|");
         String type = id_parts[0];
         String name = id_parts[1];
@@ -734,108 +737,200 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         this._connection.setAutoCommit(false);
         String table_name = this.getSQLTableName(timeseries.identifier());
         TimeSeriesStorage storageStrategy = timeseries.storageStrategy();
-        if( !table_exists(table_name)){
-            try(
-                Statement stmt = _connection.createStatement();
-                PreparedStatement insert_catalog = _connection.prepareStatement(
-                        "insert into catalog(datatype,name,meta_info) values (?,?,?)"
-                    );   
-                PreparedStatement select_catalog_id = _connection.prepareStatement(
-                        "select id from catalog where datatype = ? and name = ? and meta_info = ?"
-                );
-                PreparedStatement insert_ts_info = _connection.prepareStatement(
-                        "insert into timeseries_information(catalog_id,subtype) values (?,?)"
-                );
-                ){
-                String create_sql = 
-                    String.format(
-                        storageStrategy.tableCreate(),
-                        table_name
-                    );
+        if (!table_exists(table_name)) {
+            try (Statement stmt = _connection.createStatement();
+                    PreparedStatement insert_catalog = _connection
+                            .prepareStatement("insert into catalog(datatype,name,meta_info) values (?,?,?)");
+                    PreparedStatement select_catalog_id = _connection.prepareStatement(
+                            "select id from catalog where datatype = ? and name = ? and meta_info = ?");
+                    PreparedStatement insert_ts_info = _connection
+                            .prepareStatement("insert into timeseries_information(catalog_id,subtype) values (?,?)");) {
+                String create_sql = String.format(storageStrategy.tableCreate(), table_name);
                 stmt.execute(create_sql);
 
-                insert_catalog.setString(1,type);
-                insert_catalog.setString(2,name);
-                insert_catalog.setString(3,meta);
+                insert_catalog.setString(1, type);
+                insert_catalog.setString(2, name);
+                insert_catalog.setString(3, meta);
                 insert_catalog.execute();
 
-                select_catalog_id.setString(1,type);
-                select_catalog_id.setString(2,name);
-                select_catalog_id.setString(3,meta);
+                select_catalog_id.setString(1, type);
+                select_catalog_id.setString(2, name);
+                select_catalog_id.setString(3, meta);
                 ResultSet rs = select_catalog_id.executeQuery();
-                if (!rs.next()){
-                    throw new SQLException("unable to retrieve the catalog entry we just inserted, TimeSeries write failed");
+                if (!rs.next()) {
+                    throw new SQLException(
+                            "unable to retrieve the catalog entry we just inserted, TimeSeries write failed");
                 }
 
                 int catalog_id = rs.getInt(1);
                 rs.close();
-                insert_ts_info.setInt(1,catalog_id);
-                insert_ts_info.setString(2,timeseries.subtype());
+                insert_ts_info.setInt(1, catalog_id);
+                insert_ts_info.setString(2, timeseries.subtype());
                 insert_ts_info.execute();
             }
-        }        
-                
+        }
+
         storageStrategy.write(this._connection, table_name, timeseries);
-        
-        _connection.commit(); 
+
+        _connection.commit();
         _connection.setAutoCommit(false);
-        
+
     }
 
-
     @Override
-    public TimeSeries getTimeSeries(TimeSeriesIdentifier identifier, ZonedDateTime start, ZonedDateTime end) throws Exception{
-        String tablename = getSQLTableName(identifier);        
-        
+    public TimeSeries getTimeSeries(TimeSeriesIdentifier identifier, ZonedDateTime start, ZonedDateTime end)
+            throws Exception {
+        String tablename = getSQLTableName(identifier);
+
         String parts[] = identifier.catalogName().split("\\|");
         String datatype = parts[0];
         String name = parts[1];
         String meta = parts[2];
 
-        try(
-            PreparedStatement select_catalog_id = _connection.prepareStatement(
-                "select id from catalog where datatype = ? and name = ? and meta_info = ?"
-        );
-            PreparedStatement select_ts_info = _connection.prepareStatement(
-                "select subtype from timeseries_information where catalog_id=?")
-        ){
+        try (PreparedStatement select_catalog_id = _connection
+                .prepareStatement("select id from catalog where datatype = ? and name = ? and meta_info = ?");
+                PreparedStatement select_ts_info = _connection
+                        .prepareStatement("select subtype from timeseries_information where catalog_id=?")) {
 
-            select_catalog_id.setString(1,datatype);
-            select_catalog_id.setString(2,name);
-            select_catalog_id.setString(3,meta);
+            select_catalog_id.setString(1, datatype);
+            select_catalog_id.setString(2, name);
+            select_catalog_id.setString(3, meta);
             ResultSet rs = select_catalog_id.executeQuery();
-            if( !rs.next() ) throw new TimeSeriesNotFound(identifier.catalogName());
+            if (!rs.next())
+                throw new TimeSeriesNotFound(identifier.catalogName());
 
-            int catalog_id = rs.getInt(1); rs.close();
+            int catalog_id = rs.getInt(1);
+            rs.close();
 
-            select_ts_info.setInt(1,catalog_id);
+            select_ts_info.setInt(1, catalog_id);
             rs = select_ts_info.executeQuery();
-            if( !rs.next() ){
-                throw new InvalidAttributesException("time series "
-                                                    + identifier.catalogName() 
-                                                    + " has a catalog entry but no timeseries info that is required."
-                                                    + " It is possible your database is corrupted");
+            if (!rs.next()) {
+                throw new InvalidAttributesException("time series " + identifier.catalogName()
+                        + " has a catalog entry but no timeseries info that is required."
+                        + " It is possible your database is corrupted");
             }
             String subtype = rs.getString(1);
             TimeSeriesStorage storageStrategy = TimeSeriesStorage.strategyFor(subtype);
-            return storageStrategy.read(this._connection,identifier,tablename,subtype,start,end);
-            
-        } catch( Exception err ){
+            return storageStrategy.read(this._connection, identifier, tablename, subtype, start, end);
+
+        } catch (Exception err) {
+            throw err;
+        }
+    }
+
+    private boolean table_exists(String tablename) throws SQLException {
+        ResultSet rs = null;
+        try (PreparedStatement checktable = this._connection
+                .prepareStatement("select * from " + tablename + " LIMIT 1")) {
+            rs = checktable.executeQuery();
+            return true;
+        } catch (SQLException ex) {
+            return false;
+        } finally {
+            if (rs != null)
+                rs.close();
+        }
+    }
+
+    @Override
+    public Collection getCollection(CollectionIdentifier identifier) throws Exception {        
+        return getCollection(identifier, null, null);
+    }
+
+    @Override
+    public Collection getCollection(CollectionIdentifier identifier, ZonedDateTime start, ZonedDateTime end)
+            throws Exception {
+
+        String tablename = getSQLTableName(identifier);                
+        String parts[] = identifier.catalogName().split("\\|");
+        String datatype = parts[0];
+        String name = parts[1];
+        String meta = parts[2];
+
+        try (PreparedStatement select_catalog_id = _connection
+                .prepareStatement("select id from catalog where datatype = ? and name = ? and meta_info = ?");
+                PreparedStatement select_ts_info = _connection
+                        .prepareStatement("select subtype from collection_information where catalog_id=?")) {
+
+            select_catalog_id.setString(1, datatype);
+            select_catalog_id.setString(2, name);
+            select_catalog_id.setString(3, meta);
+            ResultSet rs = select_catalog_id.executeQuery();
+            if (!rs.next())
+                throw new TimeSeriesNotFound(identifier.catalogName());
+
+            int catalog_id = rs.getInt(1);
+            rs.close();
+
+            select_ts_info.setInt(1, catalog_id);
+            rs = select_ts_info.executeQuery();
+            if (!rs.next()) {
+                throw new InvalidAttributesException("collection " + identifier.catalogName()
+                        + " has a catalog entry but no additional nformation that is required."
+                        + " It is possible your database is corrupted");
+            }
+            String subtype = rs.getString(1);
+            CollectionStorage storageStrategy = CollectionStorage.strategyFor(subtype);            
+            return storageStrategy.read(this._connection, identifier, tablename, start, end, (id,_start,_end) ->{
+                return this.getTimeSeries(id, _start, _end);
+            });
+
+        } catch (Exception err) {
             throw err;
         }        
     }
 
+    @Override
+    public void write( TimeSeriesCollection collection ) throws Exception {
+        for( TimeSeries ts: collection){
+            this.write(ts);
+        }
+        String id_parts[] = collection.identifier().catalogName().split("\\|");
+        String type = id_parts[0];
+        String name = id_parts[1];
+        String meta = id_parts[2];
+        CollectionStorage strategy = collection.storageStrategy();
+        
+        String table_name = this.getSQLTableName(collection.identifier());
+        if( !table_exists( table_name ) ){
+            try(
+                Statement stmt = _connection.createStatement();
+                    PreparedStatement insert_catalog = _connection
+                            .prepareStatement("insert into catalog(datatype,name,meta_info) values (?,?,?)");
+                    PreparedStatement select_catalog_id = _connection.prepareStatement(
+                            "select id from catalog where datatype = ? and name = ? and meta_info = ?");
+                    PreparedStatement insert_collection_info = _connection
+                            .prepareStatement("insert into collection_information(catalog_id,name,subtype) values (?,?,?)");) {                           
 
-    private boolean table_exists(String tablename) throws SQLException{
-        ResultSet rs = null;
-        try(PreparedStatement checktable = this._connection.prepareStatement("select * from " + tablename + " LIMIT 1")){
-            rs = checktable.executeQuery();
-            return true;
-        } catch(SQLException ex ){
-            return false;
-        }finally{
-            if( rs!=null) rs.close();
-        }        
+                insert_catalog.setString(1, type);
+                insert_catalog.setString(2, name);
+                insert_catalog.setString(3, meta);
+                insert_catalog.execute();
+
+                select_catalog_id.setString(1, type);
+                select_catalog_id.setString(2, name);
+                select_catalog_id.setString(3, meta);
+                ResultSet rs = select_catalog_id.executeQuery();
+                if (!rs.next()) {
+                    throw new SQLException(
+                            "unable to retrieve the catalog entry we just inserted, Collection write failed");
+                }
+
+                int catalog_id = rs.getInt(1);
+                rs.close();
+                insert_collection_info.setInt(1, catalog_id);                
+                insert_collection_info.setString(2, name);
+                insert_collection_info.setString(3, collection.subtype());
+                insert_collection_info.execute();     
+           
+
+            }catch(Exception err ){
+                throw err;
+            }
+        }
+        
+
+
+        strategy.write(this._connection,collection,"");
     }
-
 }

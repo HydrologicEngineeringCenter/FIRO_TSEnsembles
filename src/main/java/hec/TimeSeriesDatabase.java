@@ -4,6 +4,10 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.io.*;
 import java.util.List;
+
+import hec.collections.Collection;
+import hec.collections.CollectionIdentifier;
+import hec.collections.TimeSeriesCollection;
 import hec.ensemble.*;
 import hec.paireddata.*;
 import hec.timeseries.TimeSeries;
@@ -20,11 +24,14 @@ public abstract class TimeSeriesDatabase implements AutoCloseable {
     public abstract void write(EnsembleTimeSeries ets) throws Exception;	
     public abstract void write(PairedData table) throws Exception;    
     public abstract void write(TimeSeries timeseries) throws Exception;
+    public abstract void write(TimeSeriesCollection collection) throws Exception;
     public abstract List<EnsembleIdentifier> getTimeSeriesIDs();    
     public abstract List<Identifier> getTimeSeriesIDs2();
     public abstract String getVersion();
     public abstract List<String> getVersions();
 	public abstract String getUpdateScript(String from, String to);
 	public abstract TimeSeries getTimeSeries(TimeSeriesIdentifier identifier, ZonedDateTime start, ZonedDateTime end) throws Exception;		
-
+    public abstract Collection getCollection(CollectionIdentifier identifier) throws Exception;
+    public abstract Collection getCollection(CollectionIdentifier identifier, ZonedDateTime start, ZonedDateTime end ) throws Exception;
+    
 }

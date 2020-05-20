@@ -31,6 +31,10 @@ public class TimeSeriesIdentifier implements Identifier{
         return new TimeSeriesIdentifier(name, interval, duration, units);        
     }
 
+    public String name(){
+        return this.name;
+    }
+
     @Override
     public String toString()
     {
