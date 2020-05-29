@@ -6,6 +6,20 @@ CREATE TABLE IF NOT EXISTS collection_information(
   subtype text
 );
 
+--CREATE TEMPORORY TABLE catalog_backup(id integer,name text,datatype int, meta_info);
+ALTER TABLE catalog RENAME TO catalog_bak;
+CREATE TABLE IF NOT EXISTS catalog(
+  id integer not null primary key,
+  name text not null,
+  datatype int references table_types(id) not null,
+  meta_info text,
+  UNIQUE(name,datatype,meta_info)
+);
+
+INSERT into catalog SELECT id,name,datatype,meta_info FROM catalog_bak;
+DROP TABLE catalog_bak;
+
+
 CREATE TABLE IF NOT EXISTS collections(
   collection_id integer references collection_information(id),
   catalog_id integer references catalog(id),

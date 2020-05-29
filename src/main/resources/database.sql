@@ -6,7 +6,7 @@ CREATE TABLE version(
   version text not null primary key
 );
 
-INSERT INTO version(version) values ('20200409');
+INSERT INTO version(version) values ('20200507');
 
 
 CREATE TABLE IF NOT EXISTS table_types(
@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS table_types(
 
 CREATE TABLE IF NOT EXISTS catalog(
   id integer not null primary key,
-  name text,
-  datatype int references table_types(id),
+  name text not null,
+  datatype int references table_types(id) not null,
   meta_info text,
   UNIQUE(name,datatype,meta_info)
 );

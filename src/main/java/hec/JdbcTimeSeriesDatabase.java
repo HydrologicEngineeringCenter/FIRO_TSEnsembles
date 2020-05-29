@@ -154,10 +154,13 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
                     runResourceSQLScript(script);
                     updateFor20200224_to_20200227();
                     this.version = next_version;
-                } else if (next_version.equals("20200227")) {
+                } else if (next_version.equals("20200409")) {
                     runResourceSQLScript(script);
                     updateFor20200227_to_20200409();
                     this.version = next_version;
+                } else if (next_version.equals("20200507")){
+                    runResourceSQLScript(script);
+                    this.version = next_version;                    
                 }
 
             }
