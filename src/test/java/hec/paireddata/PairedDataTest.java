@@ -19,7 +19,7 @@ public class PairedDataTest {
         try (TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName,
                 JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);) {
 
-            PairedData table = new PairedData(new PairedDataIdentifier("test", "stage","flow"));
+            PairedDataSingleIndep table = new PairedDataSingleIndep(new PairedDataIdentifier("test", "stage","flow"));
             table.addRow(0, 0);
             table.addRow(.1, 1);
             table.addRow(1, 2);

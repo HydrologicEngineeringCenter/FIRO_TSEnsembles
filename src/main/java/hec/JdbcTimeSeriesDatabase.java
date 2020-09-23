@@ -541,7 +541,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
         try {
             String sql_table_table = getSQLTableName(pdIdentifier);
-            PairedData pd = new PairedData(this, pdIdentifier);
+            PairedDataSingleIndep pd = new PairedDataSingleIndep(this, pdIdentifier);
             get_table = _connection.createStatement();
             ResultSet rs = get_table.executeQuery("select indep,dep from " + sql_table_table + " order by indep asc");
             while (rs.next()) {
