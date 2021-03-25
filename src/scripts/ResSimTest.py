@@ -28,7 +28,7 @@ def initStateVariable(currentVariable, network):
 	print("hi",fileName)
 	db = JdbcTimeSeriesDatabase("C:/project/FIRO_TSEnsembles/src/test/resources/database/ResSim.db",JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE)
 	tsid = TimeSeriesIdentifier("Coyote.fake_forecast","flow")
-	reader = db.getEnsembleTimeSeriesReader(tsid)  
+	reader = db.getEnsembleTimeSeries(tsid)  
 	currentVariable.varPut("reader", reader)
 	issueDates = reader.getIssueDates()
 	currentVariable.varPut("issueDates", issueDates)
