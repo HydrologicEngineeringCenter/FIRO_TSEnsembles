@@ -22,6 +22,12 @@ These need to be in the class path.  This can be done by editing C:\Programs\HEC
 addjars C:\FIRO_TSEnsembles\libs
 
 ```
+
+sample data ResSim.db 
+https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/tree/master/src/test/resources/database
+
+need to update 
+
 where the above libs directory contains firo-tsensembles.jar  and its dependencies
 The dependencies can be downloaed 
 https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/releases/tag/v0.1
