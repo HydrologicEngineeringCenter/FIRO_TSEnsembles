@@ -26,7 +26,8 @@ addjars C:\FIRO_TSEnsembles\libs
 sample data ResSim.db 
 https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/tree/master/src/test/resources/database
 
-need to update 
+need to update path to ResSim.db in the script.
+"C:/project/FIRO_TSEnsembles/src/test/resources/database/ResSim.db"
 
 where the above libs directory contains firo-tsensembles.jar  and its dependencies
 The dependencies can be downloaed 
