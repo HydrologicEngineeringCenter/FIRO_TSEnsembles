@@ -2,6 +2,7 @@ package hec.ensemble;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import hec.stats.Computable;
 
 /**
  * an Ensemble is an array of time-series data
@@ -74,5 +75,25 @@ public class Ensemble
     public float[][] getValues() {
       return values;
     }
-
+    public float[] iterateForTracesAcrossTime(Computable cmd){
+      int size= values.length;
+      float[] rval = new float[size];
+      for (int i = 0; i <size ; i++) {
+          rval[i] = cmd.compute(values[i]);
+      }
+      return rval;
+    }
+    public float[] iterateForTimeAcrossTraces(Computable cmd){
+      int size= values[0].length;
+      float[] rval = new float[size];
+      int traces = values.length;
+      float[] tracevals = new float[traces];
+      for (int i = 0; i <size ; i++) {//this could be more efficent as a streaming compute process.. one less loop.
+        for(int j = 0; i <traces; j++){
+          tracevals[j] = values[j][i];
+        }
+        rval[i] = cmd.compute(tracevals);
+      }
+      return rval;
+    }
   }
