@@ -1,5 +1,5 @@
 package hec.stats;
 
-public interface ComputeStream{
+public interface Computable{
     public float compute(float[] values);
 }
