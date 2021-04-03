@@ -8,8 +8,8 @@ public class MinComputable implements Computable{
         int size= values.length;
         float[] rval = new float[size];
         for (int i = 0; i <size ; i++) {
-            if(returnval>values[i]){
-                returnval = values[i];
+            if(returnvalue>values[i]){
+                returnvalue = values[i];
             }
         }
         return returnvalue;
