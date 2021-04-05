@@ -35,11 +35,11 @@ public class Ensemble
     public ZonedDateTime[] startDateTime() {
 
       ZonedDateTime[] rval = new ZonedDateTime[getTimeCount()];
-      ZonedDateTime t = startDateTime;
+      ZonedDateTime t = _configuration.getStartDate();
       int size= getTimeCount();
       for (int i = 0; i <size ; i++) {
         rval[i] =t;
-        t.plus(interval);
+        t.plus(_configuration.getDuration());
       }
       return rval;
     }
@@ -57,7 +57,7 @@ public class Ensemble
     }
 
     public ZonedDateTime getStartDateTime() {
-      return _configuration.getStartDateTime();
+      return _configuration.getStartDate();
     }
 
     /**
