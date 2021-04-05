@@ -23,12 +23,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a242daac-69a6-420c-b39a-7aebdd4ea2cc" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/hec/ensemble/EnsembleConfiguration.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/hec/metrics/MetricTypes.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/hec/metrics/Metrics.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/hec/stats/Configurable.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/hec/stats/Configuration.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/hec/ensemble/Ensemble.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hec/ensemble/Ensemble.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/hec/ensemble/EnsembleConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hec/ensemble/EnsembleConfiguration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/hec/stats/Configurable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hec/stats/Configurable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/hec/stats/Configuration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/hec/stats/Configuration.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
