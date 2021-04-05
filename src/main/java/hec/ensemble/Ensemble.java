@@ -20,7 +20,7 @@ public class Ensemble
     public Ensemble(ZonedDateTime issueDate, float[][] values, ZonedDateTime startDate, Duration interval)
     {
       this.values = values;
-      this._configuration = new EnsembleConfiguration(issueDate,startDateTime,interval);
+      this._configuration = new EnsembleConfiguration(issueDate,startDate,interval);
     }
 
     public int getTimeCount(){
