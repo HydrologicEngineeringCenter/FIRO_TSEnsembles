@@ -79,7 +79,7 @@ public class Ensemble
     public float[] iterateForTracesAcrossTime(Computable cmd){
       if (cmd instanceof hec.stats.Configurable){
         EnsembleConfiguration ec = new EnsembleConfiguration(issueDate, startDateTime, interval);
-        cmd.configure(ec);
+        ((Configurable)cmd).configure(ec);
       }
       int size= values.length;
       float[] rval = new float[size];
@@ -91,7 +91,7 @@ public class Ensemble
     public float[] iterateForTimeAcrossTraces(Computable cmd){
       if (cmd instanceof hec.stats.Configurable){
         EnsembleConfiguration ec = new EnsembleConfiguration(issueDate, startDateTime, interval);
-        cmd.configure(ec);
+        ((Configurable)cmd).configure(ec);
       }
       int size= values[0].length;
       float[] rval = new float[size];
