@@ -13,22 +13,15 @@ import hec.stats.Configurable;
  */
 public class Ensemble
   {
-    private final Duration interval;
+    private final EnsembleConfiguration _configuration;
     protected EnsembleTimeSeries parent = null;
 
 
     public Ensemble(ZonedDateTime issueDate, float[][] values, ZonedDateTime startDate, Duration interval)
     {
-      this.issueDate = issueDate;
       this.values = values;
-      this.startDateTime = startDate;
-      this.interval = interval;
+      this._configuration = new EnsembleConfiguration(issueDate,startDateTime,interval);
     }
-
-
-    private ZonedDateTime issueDate;
-
-    private ZonedDateTime startDateTime;
 
     public int getTimeCount(){
       return values[0].length;
@@ -55,16 +48,16 @@ public class Ensemble
 
 
     public ZonedDateTime getIssueDate() {
-      return issueDate;
+      return _configuration.getIssueDate();
     }
 
     public Duration getInterval()
     {
-      return this.interval;
+      return _configuration.getDuration();
     }
 
     public ZonedDateTime getStartDateTime() {
-      return startDateTime;
+      return _configuration.getStartDateTime();
     }
 
     /**
@@ -78,8 +71,7 @@ public class Ensemble
     }
     public float[] iterateForTracesAcrossTime(Computable cmd){
       if (cmd instanceof hec.stats.Configurable){
-        EnsembleConfiguration ec = new EnsembleConfiguration(issueDate, startDateTime, interval);
-        ((Configurable)cmd).configure(ec);
+        ((Configurable)cmd).configure(_configuration);
       }
       int size= values.length;
       float[] rval = new float[size];
@@ -90,8 +82,7 @@ public class Ensemble
     }
     public float[] iterateForTimeAcrossTraces(Computable cmd){
       if (cmd instanceof hec.stats.Configurable){
-        EnsembleConfiguration ec = new EnsembleConfiguration(issueDate, startDateTime, interval);
-        ((Configurable)cmd).configure(ec);
+        ((Configurable)cmd).configure(_configuration);
       }
       int size= values[0].length;
       float[] rval = new float[size];
