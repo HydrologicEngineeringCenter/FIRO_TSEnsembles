@@ -3,6 +3,7 @@ package hec.ensemble;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import hec.stats.Computable;
+import hec.stats.Configurable;
 
 /**
  * an Ensemble is an array of time-series data
