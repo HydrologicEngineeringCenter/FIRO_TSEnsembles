@@ -76,6 +76,10 @@ public class Ensemble
       return values;
     }
     public float[] iterateForTracesAcrossTime(Computable cmd){
+      if (cmd instanceof hec.stats.Configurable){
+        EnsembleConfiguration ec = new EnsembleConfiguration(issueDate, startDateTime, interval);
+        cmd.configure(ec);
+      }
       int size= values.length;
       float[] rval = new float[size];
       for (int i = 0; i <size ; i++) {
@@ -84,6 +88,10 @@ public class Ensemble
       return rval;
     }
     public float[] iterateForTimeAcrossTraces(Computable cmd){
+      if (cmd instanceof hec.stats.Configurable){
+        EnsembleConfiguration ec = new EnsembleConfiguration(issueDate, startDateTime, interval);
+        cmd.configure(ec);
+      }
       int size= values[0].length;
       float[] rval = new float[size];
       int traces = values.length;
