@@ -14,8 +14,7 @@ repositories {
 dependencies {
     implementation project(":FIRO_TSEnsembles")
     implementation 'mil.army.usace.hec:hec-core:6.0-20210210.230316-12'
-    //implementation files("C:\\Temp\\hec-externalplugin\\build\\libs\\hec-externaldata-1.0.0.jar")
-    implementation 'mil.army.usace.hec:hec-externaldata:1.0.1@jar'
+    implementation 'mil.army.usace.hec:hec-externaldata:1.0.3@jar'
 }
 
 
