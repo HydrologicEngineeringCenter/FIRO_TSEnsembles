@@ -37,4 +37,12 @@
      public int getSelectedRow() {
          return selectedRow;
      }
+
+     public String getSelectedPath() {
+         int row = table.getSelectedRow();
+         String location = table.getModel().getValueAt(row, 0).toString();
+         String parameter = table.getModel().getValueAt(row, 1).toString();
+
+         return location+"/"+parameter;
+     }
  }

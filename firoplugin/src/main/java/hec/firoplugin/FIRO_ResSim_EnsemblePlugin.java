@@ -1,25 +1,30 @@
 package hec.firoplugin;
 
+import hec.JdbcTimeSeriesDatabase;
+import hec.ensemble.TimeSeriesIdentifier;
+import hec.ensemble.ui.EnsemblePicker;
 import hec.externalplugin.ExternalDataLocation;
 import hec.externalplugin.ExternalDataType;
 import hec.externalplugin.SelfRegisteringExternalDataPlugin;
 
 import javax.swing.JFileChooser;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class FIROEnsemblePlugin extends SelfRegisteringExternalDataPlugin
+public final class FIRO_ResSim_EnsemblePlugin extends SelfRegisteringExternalDataPlugin
 {
 
-    private static final FIROEnsemblePlugin PLUGIN;
+    private static final FIRO_ResSim_EnsemblePlugin PLUGIN;
     private final List<ExternalDataType> _types = new ArrayList<>();
 
     static
     {
-        PLUGIN = new FIROEnsemblePlugin();
+        PLUGIN = new FIRO_ResSim_EnsemblePlugin();
     }
 
-    private FIROEnsemblePlugin()
+    private FIRO_ResSim_EnsemblePlugin()
     {
         super();
         ExternalDataType range = new ExternalDataType();
@@ -30,7 +35,7 @@ public final class FIROEnsemblePlugin extends SelfRegisteringExternalDataPlugin
 
     }
 
-    public static FIROEnsemblePlugin getPlugin()
+    public static FIRO_ResSim_EnsemblePlugin getPlugin()
     {
         return PLUGIN;
     }
@@ -68,20 +73,40 @@ public final class FIROEnsemblePlugin extends SelfRegisteringExternalDataPlugin
         {
             file = edl.getSource();
         }
-        //TODO.  don't mix in UI code in the plugin.
         JFileChooser fileBrowser = new JFileChooser(file);
         int returnValue = fileBrowser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION)
         {
-            String source = fileBrowser.getSelectedFile().getAbsolutePath();
+            String fileName = fileBrowser.getSelectedFile().getAbsolutePath();
+            JdbcTimeSeriesDatabase db = null;
+            try {
+                db = new JdbcTimeSeriesDatabase(fileName, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return retval;
+            }
+            List<TimeSeriesIdentifier> locations = db.getTimeSeriesIDs();
+            TableModel model = getTableModel(locations);
 
-            
+            // use dialog to pick ensemble
+            EnsemblePicker picker = new EnsemblePicker(null,model);
+            picker.setVisible(true);
 
+            String path = picker.getSelectedPath();
             retval = new ExternalDataLocation();
-            retval.setSource(source);
-            retval.setDataLocation(location);
+            retval.setSource(fileName);
+            retval.setDataLocation(path);
         }
         return retval;
+    }
+    private static TableModel getTableModel(List<TimeSeriesIdentifier> locations) {
+        String[] columnNames = {"Location", "Parameter"};
+        List<String[]> values = new ArrayList<String[]>();
+
+        for (TimeSeriesIdentifier loc : locations) {
+            values.add(new String[]{loc.location, loc.parameter});
+        }
+        return new DefaultTableModel(values.toArray(new Object[][]{}), columnNames);
     }
 
     public static void main(String[] args)
