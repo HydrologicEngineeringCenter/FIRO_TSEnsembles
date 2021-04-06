@@ -1,0 +1,22 @@
+plugins {
+    id 'java-library'
+}
+version = "1.0"
+repositories {
+    // Use 'jcenter' for resolving your dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+    mavenCentral()
+    maven {
+        url = 'https://www.hec.usace.army.mil/nexus/repository/maven-public'
+    }
+}
+dependencies {
+  //implementation project(":FIRO_TSEnsembles");
+    //TO DO... make this subproject(above) when there aren't multiple active branches.
+    implementation files("../libs/FIRO_TSEnsembles.jar")
+    compile 'mil.army.usace.hec:hec-core:6.0-20210210.230316-12'
+}
+
+
+
