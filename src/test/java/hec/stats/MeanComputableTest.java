@@ -12,8 +12,8 @@ class MeanComputableTest {
         float results = test.compute(num);
         assertEquals(4.5, results);
     }
-
-    {
+    @Test
+    public void testMeanCompute2() {
         MeanComputable test = new MeanComputable();
         float[] num = {10,30,45,80,50};
         float results = test.compute(num);
