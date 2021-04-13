@@ -4,7 +4,7 @@ public class MinComputable implements Computable{
     @Override
     public float compute(float[] values){
         //calculate the min of values
-        float returnvalue = 99999999999.00f;
+        /*float returnvalue = 99999999999.00f;
         int size= values.length;
         float[] rval = new float[size];
         for (int i = 0; i <size ; i++) {
@@ -12,6 +12,7 @@ public class MinComputable implements Computable{
                 returnvalue = values[i];
             }
         }
-        return returnvalue;
+        return returnvalue;*/
+        return java.util.Arrays.sort(values)[0];
     }
 }
