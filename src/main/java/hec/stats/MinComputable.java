@@ -13,6 +13,7 @@ public class MinComputable implements Computable{
             }
         }
         return returnvalue;*/
-        return java.util.Arrays.sort(values)[0];
+        java.util.Arrays.sort(values);
+        return values[0];
     }
 }
