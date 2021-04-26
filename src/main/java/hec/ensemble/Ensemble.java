@@ -89,7 +89,7 @@ public class Ensemble
       int traces = values.length;
       float[] tracevals = new float[traces];
       for (int i = 0; i <size ; i++) {//this could be more efficent as a streaming compute process.. one less loop.
-        for(int j = 0; i <traces; j++){
+        for(int j = 0; j <traces; j++){
           tracevals[j] = values[j][i];
         }
         rval[i] = cmd.compute(tracevals);
