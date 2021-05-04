@@ -12,7 +12,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -21,9 +21,5 @@ jobs:
       with:
         java-version: '8'
         distribution: 'adopt'
-    - name: look at files.
-      run: ls -R
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew build
+      run: gradlew build
