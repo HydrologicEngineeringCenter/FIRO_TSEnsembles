@@ -55,9 +55,9 @@ class MeanComputableTest {
     private Ensemble getEnsemble() throws Exception {
         String fn = TestingPaths.instance.getTempDir() + "/importCsvToDatabase.db";
         File f = new File(fn);
-        f.delete();
-
-        DatabaseGenerator.createTestDatabase(fn, 1);
+        if(!f.exists()) {
+            DatabaseGenerator.createTestDatabase(fn, 1);
+        }
         TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
         // --- READ
         TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2", "flow");
