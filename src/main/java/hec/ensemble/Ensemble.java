@@ -3,6 +3,7 @@ package hec.ensemble;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import hec.stats.Computable;
+import hec.stats.Configurable;
 
 /**
  * an Ensemble is an array of time-series data
@@ -12,22 +13,15 @@ import hec.stats.Computable;
  */
 public class Ensemble
   {
-    private final Duration interval;
+    private final EnsembleConfiguration _configuration;
     protected EnsembleTimeSeries parent = null;
 
 
     public Ensemble(ZonedDateTime issueDate, float[][] values, ZonedDateTime startDate, Duration interval)
     {
-      this.issueDate = issueDate;
       this.values = values;
-      this.startDateTime = startDate;
-      this.interval = interval;
+      this._configuration = new EnsembleConfiguration(issueDate,startDate,interval);
     }
-
-
-    private ZonedDateTime issueDate;
-
-    private ZonedDateTime startDateTime;
 
     public int getTimeCount(){
       return values[0].length;
@@ -41,11 +35,11 @@ public class Ensemble
     public ZonedDateTime[] startDateTime() {
 
       ZonedDateTime[] rval = new ZonedDateTime[getTimeCount()];
-      ZonedDateTime t = startDateTime;
+      ZonedDateTime t = _configuration.getStartDate();
       int size= getTimeCount();
       for (int i = 0; i <size ; i++) {
         rval[i] =t;
-        t.plus(interval);
+        t.plus(_configuration.getDuration());
       }
       return rval;
     }
@@ -54,16 +48,16 @@ public class Ensemble
 
 
     public ZonedDateTime getIssueDate() {
-      return issueDate;
+      return _configuration.getIssueDate();
     }
 
     public Duration getInterval()
     {
-      return this.interval;
+      return _configuration.getDuration();
     }
 
     public ZonedDateTime getStartDateTime() {
-      return startDateTime;
+      return _configuration.getStartDate();
     }
 
     /**
@@ -76,6 +70,9 @@ public class Ensemble
       return values;
     }
     public float[] iterateForTracesAcrossTime(Computable cmd){
+      if (cmd instanceof hec.stats.Configurable){
+        ((Configurable)cmd).configure(_configuration);
+      }
       int size= values.length;
       float[] rval = new float[size];
       for (int i = 0; i <size ; i++) {
@@ -84,12 +81,15 @@ public class Ensemble
       return rval;
     }
     public float[] iterateForTimeAcrossTraces(Computable cmd){
+      if (cmd instanceof hec.stats.Configurable){
+        ((Configurable)cmd).configure(_configuration);
+      }
       int size= values[0].length;
       float[] rval = new float[size];
       int traces = values.length;
       float[] tracevals = new float[traces];
       for (int i = 0; i <size ; i++) {//this could be more efficent as a streaming compute process.. one less loop.
-        for(int j = 0; i <traces; j++){
+        for(int j = 0; j <traces; j++){
           tracevals[j] = values[j][i];
         }
         rval[i] = cmd.compute(tracevals);
