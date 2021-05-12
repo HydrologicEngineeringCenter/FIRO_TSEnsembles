@@ -23,12 +23,12 @@ jobs:
         distribution: 'adopt'
     - name: Build with Gradle
       run: cmd /r gradlew.bat build
-    - name: dir
-      run: cmd /r dir /s /b
+#    - name: dir
+#      run: cmd /r dir /s /b
     - name: Archive jars 
       uses: actions/upload-artifact@v2
       with:
-        name: upload FIRO_TSEnsembles jar
+        name: firo-artifacts
         path: |
          FIRO_TSEnsembles/build/libs
          firoplugin/build/libs
