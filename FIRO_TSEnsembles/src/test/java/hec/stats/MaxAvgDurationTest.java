@@ -7,24 +7,29 @@ import hec.ensemble.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+
 class MaxAvgDurationTest {
     @Test
     public void testMaxAvgDurationSimpleArray() {
-        Computable test = new MaxAvgDuration(2);
+        MaxAvgDuration test = new MaxAvgDuration(3);
         float[] num = {1,2,3,4,5,6,7,8};
+        test.configure(new EnsembleConfiguration(null, null, Duration.ofHours(3)));
 
         float results = test.compute(num);
-        assertEquals(7.5, results);
+        assertEquals(21, results);
     }
     @Test
     public void testMaxAvgDurationSimpleArrayTens() {
         Computable test = new MaxAvgDuration(4);
+        Configurable c = (Configurable) test;
+        c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1)));
         float[] num = {10,30,45,80,50};
         float results = test.compute(num);
         assertEquals(51.25, results);
