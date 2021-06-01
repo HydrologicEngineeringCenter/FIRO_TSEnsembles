@@ -38,7 +38,7 @@ class PercentileDurationTest {
     }
     @Test
     public void testPercentileHighestSimpleArray() {
-        PercentilesComputable test = new PercentilesComputable(.01);
+        PercentilesComputable test = new PercentilesComputable(.125);
         float[] num = {1,2,3,4,5,6,7,8};
         float results = test.compute(num);
         assertEquals(8, results);
@@ -60,10 +60,10 @@ class PercentileDurationTest {
     }
 
     @Test
-    public void testPercentileWithEnsembleTimeAcrossTraces() {
+    public void testPercentileWithEnsembleTimeAcrossTracesLow() {
         try {
             Ensemble e = getEnsemble();
-            Computable test = new PercentilesComputable(.05);
+            Computable test = new PercentilesComputable(0.05);
             float[] output = e.iterateForTimeAcrossTraces(test);
             assertEquals(1.1300690174102783, output[3]);
         } catch (Exception e) {
@@ -72,12 +72,36 @@ class PercentileDurationTest {
         }
     }
     @Test
-    public void testPercentileWithEnsembleTracesAcrossTime() {
+    public void testPercentileWithEnsembleTimeAcrossTracesHigh() {
         try {
             Ensemble e = getEnsemble();
-            Computable test = new MaxAvgDuration(2);
+            Computable test = new PercentilesComputable(0.95);
+            float[] output = e.iterateForTimeAcrossTraces(test);
+            assertEquals(0.953000009059906, output[3]);
+        } catch (Exception e) {
+            Logger.logError(e);
+            fail();
+        }
+    }
+    @Test
+    public void testPercentileWithEnsembleTracesAcrossTimeLow() {
+        try {
+            Ensemble e = getEnsemble();
+            Computable test = new PercentilesComputable(0.05);
             float[] output = e.iterateForTracesAcrossTime(test);
-            assertEquals(11.124134063720703, output[3]);
+            assertEquals(6.473178386688232, output[3]);
+        } catch (Exception e) {
+            Logger.logError(e);
+            fail();
+        }
+    }
+    @Test
+    public void testPercentileWithEnsembleTracesAcrossTimeHigh() {
+        try {
+            Ensemble e = getEnsemble();
+            Computable test = new PercentilesComputable(0.95);
+            float[] output = e.iterateForTracesAcrossTime(test);
+            assertEquals(0.6000000238418579, output[3]);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
