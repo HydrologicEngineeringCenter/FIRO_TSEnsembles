@@ -1,5 +1,7 @@
 package hec.stats;
 
+import java.util.Arrays;
+
 public class PercentilesComputable implements Computable {
     Double _percentile; //percentile in decimal
 
@@ -17,49 +19,28 @@ public class PercentilesComputable implements Computable {
         if (this._percentile > 1.0) {
             throw new ArithmeticException("Percentile must be less than equal to 1");
         }
-        if (this._percentile <= 0) {
-            throw new ArithmeticException("Percentile must be greater than 0");
+        if (this._percentile < 0) {
+            throw new ArithmeticException("Percentile must be greater than or equal to 0");
         }
-        //sorts array descending
-        for (int i = 0; i < values.length; i++) {
-            for (int j = i + 1; j < values.length; j++) {
-                if (values[i] < values[j]) {
-                    float tmp = values[i];
-                    values[i] = values[j];
-                    values[j] = tmp;
-                }
-            }
+        //sorts array
+        Arrays.sort(values);
+
+        if (this._percentile == 0) {
+            return values[0];
         }
-        //creates an array of probabilities - index position / n
-        int indexPosition = 0;
-        float result = 0;
-        float[] exceedances = new float[values.length];
-        for (int i = 0; i < values.length; i++) {
-            exceedances[i] = ((float) i + 1) / values.length;
+        if (this._percentile == 1.0) {
+            return values[values.length-1];
         }
 
-        //searches for the index position in the exceedance array to create two points for a line
-        for (int i = 0; i < exceedances.length; i++) {
-            if (this._percentile < exceedances[0]) {
-                throw new ArithmeticException("Percentile beyond available exceedance range.  Increase percentile or add more values to input");
-            }
-            if (exceedances[i] > this._percentile) {
-                indexPosition = i;
-                float x1 = exceedances[indexPosition - 1];
-                float x2 = exceedances[indexPosition];
-                float y1 = values[indexPosition -1];
-                float y2 = values[indexPosition];
-                result = linInterp(x1, x2, y1, y2);
-                break;
-            }
-            if (exceedances[0] == this._percentile) {
-                return values[0];
-            }
-            if (exceedances[exceedances.length-1] == this._percentile) {
-                return values[values.length-1];
-            }
+        int startIndex = (int) (this._percentile * (values.length-1));
+        int endIndex = startIndex + 1;
 
-        }
+        float x1 = (float) (startIndex) / (values.length - 1);
+        float x2 = (float) (endIndex) / (values.length -1);
+        float y1 = values[startIndex];
+        float y2 = values[endIndex];
+        float result = linInterp(x1, x2, y1, y2);
+
         return result;
     }
 
