@@ -19,7 +19,10 @@ The firo-tsensembles.jar has the following dependencies:
 jdbc-api-1.4.jar
 sqlite-jdbc-3.30.1.jar
 
-These need to be in the class path.  This can be done by editing C:\Programs\HEC-ResSim-3.5.0.116\HEC-ResSim.config.
+copy these jars to  HEC-ResSim\jar\ext
+
+
+The hard way is to put these in the class path.  This can be done by editing C:\Programs\HEC-ResSim-3.5.0.116\HEC-ResSim.config.
 (example location)
 ```
 addjars C:\FIRO_TSEnsembles\libs
