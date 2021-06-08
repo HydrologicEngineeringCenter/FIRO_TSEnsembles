@@ -7,7 +7,10 @@ This is a project intended to develop a set of tools to read in data from the Ri
 
 Download the latest Build here: 
 
- https://ci.appveyor.com/project/ktarbet/firo-tsensembles/build/artifacts
+https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/actions/workflows/gradle.yml
+
+alternate location
+https://ci.appveyor.com/project/ktarbet/firo-tsensembles/build/artifacts
 
 
 ## ResSim Setup
@@ -24,7 +27,8 @@ addjars C:\FIRO_TSEnsembles\libs
 ```
 
 sample data ResSim.db 
-https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/tree/master/src/test/resources/database
+https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/tree/master/FIRO_TSEnsembles/src/test/resources/database
+
 
 need to update path to ResSim.db in the script.
 "C:/project/FIRO_TSEnsembles/src/test/resources/database/ResSim.db"
