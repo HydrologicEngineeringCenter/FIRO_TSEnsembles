@@ -14,56 +14,60 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-class PercentileDurationTest {
+class PercentileTest {
     @Test
     public void testPercentileExactSimpleArray() {
-        PercentilesComputable test = new PercentilesComputable(1.0);
+        Computable test = new PercentilesComputable(1.0f);
         float[] num = {1,2,3,4,5,6,7,8};
-        float results = test.compute(num);
-        assertEquals(8, results);
+        assertEquals(8, test.compute(num));
     }
+
+    @Test
+    public void testPercentileExactTwoValuesSimpleArray() {
+        PercentilesComputable test = new PercentilesComputable(new float[] {1.0f, 0.0f});
+        float[] num = {1,2,3,4,5,6,7,8};
+        Double[] results = test.computeMulti(num);
+        assertEquals(8, results[0]);
+        assertEquals(1, results[1]);
+    }
+
     @Test
     public void testPercentileInterpolateSimpleArray() {
-        PercentilesComputable test = new PercentilesComputable(.30);
+        Computable test = new PercentilesComputable(.30f);
         float[] num = {1,2,3,4,5,6,7,8};
-        float results = test.compute(num);
-        assertEquals(3.0999999046325684, results);
+        assertEquals(3.0999999046325684, test.compute(num));
     }
     @Test
     public void testPercentileLowestSimpleArray() {
-        PercentilesComputable test = new PercentilesComputable(0.0);
+        Computable test = new PercentilesComputable(0.0f);
         float[] num = {1,2,3,4,5,6,7,8};
-        float results = test.compute(num);
-        assertEquals(1, results);
+        assertEquals(1, test.compute(num));
     }
     @Test
     public void testPercentileHighestSimpleArray() {
-        PercentilesComputable test = new PercentilesComputable(.125);
+        Computable test = new PercentilesComputable(.125f);
         float[] num = {1,2,3,4,5,6,7,8};
-        float results = test.compute(num);
-        assertEquals(1.875, results);
+        assertEquals(1.875, test.compute(num));
     }
     @Test
     public void testPercentileExactSimpleArrayTens() {
-        PercentilesComputable test = new PercentilesComputable(.4);
+        Computable test = new PercentilesComputable(.4f);
         float[] num = {10,30,45,80,50};
-        float results = test.compute(num);
-        assertEquals(39, results);
+        assertEquals(39, test.compute(num));
     }
 
     @Test
     public void testPercentileInterpolateSimpleArrayTens() {
-        PercentilesComputable test = new PercentilesComputable(.5);
+        Computable test = new PercentilesComputable(.5f);
         float[] num = {10,30,45,80,50};
-        float results = test.compute(num);
-        assertEquals(45, results);
+        assertEquals(45, test.compute(num));
     }
 
     @Test
     public void testPercentileWithEnsembleTimeAcrossTracesLow() {
         try {
             Ensemble e = getEnsemble();
-            Computable test = new PercentilesComputable(0.05);
+            Computable test = new PercentilesComputable(0.05f);
             float[] output = e.iterateForTimeAcrossTraces(test);
             assertEquals(0.953000009059906, output[3]);
         } catch (Exception e) {
@@ -75,7 +79,7 @@ class PercentileDurationTest {
     public void testPercentileWithEnsembleTimeAcrossTracesHigh() {
         try {
             Ensemble e = getEnsemble();
-            Computable test = new PercentilesComputable(0.95);
+            Computable test = new PercentilesComputable(0.95f);
             float[] output = e.iterateForTimeAcrossTraces(test);
             assertEquals(1.1300690174102783, output[3]);
         } catch (Exception e) {
@@ -87,7 +91,7 @@ class PercentileDurationTest {
     public void testPercentileWithEnsembleTracesAcrossTimeLow() {
         try {
             Ensemble e = getEnsemble();
-            Computable test = new PercentilesComputable(0.05);
+            Computable test = new PercentilesComputable(0.05f);
             float[] output = e.iterateForTracesAcrossTime(test);
             assertEquals(0.6000000238418579, output[3]);
         } catch (Exception e) {
@@ -99,9 +103,9 @@ class PercentileDurationTest {
     public void testPercentileWithEnsembleTracesAcrossTimeHigh() {
         try {
             Ensemble e = getEnsemble();
-            Computable test = new PercentilesComputable(0.95);
+            Computable test = new PercentilesComputable(0.95f);
             float[] output = e.iterateForTracesAcrossTime(test);
-            assertEquals(6.208317279815674, output[3]);
+            assertEquals(6.208315849304199, output[3]);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
