@@ -23,14 +23,6 @@ public class PercentilesComputable implements Computable {
         return computePercentile(values, _percentiles[0]);
     }
 
-    private float linInterp(float x1, float x2, float y1, float y2, float p) {
-        //linear interpolation to estimate the value given the exceedance
-
-        double slp = (y2 - y1) / (x2 - x1);
-        double interpValue = slp * (p -x1) + y1;
-        return (float) interpValue;
-    }
-
     public Double[] computeMulti(float[] values) {
         int size = this._percentiles.length;
         Double[] result = new Double[size];
@@ -55,10 +47,10 @@ public class PercentilesComputable implements Computable {
         Arrays.sort(values);
 
         if (p == 0) {
-            return (float) values[0];
+            return values[0];
         } else {
             if (p == 1.0) {
-                return (float) values[values.length - 1];
+                return values[values.length - 1];
             } else {
                 int startIndex = (int) (p * (values.length-1));
                 int endIndex = startIndex + 1;
@@ -71,5 +63,12 @@ public class PercentilesComputable implements Computable {
                 return val;
             }
         }
+    }
+    private float linInterp(float x1, float x2, float y1, float y2, float p) {
+        //linear interpolation to estimate the value given the exceedance
+
+        double slp = (y2 - y1) / (x2 - x1);
+        double interpValue = slp * (p -x1) + y1;
+        return (float) interpValue;
     }
 }
