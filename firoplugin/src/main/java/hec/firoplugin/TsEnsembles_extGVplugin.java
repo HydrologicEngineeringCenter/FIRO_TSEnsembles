@@ -33,7 +33,7 @@ public final class TsEnsembles_extGVplugin extends SelfRegisteringExternalDataPl
         ExternalDataType range = new ExternalDataType();
         range.setPluginName(getName());
         range.setSourceType(getSupportedSourceType());
-        range.setDataType("sqlite");
+        range.setDataType("tsEnsemble");
         _types.add(range);
 
     }
@@ -58,7 +58,7 @@ public final class TsEnsembles_extGVplugin extends SelfRegisteringExternalDataPl
     @Override
     public String getSupportedSourceType()
     {
-        return "ensemble";
+        return "sqlite";
     }
 
     @Override
