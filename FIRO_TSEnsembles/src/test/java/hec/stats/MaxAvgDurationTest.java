@@ -38,7 +38,7 @@ class MaxAvgDurationTest {
     public void testMaxAvgDurationWithEnsembleTimeAcrossTraces() {
         double start = System.currentTimeMillis();
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable test = new MaxAvgDuration(2);
             float[] output = e.iterateForTimeAcrossTraces(test);
             assertEquals(1.041534423828125, output[3]);
@@ -52,7 +52,7 @@ class MaxAvgDurationTest {
     @Test
     public void testMaxAvgDurationWithEnsembleTracesAcrossTime() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable test = new MaxAvgDuration(2);
             float[] output = e.iterateForTracesAcrossTime(test);
             assertEquals(11.124134063720703, output[3]);
@@ -62,17 +62,4 @@ class MaxAvgDurationTest {
         }
     }
 
-    private Ensemble getEnsemble() throws Exception {
-        String fn = TestingPaths.instance.getTempDir() + "/importCsvToDatabase.db";
-        File f = new File(fn);
-        if(!f.exists()) {
-            DatabaseGenerator.createTestDatabase(fn, 1);
-        }
-        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
-        // --- READ
-        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2", "flow");
-        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
-        List<ZonedDateTime> issueDates = ets.getIssueDates();
-        return db.getEnsemble(tsid, issueDates.get(0));
-    }
 }
