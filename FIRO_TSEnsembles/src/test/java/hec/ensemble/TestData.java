@@ -23,10 +23,13 @@ public class TestData {
     }
 
     public static Ensemble getSampleEnsemble() {
+     return getSampleEnsemble("Kanektok.SCRN2", "flow");
+    }
+    public static Ensemble getSampleEnsemble(String location, String parameter) {
         if(s_db == null)
             s_db = getDatabase();
 
-        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2", "flow");
+        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier(location,parameter);
         EnsembleTimeSeries ets = s_db.getEnsembleTimeSeries(tsid);
         List<ZonedDateTime> issueDates = ets.getIssueDates();
         return s_db.getEnsemble(tsid, issueDates.get(0));
