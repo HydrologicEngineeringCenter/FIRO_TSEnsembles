@@ -4,9 +4,6 @@ plugins {
 version = "1.0.1"
 
 repositories {
-    maven {
-        url "https://www.hec.usace.army.mil/nexus/repository/maven-public/"
-    }
     mavenCentral()
 }
 
