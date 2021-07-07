@@ -13,29 +13,32 @@ import javax.swing.table.TableModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class FIRO_ResSim_EnsemblePlugin extends SelfRegisteringExternalDataPlugin
+/**
+ *  Plugin that can be used with ResSim Global Variables to access time series of ensemble data
+ */
+public final class TsEnsembles_extGVplugin extends SelfRegisteringExternalDataPlugin
 {
 
-    private static final FIRO_ResSim_EnsemblePlugin PLUGIN;
+    private static final TsEnsembles_extGVplugin PLUGIN;
     private final List<ExternalDataType> _types = new ArrayList<>();
 
     static
     {
-        PLUGIN = new FIRO_ResSim_EnsemblePlugin();
+        PLUGIN = new TsEnsembles_extGVplugin();
     }
 
-    private FIRO_ResSim_EnsemblePlugin()
+    private TsEnsembles_extGVplugin()
     {
         super();
         ExternalDataType range = new ExternalDataType();
         range.setPluginName(getName());
         range.setSourceType(getSupportedSourceType());
-        range.setDataType("Range");
+        range.setDataType("tsEnsemble");
         _types.add(range);
 
     }
 
-    public static FIRO_ResSim_EnsemblePlugin getPlugin()
+    public static TsEnsembles_extGVplugin getPlugin()
     {
         return PLUGIN;
     }
@@ -43,19 +46,19 @@ public final class FIRO_ResSim_EnsemblePlugin extends SelfRegisteringExternalDat
     @Override
     public String getName()
     {
-        return "FIRO Ensemble Plugin";
+        return "Ensemble Global Variable Plugin";
     }
 
     @Override
     public String getDescription()
     {
-        return "supports reading time series ensemble data";
+        return "Reads time series ensemble data from a local database";
     }
 
     @Override
     public String getSupportedSourceType()
     {
-        return "FIROEnsemblePlugin";
+        return "sqlite";
     }
 
     @Override

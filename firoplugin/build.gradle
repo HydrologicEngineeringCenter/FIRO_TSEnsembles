@@ -11,6 +11,14 @@ repositories {
         url = 'https://www.hec.usace.army.mil/nexus/repository/maven-public'
     }
 }
+
+jar {
+    manifest {
+        attributes('MainClass': 'hec.firoplugin.TsEnsembles_extGVplugin',
+                'ServerMainClass': 'hec.firoplugin.TsEnsembles_extGVplugin',
+                'Implementation-Version': project.version)
+    }
+}
 dependencies {
     implementation project(":FIRO_TSEnsembles")
     implementation 'mil.army.usace.hec:hec-core:6.0-20210210.230316-12'

@@ -23,7 +23,7 @@
          table.getSelectionModel().addListSelectionListener(event -> tableChanged(event));
 
          JButton button = new JButton();
-         button.setText("OK");
+         button.setText("Select");
          add(button);
          button.addActionListener(event -> dispose());
           pack();
