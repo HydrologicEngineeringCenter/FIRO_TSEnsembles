@@ -1,0 +1,3 @@
+rootProject.name = 'firo'
+include(':FIRO_TSEnsembles')
+include(':firoplugin')
