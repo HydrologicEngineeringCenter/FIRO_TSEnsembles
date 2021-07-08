@@ -1,7 +1,8 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
-version = "1.0.1"
+version = "0.0.1"
 
 repositories {
     maven {
@@ -23,8 +24,6 @@ test {
     jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
 }
 
-build {finalizedBy javadoc }
-
 
 task runApp(type: JavaExec) {
     main = 'hec.ensemble.EnsembleUtility'
@@ -39,3 +38,44 @@ task runEnsembleMetrics(type: JavaExec) {
     jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
     args = ["c:/temp/hefs_cache", "100","10","C:/temp/ResSim.db"]
 }
+
+publishing{
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles"
+            credentials {
+                username = "Brennan1994"
+                password = "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"
+            }
+        }
+    }
+    publications{
+        gpr(MavenPublication) {
+            from (components.java)
+            versionMapping{
+                usage('java-api'){
+                    fromResolutionOf('runtimeClassPath')
+                }
+                usage('java-runtime'){
+                    fromResolutionResult()
+                }
+            }
+        }
+    }
+}
+
+task defaultProperties {
+    println " User Home:"
+    println "Project: $project"
+    println "Name: $name"
+    println "Path: $path"
+    println "Project directory: $projectDir"
+    println "Build directory: $buildDir"
+    println "Version: $version"
+    println "Group: $project.group"
+    println "Description: $project.description"
+}
+
+
+

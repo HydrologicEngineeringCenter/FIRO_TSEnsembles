@@ -1,10 +1,9 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
-version = "1.0"
+version = "0.0.2"
 repositories {
-    // Use 'jcenter' for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
     mavenCentral()
     maven {
@@ -17,5 +16,29 @@ dependencies {
     implementation 'mil.army.usace.hec:hec-externaldata:1.0.3@jar'
 }
 
-
+publishing{
+    repositories {
+        maven {
+            name = "GitHubPackagesTSEnsembleRepo"
+            url = "https://maven.pkg.github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles"
+            credentials {
+                username = "Brennan1994"
+                password = "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"
+            }
+        }
+    }
+    publications{
+        gpr(MavenPublication) {
+            from (components.java)
+            versionMapping{
+                usage('java-api'){
+                    fromResolutionOf('runtimeClassPath')
+                }
+                usage('java-runtime'){
+                    fromResolutionResult()
+                }
+            }
+        }
+    }
+}
 
