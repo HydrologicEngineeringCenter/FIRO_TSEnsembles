@@ -15,24 +15,24 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class MultiStatComputableTest {
     @Test
-    public void testMultiStatComputeSimpleArray() {
+    public void testMultiStatComputeSimpleArrayMin() {
         Computable test = new MultiStatComputable().createCalculation(MultiStat.MIN);
         float[] num = {1,2,3,4,5,6,7,8};
         float results = test.compute(num);
         assertEquals(1, results);
     }
     @Test
-    public void testMinComputeSimpleArrayTens() {
+    public void testMultiStatComputeSimpleArrayTensMedian() {
         Computable test = new MultiStatComputable().createCalculation(MultiStat.MEDIAN);
         float[] num = {10,30,45,80,50};
         float results = test.compute(num);
         assertEquals(45, results);
     }
     @Test
-    public void testMinWithEnsembleTimeAcrossTraces() {
+    public void testMultiStatWithEnsembleTimeAcrossTracesMin() {
         try {
-            Ensemble e = getEnsemble();
-            Computable test = new MinComputable();
+            Ensemble e = TestData.getSampleEnsemble();
+            Computable test = new MultiStatComputable().createCalculation(MultiStat.MIN);
             float[] output = e.iterateForTimeAcrossTraces(test);
             assertEquals(0.953000009059906, output[3]);
         } catch (Exception e) {
@@ -41,10 +41,10 @@ class MultiStatComputableTest {
         }
     }
     @Test
-    public void testMinWithEnsembleTracesAcrossTime() {
+    public void testMultiStatWithEnsembleTracesAcrossTimeMin() {
         try {
-            Ensemble e = getEnsemble();
-            Computable test = new MinComputable();
+            Ensemble e = TestData.getSampleEnsemble();
+            Computable test = new MultiStatComputable().createCalculation(MultiStat.MIN);
             float[] output = e.iterateForTracesAcrossTime(test);
             assertEquals(-4000, output[3]);
         } catch (Exception e) {
@@ -52,19 +52,4 @@ class MultiStatComputableTest {
             fail();
         }
     }
-
-    private Ensemble getEnsemble() throws Exception {
-        String fn = TestingPaths.instance.getTempDir() + "/importCsvToDatabase.db";
-        File f = new File(fn);
-        if(!f.exists()) {
-            DatabaseGenerator.createTestDatabase(fn, 1);
-        }
-        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
-        // --- READ
-        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2", "flow");
-        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
-        List<ZonedDateTime> issueDates = ets.getIssueDates();
-        return db.getEnsemble(tsid, issueDates.get(0));
-    }
-
 }
