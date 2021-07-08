@@ -66,15 +66,46 @@ class PercentileTest {
     public void testPercentileExactTwoValuesSimpleArray() {
         PercentilesComputable test = new PercentilesComputable(new float[] {1.0f, 0.0f});
         float[] num = {1,2,3,4,5,6,7,8};
-        Double[] results = test.computeMulti(num);
+        float[] results = test.MultiCompute(num);
         assertEquals(8, results[0]);
         assertEquals(1, results[1]);
     }
 
     @Test
+    public void testPercentileWithEnsembleTwoValuesEnsemble() {
+        try {
+            Ensemble e = TestData.getSampleEnsemble();
+            MultiComputable test = new PercentilesComputable(new float[] {.05f, .95f});
+            float[][] output = e.multiComputeForTracesAcrossTime(test);
+            float[] value1 = output[3];
+            assertEquals(2, value1.length);
+            assertEquals(0.6000000238418579, value1[0]);
+            assertEquals(6.208315849304199, value1[1]);
+        } catch (Exception e) {
+            Logger.logError(e);
+            fail();
+        }
+    }
+
+    @Test
+    public void testPercentileWithEnsembleThreeValuesEnsemble() {
+        try {
+            Ensemble e = TestData.getSampleEnsemble();
+            MultiComputable test = new PercentilesComputable(new float[] {.05f, .5f, .95f});
+            float[][] output = e.multiComputeForTracesAcrossTime(test);
+            float[] value1 = output[3];
+            assertEquals(0.6000000238418579, value1[0]);
+            assertEquals(0.8479999899864197, value1[1]);
+            assertEquals(6.208315849304199, value1[2]);
+        } catch (Exception e) {
+            Logger.logError(e);
+            fail();
+        }
+    }
+    @Test
     public void testPercentileWithEnsembleTimeAcrossTracesLow() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable test = new PercentilesComputable(0.05f);
             float[] output = e.iterateForTimeAcrossTraces(test);
             assertEquals(0.953000009059906, output[3]);
@@ -86,7 +117,7 @@ class PercentileTest {
     @Test
     public void testPercentileWithEnsembleTimeAcrossTracesHigh() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable test = new PercentilesComputable(0.95f);
             float[] output = e.iterateForTimeAcrossTraces(test);
             assertEquals(1.1300690174102783, output[3]);
@@ -98,7 +129,7 @@ class PercentileTest {
     @Test
     public void testPercentileWithEnsembleTracesAcrossTimeLow() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable test = new PercentilesComputable(0.05f);
             float[] output = e.iterateForTracesAcrossTime(test);
             assertEquals(0.6000000238418579, output[3]);
@@ -110,7 +141,7 @@ class PercentileTest {
     @Test
     public void testPercentileWithEnsembleTracesAcrossTimeHigh() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable test = new PercentilesComputable(0.95f);
             float[] output = e.iterateForTracesAcrossTime(test);
             assertEquals(6.208315849304199, output[3]);
@@ -118,19 +149,5 @@ class PercentileTest {
             Logger.logError(e);
             fail();
         }
-    }
-
-    private Ensemble getEnsemble() throws Exception {
-        String fn = TestingPaths.instance.getTempDir() + "/importCsvToDatabase.db";
-        File f = new File(fn);
-        if(!f.exists()) {
-            DatabaseGenerator.createTestDatabase(fn, 1);
-        }
-        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
-        // --- READ
-        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2", "flow");
-        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
-        List<ZonedDateTime> issueDates = ets.getIssueDates();
-        return db.getEnsemble(tsid, issueDates.get(0));
     }
 }
