@@ -1,8 +1,6 @@
 # FIRO_TSEnsembles
 
-[![Build status](https://ci.appveyor.com/api/projects/status/kbb4m4pn5pe7bo37?svg=true)](https://ci.appveyor.com/project/ktarbet/firo-tsensembles)
-
-![GitHub Action](https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/actions/workflows/gradle.yml/badge.svg)
+[![GitHub Action](https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/actions/workflows/gradle.yml/badge.svg)](https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/actions/workflows/gradle.yml)
 
 
 This is a project intended to develop a set of tools to read in data from the River Forecast Centers and convert it into a sqlite database. This database will be used as a format to share data on disk between plugins in HEC-WAT and possibly CWMS.
@@ -12,37 +10,38 @@ Download the latest Build here:
 
 https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/actions/workflows/gradle.yml
 
-alternate location
-https://ci.appveyor.com/project/ktarbet/firo-tsensembles/build/artifacts
+
+## Standalone ResSim Setup
+
+Download the zip file [here](https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/releases/download/beta-0.1/beta-0.1-FIRO_TSEnsembles.zip)
+
+unzip and copy the jars to  HEC-ResSim\jar\ext
+
+Edit Hec-ResSim.config setting HasGlobalVariables to true and temp directory for SQLite as shown below.
+
+```
+#:------------------------------------------------------:
+#:Set the following parameter to "true" to turn on      :
+#:Global Variables                                      :
+#:------------------------------------------------------:
+vmparam -DHasGlobalVariables=true
+
+vmparam -Dorg.sqlite.tmpdir=c:\temp
+```
 
 
-## ResSim Setup
-
-The firo-tsensembles.jar has the following dependencies:
-jdbc-api-1.4.jar
-sqlite-jdbc-3.30.1.jar
-
-copy these jars to  HEC-ResSim\jar\ext
-
-
-The hard way is to put these in the class path.  This can be done by editing C:\Programs\HEC-ResSim-3.5.0.116\HEC-ResSim.config.
+Another way is to put these in the class path.   If multiple programs are using the Jars such as both HEC-WAT and HEC-ResSim the jars can be placed in a shared location.
+This can be done by editing C:\Programs\HEC-ResSim-3.5.0.116\HEC-ResSim.config.
 (example location)
 ```
 addjars C:\FIRO_TSEnsembles\libs
 
 ```
 
+## Sample Data
+
 sample data ResSim.db 
 https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/tree/master/FIRO_TSEnsembles/src/test/resources/database
-
-
-need to update path to ResSim.db in the script.
-"C:/project/FIRO_TSEnsembles/src/test/resources/database/ResSim.db"
-
-where the above libs directory contains firo-tsensembles.jar  and its dependencies
-The dependencies can be downloaed 
-https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/releases/tag/v0.1
-
 
 
 ## Issue
