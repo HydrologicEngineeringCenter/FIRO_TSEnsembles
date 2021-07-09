@@ -45,10 +45,11 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
      * @param ensemble  data values
      * @param startDate startingDate for this ensemble.
      * @param interval time-step (Duration) between values
+     * @param units  units of this ensemble
      */
-    public void addEnsemble(ZonedDateTime issueDate, float[][] ensemble, ZonedDateTime startDate, Duration interval)
+    public void addEnsemble(ZonedDateTime issueDate, float[][] ensemble, ZonedDateTime startDate, Duration interval, String units)
     {
-      Ensemble e = new Ensemble(issueDate,ensemble,startDate, interval);
+      Ensemble e = new Ensemble(issueDate,ensemble,startDate, interval, units);
       addEnsemble(e);
     }
     /**

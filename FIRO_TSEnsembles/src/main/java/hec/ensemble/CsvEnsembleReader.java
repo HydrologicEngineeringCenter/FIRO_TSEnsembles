@@ -98,11 +98,12 @@ public class CsvEnsembleReader {
                     }
                     else {
                         TimeSeriesIdentifier tsid= new TimeSeriesIdentifier(watershedName+"."+locName,"flow");
-                        ets = new EnsembleTimeSeries(tsid, "","",csv.FileName);
+                        // TODO  confirm units.
+                        ets = new EnsembleTimeSeries(tsid, "kcfs","",csv.FileName);
                         locationMap.put(locName, ets);
                     }
 
-                    ets.addEnsemble(t,csv.getEnsemble(locName),t1,csv.getInterval());
+                    ets.addEnsemble(t,csv.getEnsemble(locName),t1,csv.getInterval(),ets.getUnits());
                 }
             }
             t = t.plusDays(1);

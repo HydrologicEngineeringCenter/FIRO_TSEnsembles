@@ -318,12 +318,13 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         int member_length = rs.getInt("member_length");
         int member_count = rs.getInt("member_count");
         String compression = rs.getString("compression");
+        String units = rs.getString("units");
         int interval_seconds = rs.getInt("interval_seconds");
         byte[] byte_value_array = rs.getBytes("byte_value_array");
 
         float[][] values = EnsembleCompression.UnPack(byte_value_array, member_count, member_length, compression);
 
-        return new Ensemble(issue_date, values, start_date, Duration.ofSeconds(interval_seconds));
+        return new Ensemble(issue_date, values, start_date, Duration.ofSeconds(interval_seconds),units);
     }
 
     private PreparedStatement ps_insertEnsembleCollection;
