@@ -19,6 +19,7 @@ unzip and copy the jars to  HEC-ResSim\jar\ext
 
 Edit Hec-ResSim.config setting HasGlobalVariables to true and temp directory for SQLite as shown below.
 
+```
 #:------------------------------------------------------:
 #:Set the following parameter to "true" to turn on      :
 #:Global Variables                                      :
@@ -26,7 +27,7 @@ Edit Hec-ResSim.config setting HasGlobalVariables to true and temp directory for
 vmparam -DHasGlobalVariables=true
 
 vmparam -Dorg.sqlite.tmpdir=c:\temp
-
+```
 
 
 Another way is to put these in the class path.   If multiple programs are using the Jars such as both HEC-WAT and HEC-ResSim the jars can be placed in a shared location.
