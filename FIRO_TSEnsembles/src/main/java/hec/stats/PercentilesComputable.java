@@ -2,7 +2,7 @@ package hec.stats;
 
 import java.util.Arrays;
 
-public class PercentilesComputable implements Computable {
+public class PercentilesComputable implements Computable, MultiComputable {
     private float[] _percentiles;
 
     /**
@@ -14,27 +14,34 @@ public class PercentilesComputable implements Computable {
         this._percentiles = new float[] {percentile};
     }
 
-    public PercentilesComputable(float[] floats) {
-        this._percentiles = floats;
+    public PercentilesComputable(float[] percentiles) {
+        this._percentiles = percentiles;
     }
 
     @Override
     public float compute(float[] values) {
+        Arrays.sort(values);
         return computePercentile(values, _percentiles[0]);
     }
 
-    public Double[] computeMulti(float[] values) {
+    @Override
+    public float[] MultiCompute(float[] values) {
         int size = this._percentiles.length;
-        Double[] result = new Double[size];
+        float[] result = new float[size];
         int i = 0;
+        Arrays.sort(values);
 
         for (float p: this._percentiles) {
-            result[i] = Double.valueOf(computePercentile(values, p));
+            result[i] = Float.valueOf(computePercentile(values, p));
             i++;
         }
-
         return result;
     }
+    /**
+     * computePercentile must be sorted.
+     * @param values must be sorted
+     * @param p is the percentile value
+     */
 
     private float computePercentile(float[] values, float p) {
         if (p > 1.0) {
@@ -44,7 +51,7 @@ public class PercentilesComputable implements Computable {
             throw new ArithmeticException("Percentile must be greater than or equal to 0");
         }
         //sorts array
-        Arrays.sort(values);
+        //Arrays.sort(values);
 
         if (p == 0) {
             return values[0];
