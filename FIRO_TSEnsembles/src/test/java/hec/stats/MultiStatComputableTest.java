@@ -8,45 +8,41 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
+import static hec.stats.MultiStat.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class MultiStatComputableTest {
+
     @Test
     public void testMultiStatComputeSimpleArrayMin() {
-        Computable test = new MultiStatComputable().createCalculation(MultiStat.MIN);
+        MultiComputable test = new MultiStatComputable(new String[] {"MIN", "MEDIAN"});
         float[] num = {1,2,3,4,5,6,7,8};
-        float results = test.compute(num);
-        assertEquals(1, results);
+        float[] results = test.MultiCompute(num);
+        assertEquals(1, results[0]);
+        assertEquals(4.5, results[1]);
+
     }
     @Test
     public void testMultiStatComputeSimpleArrayTensMedian() {
-        Computable test = new MultiStatComputable().createCalculation(MultiStat.MEDIAN);
+        MultiComputable test = new MultiStatComputable(new String[] {"MIN"});
         float[] num = {10,30,45,80,50};
-        float results = test.compute(num);
+        float[] results = test.MultiCompute(num);
         assertEquals(45, results);
     }
     @Test
     public void testMultiStatWithEnsembleTimeAcrossTracesMin() {
         try {
             Ensemble e = TestData.getSampleEnsemble();
-            Computable test = new MultiStatComputable().createCalculation(MultiStat.MIN);
-            float[] output = e.iterateForTimeAcrossTraces(test);
-            assertEquals(0.953000009059906, output[3]);
-        } catch (Exception e) {
-            Logger.logError(e);
-            fail();
-        }
-    }
-    @Test
-    public void testMultiStatWithEnsembleTracesAcrossTimeMin() {
-        try {
-            Ensemble e = TestData.getSampleEnsemble();
-            Computable test = new MultiStatComputable().createCalculation(MultiStat.MIN);
-            float[] output = e.iterateForTracesAcrossTime(test);
-            assertEquals(-4000, output[3]);
+            MultiComputable test = new MultiStatComputable(new String[] {"MIN", "AVERAGE", "MEDIAN"});
+            float[][] output = e.multiComputeForTracesAcrossTime(test);
+            float[] value1 = output[3];
+            assertEquals(-4000, value1[0]);
+            assertEquals(-10.0833740234375, value1[1]);
+            assertEquals(0.8479999899864197, value1[2]);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
