@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 class MultiStatComputableTest {
 
     @Test
-    public void testMultiStatComputeSimpleArrayMin() {
+    public void testMultiStatComputeSimpleArrayMinTwoStat() {
         MultiComputable test = new MultiStatComputable(new String[] {"MIN", "MEDIAN"});
         float[] num = {1,2,3,4,5,6,7,8};
         float[] results = test.MultiCompute(num);
@@ -27,11 +27,20 @@ class MultiStatComputableTest {
 
     }
     @Test
-    public void testMultiStatComputeSimpleArrayTensMedian() {
+    public void testMultiStatComputeSimpleArrayTensMedianOneStat() {
         MultiComputable test = new MultiStatComputable(new String[] {"MIN"});
         float[] num = {10,30,45,80,50};
         float[] results = test.MultiCompute(num);
-        assertEquals(45, results);
+        assertEquals(10, results[0]);
+    }
+    @Test
+    public void testMultiStatComputeSimpleArrayTensMedianThreeStat() {
+        MultiComputable test = new MultiStatComputable(new String[] {"MIN", "AVERAGE", "MEDIAN"});
+        float[] num = {10,30,45,80,50};
+        float[] results = test.MultiCompute(num);
+        assertEquals(10, results[0]);
+        assertEquals(43, results[1]);
+        assertEquals(45, results[2]);
     }
     @Test
     public void testMultiStatWithEnsembleTimeAcrossTracesMin() {

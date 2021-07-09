@@ -4,14 +4,25 @@ public class MultiStatComputable implements MultiComputable{
     String[] statSelection;
 
     /**
-     * Can instantiate multiple computable objects within the stats library.
+     * The MultiComputable interface is beneficial for creating multiple time series representations.
+     * This method iterates across all traces for each timestep to produce multiple values for each
+     * timestep. A good example would be the max and min for all timesteps which would represent the
+     * bounds of the ensemble.
      * @param statSelection is expected to be a String
      */
 
     public MultiStatComputable(String[] statSelection) {
         this.statSelection = statSelection;
-        for(int i = 0; i < this.statSelection.length; i++) {
-            if (this.statSelection[i] != "MIN" || this.statSelection[i] != "AVERAGE" || this.statSelection[i] != "MEDIAN") {
+        for (String s : this.statSelection) {
+            if (s.equals("MIN")) {
+                break;
+            }
+            if (s.equals("AVERAGE")) {
+                break;
+            }
+            if (s.equals("MEDIAN")) {
+                break;
+            } else {
                 throw new ArithmeticException("Please select from one of the available statistics");
             }
         }
