@@ -2,6 +2,10 @@
 ##### STATE VARIABLE SCRIPT INITIALIZATION SECTION
 #####
 
+#####
+##### STATE VARIABLE SCRIPT INITIALIZATION SECTION
+#####
+
 from hec.script import Constants
 from hec import JdbcTimeSeriesDatabase
 from hec.ensemble import EnsembleTimeSeries
@@ -20,20 +24,40 @@ from hec.ensemble import Ensemble
 # from hec.rss.lang import StopComputeException
 # raise StopComputeException("the reason to stop the compute")
 #
+
+	
 def initStateVariable(currentVariable, network):
 	# return Constants.TRUE if the initialization is successful and Constants.FALSE if it failed.  
 	# Returning Constants.FALSE will halt the compute.
-	run = network.getRssRun()
-	fileName = run.getDSSOutputFile()
-	print("hi",fileName)
-	db = JdbcTimeSeriesDatabase("C:/project/FIRO_TSEnsembles/src/test/resources/database/ResSim.db",JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE)
-	tsid = TimeSeriesIdentifier("Coyote.fake_forecast","flow")
+
+	# get global variable
+            
+	externalGlobalVariable1=network.getGlobalVariable("sqlite-ensemble")
+	print(externalGlobalVariable1)              
+    # get source/location from global variable
+	dbFilename = externalGlobalVariable1.getSource()
+	dbLocation = externalGlobalVariable1.getDataLocation()
+
+
+	
+#	run = network.getRssRun()
+#	fileName = run.getDSSOutputFile()
+	print("dbFilename",dbFilename)
+	print("dbLocation",dbLocation)
+#	db = JdbcTimeSeriesDatabase("C:\FIRO_TSEnsembles/ResSim.db",JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE)
+	db = JdbcTimeSeriesDatabase(dbFilename,JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE)
+	
+	tsid = TimeSeriesIdentifier(dbLocation.split("/")[0],dbLocation.split("/")[1])
 	reader = db.getEnsembleTimeSeries(tsid)  
 	currentVariable.varPut("reader", reader)
 	issueDates = reader.getIssueDates()
 	currentVariable.varPut("issueDates", issueDates)
 	
 	return Constants.TRUE
+
+#####
+##### STATE VARIABLE SCRIPT COMPUTATION SECTION
+#####
 
 #####
 ##### STATE VARIABLE SCRIPT COMPUTATION SECTION
@@ -127,7 +151,7 @@ def computeReleaseInfo(t):
   if e is None:
     raise StopComputeException("Error: forecast not found for date: "+ t.toString() )
     
-  #print "ensemble loaded issueDate = ",e.getIssueDate()
+  print "ensemble loaded issueDate = ",e.getIssueDate()
   issueDate = e.getIssueDate()
   issueDates = currentVariable.varGet("issueDates")
   idx = issueDates.indexOf(issueDate)
@@ -184,11 +208,13 @@ def ensembleProcessing():
    raise StopComputeException("Error: missing ensemble forecast")
 
   return R
- 
-
 tempValue = ensembleProcessing()
 #tempValue = 1 
 currentVariable.setValue(currentRuntimestep, tempValue)
+
+#####
+##### STATE VARIABLE SCRIPT CLEANUP SECTION
+#####
 
 #####
 ##### STATE VARIABLE SCRIPT CLEANUP SECTION
