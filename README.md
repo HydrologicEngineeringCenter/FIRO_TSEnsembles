@@ -13,11 +13,13 @@ https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/actions/workflow
 
 ## Standalone ResSim Setup
 
+Install ResSim  currently: 3.5.0.283 
+
 Download the zip file [here](https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/releases/download/beta-0.1/beta-0.1-FIRO_TSEnsembles.zip)
 
 unzip and copy the jars to  HEC-ResSim\jar\ext
 
-Edit Hec-ResSim.config setting HasGlobalVariables to true and temp directory for SQLite as shown below.
+Edit Hec-ResSim.config verify HasGlobalVariables to true and temp directory for SQLite as shown below.
 
 ```
 #:------------------------------------------------------:
