@@ -11,6 +11,7 @@ from hec import JdbcTimeSeriesDatabase
 from hec.ensemble import EnsembleTimeSeries
 from hec.ensemble import TimeSeriesIdentifier
 from hec.ensemble import Ensemble
+from hec.stats import MedianComputable
 #
 # initialization function. optional.
 # set up tables and other things that only need to be performed once at the start of the compute.
@@ -66,6 +67,7 @@ def initStateVariable(currentVariable, network):
 from java.time import  ZoneId
 from java.time import  ZonedDateTime
 from hec.rss.lang import StopComputeException
+from hec.stats import MedianComputable
 import math
 
 # This Script demonstrates using ensembles (FIRO_TSEnsembles.jar) within ResSim
@@ -145,8 +147,14 @@ def computeVolumes(ensemble, steps):
 def computeReleaseInfo(t):
   reader = currentVariable.varGet("reader")
   timeOfNextEnsemble = currentVariable.varGet("timeOfNextEnsemble")
-#  print("timeOfNextEnsemble "+timeOfNextEnsemble.toString())
+  print("timeOfNextEnsemble "+timeOfNextEnsemble.toString())
   e = reader.getEnsemble(timeOfNextEnsemble) 
+  #Computable test = new MedianComputable();
+  #float[] output = e.iterateForTracesAcrossTime(test);
+  medianCompute = MedianComputable()
+  result1 = e.iterateForTracesAcrossTime(medianCompute)
+  print("result1")
+  print(result1)
 
   if e is None:
     raise StopComputeException("Error: forecast not found for date: "+ t.toString() )

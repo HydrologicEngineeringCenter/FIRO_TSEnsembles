@@ -64,7 +64,7 @@ public class Ensemble
      * ensemble data
      * row represents ensemble members
      * columns are time steps
-     * @return tow-dimensional zize float[][] (all rows are the same size)
+     * @return tow-dimensional size float[][] (all rows are the same size)
      */
     public float[][] getValues() {
       return values;
@@ -88,7 +88,7 @@ public class Ensemble
       float[] rval = new float[size];
       int traces = values.length;
       float[] tracevals = new float[traces];
-      for (int i = 0; i <size ; i++) {//this could be more efficent as a streaming compute process.. one less loop.
+      for (int i = 0; i <size ; i++) {//this could be more efficient as a streaming compute process.. one less loop.
         for(int j = 0; j <traces; j++){
           tracevals[j] = values[j][i];
         }
