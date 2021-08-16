@@ -20,7 +20,7 @@ class MaxAvgDurationTest {
     public void testMaxAvgDurationSimpleArray() {
         MaxAvgDuration test = new MaxAvgDuration(3);
         float[] num = {1,2,3,4,5,6,7,8};
-        test.configure(new EnsembleConfiguration(null, null, Duration.ofHours(3)));
+        test.configure(new EnsembleConfiguration(null, null, Duration.ofHours(3),""));
 
         float results = test.compute(num);
         assertEquals(21, results);
@@ -29,7 +29,7 @@ class MaxAvgDurationTest {
     public void testMaxAvgDurationSimpleArrayTens() {
         Computable test = new MaxAvgDuration(4);
         Configurable c = (Configurable) test;
-        c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1)));
+        c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),""));
         float[] num = {10,30,45,80,50};
         float results = test.compute(num);
         assertEquals(51.25, results);

@@ -17,10 +17,10 @@ public class Ensemble
     protected EnsembleTimeSeries parent = null;
 
 
-    public Ensemble(ZonedDateTime issueDate, float[][] values, ZonedDateTime startDate, Duration interval)
+    public Ensemble(ZonedDateTime issueDate, float[][] values, ZonedDateTime startDate, Duration interval, String units)
     {
       this.values = values;
-      this._configuration = new EnsembleConfiguration(issueDate,startDate,interval);
+      this._configuration = new EnsembleConfiguration(issueDate,startDate,interval,units);
     }
 
     public int getTimeCount(){
@@ -59,6 +59,8 @@ public class Ensemble
     public ZonedDateTime getStartDateTime() {
       return _configuration.getStartDate();
     }
+
+    public String getUnits() { return _configuration.getUnits();}
 
     /**
      * ensemble data

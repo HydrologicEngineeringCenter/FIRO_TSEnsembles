@@ -67,7 +67,7 @@ public class EnsembleUtility {
             ZonedDateTime newIssueDate = startDateTime;
             for (int j = 0; j < a.getCount(); j++) {
                 Ensemble e = a.getEnsemble(dates.get(j));
-                Ensemble e2 = new Ensemble(newIssueDate, e.getValues(), newIssueDate, e.getInterval());
+                Ensemble e2 = new Ensemble(newIssueDate, e.getValues(), newIssueDate, e.getInterval(),e.getUnits());
                 newIssueDate = newIssueDate.plusDays(1);
                 etsOut.addEnsemble(e2);
             }
