@@ -39,6 +39,12 @@ public  class CumulativeFlow implements Computable, Configurable {
 
     private float unitConverter() {
         /*TODO: here we want to check the input and output units to do the conversion*/
-        return 1.0f;
+        if (_c.getUnits().equals(_outputFlowUnits)){
+            return 1.0f;
+        }else{
+            //don't panic, just guess!!
+            return 42.0f;
+        }
+
     }
 }
