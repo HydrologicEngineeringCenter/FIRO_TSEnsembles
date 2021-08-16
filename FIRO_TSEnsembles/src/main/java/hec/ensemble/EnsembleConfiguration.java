@@ -8,13 +8,16 @@ public class EnsembleConfiguration implements Configuration{
     private final Duration _interval;
     private final ZonedDateTime _issueDate;
     private final ZonedDateTime _startDateTime;
+    private final String _units;
 
-    public EnsembleConfiguration(ZonedDateTime issueDate, ZonedDateTime startDate, Duration interval)
+    public EnsembleConfiguration(ZonedDateTime issueDate, ZonedDateTime startDate, Duration interval, String units)
     {
         this._issueDate = issueDate;
         this._startDateTime = startDate;
         this._interval = interval;
+        this._units = units;
     }
+
     public Duration getDuration(){
         return _interval;
     }
@@ -24,4 +27,5 @@ public class EnsembleConfiguration implements Configuration{
     public ZonedDateTime getStartDate(){
         return _startDateTime;
     }
+    public String getUnits(){return  _units;}
 }
