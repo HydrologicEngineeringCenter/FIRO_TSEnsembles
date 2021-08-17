@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import hec.stats.Computable;
 import hec.stats.Configurable;
+import hec.stats.MultiComputable;
 
 /**
  * an Ensemble is an array of time-series data
@@ -97,5 +98,18 @@ public class Ensemble
         rval[i] = cmd.compute(tracevals);
       }
       return rval;
+    }
+    public float[][] multiComputeForTracesAcrossTime(MultiComputable cmd){
+      if (cmd instanceof hec.stats.Configurable){
+        ((Configurable)cmd).configure(_configuration);
+      }
+      int size= values.length;
+      float[] rval;
+      float[][] val = new float[size][];
+      for (int i = 0; i <size ; i++) {
+        rval = cmd.MultiCompute(values[i]);
+        val[i] = rval;
+      }
+      return val;
     }
   }
