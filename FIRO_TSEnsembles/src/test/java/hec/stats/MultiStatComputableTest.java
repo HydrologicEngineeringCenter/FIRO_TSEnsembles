@@ -40,7 +40,7 @@ class MultiStatComputableTest {
         float[] results = test.MultiCompute(num);
         assertEquals(10, results[0]);
         assertEquals(43, results[1]);
-        assertEquals(45, results[2]);
+        assertEquals(80, results[2]);
     }
     @Test
     public void testMultiStatWithEnsembleTimeAcrossTracesMin() {
@@ -51,7 +51,7 @@ class MultiStatComputableTest {
             float[] value1 = output[3];
             assertEquals(-4000, value1[0]);
             assertEquals(-10.0833740234375, value1[1]);
-            assertEquals(0.8479999899864197, value1[2]);
+            assertEquals(11.159436225891113, value1[2]);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
