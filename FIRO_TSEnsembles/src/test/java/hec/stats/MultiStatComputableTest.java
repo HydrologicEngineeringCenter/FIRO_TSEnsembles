@@ -19,7 +19,7 @@ class MultiStatComputableTest {
 
     @Test
     public void testMultiStatComputeSimpleArrayMinTwoStat() {
-        MultiComputable test = new MultiStatComputable(new String[] {"MIN", "MEDIAN"});
+        MultiComputable test = new MultiStatComputable(new MultiStat[] {MIN, MEAN});
         float[] num = {1,2,3,4,5,6,7,8};
         float[] results = test.MultiCompute(num);
         assertEquals(1, results[0]);
@@ -28,14 +28,14 @@ class MultiStatComputableTest {
     }
     @Test
     public void testMultiStatComputeSimpleArrayTensMedianOneStat() {
-        MultiComputable test = new MultiStatComputable(new String[] {"MIN"});
+        MultiComputable test = new MultiStatComputable(new MultiStat[] {MIN});
         float[] num = {10,30,45,80,50};
         float[] results = test.MultiCompute(num);
         assertEquals(10, results[0]);
     }
     @Test
     public void testMultiStatComputeSimpleArrayTensMedianThreeStat() {
-        MultiComputable test = new MultiStatComputable(new String[] {"MIN", "AVERAGE", "MEDIAN"});
+        MultiComputable test = new MultiStatComputable(new MultiStat[] {MIN, MEAN, MAX});
         float[] num = {10,30,45,80,50};
         float[] results = test.MultiCompute(num);
         assertEquals(10, results[0]);
@@ -46,7 +46,7 @@ class MultiStatComputableTest {
     public void testMultiStatWithEnsembleTimeAcrossTracesMin() {
         try {
             Ensemble e = TestData.getSampleEnsemble();
-            MultiComputable test = new MultiStatComputable(new String[] {"MIN", "AVERAGE", "MEDIAN"});
+            MultiComputable test = new MultiStatComputable(new MultiStat[] {MIN, MEAN, MAX});
             float[][] output = e.multiComputeForTracesAcrossTime(test);
             float[] value1 = output[3];
             assertEquals(-4000, value1[0]);

@@ -1,7 +1,7 @@
 package hec.stats;
 
 public class MultiStatComputable implements MultiComputable{
-    String[] statSelection;
+    MultiStat[] statSelection;
 
     /**
      * The MultiComputable interface is beneficial for creating multiple time series representations.
@@ -11,51 +11,33 @@ public class MultiStatComputable implements MultiComputable{
      * @param statSelection is expected to be a String
      */
 
-    public MultiStatComputable(String[] statSelection) {
+    public MultiStatComputable(MultiStat[] statSelection) {
         this.statSelection = statSelection;
-        for (String s : this.statSelection) {
-            if (s.equals("MIN")) {
-                break;
-            }
-            if (s.equals("AVERAGE")) {
-                break;
-            }
-            if (s.equals("MEDIAN")) {
-                break;
-            } else {
-                throw new ArithmeticException("Please select from one of the available statistics");
-            }
-        }
     }
 
     @Override
     public float[] MultiCompute(float[] values) {
         int size =  statSelection.length;
         float [] results = new float[size];
-        MultiStat arr [] = MultiStat.values();
+        InlineStats is = new InlineStats();
+        for(float f : values){
+            is.AddObservation(f);
+        }
 
-        for (int i = 0; i < this.statSelection.length; i++) {
-            MultiStat enumType = MultiStat.valueOf(statSelection[i]);
-            float test = createCalculation(enumType).compute(values);
-            results[i] = test;
+        for (int i = 0; i < size; i++) {
+
+            switch (statSelection[i]){
+                case MIN:
+                    results[i] = is.getMin();
+                case MEAN:
+                    results[i] = is.getMean();
+                case MAX:
+                    results[i] = is.getMax();
+                default:
+                    throw new ArithmeticException("stat type not  yet supported in MultiStatComputable.");
+            }
+
         }
         return results;
-    }
-
-
-    public Computable createCalculation(MultiStat stat) {
-        Computable statValue = null;
-        switch(stat) {
-            case MIN:
-                statValue = new MinComputable();
-                break;
-            case MEDIAN:
-                statValue = new MedianComputable();
-                break;
-            case AVERAGE:
-                statValue = new MeanComputable();
-                break;
-        }
-        return statValue;
     }
 }
