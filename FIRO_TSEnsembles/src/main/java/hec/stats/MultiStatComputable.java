@@ -29,10 +29,13 @@ public class MultiStatComputable implements MultiComputable{
             switch (statSelection[i]){
                 case MIN:
                     results[i] = is.getMin();
+                    break;
                 case MEAN:
                     results[i] = is.getMean();
+                    break;
                 case MAX:
                     results[i] = is.getMax();
+                    break;
                 default:
                     throw new ArithmeticException("stat type not  yet supported in MultiStatComputable.");
             }
