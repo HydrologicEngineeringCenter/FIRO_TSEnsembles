@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 import hec.stats.Computable;
 import hec.stats.Configurable;
 import hec.stats.MultiComputable;
+import hec.stats.SingleComputable;
 
 /**
  * an Ensemble is an array of time-series data
@@ -111,5 +112,11 @@ public class Ensemble
         val[i] = rval;
       }
       return val;
+    }
+    public float singleComputeForEnsemble(SingleComputable cmd){
+      if (cmd instanceof hec.stats.Configurable){
+        ((Configurable)cmd).configure(_configuration);
+      }
+      return cmd.compute(values);
     }
   }
