@@ -16,8 +16,8 @@ public class PairedDataTest {
         String fileName= TestingPaths.instance.getTempDir()+"/"+"pairedtest.db";
         File file = new File(fileName);
         file.delete();
-        try (PairedDataDatabase db = new JdbcTimeSeriesDatabase(fileName,
-                JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);) {
+        try (PairedDataDatabase db = new JdbcDatabase(fileName,
+                JdbcDatabase.CREATION_MODE.CREATE_NEW);) {
 
             PairedData table = new PairedData("test|stage/flow");
             table.addRow(0, 0);

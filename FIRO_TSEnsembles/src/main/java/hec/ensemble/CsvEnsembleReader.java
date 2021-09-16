@@ -1,5 +1,7 @@
 package hec.ensemble;
 
+import hec.RecordIdentifier;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -97,7 +99,7 @@ public class CsvEnsembleReader {
                         ets = locationMap.get(locName);
                     }
                     else {
-                        TimeSeriesIdentifier tsid= new TimeSeriesIdentifier(watershedName+"."+locName,"flow");
+                        RecordIdentifier tsid= new RecordIdentifier(watershedName+"."+locName,"flow");
                         // TODO  confirm units.
                         ets = new EnsembleTimeSeries(tsid, "kcfs","",csv.FileName);
                         locationMap.put(locName, ets);

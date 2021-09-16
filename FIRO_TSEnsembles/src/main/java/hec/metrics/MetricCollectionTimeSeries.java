@@ -1,6 +1,6 @@
 package hec.metrics;
 
-import hec.ensemble.TimeSeriesIdentifier;
+import hec.RecordIdentifier;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.TreeMap;
 public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>
 {
 
-    private TimeSeriesIdentifier timeseriesID;
+    private RecordIdentifier timeseriesID;
     private String units;
     private String dataType;
     private String version;
@@ -23,12 +23,12 @@ public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>
         return items.size();
     }
 
-    public MetricCollectionTimeSeries(TimeSeriesIdentifier timeseriesID, String units, String dataType, String version)
+    public MetricCollectionTimeSeries(RecordIdentifier timeseriesID, String units, String dataType, String version)
     {
         init(timeseriesID,units,dataType,version);
     }
 
-    private void init(TimeSeriesIdentifier timeseriesID, String units, String dataType, String version) {
+    private void init(RecordIdentifier timeseriesID, String units, String dataType, String version) {
         this.timeseriesID = timeseriesID;
         this.units = units;
         this.dataType = dataType;
@@ -89,7 +89,7 @@ public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>
         return version;
     }
 
-    public TimeSeriesIdentifier getTimeSeriesIdentifier() {
+    public RecordIdentifier getTimeSeriesIdentifier() {
         return timeseriesID;
     }
 

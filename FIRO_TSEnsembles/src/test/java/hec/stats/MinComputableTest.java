@@ -1,8 +1,9 @@
 package hec.stats;
 
 
-import hec.JdbcTimeSeriesDatabase;
+import hec.JdbcDatabase;
 import hec.EnsembleDatabase;
+import hec.RecordIdentifier;
 import hec.ensemble.*;
 import org.junit.jupiter.api.Test;
 
@@ -59,9 +60,9 @@ class MinComputableTest {
         if(!f.exists()) {
             DatabaseGenerator.createTestDatabase(fn, 1);
         }
-        EnsembleDatabase db = new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+        EnsembleDatabase db = new JdbcDatabase(fn, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
         // --- READ
-        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2", "flow");
+        RecordIdentifier tsid = new RecordIdentifier("Kanektok.SCRN2", "flow");
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
         List<ZonedDateTime> issueDates = ets.getIssueDates();
         return db.getEnsemble(tsid, issueDates.get(0));

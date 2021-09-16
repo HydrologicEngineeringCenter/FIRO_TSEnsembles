@@ -1,5 +1,7 @@
 package hec.ensemble;
 
+import hec.RecordIdentifier;
+
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -14,7 +16,7 @@ import java.util.TreeMap;
 public class EnsembleTimeSeries implements  Iterable<Ensemble> 
   {
 
-    private TimeSeriesIdentifier timeseriesID;
+    private RecordIdentifier timeseriesID;
     private String units;
     private String dataType;
     private String version;
@@ -26,12 +28,12 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       return items.size();
     }
 
-    public EnsembleTimeSeries(TimeSeriesIdentifier timeseriesID, String units, String dataType, String version)
+    public EnsembleTimeSeries(RecordIdentifier timeseriesID, String units, String dataType, String version)
     {
       init(timeseriesID,units,dataType,version);
     }
 
-    private void init(TimeSeriesIdentifier timeseriesID, String units, String dataType, String version) {
+    private void init(RecordIdentifier timeseriesID, String units, String dataType, String version) {
       this.timeseriesID = timeseriesID;
       this.units = units;
       this.dataType = dataType;
@@ -93,7 +95,7 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       return version;
     }
 
-    public TimeSeriesIdentifier getTimeSeriesIdentifier() {
+    public RecordIdentifier getTimeSeriesIdentifier() {
       return timeseriesID;
     }
 

@@ -22,7 +22,7 @@ public class DatabaseGenerator {
 
         CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir);
         EnsembleTimeSeries[] ets = csvReader.Read("Kanektok", issueDate1, issueDate2);
-        EnsembleDatabase db = new JdbcTimeSeriesDatabase(filename, JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);
+        EnsembleDatabase db = new JdbcDatabase(filename, JdbcDatabase.CREATION_MODE.CREATE_NEW);
 
         db.write(ets);
         return db;

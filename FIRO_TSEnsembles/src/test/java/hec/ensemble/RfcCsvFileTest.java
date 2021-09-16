@@ -52,9 +52,9 @@ class RfcCsvFileTest {
             f.delete();
 
             DatabaseGenerator.createTestDatabase(fn,1);
-            EnsembleDatabase db  =new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+            EnsembleDatabase db  =new JdbcDatabase(fn, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
                     // --- READ
-            TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2","flow");
+            RecordIdentifier tsid = new RecordIdentifier("Kanektok.SCRN2","flow");
             EnsembleTimeSeries ets =  db.getEnsembleTimeSeries(tsid);
             List<ZonedDateTime> issueDates = ets.getIssueDates();
             Ensemble e = db.getEnsemble(tsid, issueDates.get(0));

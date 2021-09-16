@@ -1,10 +1,10 @@
-package hec.ensemble;
+package hec;
 
-public class TimeSeriesIdentifier {
+public class RecordIdentifier {
     public String location;
     public String parameter;
 
-    public TimeSeriesIdentifier(String location, String parameter) {
+    public RecordIdentifier(String location, String parameter) {
         this.location = location;
         this.parameter = parameter;
     }

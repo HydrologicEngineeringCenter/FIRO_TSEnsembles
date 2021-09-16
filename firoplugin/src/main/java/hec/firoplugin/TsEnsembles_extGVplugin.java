@@ -1,7 +1,7 @@
 package hec.firoplugin;
 
-import hec.JdbcTimeSeriesDatabase;
-import hec.ensemble.TimeSeriesIdentifier;
+import hec.JdbcDatabase;
+import hec.RecordIdentifier;
 import hec.ensemble.ui.EnsemblePicker;
 import hec.externalplugin.ExternalDataLocation;
 import hec.externalplugin.ExternalDataType;
@@ -81,14 +81,14 @@ public final class TsEnsembles_extGVplugin extends SelfRegisteringExternalDataPl
         if (returnValue == JFileChooser.APPROVE_OPTION)
         {
             String fileName = fileBrowser.getSelectedFile().getAbsolutePath();
-            JdbcTimeSeriesDatabase db = null;
+            JdbcDatabase db = null;
             try {
-                db = new JdbcTimeSeriesDatabase(fileName, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+                db = new JdbcDatabase(fileName, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
             } catch (Exception e) {
                 e.printStackTrace();
                 return retval;
             }
-            List<TimeSeriesIdentifier> locations = db.getTimeSeriesIDs();
+            List<RecordIdentifier> locations = db.getTimeSeriesIDs();
             TableModel model = getTableModel(locations);
 
             // use dialog to pick ensemble
@@ -102,11 +102,11 @@ public final class TsEnsembles_extGVplugin extends SelfRegisteringExternalDataPl
         }
         return retval;
     }
-    private static TableModel getTableModel(List<TimeSeriesIdentifier> locations) {
+    private static TableModel getTableModel(List<RecordIdentifier> locations) {
         String[] columnNames = {"Location", "Parameter"};
         List<String[]> values = new ArrayList<String[]>();
 
-        for (TimeSeriesIdentifier loc : locations) {
+        for (RecordIdentifier loc : locations) {
             values.add(new String[]{loc.location, loc.parameter});
         }
         return new DefaultTableModel(values.toArray(new Object[][]{}), columnNames);
