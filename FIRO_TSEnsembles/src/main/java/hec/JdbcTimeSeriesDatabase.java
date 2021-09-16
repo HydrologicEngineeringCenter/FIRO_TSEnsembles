@@ -22,7 +22,7 @@ import hec.paireddata.*;
 /**
  * Read/write Ensembles to a JDBC database
  */
-public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
+public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatabase, VersionableDatabase {
 
     public enum CREATION_MODE {
         CREATE_NEW, CREATE_NEW_OR_OPEN_EXISTING_UPDATE, CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE, OPEN_EXISTING_UPDATE,
@@ -452,22 +452,6 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         }
         return rval;
     }
-
-    @Override
-    public int getCount(TimeSeriesIdentifier timeseriesID) {
-        PreparedStatement p = null;
-        try {
-            String sql = "SELECT count(issue_datetime) from view_ensemble "
-                    + " Where location = ?  AND  parameter_name = ?";
-            p = _connection.prepareStatement(sql);
-            p.setString(1, timeseriesID.location);
-            p.setString(2, timeseriesID.parameter);
-        } catch (Exception e) {
-            Logger.logError(e);
-        }
-        return ScalarQuery(p);
-    }
-
     @Override
     public List<ZonedDateTime> getEnsembleIssueDates(TimeSeriesIdentifier timeseriesID) {
         List<ZonedDateTime> rval = new ArrayList<>();
@@ -488,19 +472,13 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         }
         return rval;
     }
-
-    public PairedData getPairedData(TimeSeriesIdentifier id) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     @Override
     public PairedData getPairedData(String table_name) {
         Statement get_table = null;
 
         try {
             String sql_table_table = getSQLTableName(table_name, "Paired Data");
-            PairedData pd = new PairedData(this, table_name);
+            PairedData pd = new PairedData(table_name);
             get_table = _connection.createStatement();
             ResultSet rs = get_table.executeQuery("select indep,dep from " + sql_table_table + " order by indep asc");
             while (rs.next()) {

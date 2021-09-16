@@ -13,7 +13,7 @@ public class DatabaseVersioning{
     @Test
     public void Original_db_can_update_to_newest() throws Exception{        
         File testdb = get_test_file("/database/ResSimTest_20200101.db");                
-        try( TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(testdb.getCanonicalPath(), JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);){
+        try( VersionableDatabase db = new JdbcTimeSeriesDatabase(testdb.getCanonicalPath(), JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);){
             assertEquals( get_latest_version(db.getVersions()), db.getVersion() );
         } catch( Exception err ){
             fail(err);

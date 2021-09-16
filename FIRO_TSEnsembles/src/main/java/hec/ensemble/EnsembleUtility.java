@@ -1,7 +1,7 @@
 package hec.ensemble;
 
 import hec.JdbcTimeSeriesDatabase;
-import hec.TimeSeriesDatabase;
+import hec.EnsembleDatabase;
 
 import java.io.File;
 import java.time.ZoneId;
@@ -38,8 +38,8 @@ public class EnsembleUtility {
      * @return
      * @throws Exception
      */
-    static private TimeSeriesDatabase createTestDatabase(String hefs_dir,int numberOfDates, int numLocations,
-                                                         String filename) throws Exception {
+    static private EnsembleDatabase createTestDatabase(String hefs_dir, int numberOfDates, int numLocations,
+                                                       String filename) throws Exception {
 
         File f = new File(filename);
         if( f.exists())
@@ -49,7 +49,7 @@ public class EnsembleUtility {
 
         CsvEnsembleReader csvReader = new CsvEnsembleReader(hefs_dir);
         EnsembleTimeSeries[] ets = csvReader.Read("RussianNapa", issueDate1, issueDate2);
-        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(filename, JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);
+        EnsembleDatabase db = new JdbcTimeSeriesDatabase(filename, JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);
         ZonedDateTime startDateTime = ZonedDateTime.of(1996, 12, 24, 12, 0, 0, 0, ZoneId.of("GMT"));
 
         // modify start/issue dates/ location
@@ -87,7 +87,7 @@ public class EnsembleUtility {
      */
     static void readModifyWrite(String fileName) throws Exception {
         long startTime = System.nanoTime();
-        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+        EnsembleDatabase db = new JdbcTimeSeriesDatabase(fileName, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
         List<TimeSeriesIdentifier> locations = db.getTimeSeriesIDs();
 
         ArrayList<EnsembleTimeSeries> etsList = new ArrayList<>();

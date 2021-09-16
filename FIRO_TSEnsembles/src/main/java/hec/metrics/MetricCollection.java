@@ -1,9 +1,7 @@
-package hec.paireddata;
+package hec.metrics;
 
-import hec.TimeSeriesDatabase;
 import hec.stats.Configuration;
 
-import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 

@@ -3,8 +3,6 @@ package hec.paireddata;
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
-import hec.TimeSeriesDatabase;
-
 public class PairedData {
     private String table_name = null;
     private ArrayList<Double> indeps = new ArrayList<>();

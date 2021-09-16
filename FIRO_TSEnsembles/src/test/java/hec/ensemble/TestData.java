@@ -1,20 +1,19 @@
 package hec.ensemble;
 
 import hec.JdbcTimeSeriesDatabase;
-import hec.TimeSeriesDatabase;
-import jdk.nashorn.internal.runtime.ECMAException;
+import hec.EnsembleDatabase;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
 public class TestData {
 
-    private static TimeSeriesDatabase s_db = null;
+    private static EnsembleDatabase s_db = null;
 
-    private static TimeSeriesDatabase getDatabase() {
+    private static EnsembleDatabase getDatabase() {
         try {
             String fn = "src/test/resources/database/importCsvToDatabase.db";
-            TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+            EnsembleDatabase db = new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
             return db;
         }catch (Exception e) {
             System.out.println(e.getMessage());

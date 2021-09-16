@@ -1,7 +1,7 @@
 package hec.stats;
 
 import hec.JdbcTimeSeriesDatabase;
-import hec.TimeSeriesDatabase;
+import hec.EnsembleDatabase;
 import hec.ensemble.*;
 import org.junit.jupiter.api.Test;
 
@@ -58,7 +58,7 @@ class MedianComputableTest {
         if(!f.exists()) {
             DatabaseGenerator.createTestDatabase(fn, 1);
         }
-        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+        EnsembleDatabase db = new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
         // --- READ
         TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2", "flow");
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);

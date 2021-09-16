@@ -1,15 +1,8 @@
 package hec.stats;
 
 
-import hec.JdbcTimeSeriesDatabase;
-import hec.TimeSeriesDatabase;
 import hec.ensemble.*;
 import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import static hec.stats.MultiStat.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,4 +1,4 @@
-package hec.paireddata;
+package hec.metrics;
 
 import hec.stats.Configuration;
 

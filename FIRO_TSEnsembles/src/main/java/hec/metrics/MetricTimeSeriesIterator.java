@@ -1,4 +1,7 @@
-package hec.paireddata;
+package hec.metrics;
+
+import hec.metrics.MetricCollection;
+import hec.metrics.MetricCollectionTimeSeries;
 
 import java.time.ZonedDateTime;
 import java.util.Iterator;
