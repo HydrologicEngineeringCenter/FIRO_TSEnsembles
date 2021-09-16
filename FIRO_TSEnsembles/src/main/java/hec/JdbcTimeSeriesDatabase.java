@@ -37,7 +37,8 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
     Connection _connection;
 
     PreparedStatement prefix_name_stmt = null;
-
+    private PreparedStatement ps_insertEnsembleCollection;
+    private PreparedStatement ps_insertEnsemble;
     /**
      * constructor for JdbcTimeSeriesDatabase
      *
@@ -107,7 +108,7 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
         prefix_name_stmt = _connection.prepareStatement("select table_prefix from table_types where name = ?");
 
     }
-
+    //region UtilityFunctions
     private String getCurrentVersionFromDB(){
         try(Statement version_query = _connection.createStatement()){
             ResultSet rs = version_query.executeQuery("select version from version");
@@ -117,8 +118,6 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
             return "20200101";
         }        
     }
-
-
     private String updateTables() {
         /**
          * This is the default but we really want to make sure this is set here or we
@@ -150,21 +149,76 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
         
         return versions.get(versions.size()-1);
     }
+    private int GetMaxID(String tableName) {
+        PreparedStatement p;
+        try {
+            String sql = "SELECT max(id) max FROM " + tableName;
+            p = _connection.prepareStatement(sql);
+        } catch (Exception e) {
+            Logger.logError(e.getMessage());
+            return -1;
+        }
+        return ScalarQuery(p);
+    }
 
+    private int ScalarQuery(PreparedStatement p) {
+        int rval = 0;
+        try {
+            ResultSet rs = p.executeQuery();
+            while (rs.next()) {
+                Object o = rs.getObject(1);
+                if (o == null)
+                    return 0;
+                rval = (int) o;
+            }
+        } catch (Exception e) {
+            Logger.logError(e);
+        }
+        return rval;
+    }
 
+    private String createTables() throws Exception {
+        runResourceSQLScript("/database.sql");
+        _connection.commit();
+        try(Statement version_query = _connection.createStatement()){
+            ResultSet rs = version_query.executeQuery("select version from version");
+            String version = rs.getString(1);
+            return version;
+        } catch( SQLException err ){
+            return "20200101";
+        }
+    }
 
+    private void runResourceSQLScript(String resource) {
+        InputStream is = this.getClass().getResourceAsStream(resource);
+        if( is == null)
+            throw new RuntimeException("resource not found:"+resource);
+        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader reader = new BufferedReader(isr);
 
+        String sql = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+
+        String[] commands = sql.split(";");
+        for (String s : commands) {
+            s = s.trim();
+            if (s.isEmpty() || s.startsWith("--") || s.startsWith("\r") || s.startsWith("\n"))
+                continue;
+            try(PreparedStatement cmd = _connection.prepareStatement(s);){
+                cmd.execute();
+            } catch (SQLException e) {
+                throw new RuntimeException("unable to run update script "+resource,e);
+            }
+        }
+    }
+    //endregion
+    //region Autoclosable
     @Override
     public void close() throws Exception {
         _connection.commit();
         _connection.close();
     }
-
-    @Override
-    public String getVersion() {
-        return this.version;
-    }
-
+    //endregion
+    //region EnsembleDatabase
     @Override
     public void write(EnsembleTimeSeries ets) throws Exception {
         write(new EnsembleTimeSeries[] { ets });
@@ -191,8 +245,6 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
         }
         _connection.commit();
     }
-
-
     /**
      * Gets EnsembleTimeSeries, loading ensembles into memory
      *
@@ -205,7 +257,6 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
                 + " AND parameter_name = ? ";
         return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
     }
-
     /**
      * Gets EnsembleTimeSeries, loading ensembles into memory.
      *
@@ -224,7 +275,6 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
 
         return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
     }
-
     private EnsembleTimeSeries readEnsembleTimeSeriesFromDB(TimeSeriesIdentifier timeseriesID, String sql) {
         EnsembleTimeSeries rval =null;
         try {
@@ -250,7 +300,6 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
         }
         return rval;
     }
-
     private EnsembleTimeSeries createEnsembleTimeSeries(ResultSet rs) throws SQLException {
 
         String location = rs.getString("location");
@@ -326,9 +375,6 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
 
         return new Ensemble(issue_date, values, start_date, Duration.ofSeconds(interval_seconds),units);
     }
-
-    private PreparedStatement ps_insertEnsembleCollection;
-
     private void InsertEnsembleCollection(int id, TimeSeriesIdentifier timeseries_id, String units, String data_type,
             String version) throws Exception {
         if (ps_insertEnsembleCollection == null) {
@@ -345,9 +391,6 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
         ps_insertEnsembleCollection.setString(6, version);
         ps_insertEnsembleCollection.execute();
     }
-
-    private PreparedStatement ps_insertEnsemble;
-
     private void InsertEnsemble(int id, int ensemble_timeseries_id, ZonedDateTime issue_datetime,
             ZonedDateTime start_datetime, int member_length, int member_count, String compression,
             long interval_seconds, byte[] byte_value_array) throws Exception {
@@ -369,70 +412,6 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
         ps_insertEnsemble.setBytes(9, byte_value_array);
         ps_insertEnsemble.execute();
     }
-
-    private int GetMaxID(String tableName) {
-        PreparedStatement p;
-        try {
-            String sql = "SELECT max(id) max FROM " + tableName;
-            p = _connection.prepareStatement(sql);
-        } catch (Exception e) {
-            Logger.logError(e.getMessage());
-            return -1;
-        }
-        return ScalarQuery(p);
-    }
-
-    private int ScalarQuery(PreparedStatement p) {
-        int rval = 0;
-        try {
-            ResultSet rs = p.executeQuery();
-            while (rs.next()) {
-                Object o = rs.getObject(1);
-                if (o == null)
-                    return 0;
-                rval = (int) o;
-            }
-        } catch (Exception e) {
-            Logger.logError(e);
-        }
-        return rval;
-    }
-
-    private String createTables() throws Exception {
-        runResourceSQLScript("/database.sql");
-        _connection.commit();
-        try(Statement version_query = _connection.createStatement()){
-            ResultSet rs = version_query.executeQuery("select version from version");
-            String version = rs.getString(1);
-            return version;
-        } catch( SQLException err ){
-            return "20200101";
-        }        
-    }
-
-    private void runResourceSQLScript(String resource) {
-        InputStream is = this.getClass().getResourceAsStream(resource);
-        if( is == null)
-            throw new RuntimeException("resource not found:"+resource);
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader reader = new BufferedReader(isr);
-
-        String sql = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-
-        String[] commands = sql.split(";");
-        for (String s : commands) {
-            s = s.trim();
-            if (s.isEmpty() || s.startsWith("--") || s.startsWith("\r") || s.startsWith("\n"))
-                continue;
-            try(PreparedStatement cmd = _connection.prepareStatement(s);){
-                cmd.execute();                
-            } catch (SQLException e) {
-                throw new RuntimeException("unable to run update script "+resource,e);
-            }
-        }
-    }
-
-
     @Override
     public List<TimeSeriesIdentifier> getTimeSeriesIDs() {
 
@@ -472,6 +451,8 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
         }
         return rval;
     }
+    //endregion
+    //region PairedDataDatabase
     @Override
     public PairedData getPairedData(String table_name) {
         Statement get_table = null;
@@ -570,7 +551,12 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
         }
         throw new TypeNotImplemented(type);
     }
-
+    //endregion
+    //region VersionedDatabase
+    @Override
+    public String getVersion() {
+        return this.version;
+    }
     @Override
     public List<String> getVersions(){
     ArrayList<String> list = new ArrayList<String>();
@@ -652,5 +638,5 @@ public class JdbcTimeSeriesDatabase implements PairedDataDatabase, EnsembleDatab
     private void updateFor20200224_to_20200227() {
 
     }
-
+    //endregion
 }
