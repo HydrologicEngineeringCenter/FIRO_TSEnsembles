@@ -1,6 +1,6 @@
 package hec.ensemble.ui;
 
-import hec.JdbcDatabase;
+import hec.SqliteDatabase;
 import hec.RecordIdentifier;
 
 import javax.swing.*;
@@ -43,7 +43,7 @@ public class EnsemblePickerDemo  extends  JFrame implements ActionListener {
     {
         try {
             String fileName = "C:\\temp\\ResSim.db";
-            JdbcDatabase db = new JdbcDatabase(fileName, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+            SqliteDatabase db = new SqliteDatabase(fileName, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
             List<RecordIdentifier> locations = db.getEnsembleTimeSeriesIDs();
             TableModel model = getTableModel(locations);
 
