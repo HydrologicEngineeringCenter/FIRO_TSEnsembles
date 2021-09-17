@@ -471,41 +471,39 @@ public class JdbcDatabase implements PairedDataDatabase, EnsembleDatabase, Versi
         for (MetricCollectionTimeSeries mts : mtsArray) {
             List<ZonedDateTime> issueDates = mts.getIssueDates();
             InsertMetricCollectionTimeSeries(++mc_ts_id, mts.getTimeSeriesIdentifier(), mts.getUnits(),
-                    mts.getDataType(), mts.getVersion());
+                    mts.type().name());
             for (int i = 0; i < issueDates.size(); i++) {
                 ZonedDateTime t = issueDates.get(i);
                 MetricCollection mc = mts.getMetricCollection(t);
                 float[][] data = mc.getValues();
                 byte[] bytes = TableCompression.Pack(data, compress);
                 InsertMetricCollection(++mc_id, mc_ts_id, mc.getIssueDate(),
-                        mc.getStartDateTime(), data[0].length, data.length, compress, mc.getInterval().getSeconds(),
+                        mc.getStartDateTime(), data[0].length, data.length, compress, mc.getInterval().getSeconds(), mc.metricStatisticsToString(),
                         bytes);
             }
         }
         _connection.commit();
     }
-    private void InsertMetricCollectionTimeSeries(int id, RecordIdentifier timeseries_id, String units, String data_type,
-                                                  String version) throws Exception {
+    private void InsertMetricCollectionTimeSeries(int id, RecordIdentifier record_id, String units, String metric_type) throws Exception {
         if (ps_insertMetricCollectionTimeSeries == null) {
-            String sql = "INSERT INTO " + metricCollectionTimeSeriesTableName + " ([id], [location], " + " [parameter_name], "
-                    + " [units], [data_type], [version]) VALUES " + "(?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO " + metricCollectionTimeSeriesTableName + " ([id], [location], [parameter_name], "
+                    + " [units], [metric_type]) VALUES " + "(?, ?, ?, ?, ?)";
             ps_insertMetricCollectionTimeSeries = _connection.prepareStatement(sql);
         }
 
         ps_insertMetricCollectionTimeSeries.setInt(1, id);
-        ps_insertMetricCollectionTimeSeries.setString(2, timeseries_id.location);
-        ps_insertMetricCollectionTimeSeries.setString(3, timeseries_id.parameter);
+        ps_insertMetricCollectionTimeSeries.setString(2, record_id.location);
+        ps_insertMetricCollectionTimeSeries.setString(3, record_id.parameter);
         ps_insertMetricCollectionTimeSeries.setString(4, units);
-        ps_insertMetricCollectionTimeSeries.setString(5, data_type);
-        ps_insertMetricCollectionTimeSeries.setString(6, version);
+        ps_insertMetricCollectionTimeSeries.setString(5, metric_type);
         ps_insertMetricCollectionTimeSeries.execute();
     }
     private void InsertMetricCollection(int id, int ts_id, ZonedDateTime issue_datetime,
                                 ZonedDateTime start_datetime, int member_length, int member_count, String compression,
-                                long interval_seconds, byte[] byte_value_array) throws Exception {
+                                long interval_seconds, String statistics, byte[] byte_value_array) throws Exception {
         if (ps_insertMetricCollection == null) {
             String sql = "INSERT INTO " + metricCollectionTableName + " ([id], [metriccollection_timeseries_id],[issue_datetime], "
-                    + " [start_datetime], [member_length], [member_count], [compression], [interval_seconds], "
+                    + " [start_datetime], [member_length], [member_count], [compression], [interval_seconds], [statistics], "
                     + "[byte_value_array]) VALUES " + "(?, ?, ?, ?, ?, ?, ?, ?,? )";
             ps_insertMetricCollection = _connection.prepareStatement(sql);
         }
@@ -518,7 +516,8 @@ public class JdbcDatabase implements PairedDataDatabase, EnsembleDatabase, Versi
         ps_insertMetricCollection.setInt(6, member_count);
         ps_insertMetricCollection.setString(7, compression);
         ps_insertMetricCollection.setLong(8, interval_seconds);
-        ps_insertMetricCollection.setBytes(9, byte_value_array);
+        ps_insertMetricCollection.setString(9, statistics);
+        ps_insertMetricCollection.setBytes(10, byte_value_array);
         ps_insertMetricCollection.execute();
     }
     /**
@@ -574,11 +573,10 @@ public class JdbcDatabase implements PairedDataDatabase, EnsembleDatabase, Versi
         String location = rs.getString("location");
         String parameter = rs.getString("parameter_name");
         String units = rs.getString("units");
-        String data_type = rs.getString("data_type");
-        String version = rs.getString("version");
+        String metric_type = rs.getString("metric_type");
         RecordIdentifier tsid = new RecordIdentifier(location, parameter);
 
-        MetricCollectionTimeSeries rval = new MetricCollectionTimeSeries(tsid, units, data_type, version);
+        MetricCollectionTimeSeries rval = new MetricCollectionTimeSeries(tsid, units, metric_type);
 
         return rval;
     }
@@ -637,10 +635,11 @@ public class JdbcDatabase implements PairedDataDatabase, EnsembleDatabase, Versi
         String compression = rs.getString("compression");
         String units = rs.getString("units");
         int interval_seconds = rs.getInt("interval_seconds");
+        String metricstats = rs.getString("statistics");
         byte[] byte_value_array = rs.getBytes("byte_value_array");
 
         float[][] values = TableCompression.UnPack(byte_value_array, member_count, member_length, compression);
-        String[] params = {"min", "max", "average"};//TODO: FIX this!
+        String[] params = metricstats.split(",");
         return new MetricCollection(issue_date, start_date, values, params); //Duration.ofSeconds(interval_seconds),units);
     }
     @Override

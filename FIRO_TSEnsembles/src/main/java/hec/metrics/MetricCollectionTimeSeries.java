@@ -1,5 +1,6 @@
 package hec.metrics;
 
+import hec.MetricDatabase;
 import hec.RecordIdentifier;
 
 import java.time.ZonedDateTime;
@@ -8,31 +9,25 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
-public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>
+public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>, Metrics
 {
 
     private RecordIdentifier timeseriesID;
     private String units;
-    private String dataType;
-    private String version;
-    //https://docs.oracle.com/javase/7/docs/api/java/util/TreeMap.html
+    private MetricTypes metricType;
     private TreeMap<ZonedDateTime,MetricCollection> items;
 
-    public int getCount()
+
+
+    public MetricCollectionTimeSeries(RecordIdentifier timeseriesID, String units, String metricType)
     {
-        return items.size();
+        init(timeseriesID,units,metricType);
     }
 
-    public MetricCollectionTimeSeries(RecordIdentifier timeseriesID, String units, String dataType, String version)
-    {
-        init(timeseriesID,units,dataType,version);
-    }
-
-    private void init(RecordIdentifier timeseriesID, String units, String dataType, String version) {
+    private void init(RecordIdentifier timeseriesID, String units, String dataType) {
         this.timeseriesID = timeseriesID;
         this.units = units;
-        this.dataType = dataType;
-        this.version = version;
+        this.metricType = MetricTypes.valueOf(dataType);
         items = new TreeMap<>();
     }
 
@@ -81,13 +76,10 @@ public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>
         return units;
     }
 
-    public String getDataType() {
-        return dataType;
+    public MetricTypes type() {
+        return metricType;
     }
 
-    public String getVersion() {
-        return version;
-    }
 
     public RecordIdentifier getTimeSeriesIdentifier() {
         return timeseriesID;

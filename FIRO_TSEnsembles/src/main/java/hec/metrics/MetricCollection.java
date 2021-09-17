@@ -5,30 +5,44 @@ import hec.stats.Configuration;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MetricCollection {
     public MetricCollectionTimeSeries parent;
     private Configuration _configuration;
     private float[][] metrics;
-    private ArrayList<ArrayList<Double>> deps = new ArrayList<>();
-    private ArrayList<String> dep_parameters = new ArrayList<>();
+    private String[] metric_statistics;
 
-    public MetricCollection(Configuration c, ArrayList<String> parameters)
+    public MetricCollection(Configuration c, String[] statistics)
     {
         this._configuration = c;
-        this.dep_parameters = parameters;
+        this.metric_statistics = statistics;
     }
-    public MetricCollection(ZonedDateTime issueDate,ZonedDateTime startDate, ArrayList<String> parameters)
+    public MetricCollection(ZonedDateTime issueDate,ZonedDateTime startDate, String[] statistics)
     {
-        this(new MetricsConfiguration(issueDate,startDate), parameters);
+        this(new MetricsConfiguration(issueDate,startDate), statistics);
     }
 
     public MetricCollection(ZonedDateTime issueDate, ZonedDateTime startDate, float[][] ensemble, String[] parameters) {
     }
     public int parameterIndex(String parameterName){
-        return dep_parameters.indexOf(parameterName);
+        int index = -1;
+        for (int i=0;i<metric_statistics.length;i++) {
+            if (metric_statistics[i].equals(parameterName)) {
+                index = i;
+                break;
+            }
+        }
+        return index;
     }
-
+    public String metricStatisticsToString(){
+        String s = "";
+        for (int i=0;i<metric_statistics.length;i++) {
+            s += metric_statistics[i] + ",";
+        }
+        s = s.substring(0,s.length()-1);
+        return s;
+    }
     public ZonedDateTime getIssueDate() {
         return _configuration.getIssueDate();
     }
