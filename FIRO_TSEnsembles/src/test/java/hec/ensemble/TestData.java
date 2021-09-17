@@ -1,8 +1,8 @@
 package hec.ensemble;
 
-import hec.JdbcDatabase;
 import hec.EnsembleDatabase;
 import hec.RecordIdentifier;
+import hec.SqliteDatabase;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -14,7 +14,7 @@ public class TestData {
     private static EnsembleDatabase getDatabase() {
         try {
             String fn = "src/test/resources/database/importCsvToDatabase.db";
-            EnsembleDatabase db = new JdbcDatabase(fn, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+            EnsembleDatabase db = new SqliteDatabase(fn, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
             return db;
         }catch (Exception e) {
             System.out.println(e.getMessage());

@@ -52,7 +52,7 @@ class RfcCsvFileTest {
             f.delete();
 
             DatabaseGenerator.createTestDatabase(fn,1);
-            EnsembleDatabase db  =new JdbcDatabase(fn, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+            EnsembleDatabase db  =new SqliteDatabase(fn, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
                     // --- READ
             RecordIdentifier tsid = new RecordIdentifier("Kanektok.SCRN2","flow");
             EnsembleTimeSeries ets =  db.getEnsembleTimeSeries(tsid);
