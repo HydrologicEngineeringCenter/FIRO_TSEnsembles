@@ -1,13 +1,10 @@
 package hec.stats;
 
-import hec.EnsembleDatabase;
-import hec.RecordIdentifier;
+
 import hec.ensemble.*;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.time.ZonedDateTime;
-import java.util.List;
+
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -28,7 +25,7 @@ class CumulativeFlowComputableTest {
             Ensemble e = TestData.getSampleEnsemble();
             Computable test = new CumulativeFlow("kcfs");
             float[] output = e.iterateForTimeAcrossTraces(test);
-            assertEquals(57.041683197021484, output[3]);
+            assertEquals(57.041683197021484*10, output[3], 0.001, "untolerable");
         } catch (Exception e) {
             Logger.logError(e);
             fail();
@@ -40,7 +37,7 @@ class CumulativeFlowComputableTest {
             Ensemble e = TestData.getSampleEnsemble();
             Computable test = new CumulativeFlow("kcfs");
             float[] output = e.iterateForTracesAcrossTime(test);//what does this even mean?
-            assertEquals(-3398.096923828125, output[3]);
+            assertEquals(-3398.096923828125*10, output[3], 0.001, "untolerable");//TestData database does not properly set units.
         } catch (Exception e) {
             Logger.logError(e);
             fail();
