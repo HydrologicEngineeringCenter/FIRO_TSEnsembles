@@ -1,7 +1,7 @@
 package hec.firoplugin;
 
-import hec.JdbcDatabase;
 import hec.RecordIdentifier;
+import hec.SqliteDatabase;
 import hec.ensemble.ui.EnsemblePicker;
 import hec.externalplugin.ExternalDataLocation;
 import hec.externalplugin.ExternalDataType;
@@ -81,14 +81,14 @@ public final class TsEnsembles_extGVplugin extends SelfRegisteringExternalDataPl
         if (returnValue == JFileChooser.APPROVE_OPTION)
         {
             String fileName = fileBrowser.getSelectedFile().getAbsolutePath();
-            JdbcDatabase db = null;
+            SqliteDatabase db = null;
             try {
-                db = new JdbcDatabase(fileName, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+                db = new SqliteDatabase(fileName, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
             } catch (Exception e) {
                 e.printStackTrace();
                 return retval;
             }
-            List<RecordIdentifier> locations = db.getTimeSeriesIDs();
+            List<RecordIdentifier> locations = db.getEnsembleTimeSeriesIDs();
             TableModel model = getTableModel(locations);
 
             // use dialog to pick ensemble
