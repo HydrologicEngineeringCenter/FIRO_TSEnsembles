@@ -3,6 +3,7 @@ package hec.ensemble;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.nio.file.FileAlreadyExistsException;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -62,7 +63,10 @@ class RfcCsvFileTest {
             float[][] data2 = e.getValues();
             AssertSCRN2(data2);
 
-        } catch (Exception e) {
+        }catch(FileAlreadyExistsException fae) {
+            Logger.logError(fae);
+        }
+        catch (Exception e) {
             Logger.logError(e);
             fail();
         }
