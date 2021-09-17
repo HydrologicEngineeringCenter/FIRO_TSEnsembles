@@ -89,7 +89,7 @@ public class EnsembleUtility {
     static void readModifyWrite(String fileName) throws Exception {
         long startTime = System.nanoTime();
         EnsembleDatabase db = new JdbcDatabase(fileName, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
-        List<RecordIdentifier> locations = db.getTimeSeriesIDs();
+        List<RecordIdentifier> locations = db.getEnsembleTimeSeriesIDs();
 
         ArrayList<EnsembleTimeSeries> etsList = new ArrayList<>();
         int count = 0;

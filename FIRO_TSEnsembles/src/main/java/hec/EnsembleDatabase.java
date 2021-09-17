@@ -5,10 +5,10 @@ import java.util.List;
 import hec.ensemble.*;
 
 public interface EnsembleDatabase extends AutoCloseable {
-    Ensemble getEnsemble(RecordIdentifier timeseriesID, ZonedDateTime issue_time);
-    EnsembleTimeSeries getEnsembleTimeSeries(RecordIdentifier timeseriesID);
-    List<ZonedDateTime> getEnsembleIssueDates(RecordIdentifier timeseriesID);
+    Ensemble getEnsemble(RecordIdentifier recordID, ZonedDateTime issue_time);
+    EnsembleTimeSeries getEnsembleTimeSeries(RecordIdentifier recordID);
+    List<ZonedDateTime> getEnsembleIssueDates(RecordIdentifier recordID);
     void write(EnsembleTimeSeries[] etsArray) throws Exception;
     void write(EnsembleTimeSeries ets) throws Exception;
-    List<RecordIdentifier> getTimeSeriesIDs();
+    List<RecordIdentifier> getEnsembleTimeSeriesIDs();
 }

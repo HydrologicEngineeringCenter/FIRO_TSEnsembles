@@ -1,7 +1,7 @@
 package hec.stats;
 
 public class MultiStatComputable implements MultiComputable{
-    MultiStat[] statSelection;
+    Statistics[] statSelection;
 
     /**
      * The MultiComputable interface is beneficial for creating multiple time series representations.
@@ -11,7 +11,7 @@ public class MultiStatComputable implements MultiComputable{
      * @param statSelection is expected to be a String
      */
 
-    public MultiStatComputable(MultiStat[] statSelection) {
+    public MultiStatComputable(Statistics[] statSelection) {
         this.statSelection = statSelection;
     }
 

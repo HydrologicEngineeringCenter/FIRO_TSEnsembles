@@ -13,7 +13,7 @@ import java.util.zip.GZIPOutputStream;
 
     /**
      * UnPack a GZIP a byte array
-     * returns a Table  (float[][])
+     * returns a 2d Array of float (float[rows][columns]) that is not jagged
      * @param data input byte array
      * @param rowCount number of rows to unpack to
      * @param columnCount number of columns to unpack to
@@ -32,7 +32,7 @@ import java.util.zip.GZIPOutputStream;
     }
 
     /**
-     * Pack an float[][] table into a byte array
+     * Pack an 2d float array (float[][]) into a 1d byte array blob
      * if compression is not defined the data is not compressed.
      *
      * @param data float[][] array to be compressed

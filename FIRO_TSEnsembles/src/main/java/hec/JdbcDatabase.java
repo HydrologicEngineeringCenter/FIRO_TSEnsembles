@@ -418,7 +418,7 @@ public class JdbcDatabase implements PairedDataDatabase, EnsembleDatabase, Versi
         ps_insertEnsemble.execute();
     }
     @Override
-    public List<RecordIdentifier> getTimeSeriesIDs() {
+    public List<RecordIdentifier> getEnsembleTimeSeriesIDs() {
 
         List<RecordIdentifier> rval = new ArrayList<>();
         String sql = "select location, parameter_name from " + ensembleTimeSeriesTableName
@@ -640,7 +640,7 @@ public class JdbcDatabase implements PairedDataDatabase, EnsembleDatabase, Versi
 
         float[][] values = TableCompression.UnPack(byte_value_array, member_count, member_length, compression);
         String[] params = metricstats.split(",");
-        return new MetricCollection(issue_date, start_date, values, params); //Duration.ofSeconds(interval_seconds),units);
+        return new MetricCollection(issue_date, start_date, params, values); //Duration.ofSeconds(interval_seconds),units);
     }
     @Override
     public List<RecordIdentifier> getMetricTimeSeriesIDs() {
