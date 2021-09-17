@@ -1,6 +1,6 @@
 package hec.ensemble;
 
-import hec.JdbcDatabase;
+import hec.SqliteDatabase;
 import hec.EnsembleDatabase;
 import hec.RecordIdentifier;
 
@@ -50,7 +50,7 @@ public class EnsembleUtility {
 
         CsvEnsembleReader csvReader = new CsvEnsembleReader(hefs_dir);
         EnsembleTimeSeries[] ets = csvReader.Read("RussianNapa", issueDate1, issueDate2);
-        EnsembleDatabase db = new JdbcDatabase(filename, JdbcDatabase.CREATION_MODE.CREATE_NEW);
+        EnsembleDatabase db = new SqliteDatabase(filename, SqliteDatabase.CREATION_MODE.CREATE_NEW);
         ZonedDateTime startDateTime = ZonedDateTime.of(1996, 12, 24, 12, 0, 0, 0, ZoneId.of("GMT"));
 
         // modify start/issue dates/ location
@@ -88,7 +88,7 @@ public class EnsembleUtility {
      */
     static void readModifyWrite(String fileName) throws Exception {
         long startTime = System.nanoTime();
-        EnsembleDatabase db = new JdbcDatabase(fileName, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+        EnsembleDatabase db = new SqliteDatabase(fileName, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
         List<RecordIdentifier> locations = db.getEnsembleTimeSeriesIDs();
 
         ArrayList<EnsembleTimeSeries> etsList = new ArrayList<>();
@@ -119,7 +119,7 @@ public class EnsembleUtility {
         f.delete();
 
         startTime = System.nanoTime();
-        JdbcDatabase dbaseOut = new JdbcDatabase(outputPath, JdbcDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
+        SqliteDatabase dbaseOut = new SqliteDatabase(outputPath, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
         dbaseOut.write(etsList.toArray(new EnsembleTimeSeries[0]));
         endTime = System.nanoTime();
         seconds = (endTime - startTime)/1000000.0/1000.0;

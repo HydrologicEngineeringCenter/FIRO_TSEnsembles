@@ -40,7 +40,7 @@ public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>, 
      */
     public void addMetricCollection(ZonedDateTime issueDate, float[][] metrics, ZonedDateTime startDate, String[] parameterNames)
     {
-        MetricCollection e = new MetricCollection(issueDate,startDate, metrics, parameterNames);
+        MetricCollection e = new MetricCollection(issueDate,startDate, parameterNames, metrics);
         addMetricCollection(e);
     }
     /**

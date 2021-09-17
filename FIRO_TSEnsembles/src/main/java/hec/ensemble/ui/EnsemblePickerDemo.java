@@ -44,7 +44,7 @@ public class EnsemblePickerDemo  extends  JFrame implements ActionListener {
         try {
             String fileName = "C:\\temp\\ResSim.db";
             JdbcDatabase db = new JdbcDatabase(fileName, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
-            List<RecordIdentifier> locations = db.getTimeSeriesIDs();
+            List<RecordIdentifier> locations = db.getEnsembleTimeSeriesIDs();
             TableModel model = getTableModel(locations);
 
             EnsemblePicker picker = new EnsemblePicker(this,model);

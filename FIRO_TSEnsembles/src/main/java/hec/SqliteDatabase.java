@@ -21,9 +21,9 @@ import hec.paireddata.*;
 import hec.metrics.*;
 
 /**
- * Read/write Ensembles to a JDBC database
+ * Read/write data to a Sqlite database
  */
-public class JdbcDatabase implements PairedDataDatabase, EnsembleDatabase, VersionableDatabase, MetricDatabase {
+public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, VersionableDatabase, MetricDatabase {
 
     public enum CREATION_MODE {
         CREATE_NEW, CREATE_NEW_OR_OPEN_EXISTING_UPDATE, CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE, OPEN_EXISTING_UPDATE,
@@ -51,7 +51,7 @@ public class JdbcDatabase implements PairedDataDatabase, EnsembleDatabase, Versi
      * @param creation_mode defines how to open, create, and update the @database
      * @throws Exception fails quickly
      */
-    public JdbcDatabase(String database, CREATION_MODE creation_mode) throws Exception {
+    public SqliteDatabase(String database, CREATION_MODE creation_mode) throws Exception {
         File f = new File(database);
         FileName = database;
         Properties prop = new Properties();

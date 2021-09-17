@@ -37,7 +37,7 @@ public class Testing {
 
             CsvEnsembleReader reader = new CsvEnsembleReader(CacheDir);
             EnsembleTimeSeries[] ets = reader.Read(name, t1, t2);
-            writeTime += ensembleWriter(fn, ets, JdbcDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE);
+            writeTime += ensembleWriter(fn, ets, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE);
             if( create)
                 create=false; // just create database on first pass
         }
@@ -57,11 +57,11 @@ public class Testing {
      * initial: 420 seconds to write a file 8.17 gb in size
      */
 
-    private double ensembleWriter(String fn, EnsembleTimeSeries[] ets, JdbcDatabase.CREATION_MODE creation_mode)
+    private double ensembleWriter(String fn, EnsembleTimeSeries[] ets, SqliteDatabase.CREATION_MODE creation_mode)
      throws Exception{
         //select id, issue_date,watershed, location_name, length(byte_value_array)  from timeseries_ensemble order by issue_date, watershed
         long start = System.currentTimeMillis();
-        try (JdbcDatabase db = new JdbcDatabase(fn,creation_mode)) {
+        try (SqliteDatabase db = new SqliteDatabase(fn,creation_mode)) {
             for (EnsembleTimeSeries e : ets) {
                 db.write(e);
             }
@@ -84,8 +84,8 @@ public class Testing {
 
         long start = System.currentTimeMillis();
         int count = 0;
-        try (JdbcDatabase db = new JdbcDatabase(fileName, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);){
-            List<RecordIdentifier> locations = db.getTimeSeriesIDs();
+        try (SqliteDatabase db = new SqliteDatabase(fileName, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);){
+            List<RecordIdentifier> locations = db.getEnsembleTimeSeriesIDs();
             for (RecordIdentifier tsid : locations) {
                 EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid, t1,t2);
                 if( ets.getCount() ==0 )
