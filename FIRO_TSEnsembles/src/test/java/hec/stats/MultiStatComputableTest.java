@@ -1,6 +1,5 @@
 package hec.stats;
 
-
 import hec.ensemble.*;
 import org.junit.jupiter.api.Test;
 

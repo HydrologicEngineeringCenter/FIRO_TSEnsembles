@@ -1,7 +1,5 @@
 package hec.stats;
 
-
-import hec.JdbcDatabase;
 import hec.EnsembleDatabase;
 import hec.RecordIdentifier;
 import hec.ensemble.*;
@@ -32,7 +30,7 @@ class MinComputableTest {
     @Test
     public void testMinWithEnsembleTimeAcrossTraces() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable test = new MinComputable();
             float[] output = e.iterateForTimeAcrossTraces(test);
             assertEquals(0.953000009059906, output[3]);
@@ -44,7 +42,7 @@ class MinComputableTest {
     @Test
     public void testMinWithEnsembleTracesAcrossTime() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable test = new MinComputable();
             float[] output = e.iterateForTracesAcrossTime(test);
             assertEquals(-4000, output[3]);
@@ -53,19 +51,4 @@ class MinComputableTest {
             fail();
         }
     }
-
-    private Ensemble getEnsemble() throws Exception {
-        String fn = TestingPaths.instance.getTempDir() + "/importCsvToDatabase.db";
-        File f = new File(fn);
-        if(!f.exists()) {
-            DatabaseGenerator.createTestDatabase(fn, 1);
-        }
-        EnsembleDatabase db = new JdbcDatabase(fn, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
-        // --- READ
-        RecordIdentifier tsid = new RecordIdentifier("Kanektok.SCRN2", "flow");
-        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
-        List<ZonedDateTime> issueDates = ets.getIssueDates();
-        return db.getEnsemble(tsid, issueDates.get(0));
-    }
-
 }

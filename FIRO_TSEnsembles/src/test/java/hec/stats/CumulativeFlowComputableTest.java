@@ -1,7 +1,5 @@
 package hec.stats;
 
-
-import hec.JdbcDatabase;
 import hec.EnsembleDatabase;
 import hec.RecordIdentifier;
 import hec.ensemble.*;
@@ -27,7 +25,7 @@ class CumulativeFlowComputableTest {
     @Test
     public void testCumulativeFlowWithEnsembleTimeAcrossTraces() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable test = new CumulativeFlow("kcfs");
             float[] output = e.iterateForTimeAcrossTraces(test);
             assertEquals(57.041683197021484, output[3]);
@@ -39,7 +37,7 @@ class CumulativeFlowComputableTest {
     @Test
     public void testCumulativeFlowWithEnsembleTracesAcrossTime() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable test = new CumulativeFlow("kcfs");
             float[] output = e.iterateForTracesAcrossTime(test);//what does this even mean?
             assertEquals(-3398.096923828125, output[3]);
@@ -49,18 +47,6 @@ class CumulativeFlowComputableTest {
         }
     }
 
-    private Ensemble getEnsemble() throws Exception {
-        String fn = TestingPaths.instance.getTempDir() + "/importCsvToDatabase.db";
-        File f = new File(fn);
-        if(!f.exists()) {
-            DatabaseGenerator.createTestDatabase(fn, 1);
-        }
-        EnsembleDatabase db = new JdbcDatabase(fn, JdbcDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
-        // --- READ
-        RecordIdentifier tsid = new RecordIdentifier("Kanektok.SCRN2", "flow");
-        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
-        List<ZonedDateTime> issueDates = ets.getIssueDates();
-        return db.getEnsemble(tsid, issueDates.get(0));
-    }
+
 
 }
