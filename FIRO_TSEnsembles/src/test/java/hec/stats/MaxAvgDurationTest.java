@@ -18,7 +18,7 @@ class MaxAvgDurationTest {
         test.configure(new EnsembleConfiguration(null, null, Duration.ofHours(3),""));
 
         float results = test.compute(num);
-        assertEquals(21, results);
+        assertEquals(25, results);
     }
     @Test
     public void testMaxAvgDurationSimpleArrayTens() {
