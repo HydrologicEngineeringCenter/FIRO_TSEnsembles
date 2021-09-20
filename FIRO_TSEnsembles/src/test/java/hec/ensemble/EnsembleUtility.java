@@ -1,7 +1,8 @@
 package hec.ensemble;
 
-import hec.JdbcTimeSeriesDatabase;
-import hec.TimeSeriesDatabase;
+import hec.SqliteDatabase;
+import hec.EnsembleDatabase;
+import hec.RecordIdentifier;
 
 import java.io.File;
 import java.time.ZoneId;
@@ -38,8 +39,8 @@ public class EnsembleUtility {
      * @return
      * @throws Exception
      */
-    static private TimeSeriesDatabase createTestDatabase(String hefs_dir,int numberOfDates, int numLocations,
-                                                         String filename) throws Exception {
+    static private EnsembleDatabase createTestDatabase(String hefs_dir, int numberOfDates, int numLocations,
+                                                       String filename) throws Exception {
 
         File f = new File(filename);
         if( f.exists())
@@ -49,7 +50,7 @@ public class EnsembleUtility {
 
         CsvEnsembleReader csvReader = new CsvEnsembleReader(hefs_dir);
         EnsembleTimeSeries[] ets = csvReader.Read("RussianNapa", issueDate1, issueDate2);
-        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(filename, JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);
+        EnsembleDatabase db = new SqliteDatabase(filename, SqliteDatabase.CREATION_MODE.CREATE_NEW);
         ZonedDateTime startDateTime = ZonedDateTime.of(1996, 12, 24, 12, 0, 0, 0, ZoneId.of("GMT"));
 
         // modify start/issue dates/ location
@@ -57,9 +58,9 @@ public class EnsembleUtility {
         List<EnsembleTimeSeries> outList = new ArrayList<EnsembleTimeSeries>();
         for (int i = 0; i <Math.min(ets.length,numLocations) ; i++) {
             EnsembleTimeSeries a = ets[i];
-            TimeSeriesIdentifier tsid = a.getTimeSeriesIdentifier();
+            RecordIdentifier tsid = a.getTimeSeriesIdentifier();
             if( i == 0) {
-                tsid = new TimeSeriesIdentifier("Coyote.fake_forecast","flow");
+                tsid = new RecordIdentifier("Coyote.fake_forecast","flow");
             }
             List<ZonedDateTime> dates = a.getIssueDates();
 
@@ -87,12 +88,12 @@ public class EnsembleUtility {
      */
     static void readModifyWrite(String fileName) throws Exception {
         long startTime = System.nanoTime();
-        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
-        List<TimeSeriesIdentifier> locations = db.getTimeSeriesIDs();
+        EnsembleDatabase db = new SqliteDatabase(fileName, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+        List<RecordIdentifier> locations = db.getEnsembleTimeSeriesIDs();
 
         ArrayList<EnsembleTimeSeries> etsList = new ArrayList<>();
         int count = 0;
-        for(TimeSeriesIdentifier tsid: locations) {
+        for(RecordIdentifier tsid: locations) {
             System.out.println(tsid.toString());
             EnsembleTimeSeries etsr = db.getEnsembleTimeSeries(tsid);
             EnsembleTimeSeries modifiedEts = new EnsembleTimeSeries(tsid,
@@ -118,7 +119,7 @@ public class EnsembleUtility {
         f.delete();
 
         startTime = System.nanoTime();
-        JdbcTimeSeriesDatabase dbaseOut = new JdbcTimeSeriesDatabase(outputPath, JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
+        SqliteDatabase dbaseOut = new SqliteDatabase(outputPath, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
         dbaseOut.write(etsList.toArray(new EnsembleTimeSeries[0]));
         endTime = System.nanoTime();
         seconds = (endTime - startTime)/1000000.0/1000.0;

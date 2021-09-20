@@ -1,17 +1,9 @@
 package hec.stats;
 
-
-import hec.JdbcTimeSeriesDatabase;
-import hec.TimeSeriesDatabase;
 import hec.ensemble.*;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import static hec.stats.MultiStat.*;
+import static hec.stats.Statistics.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -19,7 +11,7 @@ class MultiStatComputableTest {
 
     @Test
     public void testMultiStatComputeSimpleArrayMinTwoStat() {
-        MultiComputable test = new MultiStatComputable(new MultiStat[] {MIN, MEAN});
+        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MEAN});
         float[] num = {1,2,3,4,5,6,7,8};
         float[] results = test.MultiCompute(num);
         assertEquals(1, results[0]);
@@ -28,14 +20,14 @@ class MultiStatComputableTest {
     }
     @Test
     public void testMultiStatComputeSimpleArrayTensMedianOneStat() {
-        MultiComputable test = new MultiStatComputable(new MultiStat[] {MIN});
+        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN});
         float[] num = {10,30,45,80,50};
         float[] results = test.MultiCompute(num);
         assertEquals(10, results[0]);
     }
     @Test
     public void testMultiStatComputeSimpleArrayTensMedianThreeStat() {
-        MultiComputable test = new MultiStatComputable(new MultiStat[] {MIN, MEAN, MAX});
+        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MEAN, MAX});
         float[] num = {10,30,45,80,50};
         float[] results = test.MultiCompute(num);
         assertEquals(10, results[0]);
@@ -46,7 +38,7 @@ class MultiStatComputableTest {
     public void testMultiStatWithEnsembleTimeAcrossTracesMin() {
         try {
             Ensemble e = TestData.getSampleEnsemble();
-            MultiComputable test = new MultiStatComputable(new MultiStat[] {MIN, MEAN, MAX});
+            MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MEAN, MAX});
             float[][] output = e.multiComputeForTracesAcrossTime(test);
             float[] value1 = output[3];
             assertEquals(-4000, value1[0]);

@@ -18,11 +18,13 @@ import java.util.stream.Collectors;
 
 import hec.ensemble.*;
 import hec.paireddata.*;
+import hec.metrics.*;
+import hec.stats.Statistics;
 
 /**
- * Read/write Ensembles to a JDBC database
+ * Read/write data to a Sqlite database
  */
-public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
+public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, VersionableDatabase, MetricDatabase {
 
     public enum CREATION_MODE {
         CREATE_NEW, CREATE_NEW_OR_OPEN_EXISTING_UPDATE, CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE, OPEN_EXISTING_UPDATE,
@@ -31,13 +33,18 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
 
     private static String ensembleTableName = "ensemble";
     private static String ensembleTimeSeriesTableName = "ensemble_timeseries";
+    private static String metricCollectionTableName = "metrics";
+    private static String metricCollectionTimeSeriesTableName = "metrics_timeseries";
 
     private String FileName;
     private String version;
     Connection _connection;
 
     PreparedStatement prefix_name_stmt = null;
-
+    private PreparedStatement ps_insertEnsembleCollection;
+    private PreparedStatement ps_insertEnsemble;
+    private PreparedStatement ps_insertMetricCollection;
+    private PreparedStatement ps_insertMetricCollectionTimeSeries;
     /**
      * constructor for JdbcTimeSeriesDatabase
      *
@@ -45,7 +52,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
      * @param creation_mode defines how to open, create, and update the @database
      * @throws Exception fails quickly
      */
-    public JdbcTimeSeriesDatabase(String database, CREATION_MODE creation_mode) throws Exception {
+    public SqliteDatabase(String database, CREATION_MODE creation_mode) throws Exception {
         File f = new File(database);
         FileName = database;
         Properties prop = new Properties();
@@ -107,7 +114,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         prefix_name_stmt = _connection.prepareStatement("select table_prefix from table_types where name = ?");
 
     }
-
+    //region UtilityFunctions
     private String getCurrentVersionFromDB(){
         try(Statement version_query = _connection.createStatement()){
             ResultSet rs = version_query.executeQuery("select version from version");
@@ -117,8 +124,6 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
             return "20200101";
         }        
     }
-
-
     private String updateTables() {
         /**
          * This is the default but we really want to make sure this is set here or we
@@ -150,226 +155,6 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         
         return versions.get(versions.size()-1);
     }
-
-
-
-
-    @Override
-    public void close() throws Exception {
-        _connection.commit();
-        _connection.close();
-    }
-
-    @Override
-    public String getVersion() {
-        return this.version;
-    }
-
-    @Override
-    public void write(EnsembleTimeSeries ets) throws Exception {
-        write(new EnsembleTimeSeries[] { ets });
-    }
-
-    @Override
-    public void write(EnsembleTimeSeries[] etsArray) throws Exception {
-        String compress = "gzip";
-        int timeseries_ensemble_id = GetMaxID(ensembleTableName);
-        int timeseries_ensemble_collection_id = GetMaxID(ensembleTimeSeriesTableName);
-        for (EnsembleTimeSeries ets : etsArray) {
-            List<ZonedDateTime> issueDates = ets.getIssueDates();
-            InsertEnsembleCollection(++timeseries_ensemble_collection_id, ets.getTimeSeriesIdentifier(), ets.getUnits(),
-                    ets.getDataType(), ets.getVersion());
-            for (int i = 0; i < issueDates.size(); i++) {
-                ZonedDateTime t = issueDates.get(i);
-                Ensemble e = ets.getEnsemble(t);
-                float[][] data = e.getValues();
-                byte[] bytes = EnsembleCompression.Pack(data, compress);
-                InsertEnsemble(++timeseries_ensemble_id, timeseries_ensemble_collection_id, e.getIssueDate(),
-                        e.getStartDateTime(), data[0].length, data.length, compress, e.getInterval().getSeconds(),
-                        bytes);
-            }
-        }
-        _connection.commit();
-    }
-
-
-    /**
-     * Gets EnsembleTimeSeries, loading ensembles into memory
-     *
-     * @param timeseriesID TimeSeriesIdentifier
-     * @return returns @EnsembleTimeSeries
-     */
-    @Override
-    public EnsembleTimeSeries getEnsembleTimeSeries(TimeSeriesIdentifier timeseriesID) {
-        String sql = "select * from view_ensemble WHERE location = ? "
-                + " AND parameter_name = ? ";
-        return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
-    }
-
-    /**
-     * Gets EnsembleTimeSeries, loading ensembles into memory.
-     *
-     * @param timeseriesID TimeSeriesIdentifier
-     * @param issueDateStart starting DateTime
-     * @param issueDateEnd ending DateTime
-     * @return returns @EnsembleTimeSeries
-     */
-    public EnsembleTimeSeries getEnsembleTimeSeries(TimeSeriesIdentifier timeseriesID,
-            ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
-
-        String sql = "select * from  view_ensemble " + " WHERE issue_datetime  >= '"
-                + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
-                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location = ? " + " AND parameter_name = ? ";
-        sql += " order by issue_datetime";
-
-        return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
-    }
-
-    private EnsembleTimeSeries readEnsembleTimeSeriesFromDB(TimeSeriesIdentifier timeseriesID, String sql) {
-        EnsembleTimeSeries rval =null;
-        try {
-            PreparedStatement statement = _connection.prepareStatement(sql);
-            statement.setString(1, timeseriesID.location);
-            statement.setString(2, timeseriesID.parameter);
-
-            ResultSet rs = statement.executeQuery();
-            boolean firstRow = true;
-            // loop through the result set
-            while (rs.next()) {
-                int ensemble_timeseries_id = rs.getInt("ensemble_timeseries_id");
-                // first pass get the location,parameter_name, units, and data_type
-                if (firstRow) {
-                    rval = createEnsembleTimeSeries(rs);
-                    firstRow = false;
-                }
-                Ensemble e = getEnsemble(rs);
-                rval.addEnsemble(e);
-            }
-        } catch (Exception e) {
-            Logger.logError(e.getMessage());
-        }
-        return rval;
-    }
-
-    private EnsembleTimeSeries createEnsembleTimeSeries(ResultSet rs) throws SQLException {
-
-        String location = rs.getString("location");
-        String parameter = rs.getString("parameter_name");
-        String units = rs.getString("units");
-        String data_type = rs.getString("data_type");
-        String version = rs.getString("version");
-        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier(location, parameter);
-
-        EnsembleTimeSeries rval = new EnsembleTimeSeries(tsid, units, data_type, version);
-
-        return rval;
-    }
-
-    /**
-     * read an Ensemble from the database
-     *
-     * @param timeseriesID TimeSeriesIdentifier
-     * @param issueDate ZonedDateTime
-     * @return Ensemble at the issueDateStart
-     */
-    public Ensemble getEnsemble(TimeSeriesIdentifier timeseriesID, ZonedDateTime issueDate) {
-        return getEnsemble(timeseriesID, issueDate, issueDate);
-    }
-
-    /**
-     * read an Ensemble from the database
-     *
-     * @param timeseriesID  TimeSeriesIdentifier
-     * @param issueDateStart ZonedDateTime
-     * @param issueDateEnd ZonedDateTime
-     * @return first Ensemble in the time range specified.
-     */
-    public Ensemble getEnsemble(TimeSeriesIdentifier timeseriesID, ZonedDateTime issueDateStart,
-            ZonedDateTime issueDateEnd) {
-
-        String sql = "select * from  view_ensemble " + " WHERE issue_datetime  >= '"
-                + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
-                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location = ? " + " AND parameter_name = ? ";
-        sql += " order by issue_datetime";
-
-        Ensemble rval = null;
-        try {
-            PreparedStatement statement = _connection.prepareStatement(sql);
-            statement.setString(1, timeseriesID.location);
-            statement.setString(2, timeseriesID.parameter);
-
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                rval = getEnsemble(rs);
-                return rval;
-            }
-        } catch (Exception e) {
-            Logger.logError(e.getMessage());
-        }
-        return rval;
-    }
-
-    private Ensemble getEnsemble(ResultSet rs) throws SQLException {
-        int ensemble_timeseries_id = rs.getInt("ensemble_timeseries_id");
-        String d = rs.getString("issue_datetime");
-        ZonedDateTime issue_date = DateUtility.parseDateTime(d);
-        d = rs.getString("start_datetime");
-        ZonedDateTime start_date = DateUtility.parseDateTime(d);
-        int member_length = rs.getInt("member_length");
-        int member_count = rs.getInt("member_count");
-        String compression = rs.getString("compression");
-        String units = rs.getString("units");
-        int interval_seconds = rs.getInt("interval_seconds");
-        byte[] byte_value_array = rs.getBytes("byte_value_array");
-
-        float[][] values = EnsembleCompression.UnPack(byte_value_array, member_count, member_length, compression);
-
-        return new Ensemble(issue_date, values, start_date, Duration.ofSeconds(interval_seconds),units);
-    }
-
-    private PreparedStatement ps_insertEnsembleCollection;
-
-    private void InsertEnsembleCollection(int id, TimeSeriesIdentifier timeseries_id, String units, String data_type,
-            String version) throws Exception {
-        if (ps_insertEnsembleCollection == null) {
-            String sql = "INSERT INTO " + ensembleTimeSeriesTableName + " ([id], [location], " + " [parameter_name], "
-                    + " [units], [data_type], [version]) VALUES " + "(?, ?, ?, ?, ?, ?)";
-            ps_insertEnsembleCollection = _connection.prepareStatement(sql);
-        }
-
-        ps_insertEnsembleCollection.setInt(1, id);
-        ps_insertEnsembleCollection.setString(2, timeseries_id.location);
-        ps_insertEnsembleCollection.setString(3, timeseries_id.parameter);
-        ps_insertEnsembleCollection.setString(4, units);
-        ps_insertEnsembleCollection.setString(5, data_type);
-        ps_insertEnsembleCollection.setString(6, version);
-        ps_insertEnsembleCollection.execute();
-    }
-
-    private PreparedStatement ps_insertEnsemble;
-
-    private void InsertEnsemble(int id, int ensemble_timeseries_id, ZonedDateTime issue_datetime,
-            ZonedDateTime start_datetime, int member_length, int member_count, String compression,
-            long interval_seconds, byte[] byte_value_array) throws Exception {
-        if (ps_insertEnsemble == null) {
-            String sql = "INSERT INTO " + ensembleTableName + " ([id], [ensemble_timeseries_id],[issue_datetime], "
-                    + " [start_datetime], [member_length], [member_count], [compression], [interval_seconds], "
-                    + "[byte_value_array]) VALUES " + "(?, ?, ?, ?, ?, ?, ?, ?,? )";
-            ps_insertEnsemble = _connection.prepareStatement(sql);
-        }
-
-        ps_insertEnsemble.setInt(1, id);
-        ps_insertEnsemble.setInt(2, ensemble_timeseries_id);
-        ps_insertEnsemble.setString(3, DateUtility.formatDate(issue_datetime));
-        ps_insertEnsemble.setString(4, DateUtility.formatDate(start_datetime));
-        ps_insertEnsemble.setInt(5, member_length);
-        ps_insertEnsemble.setInt(6, member_count);
-        ps_insertEnsemble.setString(7, compression);
-        ps_insertEnsemble.setLong(8, interval_seconds);
-        ps_insertEnsemble.setBytes(9, byte_value_array);
-        ps_insertEnsemble.execute();
-    }
-
     private int GetMaxID(String tableName) {
         PreparedStatement p;
         try {
@@ -407,7 +192,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
             return version;
         } catch( SQLException err ){
             return "20200101";
-        }        
+        }
     }
 
     private void runResourceSQLScript(String resource) {
@@ -425,18 +210,218 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
             if (s.isEmpty() || s.startsWith("--") || s.startsWith("\r") || s.startsWith("\n"))
                 continue;
             try(PreparedStatement cmd = _connection.prepareStatement(s);){
-                cmd.execute();                
+                cmd.execute();
             } catch (SQLException e) {
                 throw new RuntimeException("unable to run update script "+resource,e);
             }
         }
     }
-
+    //endregion
+    //region Autoclosable
+    @Override
+    public void close() throws Exception {
+        _connection.commit();
+        _connection.close();
+    }
+    //endregion
+    //region EnsembleDatabase
+    @Override
+    public void write(EnsembleTimeSeries ets) throws Exception {
+        write(new EnsembleTimeSeries[] { ets });
+    }
 
     @Override
-    public List<TimeSeriesIdentifier> getTimeSeriesIDs() {
+    public void write(EnsembleTimeSeries[] etsArray) throws Exception {
+        String compress = "gzip";
+        int timeseries_ensemble_id = GetMaxID(ensembleTableName);
+        int timeseries_ensemble_collection_id = GetMaxID(ensembleTimeSeriesTableName);
+        for (EnsembleTimeSeries ets : etsArray) {
+            List<ZonedDateTime> issueDates = ets.getIssueDates();
+            InsertEnsembleCollection(++timeseries_ensemble_collection_id, ets.getTimeSeriesIdentifier(), ets.getUnits(),
+                    ets.getDataType(), ets.getVersion());
+            for (int i = 0; i < issueDates.size(); i++) {
+                ZonedDateTime t = issueDates.get(i);
+                Ensemble e = ets.getEnsemble(t);
+                float[][] data = e.getValues();
+                byte[] bytes = TableCompression.Pack(data, compress);
+                InsertEnsemble(++timeseries_ensemble_id, timeseries_ensemble_collection_id, e.getIssueDate(),
+                        e.getStartDateTime(), data[0].length, data.length, compress, e.getInterval().getSeconds(),
+                        bytes);
+            }
+        }
+        _connection.commit();
+    }
+    /**
+     * Gets EnsembleTimeSeries, loading ensembles into memory
+     *
+     * @param timeseriesID TimeSeriesIdentifier
+     * @return returns @EnsembleTimeSeries
+     */
+    @Override
+    public EnsembleTimeSeries getEnsembleTimeSeries(RecordIdentifier timeseriesID) {
+        String sql = "select * from view_ensemble WHERE location = ? "
+                + " AND parameter_name = ? ";
+        return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
+    }
+    /**
+     * Gets EnsembleTimeSeries, loading ensembles into memory.
+     *
+     * @param timeseriesID TimeSeriesIdentifier
+     * @param issueDateStart starting DateTime
+     * @param issueDateEnd ending DateTime
+     * @return returns @EnsembleTimeSeries
+     */
+    public EnsembleTimeSeries getEnsembleTimeSeries(RecordIdentifier timeseriesID,
+                                                    ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
 
-        List<TimeSeriesIdentifier> rval = new ArrayList<>();
+        String sql = "select * from  view_ensemble " + " WHERE issue_datetime  >= '"
+                + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
+                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location = ? " + " AND parameter_name = ? ";
+        sql += " order by issue_datetime";
+
+        return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
+    }
+    private EnsembleTimeSeries readEnsembleTimeSeriesFromDB(RecordIdentifier timeseriesID, String sql) {
+        EnsembleTimeSeries rval =null;
+        try {
+            PreparedStatement statement = _connection.prepareStatement(sql);
+            statement.setString(1, timeseriesID.location);
+            statement.setString(2, timeseriesID.parameter);
+
+            ResultSet rs = statement.executeQuery();
+            boolean firstRow = true;
+            // loop through the result set
+            while (rs.next()) {
+                int ensemble_timeseries_id = rs.getInt("ensemble_timeseries_id");
+                // first pass get the location,parameter_name, units, and data_type
+                if (firstRow) {
+                    rval = createEnsembleTimeSeries(rs);
+                    firstRow = false;
+                }
+                Ensemble e = getEnsemble(rs);
+                rval.addEnsemble(e);
+            }
+        } catch (Exception e) {
+            Logger.logError(e.getMessage());
+        }
+        return rval;
+    }
+    private EnsembleTimeSeries createEnsembleTimeSeries(ResultSet rs) throws SQLException {
+
+        String location = rs.getString("location");
+        String parameter = rs.getString("parameter_name");
+        String units = rs.getString("units");
+        String data_type = rs.getString("data_type");
+        String version = rs.getString("version");
+        RecordIdentifier tsid = new RecordIdentifier(location, parameter);
+
+        EnsembleTimeSeries rval = new EnsembleTimeSeries(tsid, units, data_type, version);
+
+        return rval;
+    }
+
+    /**
+     * read an Ensemble from the database
+     *
+     * @param timeseriesID TimeSeriesIdentifier
+     * @param issueDate ZonedDateTime
+     * @return Ensemble at the issueDateStart
+     */
+    public Ensemble getEnsemble(RecordIdentifier timeseriesID, ZonedDateTime issueDate) {
+        return getEnsemble(timeseriesID, issueDate, issueDate);
+    }
+
+    /**
+     * read an Ensemble from the database
+     *
+     * @param timeseriesID  TimeSeriesIdentifier
+     * @param issueDateStart ZonedDateTime
+     * @param issueDateEnd ZonedDateTime
+     * @return first Ensemble in the time range specified.
+     */
+    public Ensemble getEnsemble(RecordIdentifier timeseriesID, ZonedDateTime issueDateStart,
+                                ZonedDateTime issueDateEnd) {
+
+        String sql = "select * from  view_ensemble " + " WHERE issue_datetime  >= '"
+                + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
+                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location = ? " + " AND parameter_name = ? ";
+        sql += " order by issue_datetime";
+
+        Ensemble rval = null;
+        try {
+            PreparedStatement statement = _connection.prepareStatement(sql);
+            statement.setString(1, timeseriesID.location);
+            statement.setString(2, timeseriesID.parameter);
+
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                rval = getEnsemble(rs);
+                return rval;
+            }
+        } catch (Exception e) {
+            Logger.logError(e.getMessage());
+        }
+        return rval;
+    }
+
+    private Ensemble getEnsemble(ResultSet rs) throws SQLException {
+        int ensemble_timeseries_id = rs.getInt("ensemble_timeseries_id");
+        String d = rs.getString("issue_datetime");
+        ZonedDateTime issue_date = DateUtility.parseDateTime(d);
+        d = rs.getString("start_datetime");
+        ZonedDateTime start_date = DateUtility.parseDateTime(d);
+        int member_length = rs.getInt("member_length");
+        int member_count = rs.getInt("member_count");
+        String compression = rs.getString("compression");
+        String units = rs.getString("units");
+        int interval_seconds = rs.getInt("interval_seconds");
+        byte[] byte_value_array = rs.getBytes("byte_value_array");
+
+        float[][] values = TableCompression.UnPack(byte_value_array, member_count, member_length, compression);
+
+        return new Ensemble(issue_date, values, start_date, Duration.ofSeconds(interval_seconds),units);
+    }
+    private void InsertEnsembleCollection(int id, RecordIdentifier timeseries_id, String units, String data_type,
+                                          String version) throws Exception {
+        if (ps_insertEnsembleCollection == null) {
+            String sql = "INSERT INTO " + ensembleTimeSeriesTableName + " ([id], [location], " + " [parameter_name], "
+                    + " [units], [data_type], [version]) VALUES " + "(?, ?, ?, ?, ?, ?)";
+            ps_insertEnsembleCollection = _connection.prepareStatement(sql);
+        }
+
+        ps_insertEnsembleCollection.setInt(1, id);
+        ps_insertEnsembleCollection.setString(2, timeseries_id.location);
+        ps_insertEnsembleCollection.setString(3, timeseries_id.parameter);
+        ps_insertEnsembleCollection.setString(4, units);
+        ps_insertEnsembleCollection.setString(5, data_type);
+        ps_insertEnsembleCollection.setString(6, version);
+        ps_insertEnsembleCollection.execute();
+    }
+    private void InsertEnsemble(int id, int ensemble_timeseries_id, ZonedDateTime issue_datetime,
+            ZonedDateTime start_datetime, int member_length, int member_count, String compression,
+            long interval_seconds, byte[] byte_value_array) throws Exception {
+        if (ps_insertEnsemble == null) {
+            String sql = "INSERT INTO " + ensembleTableName + " ([id], [ensemble_timeseries_id],[issue_datetime], "
+                    + " [start_datetime], [member_length], [member_count], [compression], [interval_seconds], "
+                    + "[byte_value_array]) VALUES " + "(?, ?, ?, ?, ?, ?, ?, ?,? )";
+            ps_insertEnsemble = _connection.prepareStatement(sql);
+        }
+
+        ps_insertEnsemble.setInt(1, id);
+        ps_insertEnsemble.setInt(2, ensemble_timeseries_id);
+        ps_insertEnsemble.setString(3, DateUtility.formatDate(issue_datetime));
+        ps_insertEnsemble.setString(4, DateUtility.formatDate(start_datetime));
+        ps_insertEnsemble.setInt(5, member_length);
+        ps_insertEnsemble.setInt(6, member_count);
+        ps_insertEnsemble.setString(7, compression);
+        ps_insertEnsemble.setLong(8, interval_seconds);
+        ps_insertEnsemble.setBytes(9, byte_value_array);
+        ps_insertEnsemble.execute();
+    }
+    @Override
+    public List<RecordIdentifier> getEnsembleTimeSeriesIDs() {
+
+        List<RecordIdentifier> rval = new ArrayList<>();
         String sql = "select location, parameter_name from " + ensembleTimeSeriesTableName
                 + " order by location,parameter_name";
         try {
@@ -444,7 +429,7 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
             ResultSet rs = stmt.executeQuery();
             // loop through the result set
             while (rs.next()) {
-                TimeSeriesIdentifier tsid = new TimeSeriesIdentifier(rs.getString(1), rs.getString(2));
+                RecordIdentifier tsid = new RecordIdentifier(rs.getString(1), rs.getString(2));
                 rval.add(tsid);
             }
         } catch (Exception e) {
@@ -452,24 +437,8 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         }
         return rval;
     }
-
     @Override
-    public int getCount(TimeSeriesIdentifier timeseriesID) {
-        PreparedStatement p = null;
-        try {
-            String sql = "SELECT count(issue_datetime) from view_ensemble "
-                    + " Where location = ?  AND  parameter_name = ?";
-            p = _connection.prepareStatement(sql);
-            p.setString(1, timeseriesID.location);
-            p.setString(2, timeseriesID.parameter);
-        } catch (Exception e) {
-            Logger.logError(e);
-        }
-        return ScalarQuery(p);
-    }
-
-    @Override
-    public List<ZonedDateTime> getEnsembleIssueDates(TimeSeriesIdentifier timeseriesID) {
+    public List<ZonedDateTime> getEnsembleIssueDates(RecordIdentifier timeseriesID) {
         List<ZonedDateTime> rval = new ArrayList<>();
         PreparedStatement p = null;
         try {
@@ -488,19 +457,244 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         }
         return rval;
     }
-
-    public PairedData getPairedData(TimeSeriesIdentifier id) {
-        // TODO Auto-generated method stub
-        return null;
+    //endregion
+    //region MetricDatabase
+    @Override
+    public void write(MetricCollectionTimeSeries mts) throws Exception {
+        write(new MetricCollectionTimeSeries[] { mts });
     }
 
+    @Override
+    public void write(MetricCollectionTimeSeries[] mtsArray) throws Exception {
+        String compress = "gzip";
+        int mc_id = GetMaxID(metricCollectionTableName);
+        int mc_ts_id = GetMaxID(metricCollectionTimeSeriesTableName);
+        for (MetricCollectionTimeSeries mts : mtsArray) {
+            List<ZonedDateTime> issueDates = mts.getIssueDates();
+            InsertMetricCollectionTimeSeries(++mc_ts_id, mts.getTimeSeriesIdentifier(), mts.getUnits(),
+                    mts.type());
+            for (int i = 0; i < issueDates.size(); i++) {
+                ZonedDateTime t = issueDates.get(i);
+                MetricCollection mc = mts.getMetricCollection(t);
+                float[][] data = mc.getValues();
+                byte[] bytes = TableCompression.Pack(data, compress);
+                InsertMetricCollection(++mc_id, mc_ts_id, mc.getIssueDate(),
+                        mc.getStartDateTime(), data[0].length, data.length, compress, mc.getInterval().getSeconds(), mc.metricStatisticsToString(),
+                        bytes);
+            }
+        }
+        _connection.commit();
+    }
+    private void InsertMetricCollectionTimeSeries(int id, RecordIdentifier record_id, String units, MetricTypes metric_type) throws Exception {
+        if (ps_insertMetricCollectionTimeSeries == null) {
+            String sql = "INSERT INTO " + metricCollectionTimeSeriesTableName + " ([id], [location], [parameter_name], "
+                    + " [units], [metric_type]) VALUES " + "(?, ?, ?, ?, ?)";
+            ps_insertMetricCollectionTimeSeries = _connection.prepareStatement(sql);
+        }
+
+        ps_insertMetricCollectionTimeSeries.setInt(1, id);
+        ps_insertMetricCollectionTimeSeries.setString(2, record_id.location);
+        ps_insertMetricCollectionTimeSeries.setString(3, record_id.parameter);
+        ps_insertMetricCollectionTimeSeries.setString(4, units);
+        ps_insertMetricCollectionTimeSeries.setString(5, metric_type.name());
+        ps_insertMetricCollectionTimeSeries.execute();
+    }
+    private void InsertMetricCollection(int id, int ts_id, ZonedDateTime issue_datetime,
+                                ZonedDateTime start_datetime, int member_length, int member_count, String compression,
+                                long interval_seconds, String statistics, byte[] byte_value_array) throws Exception {
+        if (ps_insertMetricCollection == null) {
+            String sql = "INSERT INTO " + metricCollectionTableName + " ([id], [metriccollection_timeseries_id],[issue_datetime], "
+                    + " [start_datetime], [member_length], [member_count], [compression], [interval_seconds], [statistics], "
+                    + "[byte_value_array]) VALUES " + "(?, ?, ?, ?, ?, ?, ?, ?,? )";
+            ps_insertMetricCollection = _connection.prepareStatement(sql);
+        }
+
+        ps_insertMetricCollection.setInt(1, id);
+        ps_insertMetricCollection.setInt(2, ts_id);
+        ps_insertMetricCollection.setString(3, DateUtility.formatDate(issue_datetime));
+        ps_insertMetricCollection.setString(4, DateUtility.formatDate(start_datetime));
+        ps_insertMetricCollection.setInt(5, member_length);
+        ps_insertMetricCollection.setInt(6, member_count);
+        ps_insertMetricCollection.setString(7, compression);
+        ps_insertMetricCollection.setLong(8, interval_seconds);
+        ps_insertMetricCollection.setString(9, statistics);
+        ps_insertMetricCollection.setBytes(10, byte_value_array);
+        ps_insertMetricCollection.execute();
+    }
+    /**
+     * Gets EnsembleTimeSeries, loading ensembles into memory
+     *
+     * @param timeseriesID TimeSeriesIdentifier
+     * @return returns @EnsembleTimeSeries
+     */
+    @Override
+    public MetricCollectionTimeSeries getMetricCollectionTimeSeries(RecordIdentifier timeseriesID) {
+        String sql = "select * from view_metriccollection WHERE location = ? "
+                + " AND parameter_name = ? ";
+        return readMetricCollectionTimeSeriesFromDB(timeseriesID, sql);
+    }
+
+    public MetricCollectionTimeSeries getMetricCollectionTimeSeries(RecordIdentifier timeseriesID,
+                                                                    ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
+
+        String sql = "select * from  view_metriccollection " + " WHERE issue_datetime  >= '"
+                + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
+                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location = ? " + " AND parameter_name = ? ";
+        sql += " order by issue_datetime";
+
+        return readMetricCollectionTimeSeriesFromDB(timeseriesID, sql);
+    }
+    private MetricCollectionTimeSeries readMetricCollectionTimeSeriesFromDB(RecordIdentifier timeseriesID, String sql) {
+        MetricCollectionTimeSeries rval =null;
+        try {
+            PreparedStatement statement = _connection.prepareStatement(sql);
+            statement.setString(1, timeseriesID.location);
+            statement.setString(2, timeseriesID.parameter);
+
+            ResultSet rs = statement.executeQuery();
+            boolean firstRow = true;
+            // loop through the result set
+            while (rs.next()) {
+                int mc_timeseries_id = rs.getInt("metriccollection_timeseries_id");
+                // first pass get the location,parameter_name, units, and data_type
+                if (firstRow) {
+                    rval = createMetricCollectionTimeSeries(rs);
+                    firstRow = false;
+                }
+                MetricCollection m = getMetricCollection(rs);
+                rval.addMetricCollection(m);
+            }
+        } catch (Exception e) {
+            Logger.logError(e.getMessage());
+        }
+        return rval;
+    }
+    private MetricCollectionTimeSeries createMetricCollectionTimeSeries(ResultSet rs) throws SQLException {
+
+        String location = rs.getString("location");
+        String parameter = rs.getString("parameter_name");
+        String units = rs.getString("units");
+        String metric_type = rs.getString("metric_type");
+        RecordIdentifier tsid = new RecordIdentifier(location, parameter);
+        MetricTypes ms = MetricTypes.valueOf(metric_type);
+        MetricCollectionTimeSeries rval = new MetricCollectionTimeSeries(tsid, units, ms);
+
+        return rval;
+    }
+
+    /**
+     * read an Ensemble from the database
+     *
+     * @param timeseriesID TimeSeriesIdentifier
+     * @param issueDate ZonedDateTime
+     * @return Ensemble at the issueDateStart
+     */
+    public MetricCollection getMetricCollection(RecordIdentifier timeseriesID, ZonedDateTime issueDate) {
+        return getMetricCollection(timeseriesID, issueDate, issueDate);
+    }
+
+    /**
+     * read an Ensemble from the database
+     *
+     * @param timeseriesID  TimeSeriesIdentifier
+     * @param issueDateStart ZonedDateTime
+     * @param issueDateEnd ZonedDateTime
+     * @return first Ensemble in the time range specified.
+     */
+    public MetricCollection getMetricCollection(RecordIdentifier timeseriesID, ZonedDateTime issueDateStart,
+                                                ZonedDateTime issueDateEnd) {
+
+        String sql = "select * from  view_metriccollection " + " WHERE issue_datetime  >= '"
+                + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
+                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location = ? " + " AND parameter_name = ? ";
+        sql += " order by issue_datetime";
+
+        MetricCollection rval = null;
+        try {
+            PreparedStatement statement = _connection.prepareStatement(sql);
+            statement.setString(1, timeseriesID.location);
+            statement.setString(2, timeseriesID.parameter);
+
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                rval = getMetricCollection(rs);
+                return rval;
+            }
+        } catch (Exception e) {
+            Logger.logError(e.getMessage());
+        }
+        return rval;
+    }
+
+    private MetricCollection getMetricCollection(ResultSet rs) throws SQLException {
+        String d = rs.getString("issue_datetime");
+        ZonedDateTime issue_date = DateUtility.parseDateTime(d);
+        d = rs.getString("start_datetime");
+        ZonedDateTime start_date = DateUtility.parseDateTime(d);
+        int member_length = rs.getInt("member_length");
+        int member_count = rs.getInt("member_count");
+        String compression = rs.getString("compression");
+        String units = rs.getString("units");
+        int interval_seconds = rs.getInt("interval_seconds");
+        String metricstats = rs.getString("statistics");
+        byte[] byte_value_array = rs.getBytes("byte_value_array");
+
+        float[][] values = TableCompression.UnPack(byte_value_array, member_count, member_length, compression);
+        String[] params = metricstats.split(",");
+        Statistics[] stats = new Statistics[params.length];
+        for (int i = 0; i < params.length; i++){
+            stats[i] = Statistics.valueOf(params[i]);
+        }
+        return new MetricCollection(issue_date, start_date, stats, values); //Duration.ofSeconds(interval_seconds),units);
+    }
+    @Override
+    public List<RecordIdentifier> getMetricTimeSeriesIDs() {
+
+        List<RecordIdentifier> rval = new ArrayList<>();
+        String sql = "select location, parameter_name from " + metricCollectionTimeSeriesTableName
+                + " order by location,parameter_name";
+        try {
+            PreparedStatement stmt = _connection.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            // loop through the result set
+            while (rs.next()) {
+                RecordIdentifier tsid = new RecordIdentifier(rs.getString(1), rs.getString(2));
+                rval.add(tsid);
+            }
+        } catch (Exception e) {
+            Logger.logError(e);
+        }
+        return rval;
+    }
+    @Override
+    public List<ZonedDateTime> getMetricCollectionIssueDates(RecordIdentifier timeseriesID) {
+        List<ZonedDateTime> rval = new ArrayList<>();
+        PreparedStatement p = null;
+        try {
+            String sql = "SELECT issue_datetime from view_metriccollection " + " Where location = ?  AND  parameter_name = ?";
+            p = _connection.prepareStatement(sql);
+            p.setString(1, timeseriesID.location);
+            p.setString(2, timeseriesID.parameter);
+
+            ResultSet rs = p.executeQuery();
+            while (rs.next()) {
+                ZonedDateTime t = DateUtility.parseDateTime(rs.getString("issue_datetime"));
+                rval.add(t);
+            }
+        } catch (Exception e) {
+            Logger.logError(e);
+        }
+        return rval;
+    }
+    //endregion
+    //region PairedDataDatabase
     @Override
     public PairedData getPairedData(String table_name) {
         Statement get_table = null;
 
         try {
             String sql_table_table = getSQLTableName(table_name, "Paired Data");
-            PairedData pd = new PairedData(this, table_name);
+            PairedData pd = new PairedData(table_name);
             get_table = _connection.createStatement();
             ResultSet rs = get_table.executeQuery("select indep,dep from " + sql_table_table + " order by indep asc");
             while (rs.next()) {
@@ -592,7 +786,12 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
         }
         throw new TypeNotImplemented(type);
     }
-
+    //endregion
+    //region VersionedDatabase
+    @Override
+    public String getVersion() {
+        return this.version;
+    }
     @Override
     public List<String> getVersions(){
     ArrayList<String> list = new ArrayList<String>();
@@ -674,5 +873,5 @@ public class JdbcTimeSeriesDatabase extends TimeSeriesDatabase {
     private void updateFor20200224_to_20200227() {
 
     }
-
+    //endregion
 }

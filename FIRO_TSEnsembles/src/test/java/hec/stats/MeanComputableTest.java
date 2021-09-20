@@ -1,8 +1,7 @@
 package hec.stats;
 
-
-import hec.JdbcTimeSeriesDatabase;
-import hec.TimeSeriesDatabase;
+import hec.EnsembleDatabase;
+import hec.RecordIdentifier;
 import hec.ensemble.*;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +29,7 @@ class MeanComputableTest {
     @Test
     public void testMeanWithEnsembleTimeAcrossTraces() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable test = new MeanComputable();
             float[] output = e.iterateForTimeAcrossTraces(test);
             assertEquals(0.9668081998825073, output[3]);
@@ -42,7 +41,7 @@ class MeanComputableTest {
     @Test
     public void testMeanWithEnsembleTracesAcrossTime() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable test = new MeanComputable();
             float[] output = e.iterateForTracesAcrossTime(test);
             assertEquals(-10.0833740234375, output[3]);
@@ -50,20 +49,6 @@ class MeanComputableTest {
             Logger.logError(e);
             fail();
         }
-    }
-
-    private Ensemble getEnsemble() throws Exception {
-        String fn = TestingPaths.instance.getTempDir() + "/importCsvToDatabase.db";
-        File f = new File(fn);
-        if(!f.exists()) {
-            DatabaseGenerator.createTestDatabase(fn, 1);
-        }
-        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
-        // --- READ
-        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2", "flow");
-        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
-        List<ZonedDateTime> issueDates = ets.getIssueDates();
-        return db.getEnsemble(tsid, issueDates.get(0));
     }
 
 }

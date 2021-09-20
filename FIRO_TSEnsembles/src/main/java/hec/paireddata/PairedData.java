@@ -3,19 +3,10 @@ package hec.paireddata;
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
-import hec.TimeSeriesDatabase;
-
 public class PairedData {
     private String table_name = null;
-    private TimeSeriesDatabase database = null;
     private ArrayList<Double> indeps = new ArrayList<>();
     private ArrayList<Double> deps = new ArrayList<>();
-
-    public PairedData(TimeSeriesDatabase db, String table_name) {
-        this.database = db;
-        this.table_name = table_name;    
-    }
-
     public PairedData(String table_name) {
         this.table_name = table_name;        
     }

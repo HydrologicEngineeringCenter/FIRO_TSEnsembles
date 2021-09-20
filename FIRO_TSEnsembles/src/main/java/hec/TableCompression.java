@@ -1,4 +1,4 @@
-package hec.ensemble;
+package hec;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -8,12 +8,12 @@ import java.nio.ByteOrder;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
- public class EnsembleCompression {
+ public class TableCompression {
 
 
     /**
      * UnPack a GZIP a byte array
-     * returns an ensemble  (float[][])
+     * returns a 2d Array of float (float[rows][columns]) that is not jagged
      * @param data input byte array
      * @param rowCount number of rows to unpack to
      * @param columnCount number of columns to unpack to
@@ -32,7 +32,7 @@ import java.util.zip.GZIPOutputStream;
     }
 
     /**
-     * Pack an float[][] ensemble into a byte array
+     * Pack an 2d float array (float[][]) into a 1d byte array blob
      * if compression is not defined the data is not compressed.
      *
      * @param data float[][] array to be compressed

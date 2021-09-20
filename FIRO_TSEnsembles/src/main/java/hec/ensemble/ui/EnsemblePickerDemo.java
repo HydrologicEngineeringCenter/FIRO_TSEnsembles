@@ -1,7 +1,7 @@
 package hec.ensemble.ui;
 
-import hec.JdbcTimeSeriesDatabase;
-import hec.ensemble.TimeSeriesIdentifier;
+import hec.SqliteDatabase;
+import hec.RecordIdentifier;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -43,8 +43,8 @@ public class EnsemblePickerDemo  extends  JFrame implements ActionListener {
     {
         try {
             String fileName = "C:\\temp\\ResSim.db";
-            JdbcTimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fileName, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
-            List<TimeSeriesIdentifier> locations = db.getTimeSeriesIDs();
+            SqliteDatabase db = new SqliteDatabase(fileName, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+            List<RecordIdentifier> locations = db.getEnsembleTimeSeriesIDs();
             TableModel model = getTableModel(locations);
 
             EnsemblePicker picker = new EnsemblePicker(this,model);
@@ -69,11 +69,11 @@ public class EnsemblePickerDemo  extends  JFrame implements ActionListener {
         });
     }
 
-    private static TableModel getTableModel(List<TimeSeriesIdentifier> locations) {
+    private static TableModel getTableModel(List<RecordIdentifier> locations) {
         String[] columnNames = {"Location", "Parameter"};
         List<String[]> values = new ArrayList<String[]>();
 
-        for (TimeSeriesIdentifier loc : locations) {
+        for (RecordIdentifier loc : locations) {
             values.add(new String[]{loc.location, loc.parameter});
         }
         return new DefaultTableModel(values.toArray(new Object[][]{}), columnNames);

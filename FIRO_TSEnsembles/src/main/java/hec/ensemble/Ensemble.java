@@ -2,6 +2,8 @@ package hec.ensemble;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+
+import hec.metrics.MetricCollection;
 import hec.stats.Computable;
 import hec.stats.Configurable;
 import hec.stats.MultiComputable;
@@ -17,6 +19,7 @@ public class Ensemble
   {
     private final EnsembleConfiguration _configuration;
     protected EnsembleTimeSeries parent = null;
+    private float[][] values;
 
 
     public Ensemble(ZonedDateTime issueDate, float[][] values, ZonedDateTime startDate, Duration interval, String units)
@@ -46,7 +49,6 @@ public class Ensemble
       return rval;
     }
 
-    private float[][] values;
 
 
     public ZonedDateTime getIssueDate() {
@@ -82,6 +84,7 @@ public class Ensemble
       for (int i = 0; i <size ; i++) {
           rval[i] = cmd.compute(values[i]);
       }
+
       return rval;
     }
     public float[] iterateForTimeAcrossTraces(Computable cmd){

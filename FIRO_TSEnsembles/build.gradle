@@ -22,17 +22,3 @@ test {
 
 build {finalizedBy javadoc }
 
-
-task runApp(type: JavaExec) {
-    main = 'hec.ensemble.EnsembleUtility'
-    classpath = sourceSets.main.runtimeClasspath
-    jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
-    args = ["c:/temp/hefs_cache", "30","1","src/test/resources/database/ResSim.db"]
-}
-
-task runEnsembleMetrics(type: JavaExec) {
-    main = 'hec.ensemble.EnsembleUtility'
-    classpath = sourceSets.main.runtimeClasspath
-    jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
-    args = ["c:/temp/hefs_cache", "100","10","C:/temp/ResSim.db"]
-}

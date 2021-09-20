@@ -8,4 +8,9 @@ public class MaxComputable implements Computable{
         java.util.Arrays.sort(values);
         return values[size-1];
     }
+
+    @Override
+    public Statistics[] Statistics() {
+        return new Statistics[]{Statistics.MAX};
+    }
 }

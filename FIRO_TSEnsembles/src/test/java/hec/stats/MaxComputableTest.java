@@ -1,8 +1,7 @@
 package hec.stats;
 
-
-import hec.JdbcTimeSeriesDatabase;
-import hec.TimeSeriesDatabase;
+import hec.EnsembleDatabase;
+import hec.RecordIdentifier;
 import hec.ensemble.*;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +30,7 @@ class MaxComputableTest {
     @Test
     public void testMaxWithEnsembleTimeAcrossTraces() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable maxTest = new MaxComputable();
             float[] output = e.iterateForTimeAcrossTraces(maxTest);
             assertEquals(1.1300690174102783, output[3]);
@@ -43,7 +42,7 @@ class MaxComputableTest {
     @Test
     public void testMaxWithEnsembleTracesAcrossTime() {
         try {
-            Ensemble e = getEnsemble();
+            Ensemble e = TestData.getSampleEnsemble();
             Computable maxTest = new MaxComputable();
             float[] output = e.iterateForTracesAcrossTime(maxTest);
             assertEquals(11.159436225891113, output[3]);
@@ -51,20 +50,6 @@ class MaxComputableTest {
             Logger.logError(e);
             fail();
         }
-    }
-
-    private Ensemble getEnsemble() throws Exception {
-        String fn = TestingPaths.instance.getTempDir() + "/importCsvToDatabase.db";
-        File f = new File(fn);
-        if(!f.exists()) {
-            DatabaseGenerator.createTestDatabase(fn, 1);
-        }
-        TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
-        // --- READ
-        TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2", "flow");
-        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid);
-        List<ZonedDateTime> issueDates = ets.getIssueDates();
-        return db.getEnsemble(tsid, issueDates.get(0));
     }
 
 }

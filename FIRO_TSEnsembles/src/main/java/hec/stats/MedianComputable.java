@@ -12,4 +12,9 @@ public class MedianComputable implements Computable {
         }
         return (values[(n)/2-1] + values[n /2]) / 2;
     }
+
+    @Override
+    public Statistics[] Statistics() {
+        return new Statistics[]{Statistics.MEDIAN};
+    }
 }

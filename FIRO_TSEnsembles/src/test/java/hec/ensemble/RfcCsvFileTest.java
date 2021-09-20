@@ -3,6 +3,7 @@ package hec.ensemble;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.nio.file.FileAlreadyExistsException;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -52,9 +53,9 @@ class RfcCsvFileTest {
             f.delete();
 
             DatabaseGenerator.createTestDatabase(fn,1);
-            TimeSeriesDatabase db  =new JdbcTimeSeriesDatabase(fn, JdbcTimeSeriesDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
+            EnsembleDatabase db  =new SqliteDatabase(fn, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE);
                     // --- READ
-            TimeSeriesIdentifier tsid = new TimeSeriesIdentifier("Kanektok.SCRN2","flow");
+            RecordIdentifier tsid = new RecordIdentifier("Kanektok.SCRN2","flow");
             EnsembleTimeSeries ets =  db.getEnsembleTimeSeries(tsid);
             List<ZonedDateTime> issueDates = ets.getIssueDates();
             Ensemble e = db.getEnsemble(tsid, issueDates.get(0));
@@ -62,7 +63,10 @@ class RfcCsvFileTest {
             float[][] data2 = e.getValues();
             AssertSCRN2(data2);
 
-        } catch (Exception e) {
+        }catch(FileAlreadyExistsException fae) {
+            Logger.logError(fae);
+        }
+        catch (Exception e) {
             Logger.logError(e);
             fail();
         }

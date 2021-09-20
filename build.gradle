@@ -24,7 +24,7 @@ test {
 
 build {finalizedBy javadoc }
 
-
+/*
 task runApp(type: JavaExec) {
     main = 'hec.ensemble.EnsembleUtility'
     classpath = sourceSets.main.runtimeClasspath
@@ -38,3 +38,4 @@ task runEnsembleMetrics(type: JavaExec) {
     jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
     args = ["c:/temp/hefs_cache", "100","10","C:/temp/ResSim.db"]
 }
+ */
