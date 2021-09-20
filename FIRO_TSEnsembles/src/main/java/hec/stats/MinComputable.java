@@ -16,4 +16,9 @@ public class MinComputable implements Computable{
         java.util.Arrays.sort(values);
         return values[0];
     }
+
+    @Override
+    public Statistics[] Statistics() {
+        return new Statistics[]{Statistics.MIN};
+    }
 }

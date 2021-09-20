@@ -49,10 +49,13 @@ public  class MaxAvgDuration implements Computable, Configurable {
         }
         return maxVal;
     }
-
     @Override
     public void configure(Configuration c) {
         _c = c;
 
+    }
+    @Override
+    public Statistics[] Statistics() {
+        return new Statistics[]{Statistics.MAXAVERAGEDURATION};//but what duration?
     }
 }

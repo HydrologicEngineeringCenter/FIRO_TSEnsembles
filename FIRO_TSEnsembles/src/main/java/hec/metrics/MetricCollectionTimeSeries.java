@@ -2,6 +2,7 @@ package hec.metrics;
 
 import hec.MetricDatabase;
 import hec.RecordIdentifier;
+import hec.stats.Statistics;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -19,15 +20,15 @@ public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>, 
 
 
 
-    public MetricCollectionTimeSeries(RecordIdentifier timeseriesID, String units, String metricType)
+    public MetricCollectionTimeSeries(RecordIdentifier timeseriesID, String units, MetricTypes metricType)
     {
         init(timeseriesID,units,metricType);
     }
 
-    private void init(RecordIdentifier timeseriesID, String units, String dataType) {
+    private void init(RecordIdentifier timeseriesID, String units, MetricTypes metricType) {
         this.timeseriesID = timeseriesID;
         this.units = units;
-        this.metricType = MetricTypes.valueOf(dataType);
+        this.metricType = metricType;
         items = new TreeMap<>();
     }
 
@@ -38,7 +39,7 @@ public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>, 
      * @param startDate startingDate for this MetricCollection.
      * @param parameterNames  the names
      */
-    public void addMetricCollection(ZonedDateTime issueDate, float[][] metrics, ZonedDateTime startDate, String[] parameterNames)
+    public void addMetricCollection(ZonedDateTime issueDate, float[][] metrics, ZonedDateTime startDate, Statistics[] parameterNames)
     {
         MetricCollection e = new MetricCollection(issueDate,startDate, parameterNames, metrics);
         addMetricCollection(e);

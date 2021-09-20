@@ -13,4 +13,9 @@ public class MaxOfMaximumsComputable implements SingleComputable {
         }
         return maxval;
     }
+
+    @Override
+    public Statistics[] Statistics() {
+        return new Statistics[]{Statistics.MAX};
+    }
 }

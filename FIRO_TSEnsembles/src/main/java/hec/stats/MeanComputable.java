@@ -10,4 +10,9 @@ public class MeanComputable implements Computable{
             }
         return sum / values.length;
     }
+
+    @Override
+    public Statistics[] Statistics() {
+        return new Statistics[]{Statistics.MEAN};
+    }
 }

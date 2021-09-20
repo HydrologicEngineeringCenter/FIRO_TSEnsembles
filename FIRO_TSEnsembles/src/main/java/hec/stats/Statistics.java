@@ -5,7 +5,12 @@ import java.util.EnumSet;
 public enum Statistics {
     MIN,
     MAX,
-    MEAN;
+    MEAN,
+    MEDIAN,
+    PERCENTILE,
+    CUMULATIVE,
+    MAXAVERAGEDURATION;
+
     public static String pack(EnumSet<Statistics> set){
         String ret = "";
         for (Statistics s : Statistics.values()){

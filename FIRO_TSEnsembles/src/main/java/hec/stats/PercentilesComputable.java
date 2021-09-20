@@ -78,4 +78,9 @@ public class PercentilesComputable implements Computable, MultiComputable {
         double interpValue = slp * (p -x1) + y1;
         return (float) interpValue;
     }
+
+    @Override
+    public Statistics[] Statistics() {
+        return new Statistics[]{Statistics.PERCENTILE};
+    }
 }

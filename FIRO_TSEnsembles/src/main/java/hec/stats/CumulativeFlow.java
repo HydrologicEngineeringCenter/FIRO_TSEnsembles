@@ -1,6 +1,6 @@
 package hec.stats;
 
-public  class CumulativeFlow implements Computable, Configurable {
+public class CumulativeFlow implements Computable, Configurable {
     Configuration _c;
     String _outputFlowUnits;
 
@@ -44,5 +44,10 @@ public  class CumulativeFlow implements Computable, Configurable {
             //don't panic, just guess!
             return 10.0f;
         }
+    }
+
+    @Override
+    public Statistics[] Statistics() {
+        return new Statistics[]{Statistics.CUMULATIVE};
     }
 }

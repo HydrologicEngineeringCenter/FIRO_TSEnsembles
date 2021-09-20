@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import hec.ensemble.*;
 import hec.paireddata.*;
 import hec.metrics.*;
+import hec.stats.Statistics;
 
 /**
  * Read/write data to a Sqlite database
@@ -471,7 +472,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         for (MetricCollectionTimeSeries mts : mtsArray) {
             List<ZonedDateTime> issueDates = mts.getIssueDates();
             InsertMetricCollectionTimeSeries(++mc_ts_id, mts.getTimeSeriesIdentifier(), mts.getUnits(),
-                    mts.type().name());
+                    mts.type());
             for (int i = 0; i < issueDates.size(); i++) {
                 ZonedDateTime t = issueDates.get(i);
                 MetricCollection mc = mts.getMetricCollection(t);
@@ -484,7 +485,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         }
         _connection.commit();
     }
-    private void InsertMetricCollectionTimeSeries(int id, RecordIdentifier record_id, String units, String metric_type) throws Exception {
+    private void InsertMetricCollectionTimeSeries(int id, RecordIdentifier record_id, String units, MetricTypes metric_type) throws Exception {
         if (ps_insertMetricCollectionTimeSeries == null) {
             String sql = "INSERT INTO " + metricCollectionTimeSeriesTableName + " ([id], [location], [parameter_name], "
                     + " [units], [metric_type]) VALUES " + "(?, ?, ?, ?, ?)";
@@ -495,7 +496,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         ps_insertMetricCollectionTimeSeries.setString(2, record_id.location);
         ps_insertMetricCollectionTimeSeries.setString(3, record_id.parameter);
         ps_insertMetricCollectionTimeSeries.setString(4, units);
-        ps_insertMetricCollectionTimeSeries.setString(5, metric_type);
+        ps_insertMetricCollectionTimeSeries.setString(5, metric_type.name());
         ps_insertMetricCollectionTimeSeries.execute();
     }
     private void InsertMetricCollection(int id, int ts_id, ZonedDateTime issue_datetime,
@@ -575,8 +576,8 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         String units = rs.getString("units");
         String metric_type = rs.getString("metric_type");
         RecordIdentifier tsid = new RecordIdentifier(location, parameter);
-
-        MetricCollectionTimeSeries rval = new MetricCollectionTimeSeries(tsid, units, metric_type);
+        MetricTypes ms = MetricTypes.valueOf(metric_type);
+        MetricCollectionTimeSeries rval = new MetricCollectionTimeSeries(tsid, units, ms);
 
         return rval;
     }
@@ -640,7 +641,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
 
         float[][] values = TableCompression.UnPack(byte_value_array, member_count, member_length, compression);
         String[] params = metricstats.split(",");
-        return new MetricCollection(issue_date, start_date, params, values); //Duration.ofSeconds(interval_seconds),units);
+        Statistics[] stats = new Statistics[params.length];
+        for (int i = 0; i < params.length; i++){
+            stats[i] = Statistics.valueOf(params[i]);
+        }
+        return new MetricCollection(issue_date, start_date, stats, values); //Duration.ofSeconds(interval_seconds),units);
     }
     @Override
     public List<RecordIdentifier> getMetricTimeSeriesIDs() {

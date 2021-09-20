@@ -1,6 +1,7 @@
 package hec.metrics;
 
 import hec.stats.Configuration;
+import hec.stats.Statistics;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -10,19 +11,19 @@ public class MetricCollection {
     public MetricCollectionTimeSeries parent;
     private Configuration _configuration;
     private float[][] metrics;
-    private String[] metric_statistics;
+    private Statistics[] metric_statistics;
 
-    public MetricCollection(Configuration c, String[] statistics, float[][] values)
+    public MetricCollection(Configuration c, Statistics[] statistics, float[][] values)
     {
         this._configuration = c;
         this.metric_statistics = statistics;
         this.metrics = values;
     }
-    public MetricCollection(ZonedDateTime issueDate,ZonedDateTime startDate, String[] statistics, float[][] values)
+    public MetricCollection(ZonedDateTime issueDate,ZonedDateTime startDate, Statistics[] statistics, float[][] values)
     {
         this(new MetricsConfiguration(issueDate,startDate), statistics, values);
     }
-    public int parameterIndex(String parameterName){
+    public int parameterIndex(Statistics parameterName){
         int index = -1;
         for (int i=0;i<metric_statistics.length;i++) {
             if (metric_statistics[i].equals(parameterName)) {

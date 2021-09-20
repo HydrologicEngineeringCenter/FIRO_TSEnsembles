@@ -43,4 +43,9 @@ public class MultiStatComputable implements MultiComputable{
         }
         return results;
     }
+
+    @Override
+    public Statistics[] Statistics() {
+        return statSelection;
+    }
 }

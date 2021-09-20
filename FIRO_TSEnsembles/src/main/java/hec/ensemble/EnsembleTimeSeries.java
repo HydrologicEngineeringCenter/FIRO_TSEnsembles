@@ -1,6 +1,11 @@
 package hec.ensemble;
 
 import hec.RecordIdentifier;
+import hec.metrics.MetricCollection;
+import hec.metrics.MetricCollectionTimeSeries;
+import hec.metrics.MetricTypes;
+import hec.stats.Computable;
+import hec.stats.MultiComputable;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -102,5 +107,26 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
     @Override
     public Iterator<Ensemble> iterator() {
       return new EnsembleTimeSeriesIterator(this);
+    }
+
+    public MetricCollectionTimeSeries iterateAcrossTimestepsOfEnsemblesWithSingleComputable(Computable compute){
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.TIMESERIES_OF_SINGLE_VALUES);
+      for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
+        Ensemble e = it.next();
+        float[] farray = e.iterateForTracesAcrossTime(compute);
+        MetricCollection mc = new MetricCollection(e.getIssueDate(), e.getStartDateTime(), compute.Statistics(), new float[][] {farray} );
+        mcts.addMetricCollection(mc);
+      }
+      return mcts;
+    }
+    public MetricCollectionTimeSeries iterateAcrossTimestepsOfEnsemblesWithMultiComputable(MultiComputable compute){
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.ARRAY_OF_TIMESERIES);
+      for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
+        Ensemble e = it.next();
+        float[][] farray = e.multiComputeForTracesAcrossTime(compute);
+        MetricCollection mc = new MetricCollection(e.getIssueDate(), e.getStartDateTime(), compute.Statistics(), farray );
+        mcts.addMetricCollection(mc);
+      }
+      return mcts;
     }
   }
