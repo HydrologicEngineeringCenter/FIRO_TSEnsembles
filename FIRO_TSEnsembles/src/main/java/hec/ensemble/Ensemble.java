@@ -44,7 +44,7 @@ public class Ensemble
       int size= getTimeCount();
       for (int i = 0; i <size ; i++) {
         rval[i] =t;
-        t.plus(_configuration.getDuration());
+        t = t.plus(_configuration.getDuration());
       }
       return rval;
     }
