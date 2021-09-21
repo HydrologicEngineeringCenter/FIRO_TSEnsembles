@@ -11,17 +11,17 @@ import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-public class EnsembleJFreeChart implements EnsembleChart{
+public class EnsembleJFreeChart extends ApplicationFrame implements EnsembleChart{
 
     private JFreeChart chart;
 
     private String chartTitle = "";
     private String yLabel = "";
     private String xLabel = "";
-    private Boolean showLegend = true;
     private TimeSeriesCollection members;
 
-    public EnsembleJFreeChart() {
+    public EnsembleJFreeChart(String windowTitle) {
+        super(windowTitle);
         members = new TimeSeriesCollection();
     }
 
@@ -53,8 +53,12 @@ public class EnsembleJFreeChart implements EnsembleChart{
     }
 
     @Override
-    public ChartPanel getChart() {
+    public void showPlot() {
         chart = ChartFactory.createTimeSeriesChart(chartTitle, xLabel, yLabel, members);
-        return new ChartPanel(chart);
+        ChartPanel panel = new ChartPanel(chart);
+        panel.setMouseZoomable(true, false);
+        setContentPane(panel);
+        pack();
+        setVisible(true);
     }
 }
