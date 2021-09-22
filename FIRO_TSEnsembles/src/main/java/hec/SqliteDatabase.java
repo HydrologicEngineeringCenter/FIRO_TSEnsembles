@@ -20,7 +20,6 @@ import hec.ensemble.*;
 import hec.paireddata.*;
 import hec.metrics.*;
 import hec.stats.Statistics;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Read/write data to a Sqlite database
@@ -136,21 +135,24 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
             throw new RuntimeException("database operations failed at start of attempt to update", e);
         }
         List<String> versions = getVersions();
-        for (String version : versions) {
-            if (version.compareTo(this.getVersion()) > 0) {
-                String script = getUpdateScript(this.getVersion(), version);
+        for (String next_version : versions) {
+            String currentVersion = this.getVersion();
+            if (next_version.compareTo(currentVersion) > 0) {
+                String script = getUpdateScript(this.getVersion(), next_version);
+                System.out.println("running: "+script);
                 runResourceSQLScript(script);
-                if (version.equals("20200224")) {
-                    updateFor20200101_to_20200224();
-                }else if (version.equals("20200227")) {
-                    updateFor20200224_to_20200227();
-                }
-                else if (version.equals("20210922")) {
-                    System.out.println("updated to version: 20210922");
-                  //updateFor20200224_to_20200227();
-                //    throw new NotImplementedException();
-                }
 
+                if (next_version.equals("20200224")) {
+                    updateFor20200101_to_20200224();
+                    this.version = next_version;
+                }else if (next_version.equals("20200227")) {
+                    updateFor20200224_to_20200227();
+                    this.version = next_version;
+                }
+                else if (next_version.equals("20210922")) {
+                    System.out.println("updated to version: 20210922");
+                    this.version = next_version;
+                }
             }
             try {
                 _connection.commit();
