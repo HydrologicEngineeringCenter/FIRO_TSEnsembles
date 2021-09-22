@@ -14,7 +14,7 @@ public class DatabaseGenerator {
      * @param filename name of database to create
      * @param numberOfDates number of forecasts to include
      */
-    static public EnsembleDatabase createTestDatabase(String filename, int numberOfDates) throws Exception {
+    static public void createTestDatabase(String filename, int numberOfDates) throws Exception {
 
         String cacheDir = TestingPaths.instance.getCacheDir();
         ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
@@ -25,7 +25,7 @@ public class DatabaseGenerator {
         EnsembleDatabase db = new SqliteDatabase(filename, SqliteDatabase.CREATION_MODE.CREATE_NEW);
 
         db.write(ets);
-        return db;
+        db.close();
     }
 
 }

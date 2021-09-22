@@ -135,10 +135,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
             throw new RuntimeException("database operations failed at start of attempt to update", e);
         }
         List<String> versions = getVersions();
+        String script = "";
         for (String next_version : versions) {
             String currentVersion = this.getVersion();
             if (next_version.compareTo(currentVersion) > 0) {
-                String script = getUpdateScript(this.getVersion(), next_version);
+                script = getUpdateScript(this.getVersion(), next_version);
                 System.out.println("running: "+script);
                 runResourceSQLScript(script);
 
@@ -157,10 +158,10 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
             try {
                 _connection.commit();
             } catch (SQLException e) {
-                throw new RuntimeException("unable to commit changes after running all update scripts", e);
+                throw new RuntimeException("unable to commit changes after running update script "+script,e);
             }
         }
-        
+
         return versions.get(versions.size()-1);
     }
     private int GetMaxID(String tableName) {
