@@ -20,6 +20,7 @@ import hec.ensemble.*;
 import hec.paireddata.*;
 import hec.metrics.*;
 import hec.stats.Statistics;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Read/write data to a Sqlite database
@@ -143,6 +144,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                     updateFor20200101_to_20200224();
                 }else if (version.equals("20200227")) {
                     updateFor20200224_to_20200227();
+                }
+                else if (version.equals("20210922")) {
+                    System.out.println("updated to version: 20210922");
+                  //updateFor20200224_to_20200227();
+                //    throw new NotImplementedException();
                 }
 
             }
