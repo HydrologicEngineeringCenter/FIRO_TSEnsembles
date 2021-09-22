@@ -22,7 +22,9 @@ import hec.metrics.*;
 import hec.stats.Statistics;
 
 /**
- * Read/write data to a Sqlite database
+ * A database with Read/Write abilities for various data types.
+ * focused on timeseries of ensemble-timeseries
+ * implement using SqLite
  */
 public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, VersionableDatabase, MetricDatabase {
 
@@ -46,7 +48,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
     private PreparedStatement ps_insertMetricCollection;
     private PreparedStatement ps_insertMetricCollectionTimeSeries;
     /**
-     * constructor for JdbcTimeSeriesDatabase
+     * constructor for SqliteDatabase
      *
      * @param database filename for database
      * @param creation_mode defines how to open, create, and update the @database
@@ -124,6 +126,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
             return "20200101";
         }        
     }
+
+    /**
+     * run the necessary update scripts to update database schema to latest version.
+     * @return
+     */
     private String updateTables() {
         /**
          * This is the default but we really want to make sure this is set here or we
@@ -200,7 +207,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
             String version = rs.getString(1);
             return version;
         } catch( SQLException err ){
-            return "20200101";
+            return "20200101"; // keep this initial version for error condition.
         }
     }
 
@@ -239,6 +246,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         write(new EnsembleTimeSeries[] { ets });
     }
 
+    /**
+     * Writes an array of EnsembleTimeSeries to the database.
+     * @param etsArray
+     * @throws Exception
+     */
     @Override
     public void write(EnsembleTimeSeries[] etsArray) throws Exception {
         String compress = "gzip";
