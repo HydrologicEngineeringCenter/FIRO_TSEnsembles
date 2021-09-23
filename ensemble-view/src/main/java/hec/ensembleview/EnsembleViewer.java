@@ -28,7 +28,6 @@ public class EnsembleViewer {
         JPanel topPanel = new JPanel();
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
         topPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Options", TitledBorder.LEFT, TitledBorder.TOP));
-        System.out.println(((TitledBorder)topPanel.getBorder()).getTitleFont().getFontName());
         ((TitledBorder)topPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
         GridLayout experimentLayout = new GridLayout(0,2);
         topPanel.setLayout(experimentLayout);
