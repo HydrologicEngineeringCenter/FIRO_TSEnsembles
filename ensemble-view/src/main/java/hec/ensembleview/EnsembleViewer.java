@@ -6,6 +6,7 @@ import hec.ensemble.Ensemble;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -84,6 +85,8 @@ public class EnsembleViewer {
          */
         fileSearchButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("SQLite Database File", "db"));
             if (fileChooser.showOpenDialog(filePathPanel) == 0)
             {
                 filePath.setText(fileChooser.getSelectedFile().getAbsolutePath());
@@ -116,9 +119,7 @@ public class EnsembleViewer {
         dateTimes.addActionListener(e -> {
             ev.selectedZdt = ev.getZonedDateTimeFromString(ev.selectedRid, String.valueOf(dateTimes.getSelectedItem()));
             try {
-                ev.ec = ev.createChart(filePath.getText(),
-                        String.valueOf(locations.getSelectedItem()),
-                        String.valueOf(dateTimes.getSelectedItem()));
+                ev.ec = ev.createChart(filePath.getText());
                 if (ev.ec == null){
                     return;
                 }
@@ -157,7 +158,7 @@ public class EnsembleViewer {
         return null;
     }
 
-    private EnsembleChart createChart(String fileName, String location, String dateTime) throws Exception {
+    private EnsembleChart createChart(String fileName) throws Exception {
         if (Objects.equals(fileName, "") || selectedRid == null || selectedZdt == null) {
             return null;
         }
