@@ -1,17 +1,15 @@
 package hec.ensembleview;
 
-import com.sun.prism.impl.Disposer;
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.ensemble.Ensemble;
-import org.jfree.chart.ChartPanel;
-
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class EnsembleViewer {
     private SqliteDatabase db;
@@ -22,12 +20,22 @@ public class EnsembleViewer {
 
     public static void main(String[] args) {
         EnsembleViewer ev = new EnsembleViewer();
-        EnsembleChart chart = new EnsembleJFreeChart();
+        EnsembleChart emptyChart = new EnsembleJFreeChart();
 
+        /*
+        Create panel that holds file name, location, and date/time information.
+         */
         JPanel topPanel = new JPanel();
+        Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
+        topPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Options", TitledBorder.LEFT, TitledBorder.TOP));
+        System.out.println(((TitledBorder)topPanel.getBorder()).getTitleFont().getFontName());
+        ((TitledBorder)topPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
         GridLayout experimentLayout = new GridLayout(0,2);
         topPanel.setLayout(experimentLayout);
 
+        /*
+        Create file select area.
+         */
         topPanel.add(new JLabel("File"));
         JPanel filePathPanel = new JPanel();
         filePathPanel.setLayout(new GridLayout(0,2));
@@ -39,24 +47,40 @@ public class EnsembleViewer {
         filePathPanel.add(fileSearchButton);
         topPanel.add(filePathPanel);
 
+        /*
+        Create location combo box.
+         */
         topPanel.add(new JLabel("Location"));
         JComboBox<String> locations = new JComboBox<>();
         topPanel.add(locations);
 
+        /*
+        Create date/time list combo box.
+         */
         topPanel.add(new JLabel("Date/Time"));
         JComboBox<String> dateTimes = new JComboBox<>();
         topPanel.add(dateTimes);
 
+        /*
+        Create panel for holding chart panel.
+         */
+        JPanel chartPanel = new JPanel();
+        chartPanel.setLayout(new BorderLayout());
+        chartPanel.add(emptyChart.getChart());
+
+        /*
+        Setup window with options and graph.
+         */
         JFrame frame = new JFrame();
         frame.setLayout(new BorderLayout());
         frame.add(topPanel, BorderLayout.NORTH);
-        JPanel chartPanel = new JPanel();
-        chartPanel.setLayout(new BorderLayout());
-        chartPanel.add(chart.getChart());
         frame.add(chartPanel, BorderLayout.CENTER);
         frame.pack();
         frame.setVisible(true);
 
+        /*
+        Add listeners to file path button, locations combo box, and date/time combo box.
+         */
         fileSearchButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             if (fileChooser.showOpenDialog(filePathPanel) == 0)
@@ -84,7 +108,7 @@ public class EnsembleViewer {
             chartPanel.removeAll();
             chartPanel.revalidate();
             chartPanel.setLayout(new BorderLayout());
-            chartPanel.add(chart.getChart(), BorderLayout.CENTER);
+            chartPanel.add(emptyChart.getChart(), BorderLayout.CENTER);
             chartPanel.repaint();
         });
 
