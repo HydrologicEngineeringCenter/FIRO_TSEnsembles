@@ -72,6 +72,7 @@ public class EnsembleViewer {
         Setup window with options and graph.
          */
         JFrame frame = new JFrame();
+        frame.setTitle("Ensemble Viewer");
         frame.setLayout(new BorderLayout());
         frame.add(topPanel, BorderLayout.NORTH);
         frame.add(chartPanel, BorderLayout.CENTER);
