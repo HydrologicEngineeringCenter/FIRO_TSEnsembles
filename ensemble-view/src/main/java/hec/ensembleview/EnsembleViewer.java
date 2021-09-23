@@ -81,16 +81,11 @@ public class EnsembleViewer {
             String[] zdts = ev.db.getEnsembleIssueDates(ev.selectedRid).stream().map(ZonedDateTime::toString).toArray(String[]::new);
             ComboBoxModel<String> model = new DefaultComboBoxModel<>(zdts);
             dateTimes.setModel(model);
-            try {
-                ev.ec = ev.createChart(filePath.getText(),
-                        String.valueOf(locations.getSelectedItem()),
-                        String.valueOf(dateTimes.getSelectedItem()));
-                if (ev.ec == null){
-                    return;
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            chartPanel.removeAll();
+            chartPanel.revalidate();
+            chartPanel.setLayout(new BorderLayout());
+            chartPanel.add(chart.getChart(), BorderLayout.CENTER);
+            chartPanel.repaint();
         });
 
         dateTimes.addActionListener(e -> {
