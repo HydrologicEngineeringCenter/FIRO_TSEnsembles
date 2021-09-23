@@ -163,6 +163,8 @@ public class EnsembleViewer {
 
         Ensemble ensemble = db.getEnsemble(selectedRid, selectedZdt);
         EnsembleChart chart = new EnsembleJFreeChart();
+        chart.setXLabel("Date/Time");
+        chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
         float[][] vals = ensemble.getValues();
         ZonedDateTime[] dates = ensemble.startDateTime();
         for (int i = 0; i < vals.length; i++) {
