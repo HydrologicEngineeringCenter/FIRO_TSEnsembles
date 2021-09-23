@@ -72,6 +72,7 @@ public class EnsembleViewer {
          */
         JFrame frame = new JFrame();
         frame.setTitle("Ensemble Viewer");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
         frame.add(topPanel, BorderLayout.NORTH);
         frame.add(chartPanel, BorderLayout.CENTER);
