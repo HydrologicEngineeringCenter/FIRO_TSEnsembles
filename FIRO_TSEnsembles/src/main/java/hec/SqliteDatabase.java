@@ -65,6 +65,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                 if (f.exists())
                     throw new FileAlreadyExistsException(database);
                 create = true;
+                update = true;
                 break;
             }
             case CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE: {
@@ -104,8 +105,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
 
         _connection = DriverManager.getConnection("jdbc:sqlite:" + FileName, prop);
         _connection.setAutoCommit(false);
-        if (create)
+        if (create) {
             version = createTables();
+            this.version = getCurrentVersionFromDB();
+            version = updateTables();
+        }
         else if (!create && update) {
             this.version = getCurrentVersionFromDB();
             version = updateTables();
@@ -524,9 +528,9 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                                 ZonedDateTime start_datetime, int member_length, int member_count, String compression,
                                 long interval_seconds, String statistics, byte[] byte_value_array) throws Exception {
         if (ps_insertMetricCollection == null) {
-            String sql = "INSERT INTO " + metricCollectionTableName + " ([id], [metriccollection_timeseries_id],[issue_datetime], "
+            String sql = "INSERT INTO " + metricCollectionTableName + " ([id], [metriccollection_timeseries_id], [issue_datetime], "
                     + " [start_datetime], [member_length], [member_count], [compression], [interval_seconds], [statistics], "
-                    + "[byte_value_array]) VALUES " + "(?, ?, ?, ?, ?, ?, ?, ?,? )";
+                    + "[byte_value_array]) VALUES " + "(?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
             ps_insertMetricCollection = _connection.prepareStatement(sql);
         }
 

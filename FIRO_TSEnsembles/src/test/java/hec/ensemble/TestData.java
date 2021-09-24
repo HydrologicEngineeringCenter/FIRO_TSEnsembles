@@ -21,7 +21,6 @@ public class TestData {
         }
         return null;
     }
-
     public static Ensemble getSampleEnsemble() {
      return getSampleEnsemble("Kanektok.SCRN2", "flow");
     }
