@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS metrics_timeseries(
 
 CREATE TABLE IF NOT EXISTS metrics(
 id integer not null primary key,
-metriccollection_timeseries_id integer
+metriccollection_timeseries_id integer,
 issue_datetime text,
 start_datetime text,
 member_length  integer not null,
