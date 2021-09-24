@@ -26,17 +26,17 @@ public class EnsembleViewer {
         /*
         Create panel that holds file name, location, and date/time information.
          */
-        JPanel topPanel = new JPanel();
+        JPanel optionsPanel = new JPanel();
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        topPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Options", TitledBorder.LEFT, TitledBorder.TOP));
-        ((TitledBorder)topPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
+        optionsPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Options", TitledBorder.LEFT, TitledBorder.TOP));
+        ((TitledBorder)optionsPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
         GridLayout experimentLayout = new GridLayout(0,2);
-        topPanel.setLayout(experimentLayout);
+        optionsPanel.setLayout(experimentLayout);
 
         /*
         Create file select area.
          */
-        topPanel.add(new JLabel("File"));
+        optionsPanel.add(new JLabel("File"));
         JPanel filePathPanel = new JPanel();
         filePathPanel.setLayout(new GridLayout(0,2));
         JTextField filePath = new JTextField();
@@ -45,21 +45,43 @@ public class EnsembleViewer {
         JButton fileSearchButton = new JButton();
         fileSearchButton.setText("Choose File...");
         filePathPanel.add(fileSearchButton);
-        topPanel.add(filePathPanel);
+        optionsPanel.add(filePathPanel);
 
         /*
         Create location combo box.
          */
-        topPanel.add(new JLabel("Location"));
+        optionsPanel.add(new JLabel("Location"));
         JComboBox<String> locations = new JComboBox<>();
-        topPanel.add(locations);
+        optionsPanel.add(locations);
 
         /*
         Create date/time list combo box.
          */
-        topPanel.add(new JLabel("Date/Time"));
+        optionsPanel.add(new JLabel("Date/Time"));
         JComboBox<String> dateTimes = new JComboBox<>();
-        topPanel.add(dateTimes);
+        optionsPanel.add(dateTimes);
+
+        /*
+        Create metrics panel.
+         */
+        JPanel metricsPanel = new JPanel();
+        metricsPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Metrics", TitledBorder.LEFT, TitledBorder.TOP));
+        ((TitledBorder)metricsPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
+        metricsPanel.setLayout(new GridLayout(0,1));
+        JCheckBox minCheckbox = new JCheckBox("Min");
+        JCheckBox maxCheckbox = new JCheckBox("Max");
+        JCheckBox meanCheckbox = new JCheckBox("Mean");
+        metricsPanel.add(minCheckbox);
+        metricsPanel.add(maxCheckbox);
+        metricsPanel.add(meanCheckbox);
+
+        /*
+        Create panel for holding options and metrics panels.
+         */
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new GridLayout(2, 1));
+        topPanel.add(optionsPanel);
+        topPanel.add(metricsPanel);
 
         /*
         Create panel for holding chart panel.
