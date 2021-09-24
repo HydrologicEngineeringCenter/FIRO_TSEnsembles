@@ -22,7 +22,9 @@ import hec.metrics.*;
 import hec.stats.Statistics;
 
 /**
- * Read/write data to a Sqlite database
+ * A database with Read/Write abilities for various data types.
+ * focused on timeseries of ensemble-timeseries
+ * implement using SqLite
  */
 public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, VersionableDatabase, MetricDatabase {
 
@@ -46,7 +48,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
     private PreparedStatement ps_insertMetricCollection;
     private PreparedStatement ps_insertMetricCollectionTimeSeries;
     /**
-     * constructor for JdbcTimeSeriesDatabase
+     * constructor for SqliteDatabase
      *
      * @param database filename for database
      * @param creation_mode defines how to open, create, and update the @database
@@ -63,6 +65,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                 if (f.exists())
                     throw new FileAlreadyExistsException(database);
                 create = true;
+                update = true;
                 break;
             }
             case CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE: {
@@ -102,8 +105,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
 
         _connection = DriverManager.getConnection("jdbc:sqlite:" + FileName, prop);
         _connection.setAutoCommit(false);
-        if (create)
+        if (create) {
             version = createTables();
+            this.version = getCurrentVersionFromDB();
+            version = updateTables();
+        }
         else if (!create && update) {
             this.version = getCurrentVersionFromDB();
             version = updateTables();
@@ -124,6 +130,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
             return "20200101";
         }        
     }
+
+    /**
+     * run the necessary update scripts to update database schema to latest version.
+     * @return
+     */
     private String updateTables() {
         /**
          * This is the default but we really want to make sure this is set here or we
@@ -135,24 +146,33 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
             throw new RuntimeException("database operations failed at start of attempt to update", e);
         }
         List<String> versions = getVersions();
-        for (String version : versions) {
-            if (version.compareTo(this.getVersion()) > 0) {
-                String script = getUpdateScript(this.getVersion(), version);
+        String script = "";
+        for (String next_version : versions) {
+            String currentVersion = this.getVersion();
+            if (next_version.compareTo(currentVersion) > 0) {
+                script = getUpdateScript(this.getVersion(), next_version);
+                System.out.println("running: "+script);
                 runResourceSQLScript(script);
-                if (version.equals("20200224")) {
-                    updateFor20200101_to_20200224();
-                }else if (version.equals("20200227")) {
-                    updateFor20200224_to_20200227();
-                }
 
+                if (next_version.equals("20200224")) {
+                    updateFor20200101_to_20200224();
+                    this.version = next_version;
+                }else if (next_version.equals("20200227")) {
+                    updateFor20200224_to_20200227();
+                    this.version = next_version;
+                }
+                else if (next_version.equals("20210922")) {
+                    System.out.println("updated to version: 20210922");
+                    this.version = next_version;
+                }
             }
             try {
                 _connection.commit();
             } catch (SQLException e) {
-                throw new RuntimeException("unable to commit changes after running all update scripts", e);
+                throw new RuntimeException("unable to commit changes after running update script "+script,e);
             }
         }
-        
+
         return versions.get(versions.size()-1);
     }
     private int GetMaxID(String tableName) {
@@ -191,7 +211,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
             String version = rs.getString(1);
             return version;
         } catch( SQLException err ){
-            return "20200101";
+            return "20200101"; // keep this initial version for error condition.
         }
     }
 
@@ -230,6 +250,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         write(new EnsembleTimeSeries[] { ets });
     }
 
+    /**
+     * Writes an array of EnsembleTimeSeries to the database.
+     * @param etsArray
+     * @throws Exception
+     */
     @Override
     public void write(EnsembleTimeSeries[] etsArray) throws Exception {
         String compress = "gzip";
@@ -503,9 +528,9 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                                 ZonedDateTime start_datetime, int member_length, int member_count, String compression,
                                 long interval_seconds, String statistics, byte[] byte_value_array) throws Exception {
         if (ps_insertMetricCollection == null) {
-            String sql = "INSERT INTO " + metricCollectionTableName + " ([id], [metriccollection_timeseries_id],[issue_datetime], "
+            String sql = "INSERT INTO " + metricCollectionTableName + " ([id], [metriccollection_timeseries_id], [issue_datetime], "
                     + " [start_datetime], [member_length], [member_count], [compression], [interval_seconds], [statistics], "
-                    + "[byte_value_array]) VALUES " + "(?, ?, ?, ?, ?, ?, ?, ?,? )";
+                    + "[byte_value_array]) VALUES " + "(?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
             ps_insertMetricCollection = _connection.prepareStatement(sql);
         }
 

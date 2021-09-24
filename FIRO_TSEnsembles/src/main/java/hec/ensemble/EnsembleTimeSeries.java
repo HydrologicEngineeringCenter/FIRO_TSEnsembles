@@ -114,7 +114,8 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float[] farray = e.iterateForTracesAcrossTime(compute);
-        MetricCollection mc = new MetricCollection(e.getIssueDate(), e.getStartDateTime(), compute.Statistics(), new float[][] {farray} );
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),e.getUnits());
+        MetricCollection mc = new MetricCollection(ec, compute.Statistics(), new float[][] {farray} );
         mcts.addMetricCollection(mc);
       }
       return mcts;
@@ -124,7 +125,8 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float[][] farray = e.multiComputeForTracesAcrossTime(compute);
-        MetricCollection mc = new MetricCollection(e.getIssueDate(), e.getStartDateTime(), compute.Statistics(), farray );
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),e.getUnits());
+        MetricCollection mc = new MetricCollection(ec, compute.Statistics(), farray );
         mcts.addMetricCollection(mc);
       }
       return mcts;
