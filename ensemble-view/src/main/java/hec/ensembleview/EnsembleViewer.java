@@ -3,6 +3,9 @@ package hec.ensembleview;
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.ensemble.Ensemble;
+import hec.stats.MultiStatComputable;
+import hec.stats.Statistics;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
@@ -18,6 +21,10 @@ public class EnsembleViewer {
 
     private RecordIdentifier selectedRid = null;
     private ZonedDateTime selectedZdt = null;
+
+    private boolean minFlag = false;
+    private boolean maxFlag = false;
+    private boolean meanFlag = false;
 
     public static void main(String[] args) {
         EnsembleViewer ev = new EnsembleViewer();
@@ -154,6 +161,12 @@ public class EnsembleViewer {
             chartPanel.add(ev.ec.getChart(), BorderLayout.CENTER);
             chartPanel.repaint();
         });
+
+        minCheckbox.addActionListener(e -> ev.minFlag = minCheckbox.isSelected());
+
+        maxCheckbox.addActionListener(e -> ev.maxFlag = minCheckbox.isSelected());
+
+        meanCheckbox.addActionListener(e -> ev.meanFlag = minCheckbox.isSelected());
     }
 
     public void setDatabase(String absoluteFile) throws Exception {
@@ -186,6 +199,7 @@ public class EnsembleViewer {
         }
 
         Ensemble ensemble = db.getEnsemble(selectedRid, selectedZdt);
+
         EnsembleChart chart = new EnsembleJFreeChart();
         chart.setXLabel("Date/Time");
         chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
@@ -204,6 +218,24 @@ public class EnsembleViewer {
 
     public EnsembleViewer() {
 
+    }
+
+    private float[][] getStatistics(Ensemble ensemble) {
+
+
+        Statistics[] wantedStats = new Statistics[] {Statistics.MIN, Statistics.MAX, Statistics.MEAN};
+        float[][] retrievedStats = ensemble.multiComputeForTracesAcrossTime(
+                new MultiStatComputable(
+                        wantedStats));
+
+        float[][] returnStats = new float[wantedStats.length][retrievedStats.length];
+        for (int i = 0; i < retrievedStats.length; i++){
+            for (int j = 0; j < wantedStats.length; j++){
+                returnStats[j][i] = retrievedStats[i][j];
+            }
+        }
+
+        return returnStats;
     }
 
 
