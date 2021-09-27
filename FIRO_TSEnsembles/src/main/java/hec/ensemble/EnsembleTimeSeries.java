@@ -6,6 +6,7 @@ import hec.metrics.MetricCollectionTimeSeries;
 import hec.metrics.MetricTypes;
 import hec.stats.Computable;
 import hec.stats.MultiComputable;
+import hec.stats.SingleComputable;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -108,9 +109,30 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
     public Iterator<Ensemble> iterator() {
       return new EnsembleTimeSeriesIterator(this);
     }
-
+    public MetricCollectionTimeSeries computeSingleValueSummary(SingleComputable compute){
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.SINGLE_VALUE);
+      for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
+        Ensemble e = it.next();
+        float result = e.singleComputeForEnsemble(compute);
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),e.getUnits());
+        MetricCollection mc = new MetricCollection(ec, compute.Statistics(), new float[][] {{result}});
+        mcts.addMetricCollection(mc);
+      }
+      return mcts;
+    }
     public MetricCollectionTimeSeries iterateAcrossTimestepsOfEnsemblesWithSingleComputable(Computable compute){
-      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.TIMESERIES_OF_SINGLE_VALUES);
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.TIMESERIES_OF_SINGLE_VALUE);
+      for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
+        Ensemble e = it.next();
+        float[] farray = e.iterateForTimeAcrossTraces(compute);
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),e.getUnits());
+        MetricCollection mc = new MetricCollection(ec, compute.Statistics(), new float[][] {farray} );
+        mcts.addMetricCollection(mc);
+      }
+      return mcts;
+    }
+    public MetricCollectionTimeSeries iterateAcrossEnsembleTracesWithSingleComputable(Computable compute){
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.ARRAY_OF_SINGLE_VALUE);
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float[] farray = e.iterateForTracesAcrossTime(compute);
@@ -121,7 +143,18 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       return mcts;
     }
     public MetricCollectionTimeSeries iterateAcrossTimestepsOfEnsemblesWithMultiComputable(MultiComputable compute){
-      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.ARRAY_OF_TIMESERIES);
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.TIMESERIES_OF_ARRAY);
+      for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
+        Ensemble e = it.next();
+        float[][] farray = e.multiComputeForTimeAcrossTraces(compute);
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),e.getUnits());
+        MetricCollection mc = new MetricCollection(ec, compute.Statistics(), farray );
+        mcts.addMetricCollection(mc);
+      }
+      return mcts;
+    }
+    public MetricCollectionTimeSeries iterateAcrossTracesOfEnsemblesWithMultiComputable(MultiComputable compute){
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.ARRAY_OF_ARRAY);
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float[][] farray = e.multiComputeForTracesAcrossTime(compute);
