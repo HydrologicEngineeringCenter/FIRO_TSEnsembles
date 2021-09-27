@@ -75,6 +75,12 @@ public class Ensemble
     public float[][] getValues() {
       return values;
     }
+
+    /**
+     * iterate over the traces, for all of their timesteps. The result summarizes the ensembles traces into a summary value for each trace
+     * @param cmd a computable statistic
+     * @return A summary of float for each trace.
+     */
     public float[] iterateForTracesAcrossTime(Computable cmd){
       if (cmd instanceof hec.stats.Configurable){
         ((Configurable)cmd).configure(_configuration);
@@ -87,22 +93,33 @@ public class Ensemble
 
       return rval;
     }
+
+    /**
+     * iterate over the timesteps for all traces. The result sumarizes the ensemble into a time series of a statistic that represents all traces.
+     * @param cmd a computable statistic
+     * @return a timeseries summary of float (representing all traces with a statistic for each timestep)
+     */
     public float[] iterateForTimeAcrossTraces(Computable cmd){
       if (cmd instanceof hec.stats.Configurable){
         ((Configurable)cmd).configure(_configuration);
       }
-      int size= values[0].length;
+      int size= values[0].length;//number of timesteps
       float[] rval = new float[size];
-      int traces = values.length;
+      int traces = values.length;//number of traces
       float[] tracevals = new float[traces];
       for (int i = 0; i <size ; i++) {//this could be more efficient as a streaming compute process.. one less loop.
         for(int j = 0; j <traces; j++){
-          tracevals[j] = values[j][i];
+          tracevals[j] = values[j][i];//load all trace values for this timestep into an array
         }
-        rval[i] = cmd.compute(tracevals);
+        rval[i] = cmd.compute(tracevals);//compute statistic for this timestep and store.
       }
-      return rval;
+      return rval;//a time series of a statistic.
     }
+    /**
+     * iterate over the traces, for all of their timesteps. The result summarizes the ensembles traces into an array of summary values for each trace
+     * @param cmd a multicomputable statistic
+     * @return A summary of float[] for each trace representing all of the statistics computed for that trace.
+     */
     public float[][] multiComputeForTracesAcrossTime(MultiComputable cmd){
       if (cmd instanceof hec.stats.Configurable){
         ((Configurable)cmd).configure(_configuration);
@@ -115,6 +132,27 @@ public class Ensemble
         val[i] = rval;
       }
       return val;
+    }
+    /**
+     * iterate over the timesteps for all traces. The result sumarizes the ensemble into a time series of a collection of statistics that represents all traces.
+     * @param cmd a multicomputable statistic
+     * @return a timeseries  represented as [timesteps][statistics]float summary of []float (representing all traces with a collection of statistics for each timestep)
+     */
+    public float[][] multiComputeForTimeAcrossTraces(MultiComputable cmd){
+      if (cmd instanceof hec.stats.Configurable){
+        ((Configurable)cmd).configure(_configuration);
+      }
+      int size= values[0].length;//number of timesteps
+      float[][] rval = new float[size][];
+      int traces = values.length;//number of traces
+      float[] tracevals = new float[traces];
+      for (int i = 0; i <size ; i++) {
+        for(int j = 0; j <traces; j++){
+          tracevals[j] = values[j][i];//load all trace values for this timestep into an array
+        }
+        rval[i] = cmd.MultiCompute(tracevals);//compute a collection of statistics for this timestep and store.
+      }
+      return rval;//a time series of a collection of statistics.
     }
     public float singleComputeForEnsemble(SingleComputable cmd){
       if (cmd instanceof hec.stats.Configurable){
