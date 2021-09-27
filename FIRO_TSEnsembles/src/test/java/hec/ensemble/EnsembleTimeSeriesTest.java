@@ -24,10 +24,13 @@ class EnsembleTimeSeriesTest {
     static void prepareNewDatabase() throws Exception {
         //ensure no previous test db exists.
         File f = new File(_fn);
-        if (!f.delete()){
-            Logger.logError("database failed to delete, some resource must be using " + _fn);
-            fail();
+        if (f.exists()){
+            if (!f.delete()){
+                Logger.logError("database failed to delete, some resource must be using " + _fn);
+                fail();
+            }
         }
+
         //identify resource cache for csv files, and set up a 3 day time window
         String cacheDir = TestingPaths.instance.getCacheDir();
         ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
