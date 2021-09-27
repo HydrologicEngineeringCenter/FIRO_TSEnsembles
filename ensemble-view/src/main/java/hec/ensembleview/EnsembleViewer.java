@@ -162,11 +162,17 @@ public class EnsembleViewer {
             chartPanel.repaint();
         });
 
-        minCheckbox.addActionListener(e -> ev.minFlag = minCheckbox.isSelected());
+        minCheckbox.addActionListener(e -> {
+            ev.minFlag = minCheckbox.isSelected();
+        });
 
-        maxCheckbox.addActionListener(e -> ev.maxFlag = minCheckbox.isSelected());
+        maxCheckbox.addActionListener(e -> {
+            ev.maxFlag = minCheckbox.isSelected();
+        });
 
-        meanCheckbox.addActionListener(e -> ev.meanFlag = minCheckbox.isSelected());
+        meanCheckbox.addActionListener(e -> {
+            ev.meanFlag = minCheckbox.isSelected();
+        });
     }
 
     public void setDatabase(String absoluteFile) throws Exception {
