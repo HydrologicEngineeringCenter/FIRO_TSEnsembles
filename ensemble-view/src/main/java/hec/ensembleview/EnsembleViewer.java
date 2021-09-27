@@ -65,7 +65,7 @@ public class EnsembleViewer {
         Create metrics panel.
          */
         JPanel metricsPanel = new JPanel();
-        metricsPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Metrics", TitledBorder.LEFT, TitledBorder.TOP));
+        metricsPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Statistics", TitledBorder.LEFT, TitledBorder.TOP));
         ((TitledBorder)metricsPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
         metricsPanel.setLayout(new GridLayout(0,1));
         JCheckBox minCheckbox = new JCheckBox("Min");
