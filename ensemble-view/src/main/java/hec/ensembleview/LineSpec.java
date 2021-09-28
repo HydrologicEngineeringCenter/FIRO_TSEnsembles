@@ -6,11 +6,11 @@ import java.time.ZonedDateTime;
 public class LineSpec {
     public float[] values;
     public ZonedDateTime[] dateTimes;
-    public float lineStroke;
+    public Stroke lineStroke;
     public Color lineColor;
     public String lineName;
 
-    public LineSpec(float[] values, ZonedDateTime[] dateTimes, float lineStroke,
+    public LineSpec(float[] values, ZonedDateTime[] dateTimes, Stroke lineStroke,
                     Color lineColor, String lineName) {
         this.values = values;
         this.dateTimes = dateTimes;

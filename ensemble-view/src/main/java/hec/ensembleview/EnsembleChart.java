@@ -13,6 +13,6 @@ public interface EnsembleChart {
     void setYLabel(String label);
     void setXLabel(String label);
     ChartPanel getChart();
-    void addLine(float[] values, ZonedDateTime[] dateTimes, String name) throws ParseException;
+    void addLine(LineSpec line) throws ParseException;
 
 }
