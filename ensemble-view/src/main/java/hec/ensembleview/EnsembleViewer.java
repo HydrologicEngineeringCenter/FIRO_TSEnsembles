@@ -28,141 +28,27 @@ public class EnsembleViewer {
     private boolean maxFlag = false;
     private boolean meanFlag = false;
 
+    private JFrame frame;
+    private JPanel topPanel;
+    private JPanel chartPanel;
+    private JPanel optionsPanel;
+    private JPanel filePathPanel;
+    private JTextField filePath;
+    private JButton fileSearchButton;
+    private JComboBox<String> locations;
+    private JComboBox<String> dateTimes;
+    private JPanel statsPanel;
+    private JCheckBox minCheckbox;
+    private JCheckBox maxCheckbox;
+    private JCheckBox meanCheckbox;
+
     public static void main(String[] args) {
         EnsembleViewer ev = new EnsembleViewer();
-        EnsembleChart emptyChart = new EnsembleJFreeChart();
+        ev.setVisible(true);
+    }
 
-        /*
-        Create panel that holds file name, location, and date/time information.
-         */
-        JPanel optionsPanel = new JPanel();
-        Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        optionsPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Options", TitledBorder.LEFT, TitledBorder.TOP));
-        ((TitledBorder)optionsPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
-        GridLayout experimentLayout = new GridLayout(0,2);
-        optionsPanel.setLayout(experimentLayout);
-
-        /*
-        Create file select area.
-         */
-        optionsPanel.add(new JLabel("File"));
-        JPanel filePathPanel = new JPanel();
-        filePathPanel.setLayout(new GridLayout(0,2));
-        JTextField filePath = new JTextField();
-        filePath.setEditable(false);
-        filePathPanel.add(filePath);
-        JButton fileSearchButton = new JButton();
-        fileSearchButton.setText("Choose File...");
-        filePathPanel.add(fileSearchButton);
-        optionsPanel.add(filePathPanel);
-
-        /*
-        Create location combo box.
-         */
-        optionsPanel.add(new JLabel("Location"));
-        JComboBox<String> locations = new JComboBox<>();
-        optionsPanel.add(locations);
-
-        /*
-        Create date/time list combo box.
-         */
-        optionsPanel.add(new JLabel("Date/Time"));
-        JComboBox<String> dateTimes = new JComboBox<>();
-        optionsPanel.add(dateTimes);
-
-        /*
-        Create metrics panel.
-         */
-        JPanel metricsPanel = new JPanel();
-        metricsPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Statistics", TitledBorder.LEFT, TitledBorder.TOP));
-        ((TitledBorder)metricsPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
-        metricsPanel.setLayout(new GridLayout(0,1));
-        JCheckBox minCheckbox = new JCheckBox("Min");
-        JCheckBox maxCheckbox = new JCheckBox("Max");
-        JCheckBox meanCheckbox = new JCheckBox("Mean");
-        metricsPanel.add(minCheckbox);
-        metricsPanel.add(maxCheckbox);
-        metricsPanel.add(meanCheckbox);
-
-        /*
-        Create panel for holding options and metrics panels.
-         */
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new GridLayout(2, 1));
-        topPanel.add(optionsPanel);
-        topPanel.add(metricsPanel);
-
-        /*
-        Create panel for holding chart panel.
-         */
-        JPanel chartPanel = new JPanel();
-        chartPanel.setLayout(new BorderLayout());
-        chartPanel.add(emptyChart.getChart());
-
-        /*
-        Setup window with options and graph.
-         */
-        JFrame frame = new JFrame();
-        frame.setTitle("Ensemble Viewer");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new BorderLayout());
-        frame.add(topPanel, BorderLayout.NORTH);
-        frame.add(chartPanel, BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
-
-        /*
-        Add listeners to file path button, locations combo box, and date/time combo box.
-         */
-        fileSearchButton.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setAcceptAllFileFilterUsed(false);
-            fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("SQLite Database File", "db"));
-            if (fileChooser.showOpenDialog(filePathPanel) == 0)
-            {
-                filePath.setText(fileChooser.getSelectedFile().getAbsolutePath());
-                try {
-                    ev.setDatabase(fileChooser.getSelectedFile().getAbsolutePath());
-                    List<RecordIdentifier> rids = ev.db.getEnsembleTimeSeriesIDs();
-                    String[] sRids = rids.stream().map(RecordIdentifier::toString).toArray(String[]::new);
-                    ComboBoxModel<String> model = new DefaultComboBoxModel<>(sRids);
-                    locations.setModel(model);
-                    ev.selectedRid = null;
-                    ev.selectedZdt = null;
-                    ev.showEmptyChart(chartPanel);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-            }
-        });
-
-        locations.addActionListener(e -> {
-            ev.setRidFromString(String.valueOf(locations.getSelectedItem()));
-            setupDateTimeComboBox(ev, dateTimes);
-            ev.setDateTimeFromString(String.valueOf(dateTimes.getSelectedItem()));
-            ev.tryShowingChart(chartPanel);
-        });
-
-        dateTimes.addActionListener(e -> {
-            ev.setDateTimeFromString(String.valueOf(dateTimes.getSelectedItem()));
-            ev.tryShowingChart(chartPanel);
-        });
-
-        minCheckbox.addActionListener(e -> {
-            ev.minFlag = minCheckbox.isSelected();
-            ev.tryShowingChart(chartPanel);
-        });
-
-        maxCheckbox.addActionListener(e -> {
-            ev.maxFlag = maxCheckbox.isSelected();
-            ev.tryShowingChart(chartPanel);
-        });
-
-        meanCheckbox.addActionListener(e -> {
-            ev.meanFlag = meanCheckbox.isSelected();
-            ev.tryShowingChart(chartPanel);
-        });
+    public void setVisible(boolean value) {
+        frame.setVisible(value);
     }
 
     private void setRidFromString(String rid) {
@@ -173,8 +59,8 @@ public class EnsembleViewer {
         selectedZdt = getZonedDateTimeFromString(selectedRid, date);
     }
 
-    private static void setupDateTimeComboBox(EnsembleViewer ev, JComboBox<String> dateTimeComboBox) {
-        String[] zdts = ev.db.getEnsembleIssueDates(ev.selectedRid).stream().map(ZonedDateTime::toString).toArray(String[]::new);
+    private void setupDateTimeComboBox(JComboBox<String> dateTimeComboBox) {
+        String[] zdts = db.getEnsembleIssueDates(selectedRid).stream().map(ZonedDateTime::toString).toArray(String[]::new);
         ComboBoxModel<String> model = new DefaultComboBoxModel<>(zdts);
         dateTimeComboBox.setModel(model);
     }
@@ -267,12 +153,141 @@ public class EnsembleViewer {
         }
     }
 
-    public EnsembleViewer(String database) throws Exception {
-        db = new SqliteDatabase(database, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);
+    public EnsembleViewer() {
+        /*
+        Create panel that holds file name, location, and date/time information.
+         */
+        optionsPanel = new JPanel();
+        Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
+        optionsPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Options", TitledBorder.LEFT, TitledBorder.TOP));
+        ((TitledBorder)optionsPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
+        GridLayout experimentLayout = new GridLayout(0,2);
+        optionsPanel.setLayout(experimentLayout);
+
+        /*
+        Create file select area.
+         */
+        optionsPanel.add(new JLabel("File"));
+        filePathPanel = new JPanel();
+        filePathPanel.setLayout(new GridLayout(0,2));
+        filePath = new JTextField();
+        filePath.setEditable(false);
+        filePathPanel.add(filePath);
+        fileSearchButton = new JButton();
+        fileSearchButton.setText("Choose File...");
+        filePathPanel.add(fileSearchButton);
+        optionsPanel.add(filePathPanel);
+
+        /*
+        Create location combo box.
+         */
+        optionsPanel.add(new JLabel("Location"));
+        locations = new JComboBox<>();
+        optionsPanel.add(locations);
+
+        /*
+        Create date/time list combo box.
+         */
+        optionsPanel.add(new JLabel("Date/Time"));
+        dateTimes = new JComboBox<>();
+        optionsPanel.add(dateTimes);
+
+        /*
+        Create metrics panel.
+         */
+        statsPanel = new JPanel();
+        statsPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Statistics", TitledBorder.LEFT, TitledBorder.TOP));
+        ((TitledBorder)statsPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
+        statsPanel.setLayout(new GridLayout(0,1));
+        minCheckbox = new JCheckBox("Min");
+        maxCheckbox = new JCheckBox("Max");
+        meanCheckbox = new JCheckBox("Mean");
+        statsPanel.add(minCheckbox);
+        statsPanel.add(maxCheckbox);
+        statsPanel.add(meanCheckbox);
+
+        /*
+        Create panel for holding options and metrics panels.
+         */
+        topPanel = new JPanel();
+        topPanel.setLayout(new GridLayout(2, 1));
+        topPanel.add(optionsPanel);
+        topPanel.add(statsPanel);
+
+        /*
+        Create panel for holding chart panel.
+         */
+        chartPanel = new JPanel();
+        chartPanel.setLayout(new BorderLayout());
+        chartPanel.add(new EnsembleJFreeChart().getChart());
+
+        /*
+        Setup window with options and graph.
+         */
+        frame = new JFrame();
+        frame.setTitle("Ensemble Viewer");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+        frame.add(topPanel, BorderLayout.NORTH);
+        frame.add(chartPanel, BorderLayout.CENTER);
+        frame.pack();
+
+        addActionListeners();
     }
 
-    public EnsembleViewer() {
+    private void addActionListeners() {
+        /*
+        Add listeners to file path button, locations combo box, date/time combo box, and statistics combo boxes.
+         */
+        fileSearchButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("SQLite Database File", "db"));
+            if (fileChooser.showOpenDialog(filePathPanel) == 0)
+            {
+                filePath.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                try {
+                    setDatabase(fileChooser.getSelectedFile().getAbsolutePath());
+                    List<RecordIdentifier> rids = db.getEnsembleTimeSeriesIDs();
+                    String[] sRids = rids.stream().map(RecordIdentifier::toString).toArray(String[]::new);
+                    ComboBoxModel<String> model = new DefaultComboBoxModel<>(sRids);
+                    locations.setModel(model);
+                    selectedRid = null;
+                    selectedZdt = null;
+                    showEmptyChart(chartPanel);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
 
+            }
+        });
+
+        locations.addActionListener(e -> {
+            setRidFromString(String.valueOf(locations.getSelectedItem()));
+            setupDateTimeComboBox(dateTimes);
+            setDateTimeFromString(String.valueOf(dateTimes.getSelectedItem()));
+            tryShowingChart(chartPanel);
+        });
+
+        dateTimes.addActionListener(e -> {
+            setDateTimeFromString(String.valueOf(dateTimes.getSelectedItem()));
+            tryShowingChart(chartPanel);
+        });
+
+        minCheckbox.addActionListener(e -> {
+            minFlag = minCheckbox.isSelected();
+            tryShowingChart(chartPanel);
+        });
+
+        maxCheckbox.addActionListener(e -> {
+            maxFlag = maxCheckbox.isSelected();
+            tryShowingChart(chartPanel);
+        });
+
+        meanCheckbox.addActionListener(e -> {
+            meanFlag = meanCheckbox.isSelected();
+            tryShowingChart(chartPanel);
+        });
     }
 
     private Statistics[] getSelectedStatistics() {
