@@ -3,6 +3,8 @@ package hec.ensembleview;
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.ensemble.Ensemble;
+import hec.ensemble.EnsembleTimeSeries;
+import hec.metrics.MetricCollectionTimeSeries;
 import hec.stats.MultiStatComputable;
 import hec.stats.Statistics;
 
@@ -299,10 +301,12 @@ public class EnsembleViewer {
     }
 
     private float[][] getStatistics(Ensemble ensemble, Statistics[] wantedStats) {
-        float[][] retrievedStats = ensemble.multiComputeForTracesAcrossTime(
-                new MultiStatComputable(
-                        wantedStats));
+        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
+        MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(
+                new MultiStatComputable(wantedStats));
+
+        float[][] retrievedStats = mct.iterator().next().getValues();
         float[][] returnStats = new float[wantedStats.length][retrievedStats.length];
         for (int i = 0; i < retrievedStats.length; i++){
             for (int j = 0; j < wantedStats.length; j++){
