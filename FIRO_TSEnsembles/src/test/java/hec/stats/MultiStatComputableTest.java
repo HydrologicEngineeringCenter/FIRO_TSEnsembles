@@ -40,10 +40,12 @@ class MultiStatComputableTest {
             Ensemble e = TestData.getSampleEnsemble();
             MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MEAN, MAX});
             float[][] output = e.multiComputeForTracesAcrossTime(test);
-            float[] value1 = output[3];
-            assertEquals(-4000, value1[0]);
-            assertEquals(-10.0833740234375, value1[1]);
-            assertEquals(11.159436225891113, value1[2]);
+            float[] value0 = output[0];
+            float[] value1 = output[1];
+            float[] value2 = output[2];
+            assertEquals(-4000, value0[3]);
+            assertEquals(-10.0833740234375, value1[3]);
+            assertEquals(11.159436225891113, value2[3]);
         } catch (Exception e) {
             Logger.logError(e);
             fail();

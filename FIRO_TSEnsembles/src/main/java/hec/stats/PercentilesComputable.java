@@ -81,6 +81,10 @@ public class PercentilesComputable implements Computable, MultiComputable {
 
     @Override
     public Statistics[] Statistics() {
-        return new Statistics[]{Statistics.PERCENTILE};
+        Statistics[] ret = new Statistics[_percentiles.length];
+        for (int i = 0 ; i < _percentiles.length; i ++){
+            ret[i] = Statistics.PERCENTILE;
+        }
+        return ret;
     }
 }
