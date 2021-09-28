@@ -5,13 +5,17 @@ import hec.SqliteDatabase;
 import hec.ensemble.Ensemble;
 import hec.stats.MultiStatComputable;
 import hec.stats.Statistics;
+import javafx.scene.chart.Chart;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.nio.channels.SelectableChannel;
+import java.text.ParseException;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.List;
 
@@ -125,6 +129,9 @@ public class EnsembleViewer {
                     String[] sRids = rids.stream().map(RecordIdentifier::toString).toArray(String[]::new);
                     ComboBoxModel<String> model = new DefaultComboBoxModel<>(sRids);
                     locations.setModel(model);
+                    ev.selectedRid = null;
+                    ev.selectedZdt = null;
+                    ev.showEmptyChart(chartPanel);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -133,46 +140,53 @@ public class EnsembleViewer {
         });
 
         locations.addActionListener(e -> {
-            ev.selectedRid = ev.getRecordIdentifierFromString(String.valueOf(locations.getSelectedItem()));
-            ev.selectedZdt = null;
-            String[] zdts = ev.db.getEnsembleIssueDates(ev.selectedRid).stream().map(ZonedDateTime::toString).toArray(String[]::new);
-            ComboBoxModel<String> model = new DefaultComboBoxModel<>(zdts);
-            dateTimes.setModel(model);
-            chartPanel.removeAll();
-            chartPanel.revalidate();
-            chartPanel.setLayout(new BorderLayout());
-            chartPanel.add(emptyChart.getChart(), BorderLayout.CENTER);
-            chartPanel.repaint();
+            ev.setRidFromString(String.valueOf(locations.getSelectedItem()));
+            setupDateTimeComboBox(ev, dateTimes);
+            ev.setDateTimeFromString(String.valueOf(dateTimes.getSelectedItem()));
+            ev.tryShowingChart(chartPanel);
         });
 
         dateTimes.addActionListener(e -> {
-            ev.selectedZdt = ev.getZonedDateTimeFromString(ev.selectedRid, String.valueOf(dateTimes.getSelectedItem()));
-            try {
-                ev.ec = ev.createChart(filePath.getText());
-                if (ev.ec == null){
-                    return;
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            chartPanel.removeAll();
-            chartPanel.revalidate();
-            chartPanel.setLayout(new BorderLayout());
-            chartPanel.add(ev.ec.getChart(), BorderLayout.CENTER);
-            chartPanel.repaint();
+            ev.setDateTimeFromString(String.valueOf(dateTimes.getSelectedItem()));
+            ev.tryShowingChart(chartPanel);
         });
 
         minCheckbox.addActionListener(e -> {
             ev.minFlag = minCheckbox.isSelected();
+            ev.tryShowingChart(chartPanel);
         });
 
         maxCheckbox.addActionListener(e -> {
-            ev.maxFlag = minCheckbox.isSelected();
+            ev.maxFlag = maxCheckbox.isSelected();
+            ev.tryShowingChart(chartPanel);
         });
 
         meanCheckbox.addActionListener(e -> {
-            ev.meanFlag = minCheckbox.isSelected();
+            ev.meanFlag = meanCheckbox.isSelected();
+            ev.tryShowingChart(chartPanel);
         });
+    }
+
+    private void setRidFromString(String rid) {
+        selectedRid = getRecordIdentifierFromString(rid);
+    }
+
+    private void setDateTimeFromString(String date) {
+        selectedZdt = getZonedDateTimeFromString(selectedRid, date);
+    }
+
+    private static void setupDateTimeComboBox(EnsembleViewer ev, JComboBox<String> dateTimeComboBox) {
+        String[] zdts = ev.db.getEnsembleIssueDates(ev.selectedRid).stream().map(ZonedDateTime::toString).toArray(String[]::new);
+        ComboBoxModel<String> model = new DefaultComboBoxModel<>(zdts);
+        dateTimeComboBox.setModel(model);
+    }
+
+    private void showEmptyChart(JPanel chartPanel) {
+        chartPanel.removeAll();
+        chartPanel.revalidate();
+        chartPanel.setLayout(new BorderLayout());
+        chartPanel.add(new EnsembleJFreeChart().getChart(), BorderLayout.CENTER);
+        chartPanel.repaint();
     }
 
     public void setDatabase(String absoluteFile) throws Exception {
@@ -199,23 +213,60 @@ public class EnsembleViewer {
         return null;
     }
 
-    private EnsembleChart createChart(String fileName) throws Exception {
-        if (Objects.equals(fileName, "") || selectedRid == null || selectedZdt == null) {
+    private void tryShowingChart(JPanel chartPanel) {
+        try {
+            ec = createChart();
+            if (ec == null){
+                return;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        chartPanel.removeAll();
+        chartPanel.revalidate();
+        chartPanel.setLayout(new BorderLayout());
+        chartPanel.add(ec.getChart(), BorderLayout.CENTER);
+        chartPanel.repaint();
+    }
+
+    private EnsembleChart createChart() throws Exception {
+        if (selectedRid == null || selectedZdt == null) {
             return null;
         }
 
         Ensemble ensemble = db.getEnsemble(selectedRid, selectedZdt);
-
         EnsembleChart chart = new EnsembleJFreeChart();
         chart.setXLabel("Date/Time");
         chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
         float[][] vals = ensemble.getValues();
+        Statistics[] selectedStats = getSelectedStatistics();
+        float[][] stats = getStatistics(ensemble, selectedStats);
         ZonedDateTime[] dates = ensemble.startDateTime();
+        addMembersToChart(chart, vals, dates);
+        addStatisticsToChart(chart, stats, selectedStats, dates);
+        return chart;
+    }
+
+    private void addMembersToChart(EnsembleChart chart, float[][] vals, ZonedDateTime[] dates) throws ParseException {
         for (int i = 0; i < vals.length; i++) {
             chart.addLine(vals[i], dates, "Member " + (i + 1));
         }
+    }
 
-        return chart;
+    private void addStatisticsToChart(EnsembleChart chart, float[][] stats, Statistics[] selectedStats, ZonedDateTime[] dates) throws ParseException {
+        for (int i = 0; i < selectedStats.length; i++) {
+            switch (selectedStats[i]){
+                case MIN:
+                    chart.addLine(stats[i], dates, "MIN");
+                    break;
+                case MAX:
+                    chart.addLine(stats[i], dates, "MAX");
+                    break;
+                case MEAN:
+                    chart.addLine(stats[i], dates, "MEAN");
+                    break;
+            }
+        }
     }
 
     public EnsembleViewer(String database) throws Exception {
@@ -226,10 +277,15 @@ public class EnsembleViewer {
 
     }
 
-    private float[][] getStatistics(Ensemble ensemble) {
+    private Statistics[] getSelectedStatistics() {
+        List<Statistics> selectedStats = new ArrayList<>();
+        if (minFlag) selectedStats.add(Statistics.MIN);
+        if (maxFlag) selectedStats.add(Statistics.MAX);
+        if (meanFlag) selectedStats.add(Statistics.MEAN);
+        return selectedStats.toArray(new Statistics[]{});
+    }
 
-
-        Statistics[] wantedStats = new Statistics[] {Statistics.MIN, Statistics.MAX, Statistics.MEAN};
+    private float[][] getStatistics(Ensemble ensemble, Statistics[] wantedStats) {
         float[][] retrievedStats = ensemble.multiComputeForTracesAcrossTime(
                 new MultiStatComputable(
                         wantedStats));
