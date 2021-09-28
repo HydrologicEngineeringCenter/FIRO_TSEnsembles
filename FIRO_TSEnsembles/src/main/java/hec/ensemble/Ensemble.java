@@ -125,11 +125,15 @@ public class Ensemble
         ((Configurable)cmd).configure(_configuration);
       }
       int size= values.length;
+      int size2 = cmd.Statistics().length;
       float[] rval;
-      float[][] val = new float[size][];
+      float[][] val = new float[size2][size];
       for (int i = 0; i <size ; i++) {
         rval = cmd.MultiCompute(values[i]);
-        val[i] = rval;
+        for (int j = 0; j<size2;j++){
+          val[j][i] = rval[j];
+        }
+
       }
       return val;
     }
@@ -143,16 +147,21 @@ public class Ensemble
         ((Configurable)cmd).configure(_configuration);
       }
       int size= values[0].length;//number of timesteps
-      float[][] rval = new float[size][];
+      int size2 = cmd.Statistics().length;
+      float[][] val = new float[size2][size];
       int traces = values.length;//number of traces
+      float[] rval;
       float[] tracevals = new float[traces];
       for (int i = 0; i <size ; i++) {
         for(int j = 0; j <traces; j++){
           tracevals[j] = values[j][i];//load all trace values for this timestep into an array
         }
-        rval[i] = cmd.MultiCompute(tracevals);//compute a collection of statistics for this timestep and store.
+        rval = cmd.MultiCompute(tracevals);//compute a collection of statistics for this timestep and store.
+        for (int k = 0; k<size2;k++){
+          val[k][i] = rval[k];
+        }
       }
-      return rval;//a time series of a collection of statistics.
+      return val;//a time series of a collection of statistics.
     }
     public float singleComputeForEnsemble(SingleComputable cmd){
       if (cmd instanceof hec.stats.Configurable){

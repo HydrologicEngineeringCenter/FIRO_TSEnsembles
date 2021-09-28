@@ -56,10 +56,12 @@ class EnsembleTimeSeriesTest {
             //compute the statistics for the entire ensemble time series
             MetricCollectionTimeSeries output = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(test);
             //verify at the data is properly computing for a set of known values
-            float[] value1 = output.iterator().next().getValues()[3];
-            assertEquals(0.953000009059906, value1[0]);//min
-            assertEquals(0.9668087959289551, value1[1]);//mean
-            assertEquals(1.1300690174102783, value1[2]);//max
+            float[] value0 = output.iterator().next().getValues()[0];
+            float[] value1 = output.iterator().next().getValues()[1];
+            float[] value2 = output.iterator().next().getValues()[2];
+            assertEquals(0.953000009059906, value0[3]);//min
+            assertEquals(0.9668087959289551, value1[3]);//mean
+            assertEquals(1.1300690174102783, value2[3]);//max
             //write result
             _db.write(output);
         } catch (Exception e) {
@@ -79,10 +81,12 @@ class EnsembleTimeSeriesTest {
             //compute the statistics for the entire ensemble time series
             MetricCollectionTimeSeries output = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(test);
             //verify at the data is properly computing for a set of known values
-            float[] value1 = output.iterator().next().getValues()[3];
-            assertEquals(-4000, value1[0]);//min
-            assertEquals(-10.0833740234375, value1[1]);//mean
-            assertEquals(11.159436225891113, value1[2]);//max
+            float[] value0 = output.iterator().next().getValues()[0];
+            float[] value1 = output.iterator().next().getValues()[1];
+            float[] value2 = output.iterator().next().getValues()[2];
+            assertEquals(-4000, value0[3]);//min
+            assertEquals(-10.0833740234375, value1[3]);//mean
+            assertEquals(11.159436225891113, value2[3]);//max
             //write result
             _db.write(output);
         } catch (Exception e) {
