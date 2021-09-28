@@ -135,7 +135,7 @@ public class EnsembleViewer {
 
     private void addMembersToChart(EnsembleChart chart, float[][] vals, ZonedDateTime[] dates) throws ParseException {
         for (int i = 0; i < vals.length; i++) {
-            chart.addLine(vals[i], dates, "Member " + (i + 1));
+            chart.addLine(new LineSpec(vals[i], dates, new BasicStroke(1.0f), null, "Member " + (i + 1)));
         }
     }
 
@@ -143,13 +143,13 @@ public class EnsembleViewer {
         for (int i = 0; i < selectedStats.length; i++) {
             switch (selectedStats[i]){
                 case MIN:
-                    chart.addLine(stats[i], dates, "MIN");
+                    chart.addLine(new LineSpec(stats[i], dates, new BasicStroke(3.0f), Color.BLACK, "MIN"));
                     break;
                 case MAX:
-                    chart.addLine(stats[i], dates, "MAX");
+                    chart.addLine(new LineSpec(stats[i], dates, new BasicStroke(3.0f), Color.BLACK, "MAX"));
                     break;
                 case MEAN:
-                    chart.addLine(stats[i], dates, "MEAN");
+                    chart.addLine(new LineSpec(stats[i], dates, new BasicStroke(3.0f), Color.BLACK, "MEAN"));
                     break;
             }
         }
