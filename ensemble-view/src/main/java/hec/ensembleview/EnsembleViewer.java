@@ -3,11 +3,8 @@ package hec.ensembleview;
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.ensemble.Ensemble;
-<<<<<<< HEAD
 import hec.ensemble.EnsembleTimeSeries;
 import hec.metrics.MetricCollectionTimeSeries;
-=======
->>>>>>> origin/ensemble-view
 import hec.stats.MultiStatComputable;
 import hec.stats.Statistics;
 
