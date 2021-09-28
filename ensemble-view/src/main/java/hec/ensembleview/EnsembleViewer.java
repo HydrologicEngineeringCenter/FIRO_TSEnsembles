@@ -5,14 +5,12 @@ import hec.SqliteDatabase;
 import hec.ensemble.Ensemble;
 import hec.stats.MultiStatComputable;
 import hec.stats.Statistics;
-import javafx.scene.chart.Chart;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.nio.channels.SelectableChannel;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
