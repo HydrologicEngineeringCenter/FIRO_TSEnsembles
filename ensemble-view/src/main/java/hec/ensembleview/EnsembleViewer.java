@@ -127,10 +127,10 @@ public class EnsembleViewer {
         chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
         float[][] vals = ensemble.getValues();
         Statistics[] selectedStats = getSelectedStatistics();
-        float[][] stats = getStatistics(selectedStats);
+        MetricCollection stats = getStatistics(selectedStats);
         ZonedDateTime[] dates = ensemble.startDateTime();
-        addStatisticsToChart(chart, stats, selectedStats, dates);
-        boolean randomColor = stats.length <= 0;
+        addStatisticsToChart(chart, stats, dates);
+        boolean randomColor = selectedStats.length <= 0;
         addMembersToChart(chart, vals, dates, randomColor);
         return chart;
     }
@@ -150,19 +150,17 @@ public class EnsembleViewer {
 
     }
 
-    private void addStatisticsToChart(EnsembleChart chart, float[][] stats, Statistics[] selectedStats, ZonedDateTime[] dates) throws ParseException {
+    private void addStatisticsToChart(EnsembleChart chart, MetricCollection stats, ZonedDateTime[] dates) throws ParseException {
+        Statistics[] selectedStats = stats.getMetricStatistics();
         for (int i = 0; i < selectedStats.length; i++) {
             switch (selectedStats[i]){
                 case MIN:
-                    chart.addLine(new LineSpec(stats[i], dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                            1.0f, new float[] {6.0f, 6.0f}, 0.0f), Color.BLACK, "MIN"));
-                    break;
                 case MAX:
-                    chart.addLine(new LineSpec(stats[i], dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                            1.0f, new float[] {6.0f, 6.0f}, 0.0f), Color.BLACK, "MAX"));
+                    chart.addLine(new LineSpec(stats.getDateForStatistic(selectedStats[i]), dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                            1.0f, new float[] {6.0f, 6.0f}, 0.0f), Color.BLACK, selectedStats[i].name()));
                     break;
-                case MEAN:
-                    chart.addLine(new LineSpec(stats[i], dates, new BasicStroke(3.0f), Color.BLACK, "MEAN"));
+                default:
+                    chart.addLine(new LineSpec(stats.getDateForStatistic(selectedStats[i]), dates, new BasicStroke(3.0f), Color.BLACK, selectedStats[i].name()));
                     break;
             }
         }
@@ -313,14 +311,13 @@ public class EnsembleViewer {
         return selectedStats.toArray(new Statistics[]{});
     }
 
-    private float[][] getStatistics(Statistics[] wantedStats) {
+    private MetricCollection getStatistics(Statistics[] wantedStats) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
         MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(
                 new MultiStatComputable(wantedStats));
 
-        MetricCollection mc = mct.getMetricCollection(selectedZdt);
-        return mc.getValues();
+        return mct.getMetricCollection(selectedZdt);
     }
 
 
