@@ -128,8 +128,8 @@ public class EnsembleViewer {
         Statistics[] selectedStats = getSelectedStatistics();
         float[][] stats = getStatistics(ensemble, selectedStats);
         ZonedDateTime[] dates = ensemble.startDateTime();
-        addMembersToChart(chart, vals, dates);
         addStatisticsToChart(chart, stats, selectedStats, dates);
+        addMembersToChart(chart, vals, dates);
         return chart;
     }
 
@@ -143,10 +143,12 @@ public class EnsembleViewer {
         for (int i = 0; i < selectedStats.length; i++) {
             switch (selectedStats[i]){
                 case MIN:
-                    chart.addLine(new LineSpec(stats[i], dates, new BasicStroke(3.0f), Color.BLACK, "MIN"));
+                    chart.addLine(new LineSpec(stats[i], dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                            1.0f, new float[] {6.0f, 6.0f}, 0.0f), Color.BLACK, "MIN"));
                     break;
                 case MAX:
-                    chart.addLine(new LineSpec(stats[i], dates, new BasicStroke(3.0f), Color.BLACK, "MAX"));
+                    chart.addLine(new LineSpec(stats[i], dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                            1.0f, new float[] {6.0f, 6.0f}, 0.0f), Color.BLACK, "MAX"));
                     break;
                 case MEAN:
                     chart.addLine(new LineSpec(stats[i], dates, new BasicStroke(3.0f), Color.BLACK, "MEAN"));
