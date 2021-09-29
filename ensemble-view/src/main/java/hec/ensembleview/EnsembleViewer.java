@@ -130,14 +130,24 @@ public class EnsembleViewer {
         float[][] stats = getStatistics(selectedStats);
         ZonedDateTime[] dates = ensemble.startDateTime();
         addStatisticsToChart(chart, stats, selectedStats, dates);
-        addMembersToChart(chart, vals, dates);
+        boolean randomColor = stats.length <= 0;
+        addMembersToChart(chart, vals, dates, randomColor);
         return chart;
     }
 
-    private void addMembersToChart(EnsembleChart chart, float[][] vals, ZonedDateTime[] dates) throws ParseException {
-        for (int i = 0; i < vals.length; i++) {
-            chart.addLine(new LineSpec(vals[i], dates, new BasicStroke(1.0f), null, "Member " + (i + 1)));
+    private void addMembersToChart(EnsembleChart chart, float[][] vals, ZonedDateTime[] dates, boolean randomColor) throws ParseException {
+        Color c = null;
+        if (!randomColor) {
+            c = Color.blue;
+            int alpha = 50;
+            int cInt = (c.getRGB() & 0xffffff) | (alpha << 24);
+            c = new Color(cInt, true);
+
         }
+        for (int i = 0; i < vals.length; i++) {
+            chart.addLine(new LineSpec(vals[i], dates, new BasicStroke(1.0f), c, "Member " + (i + 1)));
+        }
+
     }
 
     private void addStatisticsToChart(EnsembleChart chart, float[][] stats, Statistics[] selectedStats, ZonedDateTime[] dates) throws ParseException {
