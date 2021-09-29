@@ -71,10 +71,11 @@ class PercentileTest {
             Ensemble e = TestData.getSampleEnsemble();
             MultiComputable test = new PercentilesComputable(new float[] {.05f, .95f});
             float[][] output = e.multiComputeForTracesAcrossTime(test);
-            float[] value1 = output[3];
-            assertEquals(2, value1.length);
-            assertEquals(0.6000000238418579, value1[0]);
-            assertEquals(6.208315849304199, value1[1]);
+            float[] value0 = output[0];
+            float[] value1 = output[1];
+            assertEquals(2, output.length);
+            assertEquals(0.6000000238418579, value0[3]);
+            assertEquals(6.208315849304199, value1[3]);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
@@ -87,10 +88,12 @@ class PercentileTest {
             Ensemble e = TestData.getSampleEnsemble();
             MultiComputable test = new PercentilesComputable(new float[] {.05f, .5f, .95f});
             float[][] output = e.multiComputeForTracesAcrossTime(test);
-            float[] value1 = output[3];
-            assertEquals(0.6000000238418579, value1[0]);
-            assertEquals(0.8479999899864197, value1[1]);
-            assertEquals(6.208315849304199, value1[2]);
+            float[] value0 = output[0];
+            float[] value1 = output[1];
+            float[] value2 = output[2];
+            assertEquals(0.6000000238418579, value0[3]);
+            assertEquals(0.8479999899864197, value1[3]);
+            assertEquals(6.208315849304199, value2[3]);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
