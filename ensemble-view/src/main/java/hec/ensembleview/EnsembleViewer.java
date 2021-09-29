@@ -4,6 +4,7 @@ import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
+import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.stats.MultiStatComputable;
 import hec.stats.Statistics;
@@ -126,7 +127,7 @@ public class EnsembleViewer {
         chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
         float[][] vals = ensemble.getValues();
         Statistics[] selectedStats = getSelectedStatistics();
-        float[][] stats = getStatistics(ensemble, selectedStats);
+        float[][] stats = getStatistics(selectedStats);
         ZonedDateTime[] dates = ensemble.startDateTime();
         addStatisticsToChart(chart, stats, selectedStats, dates);
         addMembersToChart(chart, vals, dates);
@@ -302,21 +303,14 @@ public class EnsembleViewer {
         return selectedStats.toArray(new Statistics[]{});
     }
 
-    private float[][] getStatistics(Ensemble ensemble, Statistics[] wantedStats) {
+    private float[][] getStatistics(Statistics[] wantedStats) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
         MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(
                 new MultiStatComputable(wantedStats));
 
-        float[][] retrievedStats = mct.iterator().next().getValues();
-        float[][] returnStats = new float[wantedStats.length][retrievedStats.length];
-        for (int i = 0; i < retrievedStats.length; i++){
-            for (int j = 0; j < wantedStats.length; j++){
-                returnStats[j][i] = retrievedStats[i][j];
-            }
-        }
-
-        return returnStats;
+        MetricCollection mc = mct.getMetricCollection(selectedZdt);
+        return mc.getValues();
     }
 
 
