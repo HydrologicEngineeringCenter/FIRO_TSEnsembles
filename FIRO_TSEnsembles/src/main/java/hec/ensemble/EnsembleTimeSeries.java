@@ -121,7 +121,7 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       return mcts;
     }
     public MetricCollectionTimeSeries iterateAcrossTimestepsOfEnsemblesWithSingleComputable(Computable compute){
-      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.TIMESERIES_OF_SINGLE_VALUE);
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.TIMESERIES_OF_ARRAY);
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float[] farray = e.iterateForTimeAcrossTraces(compute);
@@ -132,7 +132,7 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       return mcts;
     }
     public MetricCollectionTimeSeries iterateAcrossEnsembleTracesWithSingleComputable(Computable compute){
-      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.ARRAY_OF_SINGLE_VALUE);
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.ARRAY_OF_ARRAY);
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float[] farray = e.iterateForTracesAcrossTime(compute);
