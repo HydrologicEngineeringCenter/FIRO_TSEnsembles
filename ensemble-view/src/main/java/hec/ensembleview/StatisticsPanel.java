@@ -45,9 +45,5 @@ public class StatisticsPanel {
         return statsMapping.get(stat);
     }
 
-    public TreeMap<Statistics, JCheckBox> getStatsMapping() {
-        return statsMapping;
-    }
-
 
 }
