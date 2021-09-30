@@ -19,7 +19,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.List;
-import java.util.TreeMap;
 
 public class EnsembleViewer {
     private SqliteDatabase db;
@@ -272,8 +271,9 @@ public class EnsembleViewer {
             tryShowingChart(chartPanel);
         });
 
-        TreeMap<Statistics, JCheckBox> statCheckboxes = statsPanel.getStatsMapping();
-        for (JCheckBox cb : statCheckboxes.values()) {
+        Statistics[] stats = Statistics.values();
+        for (Statistics stat : stats) {
+            JCheckBox cb = statsPanel.getStatCheckbox(stat);
             cb.addActionListener(e -> tryShowingChart(chartPanel));
         }
     }
@@ -281,9 +281,8 @@ public class EnsembleViewer {
     private Statistics[] getSelectedStatistics() {
         List<Statistics> selectedStats = new ArrayList<>();
         Statistics[] stats = Statistics.values();
-        TreeMap<Statistics, JCheckBox> statsMapping = statsPanel.getStatsMapping();
         for (Statistics stat : stats) {
-            if (statsMapping.get(stat).isSelected()) {
+            if (statsPanel.getStatCheckbox(stat).isSelected()) {
                 selectedStats.add(stat);
             }
         }
