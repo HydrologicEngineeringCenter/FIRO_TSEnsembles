@@ -19,6 +19,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.List;
+import java.util.TreeMap;
 
 public class EnsembleViewer {
     private SqliteDatabase db;
@@ -26,10 +27,6 @@ public class EnsembleViewer {
 
     private RecordIdentifier selectedRid = null;
     private ZonedDateTime selectedZdt = null;
-
-    private boolean minFlag = false;
-    private boolean maxFlag = false;
-    private boolean meanFlag = false;
 
     private JFrame frame;
     private JPanel topPanel;
@@ -40,10 +37,7 @@ public class EnsembleViewer {
     private JButton fileSearchButton;
     private JComboBox<String> locations;
     private JComboBox<String> dateTimes;
-    private JPanel statsPanel;
-    private JCheckBox minCheckbox;
-    private JCheckBox maxCheckbox;
-    private JCheckBox meanCheckbox;
+    private StatisticsPanel statsPanel;
 
     public static void main(String[] args) {
         EnsembleViewer ev = new EnsembleViewer();
@@ -152,15 +146,15 @@ public class EnsembleViewer {
 
     private void addStatisticsToChart(EnsembleChart chart, MetricCollection stats, ZonedDateTime[] dates) throws ParseException {
         Statistics[] selectedStats = stats.getMetricStatistics();
-        for (int i = 0; i < selectedStats.length; i++) {
-            switch (selectedStats[i]){
+        for (Statistics selectedStat : selectedStats) {
+            switch (selectedStat) {
                 case MIN:
                 case MAX:
-                    chart.addLine(new LineSpec(stats.getDateForStatistic(selectedStats[i]), dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                            1.0f, new float[] {6.0f, 6.0f}, 0.0f), Color.BLACK, selectedStats[i].name()));
+                    chart.addLine(new LineSpec(stats.getDateForStatistic(selectedStat), dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                            1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, selectedStat.name()));
                     break;
                 default:
-                    chart.addLine(new LineSpec(stats.getDateForStatistic(selectedStats[i]), dates, new BasicStroke(3.0f), Color.BLACK, selectedStats[i].name()));
+                    chart.addLine(new LineSpec(stats.getDateForStatistic(selectedStat), dates, new BasicStroke(3.0f), Color.BLACK, selectedStat.name()));
                     break;
             }
         }
@@ -206,18 +200,9 @@ public class EnsembleViewer {
         optionsPanel.add(dateTimes);
 
         /*
-        Create metrics panel.
+        Create statistics panel.
          */
-        statsPanel = new JPanel();
-        statsPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Statistics", TitledBorder.LEFT, TitledBorder.TOP));
-        ((TitledBorder)statsPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
-        statsPanel.setLayout(new GridLayout(0,1));
-        minCheckbox = new JCheckBox("Min");
-        maxCheckbox = new JCheckBox("Max");
-        meanCheckbox = new JCheckBox("Mean");
-        statsPanel.add(minCheckbox);
-        statsPanel.add(maxCheckbox);
-        statsPanel.add(meanCheckbox);
+        statsPanel = new StatisticsPanel();
 
         /*
         Create panel for holding options and metrics panels.
@@ -225,7 +210,7 @@ public class EnsembleViewer {
         topPanel = new JPanel();
         topPanel.setLayout(new GridLayout(2, 1));
         topPanel.add(optionsPanel);
-        topPanel.add(statsPanel);
+        topPanel.add(statsPanel.getPanel());
 
         /*
         Create panel for holding chart panel.
@@ -287,27 +272,21 @@ public class EnsembleViewer {
             tryShowingChart(chartPanel);
         });
 
-        minCheckbox.addActionListener(e -> {
-            minFlag = minCheckbox.isSelected();
-            tryShowingChart(chartPanel);
-        });
-
-        maxCheckbox.addActionListener(e -> {
-            maxFlag = maxCheckbox.isSelected();
-            tryShowingChart(chartPanel);
-        });
-
-        meanCheckbox.addActionListener(e -> {
-            meanFlag = meanCheckbox.isSelected();
-            tryShowingChart(chartPanel);
-        });
+        TreeMap<Statistics, JCheckBox> statCheckboxes = statsPanel.getStatsMapping();
+        for (JCheckBox cb : statCheckboxes.values()) {
+            cb.addActionListener(e -> tryShowingChart(chartPanel));
+        }
     }
 
     private Statistics[] getSelectedStatistics() {
         List<Statistics> selectedStats = new ArrayList<>();
-        if (minFlag) selectedStats.add(Statistics.MIN);
-        if (maxFlag) selectedStats.add(Statistics.MAX);
-        if (meanFlag) selectedStats.add(Statistics.MEAN);
+        Statistics[] stats = Statistics.values();
+        TreeMap<Statistics, JCheckBox> statsMapping = statsPanel.getStatsMapping();
+        for (Statistics stat : stats) {
+            if (statsMapping.get(stat).isSelected()) {
+                selectedStats.add(stat);
+            }
+        }
         return selectedStats.toArray(new Statistics[]{});
     }
 

@@ -9,8 +9,8 @@ import java.awt.*;
 import java.util.TreeMap;
 
 public class StatisticsPanel {
-    JPanel panel;
-    TreeMap<Statistics, JCheckBox> statsMapping;
+    private JPanel panel;
+    private TreeMap<Statistics, JCheckBox> statsMapping;
 
     public StatisticsPanel() {
         panel = new JPanel();
@@ -36,4 +36,18 @@ public class StatisticsPanel {
             panel.add(cb);
         }
     }
+
+    public JPanel getPanel() {
+        return panel;
+    }
+
+    public JCheckBox getStatCheckbox(Statistics stat) {
+        return statsMapping.get(stat);
+    }
+
+    public TreeMap<Statistics, JCheckBox> getStatsMapping() {
+        return statsMapping;
+    }
+
+
 }
