@@ -4,7 +4,6 @@ import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensembleview.mappings.StatisticsStringMap;
-import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.stats.MultiStatComputable;
 import hec.stats.Statistics;
