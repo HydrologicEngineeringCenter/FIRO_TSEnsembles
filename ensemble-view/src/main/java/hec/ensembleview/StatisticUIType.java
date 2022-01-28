@@ -1,6 +1,6 @@
 package hec.ensembleview;
 
-public enum StatType {
+public enum StatisticUIType {
     CHECKBOX,
     TEXTBOX
 }

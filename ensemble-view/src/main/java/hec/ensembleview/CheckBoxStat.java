@@ -10,8 +10,8 @@ public class CheckBoxStat extends JPanel implements EnsembleViewStat {
     }
 
     @Override
-    public StatType getStatType() {
-        return StatType.CHECKBOX;
+    public StatisticUIType getStatType() {
+        return StatisticUIType.CHECKBOX;
     }
 
     @Override

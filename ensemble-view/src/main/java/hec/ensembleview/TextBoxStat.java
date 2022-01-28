@@ -10,8 +10,8 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
     }
 
     @Override
-    public StatType getStatType() {
-        return StatType.TEXTBOX;
+    public StatisticUIType getStatType() {
+        return StatisticUIType.TEXTBOX;
     }
 
     @Override

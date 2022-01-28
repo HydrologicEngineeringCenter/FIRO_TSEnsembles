@@ -1,9 +1,7 @@
 package hec.ensembleview;
 
-import javax.swing.*;
-
 public interface EnsembleViewStat {
-    StatType getStatType();
+    StatisticUIType getStatType();
     float[] getStatData();
     //boolean isEnabled();
 }
