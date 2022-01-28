@@ -31,6 +31,18 @@ public class CheckBoxStat extends JPanel implements EnsembleViewStat {
 
     @Override
     public float[] getStatData(SqliteDatabase db, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
+        switch(stat){
+            case MIN:
+            case MAX:
+            case MEAN:
+                return getDataFromMultiStatComputable(db, selectedRid, selectedZdt);
+            default:
+                return new float[0];
+        }
+
+    }
+
+    private float[] getDataFromMultiStatComputable(SqliteDatabase db, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
         MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(
@@ -45,7 +57,12 @@ public class CheckBoxStat extends JPanel implements EnsembleViewStat {
     }
 
     @Override
-    public void addActionListeners(ActionListener l) {
+    public void addActionListener(ActionListener l) {
         checkBox.addActionListener(l);
+    }
+
+    @Override
+    public boolean hasInput() {
+        return checkBox.isSelected();
     }
 }

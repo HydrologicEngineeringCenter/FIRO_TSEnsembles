@@ -37,11 +37,16 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
 
     @Override
     public Statistics getStat() {
-        return null;
+        return stat;
     }
 
     @Override
-    public void addActionListeners(ActionListener l) {
+    public void addActionListener(ActionListener l) {
         textField.addActionListener(l);
+    }
+
+    @Override
+    public boolean hasInput() {
+        return false;
     }
 }

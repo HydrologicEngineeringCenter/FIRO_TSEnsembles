@@ -1,5 +1,7 @@
 package hec.ensembleview;
 
+import hec.ensembleview.mappings.StatisticsStringMap;
+import hec.ensembleview.mappings.StatisticsUITypeMap;
 import hec.stats.Statistics;
 
 import javax.swing.*;
@@ -10,7 +12,7 @@ import java.util.TreeMap;
 
 public class StatisticsPanel {
     private JPanel panel;
-    private TreeMap<Statistics, JCheckBox> statsMapping;
+    private TreeMap<Statistics, EnsembleViewStat> statsMapping;
 
     public StatisticsPanel() {
         panel = new JPanel();
@@ -20,20 +22,38 @@ public class StatisticsPanel {
         panel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Statistics", TitledBorder.LEFT, TitledBorder.TOP));
         ((TitledBorder)panel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
         panel.setLayout(new GridLayout(0,1));
-        createStatCheckboxes();
-        addStatCheckboxesToPanel();
+        createStats();
+        addStatsToPanel();
     }
 
-    private void createStatCheckboxes() {
+    private void createStats() {
         Statistics[] allStats = Statistics.values();
         for (Statistics stat : allStats) {
-            statsMapping.put(stat, new JCheckBox(stat.name()));
+            switch(StatisticsUITypeMap.map.get(stat)) {
+                case CHECKBOX:
+                    statsMapping.put(stat, new CheckBoxStat(stat));
+                    break;
+                case TEXTBOX:
+                    statsMapping.put(stat, new TextBoxStat(stat));
+                    break;
+            }
         }
     }
 
-    private void addStatCheckboxesToPanel() {
-        for (JCheckBox cb : statsMapping.values()) {
-            panel.add(cb);
+    private void addStatsToPanel() {
+        for (EnsembleViewStat stat : statsMapping.values()) {
+            switch (stat.getStat()) {
+                case MIN:
+                case MAX:
+                case MEAN:
+                    panel.add((CheckBoxStat)stat);
+                    break;
+                case MEDIAN:
+                case PERCENTILE:
+                case CUMULATIVE:
+                case MAXAVERAGEDURATION:
+                    break;
+            }
         }
     }
 
@@ -41,7 +61,7 @@ public class StatisticsPanel {
         return panel;
     }
 
-    public JCheckBox getStatCheckbox(Statistics stat) {
+    public EnsembleViewStat getStat(Statistics stat) {
         return statsMapping.get(stat);
     }
 

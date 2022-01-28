@@ -11,6 +11,7 @@ public interface EnsembleViewStat {
     StatisticUIType getStatType();
     float[] getStatData(SqliteDatabase db, RecordIdentifier selectedRid, ZonedDateTime selectedZdt);
     Statistics getStat();
-    void addActionListeners(ActionListener l);
+    void addActionListener(ActionListener l);
+    boolean hasInput();
     //boolean isEnabled();
 }

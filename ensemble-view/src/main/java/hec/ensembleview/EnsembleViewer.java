@@ -4,6 +4,7 @@ import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
+import hec.ensembleview.mappings.StatisticsStringMap;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.stats.MultiStatComputable;
@@ -119,10 +120,9 @@ public class EnsembleViewer {
         chart.setXLabel("Date/Time");
         chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
         float[][] vals = ensemble.getValues();
-        Statistics[] selectedStats = getSelectedStatistics();
-        MetricCollection stats = getStatistics(selectedStats);
+        EnsembleViewStat[] selectedStats = getSelectedStatistics();
         ZonedDateTime[] dates = ensemble.startDateTime();
-        addStatisticsToChart(chart, stats, dates);
+        addStatisticsToChart(chart, selectedStats, dates);
         boolean randomColor = selectedStats.length <= 0;
         addMembersToChart(chart, vals, dates, randomColor);
         return chart;
@@ -143,17 +143,18 @@ public class EnsembleViewer {
 
     }
 
-    private void addStatisticsToChart(EnsembleChart chart, MetricCollection stats, ZonedDateTime[] dates) throws ParseException {
-        Statistics[] selectedStats = stats.getMetricStatistics();
-        for (Statistics selectedStat : selectedStats) {
-            switch (selectedStat) {
+    private void addStatisticsToChart(EnsembleChart chart, EnsembleViewStat[] stats, ZonedDateTime[] dates) throws ParseException {
+        for (EnsembleViewStat selectedStat : stats) {
+            switch (selectedStat.getStat()) {
                 case MIN:
                 case MAX:
-                    chart.addLine(new LineSpec(stats.getDateForStatistic(selectedStat), dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                            1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, selectedStat.name()));
+                    chart.addLine(new LineSpec(selectedStat.getStatData(db, selectedRid, selectedZdt),
+                            dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                            1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStat())));
                     break;
                 default:
-                    chart.addLine(new LineSpec(stats.getDateForStatistic(selectedStat), dates, new BasicStroke(3.0f), Color.BLACK, selectedStat.name()));
+                    chart.addLine(new LineSpec(selectedStat.getStatData(db, selectedRid, selectedZdt),
+                            dates, new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStat())));
                     break;
             }
         }
@@ -273,20 +274,21 @@ public class EnsembleViewer {
 
         Statistics[] stats = Statistics.values();
         for (Statistics stat : stats) {
-            JCheckBox cb = statsPanel.getStatCheckbox(stat);
+            EnsembleViewStat cb = statsPanel.getStat(stat);
             cb.addActionListener(e -> tryShowingChart(chartPanel));
         }
     }
 
-    private Statistics[] getSelectedStatistics() {
-        List<Statistics> selectedStats = new ArrayList<>();
+    private EnsembleViewStat[] getSelectedStatistics() {
+        List<EnsembleViewStat> selectedStats = new ArrayList<>();
         Statistics[] stats = Statistics.values();
         for (Statistics stat : stats) {
-            if (statsPanel.getStatCheckbox(stat).isSelected()) {
-                selectedStats.add(stat);
+            EnsembleViewStat selectedStat = statsPanel.getStat(stat);
+            if (selectedStat.hasInput()) {
+                selectedStats.add(selectedStat);
             }
         }
-        return selectedStats.toArray(new Statistics[]{});
+        return selectedStats.toArray(new EnsembleViewStat[]{});
     }
 
     private MetricCollection getStatistics(Statistics[] wantedStats) {
