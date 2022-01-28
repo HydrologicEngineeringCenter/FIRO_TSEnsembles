@@ -1,10 +1,11 @@
-package hec.ensembleview;
+package hec.ensembleview.mappings;
 
+import hec.ensembleview.StatisticUIType;
 import hec.stats.Statistics;
 import java.util.HashMap;
 import java.util.Map;
 
-public class StatMap {
+public class StatisticsUITypeMap {
     public final static Map<Statistics, StatisticUIType> map = new HashMap<>();
 
     static {
@@ -13,3 +14,4 @@ public class StatMap {
         map.put(Statistics.MEAN, StatisticUIType.CHECKBOX);
     }
 }
+
