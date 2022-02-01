@@ -26,7 +26,7 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
     }
 
     @Override
-    public StatisticUIType getStatType() {
+    public StatisticUIType getStatUIType() {
         return StatisticUIType.TEXTBOX;
     }
 
@@ -36,7 +36,7 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
     }
 
     @Override
-    public Statistics getStat() {
+    public Statistics getStatType() {
         return stat;
     }
 

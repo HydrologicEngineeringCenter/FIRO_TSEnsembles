@@ -25,7 +25,7 @@ public class CheckBoxStat extends JPanel implements EnsembleViewStat {
     }
 
     @Override
-    public StatisticUIType getStatType() {
+    public StatisticUIType getStatUIType() {
         return StatisticUIType.CHECKBOX;
     }
 
@@ -52,7 +52,7 @@ public class CheckBoxStat extends JPanel implements EnsembleViewStat {
     }
 
     @Override
-    public Statistics getStat() {
+    public Statistics getStatType() {
         return stat;
     }
 

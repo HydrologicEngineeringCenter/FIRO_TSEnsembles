@@ -1,6 +1,5 @@
 package hec.ensembleview;
 
-import hec.ensembleview.mappings.StatisticsStringMap;
 import hec.ensembleview.mappings.StatisticsUITypeMap;
 import hec.stats.Statistics;
 
@@ -42,16 +41,17 @@ public class StatisticsPanel {
 
     private void addStatsToPanel() {
         for (EnsembleViewStat stat : statsMapping.values()) {
-            switch (stat.getStat()) {
+            switch (stat.getStatType()) {
                 case MIN:
                 case MAX:
                 case MEAN:
                     panel.add((CheckBoxStat)stat);
                     break;
-                case MEDIAN:
+                //case MEDIAN:
                 case PERCENTILE:
                 case CUMULATIVE:
                 case MAXAVERAGEDURATION:
+                    panel.add((TextBoxStat)stat);
                     break;
             }
         }

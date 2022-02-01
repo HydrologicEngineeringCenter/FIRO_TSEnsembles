@@ -8,9 +8,9 @@ import java.awt.event.ActionListener;
 import java.time.ZonedDateTime;
 
 public interface EnsembleViewStat {
-    StatisticUIType getStatType();
+    StatisticUIType getStatUIType();
     float[] getStatData(SqliteDatabase db, RecordIdentifier selectedRid, ZonedDateTime selectedZdt);
-    Statistics getStat();
+    Statistics getStatType();
     void addActionListener(ActionListener l);
     boolean hasInput();
     //boolean isEnabled();

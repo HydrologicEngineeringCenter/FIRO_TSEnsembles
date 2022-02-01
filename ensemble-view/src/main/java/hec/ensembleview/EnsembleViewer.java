@@ -145,16 +145,16 @@ public class EnsembleViewer {
 
     private void addStatisticsToChart(EnsembleChart chart, EnsembleViewStat[] stats, ZonedDateTime[] dates) throws ParseException {
         for (EnsembleViewStat selectedStat : stats) {
-            switch (selectedStat.getStat()) {
+            switch (selectedStat.getStatType()) {
                 case MIN:
                 case MAX:
                     chart.addLine(new LineSpec(selectedStat.getStatData(db, selectedRid, selectedZdt),
                             dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                            1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStat())));
+                            1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 default:
                     chart.addLine(new LineSpec(selectedStat.getStatData(db, selectedRid, selectedZdt),
-                            dates, new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStat())));
+                            dates, new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
             }
         }
