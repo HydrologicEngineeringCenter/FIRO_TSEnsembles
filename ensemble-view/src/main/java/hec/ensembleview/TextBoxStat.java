@@ -31,8 +31,8 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
     }
 
     @Override
-    public float[] getStatData(SqliteDatabase db, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
-        return new float[0];
+    public float[] computeStat(SqliteDatabase db, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
+        return ComputeManager.computeStat(db, stat, selectedRid, selectedZdt);
     }
 
     @Override

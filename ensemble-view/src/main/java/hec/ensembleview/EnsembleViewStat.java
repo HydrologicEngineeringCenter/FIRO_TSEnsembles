@@ -9,7 +9,7 @@ import java.time.ZonedDateTime;
 
 public interface EnsembleViewStat {
     StatisticUIType getStatUIType();
-    float[] getStatData(SqliteDatabase db, RecordIdentifier selectedRid, ZonedDateTime selectedZdt);
+    float[] computeStat(SqliteDatabase db, RecordIdentifier selectedRid, ZonedDateTime selectedZdt);
     Statistics getStatType();
     void addActionListener(ActionListener l);
     boolean hasInput();

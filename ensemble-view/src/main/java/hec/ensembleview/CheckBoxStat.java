@@ -2,10 +2,7 @@ package hec.ensembleview;
 
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
-import hec.ensemble.EnsembleTimeSeries;
 import hec.ensembleview.mappings.StatisticsStringMap;
-import hec.metrics.MetricCollectionTimeSeries;
-import hec.stats.MultiStatComputable;
 import hec.stats.Statistics;
 
 import javax.swing.*;
@@ -30,25 +27,8 @@ public class CheckBoxStat extends JPanel implements EnsembleViewStat {
     }
 
     @Override
-    public float[] getStatData(SqliteDatabase db, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
-        switch(stat){
-            case MIN:
-            case MAX:
-            case MEAN:
-                return getDataFromMultiStatComputable(db, selectedRid, selectedZdt);
-            default:
-                return new float[0];
-        }
-
-    }
-
-    private float[] getDataFromMultiStatComputable(SqliteDatabase db, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
-        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
-
-        MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(
-                new MultiStatComputable(new Statistics[] {stat}));
-
-        return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+    public float[] computeStat(SqliteDatabase db, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
+        return ComputeManager.computeStat(db, stat, selectedRid, selectedZdt);
     }
 
     @Override
