@@ -46,9 +46,9 @@ public class StatisticsPanel {
                 case MIN:
                 case MAX:
                 case MEAN:
+                case MEDIAN:
                     panel.add((CheckBoxStat)stat);
                     break;
-                case MEDIAN:
                 case PERCENTILE:
                 case CUMULATIVE:
                 case MAXAVERAGEDURATION:

@@ -35,6 +35,7 @@ public class CheckBoxStat extends JPanel implements EnsembleViewStat {
             case MIN:
             case MAX:
             case MEAN:
+            case MEDIAN:
                 return getDataFromMultiStatComputable(db, selectedRid, selectedZdt);
             default:
                 return new float[0];

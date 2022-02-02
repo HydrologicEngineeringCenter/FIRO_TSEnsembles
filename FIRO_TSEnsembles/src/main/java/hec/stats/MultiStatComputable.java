@@ -20,6 +20,7 @@ public class MultiStatComputable implements MultiComputable{
         int size =  statSelection.length;
         float [] results = new float[size];
         InlineStats is = new InlineStats();
+        Computable median = new MedianComputable();
         for(float f : values){
             is.AddObservation(f);
         }
@@ -35,6 +36,9 @@ public class MultiStatComputable implements MultiComputable{
                     break;
                 case MAX:
                     results[i] = is.getMax();
+                    break;
+                case MEDIAN:
+                    results[i] = median.compute(values);
                     break;
                 default:
                     throw new ArithmeticException("stat type not  yet supported in MultiStatComputable.");

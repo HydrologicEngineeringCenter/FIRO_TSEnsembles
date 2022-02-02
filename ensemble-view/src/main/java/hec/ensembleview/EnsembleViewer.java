@@ -152,6 +152,11 @@ public class EnsembleViewer {
                             dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                             1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStat())));
                     break;
+                case MEDIAN:
+                    chart.addLine(new LineSpec(selectedStat.getStatData(db, selectedRid, selectedZdt),
+                            dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                            1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.CYAN, StatisticsStringMap.map.get(selectedStat.getStat())));
+                    break;
                 default:
                     chart.addLine(new LineSpec(selectedStat.getStatData(db, selectedRid, selectedZdt),
                             dates, new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStat())));
