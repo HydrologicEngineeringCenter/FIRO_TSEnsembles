@@ -52,6 +52,7 @@ public class StatisticsPanel {
                 case PERCENTILE:
                 case CUMULATIVE:
                 case MAXAVERAGEDURATION:
+                    panel.add((TextBoxStat)stat);
                     break;
             }
         }

@@ -13,14 +13,17 @@ import java.time.ZonedDateTime;
 public class TextBoxStat extends JPanel implements EnsembleViewStat {
     private JLabel label;
     private JTextField textField;
+    private JCheckBox checkBox;
     private final Statistics stat;
 
 
     public TextBoxStat(Statistics stat) {
-        label = new JLabel(StatisticsStringMap.map.get(stat));
+     //   label = new JLabel(StatisticsStringMap.map.get(stat));
         textField = new JTextField();
-        setLayout(new GridLayout(0, 2));
-        add(label);
+        checkBox = new JCheckBox(StatisticsStringMap.map.get(stat));
+        setLayout(new GridLayout(0, 10));
+        add(checkBox);
+     //   add(label);
         add(textField);
         this.stat = stat;
     }
