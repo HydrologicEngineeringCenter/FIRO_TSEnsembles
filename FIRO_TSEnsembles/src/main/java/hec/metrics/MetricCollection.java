@@ -3,8 +3,10 @@ package hec.metrics;
 import hec.stats.Configuration;
 import hec.stats.Statistics;
 
+import java.lang.reflect.Array;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 
 
 public class MetricCollection {
@@ -23,6 +25,11 @@ public class MetricCollection {
     {
         this(new MetricsConfiguration(issueDate,startDate), statistics, values);
     }
+
+    public Statistics[] getMetricStatistics() {
+        return metric_statistics;
+    }
+
     public int parameterIndex(Statistics parameterName){
         int index = -1;
         for (int i=0;i<metric_statistics.length;i++) {
@@ -57,4 +64,12 @@ public class MetricCollection {
         return _configuration.getDuration();
     }
     //probably need getdataforparametername.
+
+    public float[] getDateForStatistic(Statistics stat){
+        int index = Arrays.asList(metric_statistics).indexOf(stat);
+        if (index >= 0) {
+            return metrics[index];
+        }
+        return null;
+    }
 }
