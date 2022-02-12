@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 
 public class TextBoxStat extends JPanel implements EnsembleViewStat {
 //    private JLabel label;
@@ -25,10 +26,17 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
         add(checkBox);
         add(textField);
         this.stat = stat;
+
     }
 
-    public float getTextFieldValue() {
-        return Float.parseFloat(textField.getText());
+    public float[] getTextFieldValue() {
+        String textValues = textField.getText();
+        String[] textValuesParse = textValues.strip().split("[,:;]");
+        float[] floatValuesParse = new float[textValuesParse.length];
+        for(int i = 0; i < textValuesParse.length; i++) {
+            floatValuesParse[i] = Float.parseFloat(textValuesParse[i]);
+        }
+        return floatValuesParse;
     }
 
     @Override
@@ -43,7 +51,8 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
 
     @Override
     public void addActionListener(ActionListener l) {
-        textField.addActionListener(l);
+            textField.addActionListener(l);
+
     }
 
     @Override
