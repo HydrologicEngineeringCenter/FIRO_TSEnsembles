@@ -51,7 +51,8 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
 
     @Override
     public void addActionListener(ActionListener l) {
-            textField.addActionListener(l);
+        checkBox.addActionListener(l);
+        textField.addActionListener(l);
 
     }
 
