@@ -184,6 +184,10 @@ public class EnsembleViewer {
                                 1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
                     }
                     break;
+                case MAXAVERAGEDURATION:
+                    chart.addLine(new LineSpec(ComputeManager.computeTextBoxStat(db, selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue()),
+                            dates, new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
+
             }
         }
     }
