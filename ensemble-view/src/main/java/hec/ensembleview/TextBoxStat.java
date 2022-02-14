@@ -7,6 +7,7 @@ import hec.stats.Statistics;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -26,7 +27,14 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
         add(checkBox);
         add(textField);
         this.stat = stat;
-
+        textField.setEditable(false);
+        checkBox.addActionListener(e -> {
+            if(checkBox.isSelected()) {
+                textField.setEditable(true);
+            } else if(!checkBox.isSelected()) {
+                textField.setEditable(false);
+            }
+        });
     }
 
     public float[] getTextFieldValue() {
