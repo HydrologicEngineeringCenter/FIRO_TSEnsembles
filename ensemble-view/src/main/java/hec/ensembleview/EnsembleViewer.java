@@ -15,6 +15,7 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -174,12 +175,13 @@ public class EnsembleViewer {
                     break;
                 case PERCENTILE:
                     float[] percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();
+                    DecimalFormat df = new DecimalFormat("0.0");
 
                     for(int i = 0; i < percentiles.length; i++) {
 
                         chart.addLine(new LineSpec(ComputeManager.computeTextBoxStat(db, selectedStat.getStatType(), selectedRid, selectedZdt, new float[] {(percentiles[i])}),
                                 dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                                1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType())));
+                                1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
                     }
                     break;
             }
