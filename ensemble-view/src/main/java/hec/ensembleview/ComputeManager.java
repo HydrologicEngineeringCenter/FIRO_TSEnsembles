@@ -55,7 +55,7 @@ public class ComputeManager {
     static private float[] computeStatFromComputable(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, int value) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
-        MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
+        MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithSingleComputable(
                 new MaxAvgDuration(value));
 
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
