@@ -68,8 +68,8 @@ public class EnsembleViewer {
         chartPanel.repaint();
     }
 
-    public void setModel(String absoluteFile) throws Exception {
-        model = new EnsembleViewerModel(new SqliteDatabase(absoluteFile, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE));
+    public void setModel(String dbFile) throws Exception {
+        model = new EnsembleViewerModel(dbFile);
     }
 
     private RecordIdentifier getRecordIdentifierFromString(String stringRID){

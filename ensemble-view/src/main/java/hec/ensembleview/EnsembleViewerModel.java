@@ -14,8 +14,8 @@ import java.time.ZonedDateTime;
 public class EnsembleViewerModel {
     public SqliteDatabase db;
 
-    public EnsembleViewerModel(SqliteDatabase db) {
-        this.db = db;
+    public EnsembleViewerModel(String dbFile) throws Exception {
+        this.db = new SqliteDatabase(dbFile, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);
     }
 
     public float[] computeCheckBoxStat(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
