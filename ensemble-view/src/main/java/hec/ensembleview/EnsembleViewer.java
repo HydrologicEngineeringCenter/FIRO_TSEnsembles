@@ -15,11 +15,13 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.List;
+import java.util.Random;
 
 public class EnsembleViewer {
     private SqliteDatabase db;
@@ -143,19 +145,49 @@ public class EnsembleViewer {
 
     }
 
+    private Color randomColor(int i) {
+        Random rand = new Random(i);
+        float r = rand.nextFloat();
+        float g = rand.nextFloat();
+        float b = rand.nextFloat();
+
+        Color color = new Color(r, g, b);
+        return color;
+    }
+
+
     private void addStatisticsToChart(EnsembleChart chart, EnsembleViewStat[] stats, ZonedDateTime[] dates) throws ParseException {
         for (EnsembleViewStat selectedStat : stats) {
             switch (selectedStat.getStatType()) {
                 case MIN:
                 case MAX:
-                    chart.addLine(new LineSpec(ComputeManager.computeStat(db, selectedStat.getStatType(), selectedRid, selectedZdt),
+                    chart.addLine(new LineSpec(ComputeManager.computeCheckBoxStat(db, selectedStat.getStatType(), selectedRid, selectedZdt),
                             dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                             1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
-                default:
-                    chart.addLine(new LineSpec(ComputeManager.computeStat(db, selectedStat.getStatType(), selectedRid, selectedZdt),
+                case MEAN:
+                    chart.addLine(new LineSpec(ComputeManager.computeCheckBoxStat(db, selectedStat.getStatType(), selectedRid, selectedZdt),
                             dates, new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
+                case MEDIAN:
+                    chart.addLine(new LineSpec(ComputeManager.computeCheckBoxStat(db, selectedStat.getStatType(), selectedRid, selectedZdt),
+                            dates, new BasicStroke(3.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
+                case PERCENTILE:
+                    float[] percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();
+                    DecimalFormat df = new DecimalFormat("0.0");
+
+                    for(int i = 0; i < percentiles.length; i++) {
+
+                        chart.addLine(new LineSpec(ComputeManager.computeTextBoxStat(db, selectedStat.getStatType(), selectedRid, selectedZdt, new float[] {(percentiles[i])}),
+                                dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                                1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
+                    }
+                    break;
+                case MAXAVERAGEDURATION:
+                    chart.addLine(new LineSpec(ComputeManager.computeTextBoxStat(db, selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue()),
+                            dates, new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
+
             }
         }
     }
