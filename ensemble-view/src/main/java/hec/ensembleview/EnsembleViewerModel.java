@@ -11,19 +11,26 @@ import hec.stats.Statistics;
 
 import java.time.ZonedDateTime;
 
-public class ComputeManager {
-    static public float[] computeCheckBoxStat(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
+public class EnsembleViewerModel {
+    public SqliteDatabase db;
+
+    public EnsembleViewerModel(SqliteDatabase db) {
+        this.db = db;
+    }
+
+    public float[] computeCheckBoxStat(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
         switch(stat){
             case MIN:
             case MAX:
             case MEAN:
-                return computeStatFromMultiStatComputable(db, stat, selectedRid, selectedZdt);
+                return computeStatFromMultiStatComputable(stat, selectedRid, selectedZdt);
             default:
                 return new float[0];
         }
+
     }
 
-    static public float[] computeTextBoxStat(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, float[] values) {
+    public float[] computeTextBoxStat(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, float[] values) {
         switch(stat){
             case PERCENTILE:
                 return computeStatFromPercentilesComputable(db, stat, selectedRid, selectedZdt, values);
@@ -34,7 +41,7 @@ public class ComputeManager {
         }
     }
 
-    static private float[] computeStatFromMultiStatComputable(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
+    private float[] computeStatFromMultiStatComputable(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
         MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(
@@ -43,7 +50,7 @@ public class ComputeManager {
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }
 
-    static private float[] computeStatFromPercentilesComputable(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, float[] percentiles) {
+    private float[] computeStatFromPercentilesComputable(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, float[] percentiles) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
         MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(
@@ -52,7 +59,7 @@ public class ComputeManager {
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }
 
-    static private float[] computeStatFromComputable(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, int value) {
+    private float[] computeStatFromComputable(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, int value) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
         MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithSingleComputable(

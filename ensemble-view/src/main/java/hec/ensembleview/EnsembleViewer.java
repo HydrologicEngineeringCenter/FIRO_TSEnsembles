@@ -3,11 +3,7 @@ package hec.ensembleview;
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.ensemble.Ensemble;
-import hec.ensemble.EnsembleTimeSeries;
 import hec.ensembleview.mappings.StatisticsStringMap;
-import hec.metrics.MetricCollection;
-import hec.metrics.MetricCollectionTimeSeries;
-import hec.stats.MultiStatComputable;
 import hec.stats.Statistics;
 
 import javax.swing.*;
@@ -24,7 +20,7 @@ import java.util.List;
 import java.util.Random;
 
 public class EnsembleViewer {
-    private SqliteDatabase db;
+    private EnsembleViewerModel model;
     private EnsembleChart ec;
 
     private RecordIdentifier selectedRid = null;
@@ -59,7 +55,7 @@ public class EnsembleViewer {
     }
 
     private void setupDateTimeComboBox(JComboBox<String> dateTimeComboBox) {
-        String[] zdts = db.getEnsembleIssueDates(selectedRid).stream().map(ZonedDateTime::toString).toArray(String[]::new);
+        String[] zdts = model.db.getEnsembleIssueDates(selectedRid).stream().map(ZonedDateTime::toString).toArray(String[]::new);
         ComboBoxModel<String> model = new DefaultComboBoxModel<>(zdts);
         dateTimeComboBox.setModel(model);
     }
@@ -72,12 +68,12 @@ public class EnsembleViewer {
         chartPanel.repaint();
     }
 
-    public void setDatabase(String absoluteFile) throws Exception {
-        db = new SqliteDatabase(absoluteFile, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);
+    public void setModel(String absoluteFile) throws Exception {
+        model = new EnsembleViewerModel(new SqliteDatabase(absoluteFile, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE));
     }
 
     private RecordIdentifier getRecordIdentifierFromString(String stringRID){
-        List<RecordIdentifier> rids = db.getEnsembleTimeSeriesIDs();
+        List<RecordIdentifier> rids = model.db.getEnsembleTimeSeriesIDs();
         for (RecordIdentifier rid : rids) {
             if (Objects.equals(rid.toString(), stringRID)) {
                 return rid;
@@ -87,7 +83,7 @@ public class EnsembleViewer {
     }
 
     private ZonedDateTime getZonedDateTimeFromString(RecordIdentifier rid ,String stringZDT){
-        List<ZonedDateTime> zdts = db.getEnsembleIssueDates(rid);
+        List<ZonedDateTime> zdts = model.db.getEnsembleIssueDates(rid);
         for (ZonedDateTime zdt : zdts) {
             if (Objects.equals(zdt.toString(), stringZDT)){
                 return zdt;
@@ -117,7 +113,7 @@ public class EnsembleViewer {
             return null;
         }
 
-        Ensemble ensemble = db.getEnsemble(selectedRid, selectedZdt);
+        Ensemble ensemble = model.db.getEnsemble(selectedRid, selectedZdt);
         EnsembleChart chart = new EnsembleJFreeChart();
         chart.setXLabel("Date/Time");
         chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
@@ -161,16 +157,17 @@ public class EnsembleViewer {
             switch (selectedStat.getStatType()) {
                 case MIN:
                 case MAX:
-                    chart.addLine(new LineSpec(ComputeManager.computeCheckBoxStat(db, selectedStat.getStatType(), selectedRid, selectedZdt),
+                    chart.addLine(new LineSpec(model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
+                    chart.addLine(new LineSpec(model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
                             dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                             1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MEAN:
-                    chart.addLine(new LineSpec(ComputeManager.computeCheckBoxStat(db, selectedStat.getStatType(), selectedRid, selectedZdt),
+                    chart.addLine(new LineSpec(model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
                             dates, new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MEDIAN:
-                    chart.addLine(new LineSpec(ComputeManager.computeCheckBoxStat(db, selectedStat.getStatType(), selectedRid, selectedZdt),
+                    chart.addLine(new LineSpec(model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
                             dates, new BasicStroke(3.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case PERCENTILE:
@@ -179,13 +176,13 @@ public class EnsembleViewer {
 
                     for(int i = 0; i < percentiles.length; i++) {
 
-                        chart.addLine(new LineSpec(ComputeManager.computeTextBoxStat(db, selectedStat.getStatType(), selectedRid, selectedZdt, new float[] {(percentiles[i])}),
+                        chart.addLine(new LineSpec(model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, new float[] {(percentiles[i])}),
                                 dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                                 1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
                     }
                     break;
                 case MAXAVERAGEDURATION:
-                    chart.addLine(new LineSpec(ComputeManager.computeTextBoxStat(db, selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue()),
+                    chart.addLine(new LineSpec(model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue()),
                             dates, new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
 
             }
@@ -277,8 +274,8 @@ public class EnsembleViewer {
             {
                 filePath.setText(fileChooser.getSelectedFile().getAbsolutePath());
                 try {
-                    setDatabase(fileChooser.getSelectedFile().getAbsolutePath());
-                    List<RecordIdentifier> rids = db.getEnsembleTimeSeriesIDs();
+                    setModel(fileChooser.getSelectedFile().getAbsolutePath());
+                    List<RecordIdentifier> rids = model.db.getEnsembleTimeSeriesIDs();
                     String[] sRids = rids.stream().map(RecordIdentifier::toString).toArray(String[]::new);
                     ComboBoxModel<String> model = new DefaultComboBoxModel<>(sRids);
                     locations.setModel(model);
@@ -322,15 +319,5 @@ public class EnsembleViewer {
         }
         return selectedStats.toArray(new EnsembleViewStat[]{});
     }
-
-    private MetricCollection getStatistics(Statistics[] wantedStats) {
-        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
-
-        MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(
-                new MultiStatComputable(wantedStats));
-
-        return mct.getMetricCollection(selectedZdt);
-    }
-
 
 }
