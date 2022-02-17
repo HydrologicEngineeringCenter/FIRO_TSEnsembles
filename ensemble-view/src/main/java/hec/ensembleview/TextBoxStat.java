@@ -39,7 +39,7 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
 
     public float[] getTextFieldValue() {
         String textValues = textField.getText();
-        String[] textValuesParse = textValues.strip().split("[,:;]");
+        String[] textValuesParse = textValues.trim().split("[,:;]");
         float[] floatValuesParse = new float[textValuesParse.length];
         for(int i = 0; i < textValuesParse.length; i++) {
             floatValuesParse[i] = Float.parseFloat(textValuesParse[i]);
