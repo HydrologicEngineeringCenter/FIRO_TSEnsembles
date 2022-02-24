@@ -4,10 +4,7 @@ import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.metrics.MetricCollectionTimeSeries;
-import hec.stats.MaxAvgDuration;
-import hec.stats.MultiStatComputable;
-import hec.stats.PercentilesComputable;
-import hec.stats.Statistics;
+import hec.stats.*;
 
 import java.time.ZonedDateTime;
 
@@ -24,6 +21,8 @@ public class EnsembleViewerModel {
             case MAX:
             case MEAN:
                 return computeStatFromMultiStatComputable(stat, selectedRid, selectedZdt);
+            case CUMULATIVE:
+                return computeStatFromCumulativeComputable(stat, selectedRid, selectedZdt);
             default:
                 return new float[0];
         }
@@ -35,7 +34,7 @@ public class EnsembleViewerModel {
             case PERCENTILE:
                 return computeStatFromPercentilesComputable(db, stat, selectedRid, selectedZdt, values);
             case MAXAVERAGEDURATION:
-                return computeStatFromComputable(db, stat, selectedRid,selectedZdt, (int) values[0]);
+                return computeStatFromMaxAvgDurationComputable(db, stat, selectedRid,selectedZdt, (int) values[0]);
             default:
                 return new float[0];
         }
@@ -59,11 +58,20 @@ public class EnsembleViewerModel {
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }
 
-    private float[] computeStatFromComputable(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, int value) {
+    private float[] computeStatFromMaxAvgDurationComputable(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, int value) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
         MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithSingleComputable(
                 new MaxAvgDuration(value));
+
+        return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+    }
+
+    private float[] computeStatFromCumulativeComputable(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
+        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
+
+        MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithSingleComputable(
+                new CumulativeFlow());
 
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }
