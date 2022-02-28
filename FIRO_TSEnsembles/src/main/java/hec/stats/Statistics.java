@@ -7,9 +7,10 @@ public enum Statistics {
     MAX,
     MEAN,
     MEDIAN,
-    PERCENTILE,
     CUMULATIVE,
-    MAXAVERAGEDURATION;
+    PERCENTILE,
+    MAXAVERAGEDURATION,
+    MAXACCUMDURATION;
 
     public static String pack(EnumSet<Statistics> set){
         String ret = "";
