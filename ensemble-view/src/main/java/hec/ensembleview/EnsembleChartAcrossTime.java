@@ -1,5 +1,6 @@
 package hec.ensembleview;
 
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -53,23 +54,23 @@ public class EnsembleChartAcrossTime implements EnsembleChart{
             newMember.add(new Second(dt), line.values[i]);
         }
 
-        if (!RangeExists(line.rangeAxis))
-            CreateRange(line.rangeAxis);
+        if (!rangeExists(line.rangeAxis))
+            createRange(line.rangeAxis);
 
-        AddTimeSeriesToRange(line.rangeAxis, newMember);
+        addTimeSeriesToRange(line.rangeAxis, newMember);
     }
 
-    private void AddTimeSeriesToRange(int rangeAxis, TimeSeries newMember) {
+    private void addTimeSeriesToRange(int rangeAxis, TimeSeries newMember) {
         TimeSeriesCollection updatedCollection = RangeMap.get(rangeAxis);
         updatedCollection.addSeries(newMember);
         RangeMap.put(rangeAxis, updatedCollection);
     }
 
-    private void CreateRange(int rangeAxis) {
+    private void createRange(int rangeAxis) {
         RangeMap.put(rangeAxis, new TimeSeriesCollection());
     }
 
-    private boolean RangeExists(int rangeAxis) {
+    private boolean rangeExists(int rangeAxis) {
         return RangeMap.containsKey(rangeAxis);
     }
 
