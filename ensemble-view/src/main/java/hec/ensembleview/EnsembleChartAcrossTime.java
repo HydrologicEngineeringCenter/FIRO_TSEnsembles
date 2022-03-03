@@ -14,9 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class EnsembleJFreeChart implements EnsembleChart{
-
-    private JFreeChart chart;
+public class EnsembleChartAcrossTime implements EnsembleChart{
 
     private String chartTitle = "";
     private String yLabel = "";
@@ -25,9 +23,8 @@ public class EnsembleJFreeChart implements EnsembleChart{
     private final TimeSeriesCollection members;
     private List<LineSpec> lines;
 
-    public EnsembleJFreeChart() {
+    public EnsembleChartAcrossTime() {
         members = new TimeSeriesCollection();
-        chart = ChartFactory.createTimeSeriesChart("", "", "", members);
         lines = new ArrayList<>();
     }
 
@@ -60,8 +57,8 @@ public class EnsembleJFreeChart implements EnsembleChart{
     }
 
     @Override
-    public ChartPanel getChart() {
-        chart = ChartFactory.createTimeSeriesChart(chartTitle, xLabel, yLabel, members);
+    public ChartPanel generateChart() {
+        JFreeChart chart = ChartFactory.createTimeSeriesChart(chartTitle, xLabel, yLabel, members);
         XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) chart.getXYPlot().getRenderer();
 
         for (int i = 0; i < lines.size(); i++) {
