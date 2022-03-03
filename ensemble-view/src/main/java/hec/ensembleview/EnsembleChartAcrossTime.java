@@ -1,8 +1,10 @@
 package hec.ensembleview;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
@@ -10,9 +12,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class EnsembleChartAcrossTime implements EnsembleChart{
 
@@ -20,11 +20,10 @@ public class EnsembleChartAcrossTime implements EnsembleChart{
     private String yLabel = "";
     private String xLabel = "";
     private final Boolean showLegend = true;
-    private final TimeSeriesCollection members;
     private List<LineSpec> lines;
+    private Map<Integer, TimeSeriesCollection> RangeMap = new HashMap<>();
 
     public EnsembleChartAcrossTime() {
-        members = new TimeSeriesCollection();
         lines = new ArrayList<>();
     }
 
@@ -53,21 +52,48 @@ public class EnsembleChartAcrossTime implements EnsembleChart{
             Date dt = dateFormat.parse(line.dateTimes[i].toLocalDateTime().toString());
             newMember.add(new Second(dt), line.values[i]);
         }
-        members.addSeries(newMember);
+
+        if (!RangeExists(line.rangeAxis))
+            CreateRange(line.rangeAxis);
+
+        AddTimeSeriesToRange(line.rangeAxis, newMember);
+    }
+
+    private void AddTimeSeriesToRange(int rangeAxis, TimeSeries newMember) {
+        TimeSeriesCollection updatedCollection = RangeMap.get(rangeAxis);
+        updatedCollection.addSeries(newMember);
+        RangeMap.put(rangeAxis, updatedCollection);
+    }
+
+    private void CreateRange(int rangeAxis) {
+        RangeMap.put(rangeAxis, new TimeSeriesCollection());
+    }
+
+    private boolean RangeExists(int rangeAxis) {
+        return RangeMap.containsKey(rangeAxis);
     }
 
     @Override
     public ChartPanel generateChart() {
-        JFreeChart chart = ChartFactory.createTimeSeriesChart(chartTitle, xLabel, yLabel, members);
-        XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) chart.getXYPlot().getRenderer();
+        XYPlot plot = new XYPlot();
+
+        for (int i = 0; i < RangeMap.size(); i++) {
+            XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+            plot.setDataset(i, RangeMap.get(i));
+            plot.setRenderer(i, renderer);
+            plot.setDomainAxis(new DateAxis(xLabel));
+            plot.setRangeAxis(i, new NumberAxis(yLabel));
+            plot.mapDatasetToDomainAxis(0, i);
+            plot.mapDatasetToRangeAxis(i, i);
+        }
 
         for (int i = 0; i < lines.size(); i++) {
             LineSpec currentLine = lines.get(i);
-            renderer.setSeriesStroke(i, currentLine.lineStroke);
-            if (currentLine.lineColor != null) renderer.setSeriesPaint(i, currentLine.lineColor);
+            plot.getRenderer().setSeriesStroke(i, currentLine.lineStroke);
+            if (currentLine.lineColor != null) plot.getRenderer().setSeriesPaint(i, currentLine.lineColor);
         }
 
-        return new ChartPanel(chart);
+        return new ChartPanel(new JFreeChart(chartTitle, plot));
     }
 
 }
