@@ -64,6 +64,8 @@ public class EnsembleChartAcrossTime implements EnsembleChart{
     @Override
     public ChartPanel generateChart() {
         XYPlot plot = new XYPlot();
+        plot.setDomainPannable(true);
+        plot.setRangePannable(true);
 
         for (int i = 0; i < timeSeriesCollectionMap.size(); i++) {
             rendererMap.put(i, new XYLineAndShapeRenderer());
@@ -82,8 +84,11 @@ public class EnsembleChartAcrossTime implements EnsembleChart{
                 if (currentLine.lineColor != null) plot.getRenderer(i).setSeriesPaint(j, currentLine.lineColor);
             }
         }
+        ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot));
+        chart.setMouseWheelEnabled(true);
 
-        return new ChartPanel(new JFreeChart(chartTitle, plot));
+
+        return chart;
     }
 
 }
