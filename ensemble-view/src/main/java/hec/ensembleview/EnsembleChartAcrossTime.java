@@ -74,9 +74,7 @@ public class EnsembleChartAcrossTime implements EnsembleChart{
             plot.setRangeAxis(i, new NumberAxis(yLabel));
             plot.mapDatasetToDomainAxis(i, 0);
             plot.mapDatasetToRangeAxis(i, i);
-        }
 
-        for (int i = 0; i < lineSpecMap.size(); i++) {
             List<LineSpec> linesForRange = lineSpecMap.get(i);
             for (int j = 0; j < linesForRange.size(); j++) {
                 LineSpec currentLine = linesForRange.get(j);
