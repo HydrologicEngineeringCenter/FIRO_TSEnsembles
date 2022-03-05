@@ -112,6 +112,8 @@ public class EnsembleChartAcrossTime implements EnsembleChart{
             renderer.setDefaultToolTipGenerator(xyToolTipGenerator);
         }
 
+        chart.setDismissDelay(Integer.MAX_VALUE);
+
     }
 
 }
