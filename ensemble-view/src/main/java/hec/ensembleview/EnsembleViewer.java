@@ -168,6 +168,10 @@ public class EnsembleViewer {
                     chart.addLine(new LineSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
                             dates, new BasicStroke(3.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
+                case CUMULATIVE:
+                    chart.addLine(new LineSpec(1, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
+                            dates, new BasicStroke(3.0f), Color.ORANGE, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
                 case PERCENTILE:
                     float[] percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();
                     DecimalFormat df = new DecimalFormat("0.0");
