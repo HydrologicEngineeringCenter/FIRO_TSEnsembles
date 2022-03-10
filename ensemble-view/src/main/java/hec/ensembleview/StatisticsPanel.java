@@ -45,11 +45,11 @@ public class StatisticsPanel {
                 case MIN:
                 case MAX:
                 case MEAN:
+                case CUMULATIVE:
                     panel.add((CheckBoxStat)stat);
                     break;
                 //case MEDIAN:
                 case PERCENTILE:
-                case CUMULATIVE:
                 case MAXAVERAGEDURATION:
                     panel.add((TextBoxStat)stat);
                     break;

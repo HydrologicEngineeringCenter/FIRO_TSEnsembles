@@ -1,7 +1,6 @@
 package hec.ensembleview;
 
 import hec.RecordIdentifier;
-import hec.SqliteDatabase;
 import hec.ensemble.Ensemble;
 import hec.ensembleview.mappings.StatisticsStringMap;
 import hec.stats.Statistics;
@@ -64,7 +63,7 @@ public class EnsembleViewer {
         chartPanel.removeAll();
         chartPanel.revalidate();
         chartPanel.setLayout(new BorderLayout());
-        chartPanel.add(new EnsembleJFreeChart().getChart(), BorderLayout.CENTER);
+        chartPanel.add(new EnsembleChartAcrossTime().generateChart(), BorderLayout.CENTER);
         chartPanel.repaint();
     }
 
@@ -104,7 +103,7 @@ public class EnsembleViewer {
         chartPanel.removeAll();
         chartPanel.revalidate();
         chartPanel.setLayout(new BorderLayout());
-        chartPanel.add(ec.getChart(), BorderLayout.CENTER);
+        chartPanel.add(ec.generateChart(), BorderLayout.CENTER);
         chartPanel.repaint();
     }
 
@@ -114,7 +113,7 @@ public class EnsembleViewer {
         }
 
         Ensemble ensemble = model.db.getEnsemble(selectedRid, selectedZdt);
-        EnsembleChart chart = new EnsembleJFreeChart();
+        EnsembleChart chart = new EnsembleChartAcrossTime();
         chart.setXLabel("Date/Time");
         chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
         float[][] vals = ensemble.getValues();
@@ -136,7 +135,7 @@ public class EnsembleViewer {
 
         }
         for (int i = 0; i < vals.length; i++) {
-            chart.addLine(new LineSpec(vals[i], dates, new BasicStroke(1.0f), c, "Member " + (i + 1)));
+            chart.addLine(new LineSpec(0, vals[i], dates, new BasicStroke(1.0f), c, "Member " + (i + 1)));
         }
 
     }
@@ -157,17 +156,21 @@ public class EnsembleViewer {
             switch (selectedStat.getStatType()) {
                 case MIN:
                 case MAX:
-                    chart.addLine(new LineSpec(model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
+                    chart.addLine(new LineSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
                             dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                             1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MEAN:
-                    chart.addLine(new LineSpec(model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
+                    chart.addLine(new LineSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
                             dates, new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MEDIAN:
-                    chart.addLine(new LineSpec(model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
+                    chart.addLine(new LineSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
                             dates, new BasicStroke(3.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
+                case CUMULATIVE:
+                    chart.addLine(new LineSpec(1, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
+                            dates, new BasicStroke(3.0f), Color.ORANGE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case PERCENTILE:
                     float[] percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();
@@ -175,13 +178,13 @@ public class EnsembleViewer {
 
                     for(int i = 0; i < percentiles.length; i++) {
 
-                        chart.addLine(new LineSpec(model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, new float[] {(percentiles[i])}),
+                        chart.addLine(new LineSpec(0, model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, new float[] {(percentiles[i])}),
                                 dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                                 1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
                     }
                     break;
                 case MAXAVERAGEDURATION:
-                    chart.addLine(new LineSpec(model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue()),
+                    chart.addLine(new LineSpec(0, model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue()),
                             dates, new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
 
             }
@@ -245,7 +248,7 @@ public class EnsembleViewer {
          */
         chartPanel = new JPanel();
         chartPanel.setLayout(new BorderLayout());
-        chartPanel.add(new EnsembleJFreeChart().getChart());
+        chartPanel.add(new EnsembleChartAcrossTime().generateChart());
 
         /*
         Setup window with options and graph.
