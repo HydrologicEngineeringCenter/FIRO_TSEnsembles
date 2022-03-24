@@ -245,16 +245,9 @@ public class EnsembleViewer {
         topPanel.add(statsPanel.getPanel());
 
         /*
-        Create panel for holding chart panel.
+        Create tab specs and tabs in the tab pane.
          */
-        tabs.add(new TabSpec("Across Time", new EnsembleChartAcrossTime().generateChart(), ChartType.TimePlot));
-        tabs.get(0).chartPanel.setLayout(new BorderLayout());
-
-        /*
-        Create Tabs
-         */
-        tabPane = new JTabbedPane();
-        tabPane.addTab("Across Time", tabs.get(0).chartPanel);
+        createTabs();
 
         /*
         Setup window with options and graph.
@@ -268,6 +261,20 @@ public class EnsembleViewer {
         frame.pack();
 
         addActionListeners();
+    }
+
+    private void createTabs() {
+        /*
+        Create tab spec.
+         */
+        tabs.add(new TabSpec("Across Time", new EnsembleChartAcrossTime().generateChart(), ChartType.TimePlot));
+        tabs.get(0).chartPanel.setLayout(new BorderLayout());
+
+        /*
+        Create tabs in tab pane.
+         */
+        tabPane = new JTabbedPane();
+        tabPane.addTab("Across Time", tabs.get(0).chartPanel);
     }
 
     private void addActionListeners() {
