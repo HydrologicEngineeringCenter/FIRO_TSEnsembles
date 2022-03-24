@@ -35,6 +35,7 @@ public class EnsembleViewer {
     private JComboBox<String> locations;
     private JComboBox<String> dateTimes;
     private StatisticsPanel statsPanel;
+    private JTabbedPane tabs;
 
     public static void main(String[] args) {
         EnsembleViewer ev = new EnsembleViewer();
@@ -251,6 +252,13 @@ public class EnsembleViewer {
         chartPanel.add(new EnsembleChartAcrossTime().generateChart());
 
         /*
+        Create Tabs
+         */
+        tabs = new JTabbedPane();
+        tabs.addTab("Across Time", chartPanel);
+
+
+        /*
         Setup window with options and graph.
          */
         frame = new JFrame();
@@ -258,7 +266,7 @@ public class EnsembleViewer {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
         frame.add(topPanel, BorderLayout.NORTH);
-        frame.add(chartPanel, BorderLayout.CENTER);
+        frame.add(tabs, BorderLayout.CENTER);
         frame.pack();
 
         addActionListeners();
