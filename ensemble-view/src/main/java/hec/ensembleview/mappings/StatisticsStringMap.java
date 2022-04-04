@@ -17,5 +17,6 @@ public class StatisticsStringMap {
         map.put(Statistics.PERCENTILE, "Percentile");
         map.put(Statistics.CUMULATIVE, "Cumulative");
         map.put(Statistics.MAXAVERAGEDURATION, "Max Average Duration");
+        map.put(Statistics.MAXACCUMDURATION, "Max Accum Duration");
     }
 }
