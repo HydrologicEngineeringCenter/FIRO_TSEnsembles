@@ -51,6 +51,7 @@ public class StatisticsPanel {
                 //case MEDIAN:
                 case PERCENTILE:
                 case MAXAVERAGEDURATION:
+                case MAXACCUMDURATION:
                     panel.add((TextBoxStat)stat);
                     break;
             }
