@@ -21,7 +21,7 @@ public class EnsembleViewerModel {
             case MAX:
             case MEAN:
                 return computeStatFromMultiStatComputable(stat, selectedRid, selectedZdt);
-            case CUMULATIVE:
+            case TOTAL:
                 return computeStatFromCumulativeComputable(stat, selectedRid, selectedZdt);
             default:
                 return new float[0];
@@ -71,7 +71,7 @@ public class EnsembleViewerModel {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
         MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithSingleComputable(
-                new CumulativeFlow());
+                new TotalFlow());
 
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }
