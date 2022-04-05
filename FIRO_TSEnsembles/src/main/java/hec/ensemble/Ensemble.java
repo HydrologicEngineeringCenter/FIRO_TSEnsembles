@@ -70,7 +70,7 @@ public class Ensemble
      * ensemble data
      * row represents ensemble members
      * columns are time steps
-     * @return tow-dimensional size float[][] (all rows are the same size)
+     * @return two-dimensional size float[][] (all rows are the same size)
      */
     public float[][] getValues() {
       return values;
