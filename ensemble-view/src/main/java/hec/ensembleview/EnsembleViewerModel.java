@@ -22,6 +22,8 @@ public class EnsembleViewerModel {
             case MEAN:
                 return computeStatFromMultiStatComputable(stat, selectedRid, selectedZdt);
             case TOTAL:
+                return computeStatFromTotalComputable(stat, selectedRid, selectedZdt);
+            case CUMULATIVE:
                 return computeStatFromCumulativeComputable(stat, selectedRid, selectedZdt);
             default:
                 return new float[0];
@@ -67,11 +69,19 @@ public class EnsembleViewerModel {
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }
 
-    private float[] computeStatFromCumulativeComputable(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
+    private float[] computeStatFromTotalComputable(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
         MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithSingleComputable(
                 new TotalFlow());
+
+        return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+    }
+    private float[] computeStatFromCumulativeComputable(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
+        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
+
+        MetricCollectionTimeSeries mct = ets.iterateTracesOfEnsemblesWithMultiComputable(
+                new CumulativeComputable());
 
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }

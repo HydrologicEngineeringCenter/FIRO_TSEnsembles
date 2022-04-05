@@ -9,6 +9,7 @@ public enum Statistics {
     MEDIAN,
     TOTAL,
     PERCENTILE,
+    CUMULATIVE,
     MAXAVERAGEDURATION,
     MAXACCUMDURATION;
 

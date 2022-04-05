@@ -169,4 +169,28 @@ public class Ensemble
       }
       return cmd.compute(values);
     }
+
+    /**
+     * iterate over each trace and its timestep.  The result is an array of time series as initial ensemble forecasts transformed based on the statistic, such as the cumulative discharge
+     * @param cmd a multicomputable statistic
+     * @return a time series represented as []float
+     */
+    public float[][] multiComputeForEachTraces(MultiComputable cmd){
+      if (cmd instanceof hec.stats.Configurable){
+        ((Configurable)cmd).configure(_configuration);
+      }
+      int traces= values.length;  //number of traces
+      int time = values[0].length;  //number of time steps
+      float[] rval;
+      float[][] val = new float[traces][time];
+      for (int i = 0; i <traces ; i++) {
+        rval = cmd.MultiCompute(values[i]);
+        for (int j = 0; j<time;j++){
+          val[i][j] = rval[j];
+        }
+
+      }
+      return val;
+    }
   }
+
