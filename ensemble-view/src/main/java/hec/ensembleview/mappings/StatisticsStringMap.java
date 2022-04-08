@@ -1,6 +1,5 @@
 package hec.ensembleview.mappings;
 
-import hec.ensembleview.StatisticUIType;
 import hec.stats.Statistics;
 
 import java.util.HashMap;
@@ -15,6 +14,7 @@ public class StatisticsStringMap {
         map.put(Statistics.MEAN, "Mean");
         map.put(Statistics.MEDIAN, "Median");
         map.put(Statistics.PERCENTILE, "Percentile");
+        map.put(Statistics.TOTAL, "Total Flow");
         map.put(Statistics.CUMULATIVE, "Cumulative");
         map.put(Statistics.MAXAVERAGEDURATION, "Max Average Duration");
         map.put(Statistics.MAXACCUMDURATION, "Max Accum Duration");

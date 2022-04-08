@@ -1,13 +1,13 @@
 package hec.stats;
 
-public class CumulativeFlow implements Computable, Configurable {
+public class Total implements Computable, Configurable {
     Configuration _c;
 
     /**
-     * Instantiates a cumulative flow computable object
+     * Instantiates a total flow computable object
      */
 
-    public CumulativeFlow() {
+    public Total() {
     }
 
     @Override
@@ -26,6 +26,6 @@ public class CumulativeFlow implements Computable, Configurable {
 
     @Override
     public Statistics[] Statistics() {
-        return new Statistics[]{Statistics.CUMULATIVE};
+        return new Statistics[]{Statistics.TOTAL};
     }
 }

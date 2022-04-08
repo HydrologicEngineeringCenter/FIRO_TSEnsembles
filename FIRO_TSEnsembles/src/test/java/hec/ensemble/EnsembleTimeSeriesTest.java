@@ -95,6 +95,31 @@ class EnsembleTimeSeriesTest {
         }
     }
     @Test
+    void iterateTracesOfEnsemblesWithMultiComputable() {
+        try {
+            //define a location and variable
+            RecordIdentifier tsid = new RecordIdentifier("Kanektok.SCRN2", "flow");
+            //get an ensemble time series
+            EnsembleTimeSeries ets = _db.getEnsembleTimeSeries(tsid);
+            //create a computable statistic
+            MultiComputable test = new CumulativeComputable();
+            //compute the statistics for the entire ensemble time series
+            MetricCollectionTimeSeries output = ets.iterateTracesOfEnsemblesWithMultiComputable(test);
+            //verify at the data is properly computing for a set of known values
+            float[] value0 = output.iterator().next().getValues()[0];
+            float[] value1 = output.iterator().next().getValues()[1];
+            float[] value2 = output.iterator().next().getValues()[2];
+            assertEquals(-6199.046875, value0[3]);
+            assertEquals(-1997.0689697265625, value1[3]);
+            assertEquals(-2997.069091796875, value2[3]);
+            //write result
+            _db.write(output);
+        } catch (Exception e) {
+            Logger.logError(e);
+            fail();
+        }
+    }
+    @Test
     void iterateAcrossTimestepsOfEnsemblesWithSingleComputable() {
         try {
             //define a location and variable
