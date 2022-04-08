@@ -73,7 +73,7 @@ public class EnsembleViewerModel {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
         MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithSingleComputable(
-                new TotalFlow());
+                new Total());
 
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }

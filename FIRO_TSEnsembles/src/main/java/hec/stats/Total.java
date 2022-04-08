@@ -1,13 +1,13 @@
 package hec.stats;
 
-public class TotalFlow implements Computable, Configurable {
+public class Total implements Computable, Configurable {
     Configuration _c;
 
     /**
      * Instantiates a total flow computable object
      */
 
-    public TotalFlow() {
+    public Total() {
     }
 
     @Override
