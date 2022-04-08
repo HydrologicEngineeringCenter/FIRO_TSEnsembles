@@ -120,7 +120,7 @@ public class EnsembleViewer {
         float[][] vals = ensemble.getValues();
         EnsembleViewStat[] selectedStats = getSelectedStatistics();
         ZonedDateTime[] dates = ensemble.startDateTime();
-        addStatisticsToChart(chart, selectedStats, dates);
+        addStatisticsToTimePlot((EnsembleChartAcrossTime) chart, selectedStats, dates);
         boolean randomColor = selectedStats.length <= 0;
         addMembersToChart(chart, vals, dates, randomColor);
         return chart;
@@ -136,7 +136,7 @@ public class EnsembleViewer {
 
         }
         for (int i = 0; i < vals.length; i++) {
-            chart.addLine(new LineSpec(0, vals[i], dates, new BasicStroke(1.0f), c, "Member " + (i + 1)));
+            ((EnsembleChartAcrossTime) (chart)).addLine(new LineSpec(0, vals[i], dates, new BasicStroke(1.0f), c, "Member " + (i + 1)));
         }
 
     }
@@ -151,8 +151,42 @@ public class EnsembleViewer {
         return color;
     }
 
+    private void addStatisticsToScatterPlot(EnsembleChartAcrossEnsembles chart, EnsembleViewStat[] stats) throws ParseException {
+        for (EnsembleViewStat selectedStat : stats) {
+            switch (selectedStat.getStatType()) {
+                case MIN:
+                case MAX:
+                    chart.addPoint(new PointSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
+                            new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                            1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
+                case MEAN:
+                    chart.addPoint(new PointSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
+                            new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
+                case MEDIAN:
+                    chart.addPoint(new PointSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt),
+                            new BasicStroke(3.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
+                case PERCENTILE:
+                    float[] percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();
+                    DecimalFormat df = new DecimalFormat("0.0");
 
-    private void addStatisticsToChart(EnsembleChart chart, EnsembleViewStat[] stats, ZonedDateTime[] dates) throws ParseException {
+                    for(int i = 0; i < percentiles.length; i++) {
+
+                        chart.addPoint(new PointSpec(0, model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, new float[] {(percentiles[i])}), new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                                1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
+                    }
+                    break;
+                case MAXAVERAGEDURATION:
+                    chart.addPoint(new PointSpec(0, model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue()),
+                            new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
+
+            }
+        }
+    }
+
+    private void addStatisticsToTimePlot(EnsembleChartAcrossTime chart, EnsembleViewStat[] stats, ZonedDateTime[] dates) throws ParseException {
         for (EnsembleViewStat selectedStat : stats) {
             switch (selectedStat.getStatType()) {
                 case MIN:
@@ -188,10 +222,6 @@ public class EnsembleViewer {
                                 1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
                     }
                     break;
-                case MAXAVERAGEDURATION:
-                    chart.addLine(new LineSpec(0, model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue()),
-                            dates, new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
-
             }
         }
     }
