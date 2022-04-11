@@ -164,4 +164,16 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       }
       return mcts;
     }
+    public MetricCollectionTimeSeries iterateTracesOfEnsemblesWithMultiComputable(MultiComputable compute){
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.TIMESERIES_OF_ARRAY);
+      for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
+        Ensemble e = it.next();
+        float[][] farray = e.multiComputeForEachTraces(compute);
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),e.getUnits());
+        MetricCollection mc = new MetricCollection(ec, compute.Statistics(), farray );
+        mcts.addMetricCollection(mc);
+      }
+      return mcts;
+    }
+
   }
