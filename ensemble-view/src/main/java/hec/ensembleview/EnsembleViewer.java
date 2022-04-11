@@ -27,7 +27,7 @@ public class EnsembleViewer {
 
     private JFrame frame;
     private JPanel topPanel;
-    private JPanel chartPanel;
+    private final List<TabSpec> tabs = new ArrayList<>();
     private JPanel optionsPanel;
     private JPanel filePathPanel;
     private JTextField filePath;
@@ -35,6 +35,7 @@ public class EnsembleViewer {
     private JComboBox<String> locations;
     private JComboBox<String> dateTimes;
     private StatisticsPanel statsPanel;
+    private JTabbedPane tabPane;
 
     public static void main(String[] args) {
         EnsembleViewer ev = new EnsembleViewer();
@@ -248,11 +249,9 @@ public class EnsembleViewer {
         topPanel.add(statsPanel.getPanel());
 
         /*
-        Create panel for holding chart panel.
+        Create tab specs and tabs in the tab pane.
          */
-        chartPanel = new JPanel();
-        chartPanel.setLayout(new BorderLayout());
-        chartPanel.add(new EnsembleChartAcrossTime().generateChart());
+        createTabs();
 
         /*
         Setup window with options and graph.
@@ -262,10 +261,24 @@ public class EnsembleViewer {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
         frame.add(topPanel, BorderLayout.NORTH);
-        frame.add(chartPanel, BorderLayout.CENTER);
+        frame.add(tabPane, BorderLayout.CENTER);
         frame.pack();
 
         addActionListeners();
+    }
+
+    private void createTabs() {
+        /*
+        Create tab spec.
+         */
+        tabs.add(new TabSpec("Across Time", new EnsembleChartAcrossTime().generateChart(), ChartType.TimePlot));
+        tabs.get(0).chartPanel.setLayout(new BorderLayout());
+
+        /*
+        Create tabs in tab pane.
+         */
+        tabPane = new JTabbedPane();
+        tabPane.addTab("Across Time", tabs.get(0).chartPanel);
     }
 
     private void addActionListeners() {
@@ -287,7 +300,7 @@ public class EnsembleViewer {
                     locations.setModel(model);
                     selectedRid = null;
                     selectedZdt = null;
-                    showEmptyChart(chartPanel);
+                    showEmptyChart(getCurrentlyShownChart());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -299,18 +312,18 @@ public class EnsembleViewer {
             setRidFromString(String.valueOf(locations.getSelectedItem()));
             setupDateTimeComboBox(dateTimes);
             setDateTimeFromString(String.valueOf(dateTimes.getSelectedItem()));
-            tryShowingChart(chartPanel);
+            tryShowingChart(getCurrentlyShownChart());
         });
 
         dateTimes.addActionListener(e -> {
             setDateTimeFromString(String.valueOf(dateTimes.getSelectedItem()));
-            tryShowingChart(chartPanel);
+            tryShowingChart(getCurrentlyShownChart());
         });
 
         Statistics[] stats = Statistics.values();
         for (Statistics stat : stats) {
             EnsembleViewStat cb = statsPanel.getStat(stat);
-            cb.addActionListener(e -> tryShowingChart(chartPanel));
+            cb.addActionListener(e -> tryShowingChart(getCurrentlyShownChart()));
         }
     }
 
@@ -324,6 +337,10 @@ public class EnsembleViewer {
             }
         }
         return selectedStats.toArray(new EnsembleViewStat[]{});
+    }
+
+    private JPanel getCurrentlyShownChart() {
+        return tabs.get(tabPane.getSelectedIndex()).chartPanel;
     }
 
 }
