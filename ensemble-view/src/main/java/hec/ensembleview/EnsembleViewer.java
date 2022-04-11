@@ -304,11 +304,16 @@ public class EnsembleViewer {
         tabs.add(new TabSpec("Across Time", new EnsembleChartAcrossTime().generateChart(), ChartType.TimePlot));
         tabs.get(0).chartPanel.setLayout(new BorderLayout());
 
+        tabs.add(new TabSpec("Across Ensembles", new EnsembleChartAcrossEnsembles().generateChart(),ChartType.ScatterPlot));
+        tabs.get(1).chartPanel.setLayout(new BorderLayout());
+
         /*
         Create tabs in tab pane.
          */
         tabPane = new JTabbedPane();
-        tabPane.addTab("Across Time", tabs.get(0).chartPanel);
+        tabPane.addTab(tabs.get(0).tabName, tabs.get(0).chartPanel);
+        tabPane.addTab(tabs.get(1).tabName, tabs.get(1).chartPanel);
+
     }
 
     private void addActionListeners() {

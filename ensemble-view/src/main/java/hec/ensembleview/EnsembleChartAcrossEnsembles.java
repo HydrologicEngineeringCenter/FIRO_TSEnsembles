@@ -21,7 +21,7 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot 
     private final Map<Integer, XYSeriesCollection> XYSeriesCollectionMap = new HashMap<>();
     private final Map<Integer, XYLineAndShapeRenderer> rendererMap = new HashMap<>();
 
-    public EnsembleChartAcrossEnsembles(String title) {
+    public EnsembleChartAcrossEnsembles() {
     }
 
     @Override
