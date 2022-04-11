@@ -39,11 +39,11 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot 
     @Override
     public void addPoint(PointSpec point) throws ParseException {
         XYSeries newMember = new XYSeries(point.pointName);
-        for(int i = 0; i < point.yValue.length;i++) {
-            newMember.add(i, point.yValue[i]);
+        for (int i = 0; i < point.yValue.length; i++) {
+            newMember.add(i + 1, point.yValue[i]);
         }
 
-        if(!XYSeriesCollectionMap.containsKey(point.rangeAxis)) {
+        if (!XYSeriesCollectionMap.containsKey(point.rangeAxis)) {
             XYSeriesCollectionMap.put(point.rangeAxis, new XYSeriesCollection());
             pointSpecMap.put(point.rangeAxis, new ArrayList<>());
         }
@@ -52,6 +52,7 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot 
         pointSpecMap.get(point.rangeAxis).add(point);
 
     }
+
 
     @Override
     public ChartPanel generateChart() {
@@ -72,7 +73,7 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot 
             List<PointSpec> pointsForRange = pointSpecMap.get(i);
             for(int j = 0; j < pointsForRange.size(); j++) {
                 PointSpec currentPoint = pointsForRange.get(i);
-                plot.getRenderer(i).setSeriesStroke(j, currentPoint.lineStroke);
+               // plot.getRenderer(i).setSeriesStroke(j, currentPoint.lineStroke);
                 if(currentPoint.pointColor != null) plot.getRenderer(i).setSeriesPaint(j, currentPoint.pointColor);
             }
         }
