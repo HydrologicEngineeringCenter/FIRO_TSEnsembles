@@ -36,6 +36,8 @@ public class EnsembleViewerModel {
                 return computeStatFromPercentilesComputable(db, stat, selectedRid, selectedZdt, values, chartType);
             case MAXAVERAGEDURATION:
                 return computeStatFromMaxAvgDurationComputable(db, stat, selectedRid,selectedZdt, (int) values[0]);
+            case MAXACCUMDURATION:
+                return computeStatFromMaxAccumDurationComputable(db, stat, selectedRid,selectedZdt, (int) values[0]);
             default:
                 return new float[0];
         }
@@ -70,6 +72,15 @@ public class EnsembleViewerModel {
 
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new MaxAvgDuration(value));
+
+        return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+    }
+
+    private float[] computeStatFromMaxAccumDurationComputable(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, int value) {
+        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
+
+        MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
+                new MaxAccumDuration(value));
 
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }

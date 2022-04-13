@@ -197,6 +197,10 @@ public class EnsembleViewer {
                     chart.addPoint(new PointSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
                             new BasicStroke(3.0f), Color.ORANGE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
+                case TOTAL:
+                    chart.addPoint(new PointSpec(1, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
+                             new BasicStroke(3.0f), Color.GRAY, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
                 case PERCENTILE:
                     float[] percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();
                     DecimalFormat df = new DecimalFormat("0.0");
@@ -210,7 +214,10 @@ public class EnsembleViewer {
                 case MAXAVERAGEDURATION:
                     chart.addPoint(new PointSpec(0, model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue(), tabs.get(tabPane.getSelectedIndex()).chartType),
                             new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
-
+                    break;
+                case MAXACCUMDURATION:
+                    chart.addPoint(new PointSpec(0, model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue(), tabs.get(tabPane.getSelectedIndex()).chartType),
+                            new BasicStroke(3.0f), Color.GREEN, StatisticsStringMap.map.get(selectedStat.getStatType())));
             }
         }
     }
@@ -234,10 +241,6 @@ public class EnsembleViewer {
                     break;
                 case CUMULATIVE:
                     chart.addLine(new LineSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
-                            dates, new BasicStroke(3.0f), Color.ORANGE, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case TOTAL:
-                    chart.addLine(new LineSpec(1, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
                             dates, new BasicStroke(3.0f), Color.ORANGE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case PERCENTILE:
