@@ -15,12 +15,10 @@ public class CheckBoxStat extends JPanel implements EnsembleViewStat {
     private final Statistics stat;
 
     public CheckBoxStat(Statistics stat) {
-        setLayout(new GridLayout(1, 1));
+        setLayout(new BorderLayout());
         checkBox = new JCheckBox(StatisticsStringMap.map.get(stat));
         add(checkBox);
         this.stat = stat;
-        setPreferredSize(new Dimension(10, 10));
-        validate();
     }
 
     @Override
