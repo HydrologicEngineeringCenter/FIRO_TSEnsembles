@@ -7,27 +7,27 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.List;
 import java.util.TreeMap;
 
 public class StatisticsPanel {
     private JPanel panel;
     private TreeMap<Statistics, EnsembleViewStat> statsMapping;
 
-    public StatisticsPanel() {
+    public StatisticsPanel(List<Statistics> statistics) {
         panel = new JPanel();
         statsMapping = new TreeMap<>();
 
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
         panel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Statistics", TitledBorder.LEFT, TitledBorder.TOP));
         ((TitledBorder)panel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
-        panel.setLayout(new GridLayout(0,1));
-        createStats();
+        createStats(statistics);
+        panel.setLayout(new GridLayout(statsMapping.size(),1));
         addStatsToPanel();
     }
 
-    private void createStats() {
-        Statistics[] allStats = Statistics.values();
-        for (Statistics stat : allStats) {
+    private void createStats(List<Statistics> statistics) {
+        for (Statistics stat : statistics) {
             switch(StatisticsUITypeMap.map.get(stat)) {
                 case CHECKBOX:
                     statsMapping.put(stat, new CheckBoxStat(stat));

@@ -13,6 +13,6 @@ public interface EnsembleChart {
     void setYLabel(String label);
     void setXLabel(String label);
     ChartPanel generateChart();
-    void addLine(LineSpec line) throws ParseException;
+
 
 }
