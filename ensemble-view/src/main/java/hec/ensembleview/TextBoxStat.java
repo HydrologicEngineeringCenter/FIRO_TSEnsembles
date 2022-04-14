@@ -23,7 +23,7 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
 //        label = new JLabel(StatisticsStringMap.map.get(stat));
         checkBox = new JCheckBox(StatisticsStringMap.map.get(stat));
         textField = new JTextField();
-        setLayout(new GridLayout(0, 2));
+        setLayout(new GridLayout(1, 2));
         add(checkBox);
         add(textField);
         this.stat = stat;
@@ -35,6 +35,8 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
                 textField.setEditable(false);
             }
         });
+        setPreferredSize(getPreferredSize());
+        validate();
     }
 
     public float[] getTextFieldValue() {
