@@ -35,6 +35,9 @@ public class StatisticsPanel {
                 case TEXTBOX:
                     statsMapping.put(stat, new TextBoxStat(stat));
                     break;
+                case RADIOBUTTON:
+                    statsMapping.put(stat, new RadioButtonStat(stat));
+                    break;
             }
         }
     }
@@ -46,8 +49,10 @@ public class StatisticsPanel {
                 case MAX:
                 case MEAN:
                 case TOTAL:
-                case CUMULATIVE:
                     panel.add((CheckBoxStat)stat);
+                    break;
+                case CUMULATIVE:
+                    panel.add((RadioButtonStat)stat);
                     break;
                 //case MEDIAN:
                 case PERCENTILE:

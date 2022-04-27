@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Random;
 
 public class EnsembleViewer {
-    private EnsembleViewerModel model;
+    private ComputeEngine model;
     private EnsembleChart ec;
 
     private RecordIdentifier selectedRid = null;
@@ -69,7 +69,7 @@ public class EnsembleViewer {
     }
 
     public void setModel(String dbFile) throws Exception {
-        model = new EnsembleViewerModel(dbFile);
+        model = new ComputeEngine(dbFile);
     }
 
     private RecordIdentifier getRecordIdentifierFromString(String stringRID){
@@ -122,9 +122,17 @@ public class EnsembleViewer {
             EnsembleChart chart = new EnsembleChartAcrossTime();
             chart.setXLabel("Date/Time");
             chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
-            addStatisticsToTimePlot((EnsembleChartAcrossTime) chart, selectedStats, dates);
             boolean randomColor = selectedStats.length <= 0;
-            addLineMembersToChart(chart, vals, dates, randomColor);
+            if (isStatSelected(selectedStats, Statistics.CUMULATIVE)){
+                addStatisticsToTimePlot((EnsembleChartAcrossTime) chart, selectedStats, dates);
+                float[][] cumulativeVals = model.computeRadioButtonStat(Statistics.CUMULATIVE, selectedRid, selectedZdt, ChartType.TimePlot);
+                addLineMembersToChart(chart, cumulativeVals, dates, true);
+            }
+            else
+            {
+                addStatisticsToTimePlot((EnsembleChartAcrossTime) chart, selectedStats, dates);
+                addLineMembersToChart(chart, vals, dates, randomColor);
+            }
             return chart;
 
         } else {
@@ -134,6 +142,14 @@ public class EnsembleViewer {
             addStatisticsToScatterPlot((EnsembleChartAcrossEnsembles) chart, selectedStats);
             return chart;
         }
+    }
+
+    private boolean isStatSelected(EnsembleViewStat[] selectedStats, Statistics theStat) {
+        for (EnsembleViewStat stat : selectedStats) {
+            if (stat.getStatType() == theStat)
+                return true;
+        }
+        return false;
     }
 
     private void addLineMembersToChart(EnsembleChart chart, float[][] vals, ZonedDateTime[] dates, boolean randomColor) throws ParseException {
@@ -238,10 +254,6 @@ public class EnsembleViewer {
                 case MEDIAN:
                     chart.addLine(new LineSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
                             dates, new BasicStroke(3.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case CUMULATIVE:
-                    chart.addLine(new LineSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
-                            dates, new BasicStroke(3.0f), Color.ORANGE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case PERCENTILE:
                     float[] percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();

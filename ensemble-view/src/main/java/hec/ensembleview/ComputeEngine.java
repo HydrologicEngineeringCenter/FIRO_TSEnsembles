@@ -8,10 +8,10 @@ import hec.stats.*;
 
 import java.time.ZonedDateTime;
 
-public class EnsembleViewerModel {
+public class ComputeEngine {
     public SqliteDatabase db;
 
-    public EnsembleViewerModel(String dbFile) throws Exception {
+    public ComputeEngine(String dbFile) throws Exception {
         this.db = new SqliteDatabase(dbFile, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);
     }
 
@@ -23,11 +23,17 @@ public class EnsembleViewerModel {
                 return computeStatFromMultiStatComputable(stat, selectedRid, selectedZdt, chartType);
             case TOTAL:
                 return computeStatFromTotalComputable(stat, selectedRid, selectedZdt);
-            case CUMULATIVE:
-                return computeStatFromCumulativeComputable(stat, selectedRid, selectedZdt);
             default:
                 return new float[0];
         }
+    }
+
+    public float[][] computeRadioButtonStat(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, ChartType chartType) {
+        switch(stat) {
+            case CUMULATIVE:
+                return computeStatFromCumulativeComputable(stat, selectedRid, selectedZdt);
+        }
+        return new float[0][0];
     }
 
     public float[] computeTextBoxStat(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, float[] values, ChartType chartType) {
@@ -93,12 +99,12 @@ public class EnsembleViewerModel {
 
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }
-    private float[] computeStatFromCumulativeComputable(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
+    private float[][] computeStatFromCumulativeComputable(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
         MetricCollectionTimeSeries mct = ets.iterateTracesOfEnsemblesWithMultiComputable(
                 new CumulativeComputable());
 
-        return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+        return mct.getMetricCollection(selectedZdt).getValues();
     }
 }
