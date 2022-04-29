@@ -358,12 +358,11 @@ public class EnsembleViewer {
         for(TabSpec tab: tabs) {
             JPanel panel = new JPanel();
             panel.setLayout(new BorderLayout());
+            JTabbedPane
             panel.add(tab.statPanel.getPanel(), BorderLayout.NORTH);
             panel.add(tab.chartPanel, BorderLayout.CENTER);
             tabPane.addTab(tab.tabName, panel);
         }
-
-
 
     }
 
