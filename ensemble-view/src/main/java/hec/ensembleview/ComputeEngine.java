@@ -110,8 +110,7 @@ public class ComputeEngine {
         return null;
     }
 
-    private static float[] computeStatFromPercentilesComputable(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, float[] percentiles, ChartType chartType) {
-        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
+    private static float[] computeStatFromPercentilesComputable(EnsembleTimeSeries ets, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, float[] percentiles, ChartType chartType) {
         if(chartType == ChartType.TimePlot) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(new PercentilesComputable(percentiles));
             return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
@@ -134,6 +133,20 @@ public class ComputeEngine {
     private float[] computeStatFromMaxAccumDurationComputable(SqliteDatabase db, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, int value) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
 
+        MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
+                new MaxAccumDuration(value));
+
+        return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+    }
+
+    private static float[] computeStatFromMaxAvgDurationComputable(EnsembleTimeSeries ets, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, int value) {
+        MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
+                new MaxAvgDuration(value));
+
+        return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+    }
+
+    private static float[] computeStatFromMaxAccumDurationComputable(EnsembleTimeSeries ets, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, int value) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new MaxAccumDuration(value));
 
