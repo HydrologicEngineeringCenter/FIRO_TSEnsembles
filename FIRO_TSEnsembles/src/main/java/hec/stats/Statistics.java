@@ -12,7 +12,8 @@ public enum Statistics {
     PERCENTILE,
     CUMULATIVE,
     MAXAVERAGEDURATION,
-    MAXACCUMDURATION;
+    MAXACCUMDURATION,
+    COMPUTABLE;
 
     public static String pack(EnumSet<Statistics> set){ //returns a list of the statistics in a string format
         String ret = "";
