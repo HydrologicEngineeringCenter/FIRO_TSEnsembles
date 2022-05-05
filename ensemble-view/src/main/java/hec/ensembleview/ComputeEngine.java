@@ -15,19 +15,6 @@ public class ComputeEngine {
         this.db = new SqliteDatabase(dbFile, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);
     }
 
-    public float[] computeCheckBoxStat(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, ChartType chartType) {
-        switch(stat){
-            case MIN:
-            case MAX:
-            case MEAN:
-                return computeStatFromMultiStatComputable(stat, selectedRid, selectedZdt, chartType);
-            case TOTAL:
-                return computeStatFromTotalComputable(stat, selectedRid, selectedZdt);
-            default:
-                return new float[0];
-        }
-    }
-
     public static float[] computeCheckBoxStat(EnsembleTimeSeries ets, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, ChartType chartType) {
         switch(stat){
             case MIN:
@@ -41,7 +28,46 @@ public class ComputeEngine {
         }
     }
 
-    public float[][] computeRadioButtonStat(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, ChartType chartType) {
+    public static float[] computeTextBoxStat(EnsembleTimeSeries ets, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, float[] values, ChartType chartType) {
+        switch(stat){
+            case PERCENTILE:
+                return computeStatFromPercentilesComputable(ets, stat, selectedRid, selectedZdt, values, chartType);
+            case MAXAVERAGEDURATION:
+                return computeStatFromMaxAvgDurationComputable(ets, stat, selectedRid,selectedZdt, (int) values[0]);
+            case MAXACCUMDURATION:
+                return computeStatFromMaxAccumDurationComputable(ets, stat, selectedRid,selectedZdt, (int) values[0]);
+            default:
+                return new float[0];
+        }
+    }
+
+    public float[] computeCheckBoxStat(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, ChartType chartType) {
+        switch(stat){
+            case MIN:
+            case MAX:
+            case MEAN:
+                return computeStatFromMultiStatComputable(stat, selectedRid, selectedZdt, chartType);
+            case TOTAL:
+                return computeStatFromTotalComputable(stat, selectedRid, selectedZdt);
+            default:
+                return new float[0];
+        }
+    }
+
+    public static float[] computeRadioButtonStat(EnsembleTimeSeries ets, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, ChartType chartType) {
+        switch(stat){
+            case MIN:
+            case MAX:
+            case MEAN:
+                return computeStatFromMultiStatComputable(ets, stat, selectedRid, selectedZdt, chartType);
+            case TOTAL:
+                return computeStatFromTotalComputable(ets, stat, selectedRid, selectedZdt);
+            default:
+                return new float[0];
+        }
+    }
+
+    public float[][] computeRadioButtonTransform(Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, ChartType chartType) {
         switch(stat) {
             case CUMULATIVE:
                 return computeStatFromCumulativeComputable(stat, selectedRid, selectedZdt);
@@ -57,19 +83,6 @@ public class ComputeEngine {
                 return computeStatFromMaxAvgDurationComputable(db, stat, selectedRid,selectedZdt, (int) values[0]);
             case MAXACCUMDURATION:
                 return computeStatFromMaxAccumDurationComputable(db, stat, selectedRid,selectedZdt, (int) values[0]);
-            default:
-                return new float[0];
-        }
-    }
-
-    public static float[] computeTextBoxStat(EnsembleTimeSeries ets, Statistics stat, RecordIdentifier selectedRid, ZonedDateTime selectedZdt, float[] values, ChartType chartType) {
-        switch(stat){
-            case PERCENTILE:
-                return computeStatFromPercentilesComputable(ets, stat, selectedRid, selectedZdt, values, chartType);
-            case MAXAVERAGEDURATION:
-                return computeStatFromMaxAvgDurationComputable(ets, stat, selectedRid,selectedZdt, (int) values[0]);
-            case MAXACCUMDURATION:
-                return computeStatFromMaxAccumDurationComputable(ets, stat, selectedRid,selectedZdt, (int) values[0]);
             default:
                 return new float[0];
         }
