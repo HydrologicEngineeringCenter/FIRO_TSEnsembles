@@ -406,8 +406,8 @@ public class EnsembleViewer {
 
         for(TabSpec tab: tabs) {
             for (Statistics stat : ChartTypeStatisticsMap.map.get(tab.chartType)) {
-                EnsembleViewStat cb = tab.statPanel.getStat(stat);
-                cb.addActionListener(e -> tryShowingChart(tab.chartPanel));
+                EnsembleViewStat evs = tab.statPanel.getStat(stat);
+                evs.addActionListener(e -> tryShowingChart(tab.chartPanel));
             }
         }
 
@@ -415,10 +415,9 @@ public class EnsembleViewer {
 
     private EnsembleViewStat[] getSelectedStatistics() {
         List<EnsembleViewStat> selectedStats = new ArrayList<>();
-        Statistics[] stats = Statistics.values();
         for (Statistics stat : ChartTypeStatisticsMap.map.get(tabs.get(tabPane.getSelectedIndex()).chartType)) {
             EnsembleViewStat selectedStat = getCurrentlyShownStatsPanel().getStat(stat);
-            if (selectedStat.hasInput()) {
+            if (selectedStat.hasInput() && selectedStat.getStatType() != Statistics.NONE) {
                 selectedStats.add(selectedStat);
             }
         }

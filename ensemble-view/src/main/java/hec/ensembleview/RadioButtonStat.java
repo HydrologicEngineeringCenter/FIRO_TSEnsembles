@@ -28,6 +28,10 @@ public class RadioButtonStat extends JPanel implements EnsembleViewStat {
         return stat;
     }
 
+    public JRadioButton getRadioButton() {
+        return radioButton;
+    }
+
     @Override
     public void addActionListener(ActionListener l) {
         radioButton.addActionListener(l);
