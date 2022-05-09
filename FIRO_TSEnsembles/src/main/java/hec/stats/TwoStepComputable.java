@@ -1,15 +1,16 @@
 package hec.stats;
 
 public class TwoStepComputable implements SingleComputable, Configurable {
-    /**
-     * The two step computable computes two computable object in sequence either across time or across ensembles.
-     * Across time or across ensembles can be computed first or second
-     */
 
     private final Computable _stepOne;
     private final Computable _stepTwo;
     private boolean _acrossTime;
     Configuration _c;
+
+    /**
+     * The two step computable computes two computable object in sequence either across time or across ensembles.
+     * Across time or across ensembles can be computed first or second
+     */
 
     public TwoStepComputable(Computable stepOne, Computable stepTwo, boolean acrossTime) {
         _stepOne = stepOne;
