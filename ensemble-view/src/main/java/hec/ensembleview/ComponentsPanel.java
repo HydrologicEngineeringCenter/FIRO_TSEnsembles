@@ -10,24 +10,29 @@ import java.awt.*;
 import java.util.List;
 import java.util.TreeMap;
 
-public class StatisticsPanel {
+public class ComponentsPanel {
     private JPanel parentPanel;
     private JPanel statPanel;
-    private JPanel transformPanel;
+    private JPanel timeSeriesViewPanel;
     private TreeMap<Statistics, EnsembleViewStat> statsMapping;
 
-    public StatisticsPanel(List<Statistics> statistics) {
+    /**
+     * The Components Panel class sets up the parent panel, stats panel, and time series view panel for UI.
+     * stats panel computes statistics on the selected time series view.  Time series view panel displays the raw or cumulative ensemble time series
+     */
+
+    public ComponentsPanel(List<Statistics> statistics) {
         setupStatsPanel();
-        setupTransformPanel();
+        setupTimeSeriesViewPanel();
         setupParentPanel();
 
         createComponents(statistics);
 
         addComponentsToStatsPanel();
-        addComponentsToTransformPanel();
+        addComponentsToTimeSeriesViewPanel();
     }
 
-    private void addComponentsToTransformPanel() {
+    private void addComponentsToTimeSeriesViewPanel() {
         ButtonGroup buttonGroup = new ButtonGroup();
 
         for (EnsembleViewStat stat : statsMapping.values()) {
@@ -35,13 +40,13 @@ public class StatisticsPanel {
                 case NONE:
                     ((RadioButtonStat)stat).getRadioButton().setSelected(true);
                 case CUMULATIVE:
-                    transformPanel.add((RadioButtonStat)stat);
+                    timeSeriesViewPanel.add((RadioButtonStat)stat);
                     buttonGroup.add(((RadioButtonStat)stat).getRadioButton());
                     break;
             }
         }
 
-        transformPanel.setLayout(new GridLayout(0,1));
+        timeSeriesViewPanel.setLayout(new GridLayout(0,1));
     }
 
     private void addComponentsToStatsPanel() {
@@ -68,12 +73,12 @@ public class StatisticsPanel {
         statPanel.setLayout(new GridLayout(0,1));
     }
 
-    private void setupTransformPanel() {
-        transformPanel = new JPanel();
+    private void setupTimeSeriesViewPanel() {
+        timeSeriesViewPanel = new JPanel();
 
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        transformPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Transforms", TitledBorder.LEFT, TitledBorder.TOP));
-        ((TitledBorder) transformPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
+        timeSeriesViewPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Transforms", TitledBorder.LEFT, TitledBorder.TOP));
+        ((TitledBorder) timeSeriesViewPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
     }
 
     private void setupStatsPanel() {
@@ -89,7 +94,7 @@ public class StatisticsPanel {
 
         parentPanel.setLayout(new GridLayout(1, 2));
         parentPanel.add(statPanel, BorderLayout.WEST);
-        parentPanel.add(transformPanel, BorderLayout.EAST);
+        parentPanel.add(timeSeriesViewPanel, BorderLayout.EAST);
     }
 
     private void createComponents(List<Statistics> statistics) {

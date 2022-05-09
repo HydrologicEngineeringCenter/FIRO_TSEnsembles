@@ -388,10 +388,10 @@ public class EnsembleViewer {
         /*
         Create tab spec.
          */
-        tabs.add(new TabSpec("Across Time", new EnsembleChartAcrossTime().generateChart(), new StatisticsPanel(ChartTypeStatisticsMap.map.get(ChartType.TimePlot)), ChartType.TimePlot));
+        tabs.add(new TabSpec("Across Time", new EnsembleChartAcrossTime().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.map.get(ChartType.TimePlot)), ChartType.TimePlot));
         tabs.get(0).chartPanel.setLayout(new BorderLayout());
 
-        tabs.add(new TabSpec("Across Ensembles", new EnsembleChartAcrossEnsembles().generateChart(), new StatisticsPanel(ChartTypeStatisticsMap.map.get(ChartType.ScatterPlot)), ChartType.ScatterPlot));
+        tabs.add(new TabSpec("Across Ensembles", new EnsembleChartAcrossEnsembles().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.map.get(ChartType.ScatterPlot)), ChartType.ScatterPlot));
         tabs.get(1).chartPanel.setLayout(new BorderLayout());
 
         /*
@@ -472,7 +472,7 @@ public class EnsembleViewer {
         return tabs.get(tabPane.getSelectedIndex()).chartPanel;
     }
 
-    private StatisticsPanel getCurrentlyShownStatsPanel() {
+    private ComponentsPanel getCurrentlyShownStatsPanel() {
         return tabs.get(tabPane.getSelectedIndex()).statPanel;
     }
 
