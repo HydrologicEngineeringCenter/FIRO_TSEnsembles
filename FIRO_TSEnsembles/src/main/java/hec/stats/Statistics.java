@@ -3,6 +3,7 @@ package hec.stats;
 import java.util.EnumSet;
 
 public enum Statistics {
+    NONE,
     MIN,
     MAX,
     MEAN,

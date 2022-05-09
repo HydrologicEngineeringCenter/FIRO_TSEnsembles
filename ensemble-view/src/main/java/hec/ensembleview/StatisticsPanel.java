@@ -11,22 +11,90 @@ import java.util.List;
 import java.util.TreeMap;
 
 public class StatisticsPanel {
-    private JPanel panel;
+    private JPanel parentPanel;
+    private JPanel statPanel;
+    private JPanel transformPanel;
     private TreeMap<Statistics, EnsembleViewStat> statsMapping;
 
     public StatisticsPanel(List<Statistics> statistics) {
-        panel = new JPanel();
-        statsMapping = new TreeMap<>();
+        setupStatsPanel();
+        setupTransformPanel();
+        setupParentPanel();
 
-        Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        panel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Statistics", TitledBorder.LEFT, TitledBorder.TOP));
-        ((TitledBorder)panel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
-        createStats(statistics);
-        panel.setLayout(new GridLayout(statsMapping.size(),1));
-        addStatsToPanel();
+        createComponents(statistics);
+
+        addComponentsToStatsPanel();
+        addComponentsToTransformPanel();
     }
 
-    private void createStats(List<Statistics> statistics) {
+    private void addComponentsToTransformPanel() {
+        ButtonGroup buttonGroup = new ButtonGroup();
+
+        for (EnsembleViewStat stat : statsMapping.values()) {
+            switch (stat.getStatType()) {
+                case NONE:
+                    ((RadioButtonStat)stat).getRadioButton().setSelected(true);
+                case CUMULATIVE:
+                    transformPanel.add((RadioButtonStat)stat);
+                    buttonGroup.add(((RadioButtonStat)stat).getRadioButton());
+                    break;
+            }
+        }
+
+        transformPanel.setLayout(new GridLayout(0,1));
+    }
+
+    private void addComponentsToStatsPanel() {
+        int componentCounter = 0;
+        for (EnsembleViewStat stat : statsMapping.values()) {
+            switch (stat.getStatType()) {
+                case MIN:
+                case MAX:
+                case MEAN:
+                case TOTAL:
+                    statPanel.add((CheckBoxStat)stat);
+                    componentCounter++;
+                    break;
+                //case MEDIAN:
+                case PERCENTILE:
+                case MAXAVERAGEDURATION:
+                case MAXACCUMDURATION:
+                    statPanel.add((TextBoxStat)stat);
+                    componentCounter++;
+                    break;
+            }
+        }
+
+        statPanel.setLayout(new GridLayout(0,1));
+    }
+
+    private void setupTransformPanel() {
+        transformPanel = new JPanel();
+
+        Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
+        transformPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Transforms", TitledBorder.LEFT, TitledBorder.TOP));
+        ((TitledBorder) transformPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
+    }
+
+    private void setupStatsPanel() {
+        statPanel = new JPanel();
+
+        Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
+        statPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Statistics", TitledBorder.LEFT, TitledBorder.TOP));
+        ((TitledBorder) statPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
+    }
+
+    private void setupParentPanel() {
+        parentPanel = new JPanel();
+
+        parentPanel.setLayout(new GridLayout(1, 2));
+        parentPanel.add(statPanel, BorderLayout.WEST);
+        parentPanel.add(transformPanel, BorderLayout.EAST);
+    }
+
+    private void createComponents(List<Statistics> statistics) {
+        statsMapping = new TreeMap<>();
+
         for (Statistics stat : statistics) {
             switch(StatisticsUITypeMap.map.get(stat)) {
                 case CHECKBOX:
@@ -35,32 +103,15 @@ public class StatisticsPanel {
                 case TEXTBOX:
                     statsMapping.put(stat, new TextBoxStat(stat));
                     break;
-            }
-        }
-    }
-
-    private void addStatsToPanel() {
-        for (EnsembleViewStat stat : statsMapping.values()) {
-            switch (stat.getStatType()) {
-                case MIN:
-                case MAX:
-                case MEAN:
-                case TOTAL:
-                case CUMULATIVE:
-                    panel.add((CheckBoxStat)stat);
-                    break;
-                //case MEDIAN:
-                case PERCENTILE:
-                case MAXAVERAGEDURATION:
-                case MAXACCUMDURATION:
-                    panel.add((TextBoxStat)stat);
+                case RADIOBUTTON:
+                    statsMapping.put(stat, new RadioButtonStat(stat));
                     break;
             }
         }
     }
 
     public JPanel getPanel() {
-        return panel;
+        return parentPanel;
     }
 
     public EnsembleViewStat getStat(Statistics stat) {

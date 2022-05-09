@@ -2,6 +2,7 @@ package hec.ensembleview;
 
 import hec.RecordIdentifier;
 import hec.ensemble.Ensemble;
+import hec.ensemble.EnsembleTimeSeries;
 import hec.ensembleview.mappings.ChartTypeStatisticsMap;
 import hec.ensembleview.mappings.StatisticsStringMap;
 import hec.stats.Statistics;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Random;
 
 public class EnsembleViewer {
-    private EnsembleViewerModel model;
+    private ComputeEngine computeEngine;
     private EnsembleChart ec;
 
     private RecordIdentifier selectedRid = null;
@@ -55,7 +56,7 @@ public class EnsembleViewer {
     }
 
     private void setupDateTimeComboBox(JComboBox<String> dateTimeComboBox) {
-        String[] zdts = model.db.getEnsembleIssueDates(selectedRid).stream().map(ZonedDateTime::toString).toArray(String[]::new);
+        String[] zdts = computeEngine.db.getEnsembleIssueDates(selectedRid).stream().map(ZonedDateTime::toString).toArray(String[]::new);
         ComboBoxModel<String> model = new DefaultComboBoxModel<>(zdts);
         dateTimeComboBox.setModel(model);
     }
@@ -68,12 +69,12 @@ public class EnsembleViewer {
         chartPanel.repaint();
     }
 
-    public void setModel(String dbFile) throws Exception {
-        model = new EnsembleViewerModel(dbFile);
+    public void setComputeEngine(String dbFile) throws Exception {
+        computeEngine = new ComputeEngine(dbFile);
     }
 
     private RecordIdentifier getRecordIdentifierFromString(String stringRID){
-        List<RecordIdentifier> rids = model.db.getEnsembleTimeSeriesIDs();
+        List<RecordIdentifier> rids = computeEngine.db.getEnsembleTimeSeriesIDs();
         for (RecordIdentifier rid : rids) {
             if (Objects.equals(rid.toString(), stringRID)) {
                 return rid;
@@ -83,7 +84,7 @@ public class EnsembleViewer {
     }
 
     private ZonedDateTime getZonedDateTimeFromString(RecordIdentifier rid ,String stringZDT){
-        List<ZonedDateTime> zdts = model.db.getEnsembleIssueDates(rid);
+        List<ZonedDateTime> zdts = computeEngine.db.getEnsembleIssueDates(rid);
         for (ZonedDateTime zdt : zdts) {
             if (Objects.equals(zdt.toString(), stringZDT)){
                 return zdt;
@@ -113,27 +114,53 @@ public class EnsembleViewer {
             return null;
         }
 
-        Ensemble ensemble = model.db.getEnsemble(selectedRid, selectedZdt);
+        Ensemble ensemble = computeEngine.db.getEnsemble(selectedRid, selectedZdt);
 
         float[][] vals = ensemble.getValues();
         EnsembleViewStat[] selectedStats = getSelectedStatistics();
         ZonedDateTime[] dates = ensemble.startDateTime();
         if(tabs.get(tabPane.getSelectedIndex()).chartType == ChartType.TimePlot) {
-            EnsembleChart chart = new EnsembleChartAcrossTime();
+            EnsembleChartAcrossTime chart = new EnsembleChartAcrossTime();
             chart.setXLabel("Date/Time");
             chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
-            addStatisticsToTimePlot((EnsembleChartAcrossTime) chart, selectedStats, dates);
-            boolean randomColor = selectedStats.length <= 0;
-            addLineMembersToChart(chart, vals, dates, randomColor);
+            boolean randomColor = selectedStats.length <= 1;
+            if (isTransformSelected(selectedStats)){
+                float[][] cumulativeVals = computeEngine.computeRadioButtonTransform(getSelectedTransform(selectedStats), selectedRid, selectedZdt, ChartType.TimePlot);
+                EnsembleTimeSeries ets = new EnsembleTimeSeries(selectedRid, "units", "data_type", "version");
+                ets.addEnsemble(new Ensemble(ensemble.getIssueDate(), cumulativeVals, ensemble.getStartDateTime(), ensemble.getInterval(), ensemble.getUnits()));
+                addStatisticsToTimePlot(chart, selectedStats, getSelectedTransform(selectedStats), ets, dates);
+                addLineMembersToChart(chart, cumulativeVals, dates, randomColor);
+            }
+            else
+            {
+                addStatisticsToTimePlot(chart, selectedStats, dates);
+                addLineMembersToChart(chart, vals, dates, randomColor);
+            }
             return chart;
 
         } else {
-            EnsembleChart chart = new EnsembleChartAcrossEnsembles();
+            EnsembleChartAcrossEnsembles chart = new EnsembleChartAcrossEnsembles();
             chart.setXLabel("Ensembles");
             chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
-            addStatisticsToScatterPlot((EnsembleChartAcrossEnsembles) chart, selectedStats);
+            addStatisticsToScatterPlot(chart, selectedStats);
             return chart;
         }
+    }
+
+    private Statistics getSelectedTransform(EnsembleViewStat[] selectedStats) {
+        for (EnsembleViewStat stat : selectedStats) {
+            if (stat.getStatUIType() == StatisticUIType.RADIOBUTTON && stat.hasInput())
+                return stat.getStatType();
+        }
+        return null;
+    }
+
+    private boolean isTransformSelected(EnsembleViewStat[] selectedStats) {
+        for (EnsembleViewStat stat : selectedStats) {
+            if (stat.getStatUIType() == StatisticUIType.RADIOBUTTON && stat.hasInput() && stat.getStatType() != Statistics.NONE)
+                return true;
+        }
+        return false;
     }
 
     private void addLineMembersToChart(EnsembleChart chart, float[][] vals, ZonedDateTime[] dates, boolean randomColor) throws ParseException {
@@ -180,25 +207,25 @@ public class EnsembleViewer {
         for (EnsembleViewStat selectedStat : stats) {
             switch (selectedStat.getStatType()) {
                 case MIN:
-                    chart.addPoint(new PointSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
+                    chart.addPoint(new PointSpec(0, computeEngine.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
                             new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                                     1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.RED, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MAX:
-                    chart.addPoint(new PointSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
+                    chart.addPoint(new PointSpec(0, computeEngine.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
                             new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                             1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MEAN:
-                    chart.addPoint(new PointSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
+                    chart.addPoint(new PointSpec(0, computeEngine.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
                             new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MEDIAN:
-                    chart.addPoint(new PointSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
+                    chart.addPoint(new PointSpec(0, computeEngine.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
                             new BasicStroke(3.0f), Color.ORANGE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case TOTAL:
-                    chart.addPoint(new PointSpec(1, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
+                    chart.addPoint(new PointSpec(1, computeEngine.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
                              new BasicStroke(3.0f), Color.GRAY, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case PERCENTILE:
@@ -207,17 +234,50 @@ public class EnsembleViewer {
 
                     for(int i = 0; i < percentiles.length; i++) {
 
-                        chart.addPoint(new PointSpec(0, model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, new float[] {(percentiles[i])}, tabs.get(tabPane.getSelectedIndex()).chartType), new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                        chart.addPoint(new PointSpec(0, computeEngine.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, new float[] {(percentiles[i])}, tabs.get(tabPane.getSelectedIndex()).chartType), new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                                 1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
                     }
                     break;
                 case MAXAVERAGEDURATION:
-                    chart.addPoint(new PointSpec(0, model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue(), tabs.get(tabPane.getSelectedIndex()).chartType),
+                    chart.addPoint(new PointSpec(0, computeEngine.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue(), tabs.get(tabPane.getSelectedIndex()).chartType),
                             new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MAXACCUMDURATION:
-                    chart.addPoint(new PointSpec(0, model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue(), tabs.get(tabPane.getSelectedIndex()).chartType),
+                    chart.addPoint(new PointSpec(0, computeEngine.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, ((TextBoxStat) selectedStat).getTextFieldValue(), tabs.get(tabPane.getSelectedIndex()).chartType),
                             new BasicStroke(3.0f), Color.GREEN, StatisticsStringMap.map.get(selectedStat.getStatType())));
+            }
+        }
+    }
+
+
+
+    private void addStatisticsToTimePlot(EnsembleChartAcrossTime chart, EnsembleViewStat[] stats, Statistics selectedTransform, EnsembleTimeSeries ets, ZonedDateTime[] dates) throws ParseException {
+        for (EnsembleViewStat selectedStat : stats) {
+            switch (selectedStat.getStatType()) {
+                case MIN:
+                case MAX:
+                    chart.addLine(new LineSpec(0, ComputeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
+                            dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                            1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
+                case MEAN:
+                    chart.addLine(new LineSpec(0, ComputeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), selectedRid, selectedZdt,tabs.get(tabPane.getSelectedIndex()).chartType),
+                            dates, new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
+                case MEDIAN:
+                    chart.addLine(new LineSpec(0, ComputeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
+                            dates, new BasicStroke(3.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
+                case PERCENTILE:
+                    float[] percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();
+                    DecimalFormat df = new DecimalFormat("0.0");
+
+                    for(int i = 0; i < percentiles.length; i++) {
+                        chart.addLine(new LineSpec(0, ComputeEngine.computeTextBoxStat(ets, selectedStat.getStatType(), selectedRid, selectedZdt, new float[] {(percentiles[i])}, tabs.get(tabPane.getSelectedIndex()).chartType),
+                                dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                                1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
+                    }
+                    break;
             }
         }
     }
@@ -227,21 +287,17 @@ public class EnsembleViewer {
             switch (selectedStat.getStatType()) {
                 case MIN:
                 case MAX:
-                    chart.addLine(new LineSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
+                    chart.addLine(new LineSpec(0, computeEngine.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
                             dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                             1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MEAN:
-                    chart.addLine(new LineSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt,tabs.get(tabPane.getSelectedIndex()).chartType),
+                    chart.addLine(new LineSpec(0, computeEngine.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt,tabs.get(tabPane.getSelectedIndex()).chartType),
                             dates, new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MEDIAN:
-                    chart.addLine(new LineSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
+                    chart.addLine(new LineSpec(0, computeEngine.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
                             dates, new BasicStroke(3.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case CUMULATIVE:
-                    chart.addLine(new LineSpec(0, model.computeCheckBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, tabs.get(tabPane.getSelectedIndex()).chartType),
-                            dates, new BasicStroke(3.0f), Color.ORANGE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case PERCENTILE:
                     float[] percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();
@@ -249,7 +305,7 @@ public class EnsembleViewer {
 
                     for(int i = 0; i < percentiles.length; i++) {
 
-                        chart.addLine(new LineSpec(0, model.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, new float[] {(percentiles[i])}, tabs.get(tabPane.getSelectedIndex()).chartType),
+                        chart.addLine(new LineSpec(0, computeEngine.computeTextBoxStat(selectedStat.getStatType(), selectedRid, selectedZdt, new float[] {(percentiles[i])}, tabs.get(tabPane.getSelectedIndex()).chartType),
                                 dates, new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                                 1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
                     }
@@ -351,8 +407,6 @@ public class EnsembleViewer {
             tabPane.addTab(tab.tabName, panel);
         }
 
-
-
     }
 
     private void addActionListeners() {
@@ -367,8 +421,8 @@ public class EnsembleViewer {
             {
                 filePath.setText(fileChooser.getSelectedFile().getAbsolutePath());
                 try {
-                    setModel(fileChooser.getSelectedFile().getAbsolutePath());
-                    List<RecordIdentifier> rids = model.db.getEnsembleTimeSeriesIDs();
+                    setComputeEngine(fileChooser.getSelectedFile().getAbsolutePath());
+                    List<RecordIdentifier> rids = computeEngine.db.getEnsembleTimeSeriesIDs();
                     String[] sRids = rids.stream().map(RecordIdentifier::toString).toArray(String[]::new);
                     ComboBoxModel<String> model = new DefaultComboBoxModel<>(sRids);
                     locations.setModel(model);
@@ -396,8 +450,8 @@ public class EnsembleViewer {
 
         for(TabSpec tab: tabs) {
             for (Statistics stat : ChartTypeStatisticsMap.map.get(tab.chartType)) {
-                EnsembleViewStat cb = tab.statPanel.getStat(stat);
-                cb.addActionListener(e -> tryShowingChart(tab.chartPanel));
+                EnsembleViewStat evs = tab.statPanel.getStat(stat);
+                evs.addActionListener(e -> tryShowingChart(tab.chartPanel));
             }
         }
 
@@ -405,7 +459,6 @@ public class EnsembleViewer {
 
     private EnsembleViewStat[] getSelectedStatistics() {
         List<EnsembleViewStat> selectedStats = new ArrayList<>();
-        Statistics[] stats = Statistics.values();
         for (Statistics stat : ChartTypeStatisticsMap.map.get(tabs.get(tabPane.getSelectedIndex()).chartType)) {
             EnsembleViewStat selectedStat = getCurrentlyShownStatsPanel().getStat(stat);
             if (selectedStat.hasInput()) {

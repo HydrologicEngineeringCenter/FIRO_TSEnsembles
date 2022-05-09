@@ -1,5 +1,7 @@
 package hec.ensembleview;
 
+import hec.stats.Transforms;
+
 import javax.swing.*;
 
 public class TabSpec {
