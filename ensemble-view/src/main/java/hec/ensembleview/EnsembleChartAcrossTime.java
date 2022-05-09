@@ -68,23 +68,23 @@ public class EnsembleChartAcrossTime implements EnsembleChart, LinePlot {  //Rem
         plot.setDomainPannable(true); //allow the chart to zoom
         plot.setRangePannable(true);  //allow the chart to zoom
 
-        for (int i = 0; i < timeSeriesCollectionMap.size(); i++) {  // for statement, iterates through timeseriescollection map which is for either y1 or y2
-            rendererMap.put(i, new XYLineAndShapeRenderer());  //puts a new instance of XYLineandShapeRenderer object to renderer Map.
-            XYLineAndShapeRenderer renderer = rendererMap.get(i); //gets the XYLineAndShapeRenderer object just created and assign to variable renderer
-            plot.setDataset(i, timeSeriesCollectionMap.get(i));  // set the timeseries stat from the collection map (0 or 1) to the XYplot
-            plot.setRenderer(i, renderer);  //add renderer to the plot which displays the shapes and lines
+        timeSeriesCollectionMap.forEach((k, v) -> {  // for statement, iterates through timeseriescollection map which is for either y1 or y2
+            rendererMap.put(k, new XYLineAndShapeRenderer());  //puts a new instance of XYLineandShapeRenderer object to renderer Map.
+            XYLineAndShapeRenderer renderer = rendererMap.get(k); //gets the XYLineAndShapeRenderer object just created and assign to variable renderer
+            plot.setDataset(k, timeSeriesCollectionMap.get(k));  // set the timeseries stat from the collection map (0 or 1) to the XYplot
+            plot.setRenderer(k, renderer);  //add renderer to the plot which displays the shapes and lines
             plot.setDomainAxis(new DateAxis(xLabel)); //sets the x axis as the date and gives it label
-            plot.setRangeAxis(i, new NumberAxis(yLabel));  //sets the y axis as a numberaxis and give it a label
-            plot.mapDatasetToDomainAxis(i, 0);  //maps the dataset to the x axis, needed because of the y1 and y2 but x axis is always the same
-            plot.mapDatasetToRangeAxis(i, i); // map dataset to y axis, y1 or y2
+            plot.setRangeAxis(k, new NumberAxis(yLabel));  //sets the y axis as a numberaxis and give it a label
+            plot.mapDatasetToDomainAxis(k, 0);  //maps the dataset to the x axis, needed because of the y1 and y2 but x axis is always the same
+            plot.mapDatasetToRangeAxis(k, k); // map dataset to y axis, y1 or y2
 
-            List<LineSpec> linesForRange = lineSpecMap.get(i);  //get list of linespecs for y1 or y2 axis. Setting the line specifications
+            List<LineSpec> linesForRange = lineSpecMap.get(k);  //get list of linespecs for y1 or y2 axis. Setting the line specifications
             for (int j = 0; j < linesForRange.size(); j++) { // for loop. Loop through list of lineSpecs
                 LineSpec currentLine = linesForRange.get(j);  // get one LineSpec
-                plot.getRenderer(i).setSeriesStroke(j, currentLine.lineStroke);  //set the series stroke for the line
-                if (currentLine.lineColor != null) plot.getRenderer(i).setSeriesPaint(j, currentLine.lineColor);  // set line color
+                plot.getRenderer(k).setSeriesStroke(j, currentLine.lineStroke);  //set the series stroke for the line
+                if (currentLine.lineColor != null) plot.getRenderer(k).setSeriesPaint(j, currentLine.lineColor);  // set line color
             }
-        }
+        });
 
         ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot));  // create a new instance of the chart panel.  As a parameter, JFreeChart class is instantiated and passed with chart title and created plot
         chart.setMouseWheelEnabled(true);
@@ -107,10 +107,10 @@ public class EnsembleChartAcrossTime implements EnsembleChart, LinePlot {  //Rem
         };
 
 
-        for (int i = 0; i < rendererMap.size(); i++) {
-            XYLineAndShapeRenderer renderer = ((XYLineAndShapeRenderer)chart.getChart().getXYPlot().getRenderer(i));
+        rendererMap.forEach((k, v) -> {
+            XYLineAndShapeRenderer renderer = ((XYLineAndShapeRenderer)chart.getChart().getXYPlot().getRenderer(k));
             renderer.setDefaultToolTipGenerator(xyToolTipGenerator);
-        }
+        });
 
         chart.setDismissDelay(Integer.MAX_VALUE);
 
