@@ -21,6 +21,10 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot 
     private final Map<Integer, XYSeriesCollection> XYSeriesCollectionMap = new HashMap<>();
     private final Map<Integer, XYLineAndShapeRenderer> rendererMap = new HashMap<>();
 
+    /**
+     * Ensembles Charts Across Ensembles class sets up and displays the metrics for the scatter plot chart
+     */
+
     public EnsembleChartAcrossEnsembles() {
     }
 

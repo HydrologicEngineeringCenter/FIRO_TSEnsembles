@@ -13,8 +13,13 @@ import hec.stats.Total;
 import java.time.ZonedDateTime;
 
 public class ComputeEngine {
-    public ComputeEngine() {
 
+    /**
+     * The Compute Engine class calls the metrics class and passes the compute as a checkbox, textbox, or radio button.  Compute iterates across timesteps of ensembles
+     * for the time series plot or the compute can iterate across traces of ensembles for the scatterplot
+     */
+
+    public ComputeEngine() {
     }
 
     public float[] computeCheckBoxStat(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
