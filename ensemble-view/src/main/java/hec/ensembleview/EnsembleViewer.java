@@ -117,14 +117,19 @@ public class EnsembleViewer {
         float[][] vals = ensemble.getValues();
         EnsembleViewStat[] selectedStats = getSelectedStatistics();
         ZonedDateTime[] dates = ensemble.startDateTime();
+
+        /*
+        depending on which tab pane is selected, show time series plot or show scatter plot
+         */
+
         if(tabs.get(tabPane.getSelectedIndex()).chartType == ChartType.TimePlot) {
             EnsembleChartAcrossTime chart = new EnsembleChartAcrossTime();
             chart.setXLabel("Date/Time");
             chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
             boolean randomColor = selectedStats.length <= 1;
-            if (isTransformSelected(selectedStats)){
+            if (isTimeSeriesViewSelected(selectedStats)){  // if the Radio button is selected to Cumulative or Moving Average, compute metric for time series view
                 float[][] cumulativeVals = computeEngine.computeRadioButtonTransform(db.getEnsembleTimeSeries(selectedRid),
-                        getSelectedTransform(selectedStats), selectedZdt, ChartType.TimePlot);
+                        getSelectedTimeSeriesView(selectedStats), selectedZdt, ChartType.TimePlot);
                 EnsembleTimeSeries ets = new EnsembleTimeSeries(selectedRid, "units", "data_type", "version");
                 ets.addEnsemble(new Ensemble(ensemble.getIssueDate(), cumulativeVals, ensemble.getStartDateTime(), ensemble.getInterval(), ensemble.getUnits()));
                 addStatisticsToTimePlot(chart, selectedStats, ets, dates);
@@ -146,7 +151,7 @@ public class EnsembleViewer {
         }
     }
 
-    private Statistics getSelectedTransform(EnsembleViewStat[] selectedStats) {
+    private Statistics getSelectedTimeSeriesView(EnsembleViewStat[] selectedStats) {
         for (EnsembleViewStat stat : selectedStats) {
             if (stat.getStatUIType() == StatisticUIType.RADIOBUTTON && stat.hasInput())
                 return stat.getStatType();
@@ -154,7 +159,7 @@ public class EnsembleViewer {
         return null;
     }
 
-    private boolean isTransformSelected(EnsembleViewStat[] selectedStats) {
+    private boolean isTimeSeriesViewSelected(EnsembleViewStat[] selectedStats) {
         for (EnsembleViewStat stat : selectedStats) {
             if (stat.getStatUIType() == StatisticUIType.RADIOBUTTON && stat.hasInput() && stat.getStatType() != Statistics.NONE)
                 return true;
@@ -186,6 +191,10 @@ public class EnsembleViewer {
         Color color = new Color(r, g, b);
         return color;
     }
+
+    /*
+    Calls the Compute Engine class to compute selected metrics and add metric to scatter plot for a given Point Specification and y-axis
+    */
 
     private void addStatisticsToScatterPlot(EnsembleChartAcrossEnsembles chart, EnsembleViewStat[] stats, EnsembleTimeSeries ets) throws ParseException {
         for (EnsembleViewStat selectedStat : stats) {
@@ -241,6 +250,10 @@ public class EnsembleViewer {
             }
         }
     }
+
+    /*
+    Calls the Compute Engine class to compute selected metrics and add metric to time series plot for a given Line Specification and y-axis
+    */
 
     private void addStatisticsToTimePlot(EnsembleChartAcrossTime chart, EnsembleViewStat[] stats, EnsembleTimeSeries ets, ZonedDateTime[] dates) throws ParseException {
         for (EnsembleViewStat selectedStat : stats) {
