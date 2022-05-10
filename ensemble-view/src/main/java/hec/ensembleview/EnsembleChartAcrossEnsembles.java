@@ -21,6 +21,10 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot 
     private final Map<Integer, XYSeriesCollection> XYSeriesCollectionMap = new HashMap<>();
     private final Map<Integer, XYLineAndShapeRenderer> rendererMap = new HashMap<>();
 
+    /**
+     * Ensembles Charts Across Ensembles class sets up and displays the metrics for the scatter plot chart
+     */
+
     public EnsembleChartAcrossEnsembles() {
     }
 
@@ -60,23 +64,24 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot 
         plot.setDomainPannable(true);
         plot.setRangePannable(true);
 
-        for(int i = 0; i< XYSeriesCollectionMap.size(); i++) {
-            rendererMap.put(i, new XYLineAndShapeRenderer(false, true));
-            XYLineAndShapeRenderer renderer = rendererMap.get(i);
-            plot.setDataset(i, XYSeriesCollectionMap.get(i));
-            plot.setRenderer(i, renderer);
+        XYSeriesCollectionMap.forEach((k, v) -> {
+            rendererMap.put(k, new XYLineAndShapeRenderer(false, true));
+            XYLineAndShapeRenderer renderer = rendererMap.get(k);
+            plot.setDataset(k, XYSeriesCollectionMap.get(k));
+            plot.setRenderer(k, renderer);
             plot.setDomainAxis(new NumberAxis(xLabel));
-            plot.setRangeAxis(i, new NumberAxis(yLabel));
-            plot.mapDatasetToDomainAxis(i, 0);
-            plot.mapDatasetToRangeAxis(i, i);
+            plot.setRangeAxis(k, new NumberAxis(yLabel));
+            plot.mapDatasetToDomainAxis(k, 0);
+            plot.mapDatasetToRangeAxis(k, k);
 
-            List<PointSpec> pointsForRange = pointSpecMap.get(i);
+            List<PointSpec> pointsForRange = pointSpecMap.get(k);
             for(int j = 0; j < pointsForRange.size(); j++) {
                 PointSpec currentPoint = pointsForRange.get(j);
-                plot.getRenderer(i).setSeriesStroke(j, currentPoint.lineStroke);
-                if(currentPoint.pointColor != null) plot.getRenderer(i).setSeriesPaint(j, currentPoint.pointColor);
+                plot.getRenderer(k).setSeriesStroke(j, currentPoint.lineStroke);
+                if(currentPoint.pointColor != null) plot.getRenderer(k).setSeriesPaint(j, currentPoint.pointColor);
             }
-        }
+        });
+
         ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot));
         chart.setMouseWheelEnabled(true);
         setChartToolTip(chart);
@@ -94,11 +99,10 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot 
             return stringBuilder.toString();
         };
 
-
-        for (int i = 0; i < rendererMap.size(); i++) {
-            XYLineAndShapeRenderer renderer = ((XYLineAndShapeRenderer)chart.getChart().getXYPlot().getRenderer(i));
+        rendererMap.forEach((k, v) -> {
+            XYLineAndShapeRenderer renderer = ((XYLineAndShapeRenderer)chart.getChart().getXYPlot().getRenderer(k));
             renderer.setDefaultToolTipGenerator(xyToolTipGenerator);
-        }
+        });
 
         chart.setDismissDelay(Integer.MAX_VALUE);
 
