@@ -35,6 +35,17 @@ class MultiStatComputableTest {
         assertEquals(80, results[2]);
     }
     @Test
+    public void testMultiStatComputeSimpleArrayTensMedianFiveStat() {
+        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MEAN, MAX, VARIANCE, STANDARDDEVIATION});
+        float[] num = {10,30,45,80,50};
+        float[] results = test.MultiCompute(num);
+        assertEquals(10, results[0]);
+        assertEquals(43, results[1]);
+        assertEquals(80, results[2]);
+        assertEquals(670, results[3]);
+        assertEquals(25.884357452392578, results[4]);
+    }
+    @Test
     public void testMultiStatWithEnsembleTimeAcrossTracesMin() {
         try {
             Ensemble e = TestData.getSampleEnsemble();

@@ -8,6 +8,8 @@ public enum Statistics {
     MAX,
     AVERAGE,
     MEDIAN,
+    VARIANCE,
+    STANDARDDEVIATION,
     TOTAL,
     PERCENTILE,
     CUMULATIVE,

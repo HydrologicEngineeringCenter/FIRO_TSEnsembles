@@ -36,6 +36,12 @@ public class MultiStatComputable implements MultiComputable{
                 case MAX:
                     results[i] = is.getMax();
                     break;
+                case VARIANCE:
+                    results[i] = is.getSampleVariance();
+                    break;
+                case STANDARDDEVIATION:
+                    results[i] = is.getStandardDeviation();
+                    break;
                 default:
                     throw new ArithmeticException("stat type not  yet supported in MultiStatComputable.");
             }
