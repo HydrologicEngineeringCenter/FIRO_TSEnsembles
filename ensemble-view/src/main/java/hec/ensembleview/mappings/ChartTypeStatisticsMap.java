@@ -5,7 +5,7 @@ import hec.stats.Statistics;
 
 import java.util.*;
 
-public class ChartTypeStatisticsMap {
+public class ChartTypeStatisticsMap { //maps the statistics to the specific statistics panel
     public static Map<ChartType, List<Statistics>> map = new HashMap<>();
     static {
         map.put(ChartType.TimePlot, Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.MEAN, Statistics.MEDIAN, Statistics.CUMULATIVE, Statistics.NONE, Statistics.PERCENTILE));

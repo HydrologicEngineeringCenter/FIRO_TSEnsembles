@@ -12,6 +12,11 @@ public  class MaxAccumDuration implements Computable, Configurable {
         this._duration = duration;
     }
 
+    public MaxAccumDuration(Integer duration, Configuration c) {
+        this._duration = duration;
+        _c = c;
+    }
+
     private Integer timeStepsPerDuration() {
             Integer timeStep = (int) _c.getDuration().toHours();
             if(timeStep == null) {
