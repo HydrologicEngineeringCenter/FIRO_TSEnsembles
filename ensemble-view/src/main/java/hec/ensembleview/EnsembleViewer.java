@@ -7,6 +7,7 @@ import hec.ensemble.EnsembleTimeSeries;
 import hec.ensembleview.mappings.ChartTypeStatisticsMap;
 import hec.ensembleview.mappings.StatisticsStringMap;
 import hec.ensembleview.tabs.ChartTab;
+import hec.ensembleview.tabs.SingleValueSummaryTab;
 import hec.stats.Statistics;
 
 import javax.swing.*;
@@ -370,6 +371,9 @@ public class EnsembleViewer {
 
         tabs.add(new TabSpec("Across Ensembles", new JPanel(), TabType.Chart));
         tabs.get(1).panel = new ChartTab(new EnsembleChartAcrossEnsembles().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.map.get(ChartType.ScatterPlot)), ChartType.ScatterPlot);
+
+        tabs.add(new TabSpec("Single Value Summary", new JPanel(), TabType.SingleValueSummary));
+        tabs.get(2).panel = new SingleValueSummaryTab();
 
         /*
         Create tabs in tab pane.
