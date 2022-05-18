@@ -2,7 +2,6 @@ package hec.ensembleview.tabs;
 
 import hec.ensembleview.ChartType;
 import hec.ensembleview.ComponentsPanel;
-import javafx.scene.chart.Chart;
 
 import javax.swing.*;
 import java.awt.*;
