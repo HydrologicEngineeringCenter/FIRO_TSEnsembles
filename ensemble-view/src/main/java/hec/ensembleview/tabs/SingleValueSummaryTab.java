@@ -3,7 +3,7 @@ package hec.ensembleview.tabs;
 import hec.ensembleview.ChartType;
 import hec.ensembleview.mappings.ChartTypeStatisticsMap;
 import hec.stats.Statistics;
-import javafx.scene.chart.Chart;
+//import javafx.scene.chart.Chart;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,19 +31,59 @@ public class SingleValueSummaryTab extends JPanel {
     }
 
     private void organizeUI() {
-        setLayout(new GridLayout(1, 2));
+        setLayout(new GridLayout(1,2));
 
         add(leftPanel);
         add(rightPanel);
 
-        leftPanel.setLayout(new GridLayout(0, 1));
-        rightPanel.setLayout(new BorderLayout());
-        buttonPanel.setLayout(new BorderLayout());
+        GroupLayout layout = new GroupLayout(leftPanel);
+        leftPanel.setLayout(layout);
+        layout.setAutoCreateGaps(true);
+        layout.setAutoCreateContainerGaps(true);
+        /*layout.linkSize(SwingConstants.HORIZONTAL, cleanButton, computeButton);*/
+
+        layout.setHorizontalGroup(
+                layout.createSequentialGroup()
+                    .addGroup(layout.createParallelGroup()
+                        .addComponent(chartTypeComboBox)
+                        .addComponent(statComboBox1)
+                        .addComponent(statComboBox2))
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                .addComponent(textField1)
+                                .addComponent(textField2)
+                                .addComponent(computeButton)
+                                /*.addComponent(cleanButton)*/)
+        );
+
+        layout.setVerticalGroup(
+                layout.createSequentialGroup()
+                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(chartTypeComboBox)).addContainerGap().addGap(50)
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(statComboBox1)
+                                .addComponent(textField1)).addContainerGap().addGap(50)
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(statComboBox2)
+                                .addComponent(textField2))
+                        .addComponent(computeButton)
+                        /*.addComponent(cleanButton)*/
+        );
+        BorderLayout rightArea = new BorderLayout(10,10);
+
+        rightPanel.setLayout(rightArea);
+
+        rightPanel.add(outputArea, BorderLayout.CENTER);
+        rightPanel.add(cleanButton, BorderLayout.SOUTH);
+
+
+
+
+        /*buttonPanel.setLayout(new BorderLayout());
 
         buttonPanel.add(computeButton, BorderLayout.WEST);
-        buttonPanel.add(cleanButton, BorderLayout.EAST);
+        buttonPanel.add(cleanButton, BorderLayout.EAST);*/
 
-        JPanel chartTypeComboBoxPanel = new JPanel();
+/*        JPanel chartTypeComboBoxPanel = new JPanel();
         chartTypeComboBoxPanel.add(chartTypeComboBox);
         leftPanel.add(chartTypeComboBoxPanel);
 
@@ -59,9 +99,8 @@ public class SingleValueSummaryTab extends JPanel {
         statComboBox2Panel.add(textField2);
         leftPanel.add(statComboBox2Panel);
 
-        leftPanel.add(buttonPanel);
+        leftPanel.add(buttonPanel);*/
 
-        rightPanel.add(outputArea);
     }
 
     private void setChartTypeComboBox() {
