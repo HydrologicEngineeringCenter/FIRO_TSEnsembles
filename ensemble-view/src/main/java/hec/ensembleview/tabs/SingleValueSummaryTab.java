@@ -1,12 +1,16 @@
 package hec.ensembleview.tabs;
 
 import hec.ensembleview.ChartType;
+import hec.ensembleview.ComputeEngine;
+import hec.ensembleview.StatisticUIType;
 import hec.ensembleview.mappings.ChartTypeStatisticsMap;
+import hec.ensembleview.mappings.StatisticsUITypeMap;
 import hec.stats.Statistics;
 //import javafx.scene.chart.Chart;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 public class SingleValueSummaryTab extends JPanel {
     JPanel leftPanel;
@@ -19,7 +23,7 @@ public class SingleValueSummaryTab extends JPanel {
     JTextField textField2;
 
     JPanel buttonPanel;
-    JButton computeButton;
+    public JButton computeButton;
     JButton cleanButton;
 
     JTextArea outputArea;
@@ -28,6 +32,66 @@ public class SingleValueSummaryTab extends JPanel {
         initializeUI();
         organizeUI();
         setChartTypeComboBox();
+        setActionListeners();
+    }
+
+    public Statistics getFirstStat()
+    {
+        return (Statistics)statComboBox1.getSelectedItem();
+    }
+
+    public Statistics getSecondStat()
+    {
+        return (Statistics)statComboBox2.getSelectedItem();
+    }
+
+    public ChartType getChartType() {
+        return (ChartType)chartTypeComboBox.getSelectedItem();
+    }
+
+    public float[] getFirstTextFieldValue() {
+        if (StatisticsUITypeMap.map.get((Statistics)statComboBox1.getSelectedItem()) != StatisticUIType.TEXTBOX)
+            return null;
+
+        String textValues = textField1.getText();
+
+        if (Objects.equals(textValues, ""))
+            return null;
+
+        String[] textValuesParse = textValues.trim().split("[,:;]");
+        float[] floatValuesParse = new float[textValuesParse.length];
+        for(int i = 0; i < textValuesParse.length; i++) {
+            floatValuesParse[i] = Float.parseFloat(textValuesParse[i]);
+        }
+        return floatValuesParse;
+    }
+
+    public float[] getSecondTextFieldValue() {
+        if (StatisticsUITypeMap.map.get((Statistics)statComboBox2.getSelectedItem()) != StatisticUIType.TEXTBOX)
+            return null;
+
+        String textValues = textField2.getText();
+
+        if (Objects.equals(textValues, ""))
+            return null;
+
+        String[] textValuesParse = textValues.trim().split("[,:;]");
+        float[] floatValuesParse = new float[textValuesParse.length];
+        for(int i = 0; i < textValuesParse.length; i++) {
+            floatValuesParse[i] = Float.parseFloat(textValuesParse[i]);
+        }
+        return floatValuesParse;
+    }
+
+    public void writeLn(String output) {
+        outputArea.append("\n" + output);
+    }
+
+
+    private void setActionListeners() {
+        cleanButton.addActionListener(e -> {
+            outputArea.setText("");
+        });
     }
 
     private void organizeUI() {
@@ -40,7 +104,6 @@ public class SingleValueSummaryTab extends JPanel {
         leftPanel.setLayout(layout);
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(true);
-        /*layout.linkSize(SwingConstants.HORIZONTAL, cleanButton, computeButton);*/
 
         layout.setHorizontalGroup(
                 layout.createSequentialGroup()
@@ -51,8 +114,7 @@ public class SingleValueSummaryTab extends JPanel {
                         .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                 .addComponent(textField1)
                                 .addComponent(textField2)
-                                .addComponent(computeButton)
-                                /*.addComponent(cleanButton)*/)
+                                .addComponent(computeButton))
         );
 
         layout.setVerticalGroup(
@@ -66,7 +128,6 @@ public class SingleValueSummaryTab extends JPanel {
                                 .addComponent(statComboBox2)
                                 .addComponent(textField2))
                         .addComponent(computeButton)
-                        /*.addComponent(cleanButton)*/
         );
         BorderLayout rightArea = new BorderLayout(10,10);
 
@@ -74,32 +135,6 @@ public class SingleValueSummaryTab extends JPanel {
 
         rightPanel.add(outputArea, BorderLayout.CENTER);
         rightPanel.add(cleanButton, BorderLayout.SOUTH);
-
-
-
-
-        /*buttonPanel.setLayout(new BorderLayout());
-
-        buttonPanel.add(computeButton, BorderLayout.WEST);
-        buttonPanel.add(cleanButton, BorderLayout.EAST);*/
-
-/*        JPanel chartTypeComboBoxPanel = new JPanel();
-        chartTypeComboBoxPanel.add(chartTypeComboBox);
-        leftPanel.add(chartTypeComboBoxPanel);
-
-        JPanel statComboBox1Panel = new JPanel();
-        statComboBox1Panel.setLayout(new GridLayout(1, 2));
-        statComboBox1Panel.add(statComboBox1);
-        statComboBox1Panel.add(textField1);
-        leftPanel.add(statComboBox1Panel);
-
-        JPanel statComboBox2Panel = new JPanel();
-        statComboBox2Panel.setLayout(new GridLayout(1, 2));
-        statComboBox2Panel.add(statComboBox2);
-        statComboBox2Panel.add(textField2);
-        leftPanel.add(statComboBox2Panel);
-
-        leftPanel.add(buttonPanel);*/
 
     }
 

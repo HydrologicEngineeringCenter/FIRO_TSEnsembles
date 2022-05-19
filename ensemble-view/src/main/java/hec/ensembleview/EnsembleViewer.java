@@ -93,7 +93,14 @@ public class EnsembleViewer {
         return null;
     }
 
-    private void tryShowingChart(JPanel chartPanel) {
+    private void tryShowingChart() {
+        if (tabs.get(tabPane.getSelectedIndex()).tabType != TabType.Chart)
+            return;
+
+
+
+        JPanel chartPanel = getCurrentlyShownChart();
+
         try {
             ec = createChart();
             if (ec == null){
@@ -406,7 +413,7 @@ public class EnsembleViewer {
                     locations.setModel(model);
                     selectedRid = null;
                     selectedZdt = null;
-                    showEmptyChart(getCurrentlyShownChart());
+                    //showEmptyChart(getCurrentlyShownChart());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -418,12 +425,12 @@ public class EnsembleViewer {
             setRidFromString(String.valueOf(locations.getSelectedItem()));
             setupDateTimeComboBox(dateTimes);
             setDateTimeFromString(String.valueOf(dateTimes.getSelectedItem()));
-            tryShowingChart(getCurrentlyShownChart());
+            tryShowingChart();
         });
 
         dateTimes.addActionListener(e -> {
             setDateTimeFromString(String.valueOf(dateTimes.getSelectedItem()));
-            tryShowingChart(getCurrentlyShownChart());
+            tryShowingChart();
         });
 
         for(TabSpec tab: tabs) {
@@ -431,12 +438,28 @@ public class EnsembleViewer {
                 ChartTab chartTab = ((ChartTab)tab.panel);
                 for (Statistics stat : ChartTypeStatisticsMap.map.get(chartTab.chartType)) {
                     EnsembleViewStat evs = chartTab.componentsPanel.getStat(stat);
-                    evs.addActionListener(e -> tryShowingChart(chartTab.chartPanel));
+                    evs.addActionListener(e -> tryShowingChart());
                 }
+            } else if (tab.tabType == TabType.SingleValueSummary) {
+                SingleValueSummaryTab summaryTab = ((SingleValueSummaryTab)tab.panel);
+                summaryTab.computeButton.addActionListener(e -> tryShowingSingleValueSummary(summaryTab));
             }
         }
 
+        tabPane.addChangeListener(e -> tryShowingChart());
+
     }
+
+    private void tryShowingSingleValueSummary(SingleValueSummaryTab tab) {
+        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
+        float value = computeEngine.computeTwoStepComputable(ets, selectedZdt, tab.getFirstStat(), tab.getFirstTextFieldValue(),
+                tab.getSecondStat(), tab.getSecondTextFieldValue(), tab.getChartType() == ChartType.TimePlot);
+        tab.writeLn(String.join(" ", tab.getChartType().toString(),
+                tab.getFirstStat().toString(),
+                tab.getSecondStat().toString(),
+                "=", Float.toString(value)));
+    }
+
 
     private EnsembleViewStat[] getSelectedStatistics() {
         List<EnsembleViewStat> selectedStats = new ArrayList<>();

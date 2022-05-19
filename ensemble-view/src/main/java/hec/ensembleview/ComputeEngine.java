@@ -51,10 +51,33 @@ public class ComputeEngine {
         }
     }
 
-    private float computeTwoStepComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Computable stepOne, Computable stepTwo, boolean acrossTime) {
-        SingleComputable compute = new TwoStepComputable(stepOne, stepTwo, acrossTime);
+    public float computeTwoStepComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean acrossTime) {
+        SingleComputable compute = new TwoStepComputable(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), acrossTime);
         Ensemble e = ets.getEnsemble(selectedZdt);
         return e.singleComputeForEnsemble(compute);
+    }
+
+    private Computable getComputable(Statistics stat, float[] values) {
+        switch (stat) {
+            case MIN:
+                return new MinComputable();
+            case MAX:
+                return new MaxComputable();
+            case MEAN:
+                return new MeanComputable();
+            case MEDIAN:
+                return new MedianComputable();
+            case PERCENTILE:
+                return new PercentilesComputable(values);
+            case TOTAL:
+                return new Total();
+            case MAXACCUMDURATION:
+                return new MaxAccumDuration((int) values[0]);
+            case MAXAVERAGEDURATION:
+                return new MaxAvgDuration((int) values[0]);
+            default:
+                return null;
+        }
     }
 
     private float[] computeStatFromMultiStatComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
