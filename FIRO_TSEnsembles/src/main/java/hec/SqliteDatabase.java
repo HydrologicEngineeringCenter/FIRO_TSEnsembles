@@ -252,8 +252,8 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
 
     /**
      * Writes an array of EnsembleTimeSeries to the database.
-     * @param etsArray
-     * @throws Exception
+     * @param etsArray array of EnsembleTimeSeries
+     * @throws Exception throws exception if an error occurss during write.
      */
     @Override
     public void write(EnsembleTimeSeries[] etsArray) throws Exception {
