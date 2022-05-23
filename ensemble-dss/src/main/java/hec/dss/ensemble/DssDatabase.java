@@ -40,13 +40,13 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     /**
      * Builds F part of DSS path
-     * We are not including C:000001-- TimeSeriesCollectionContainer will do that
      *
      * C - value is 6 alphanumeric characters
-     * T - value is valid date and time in the format YYYYMMDD-hhmm
-     * N - no validation performed
-     * V - value is valid date and time in the format YYYYMMDD-hhmmss
-     * R - value is even number of characters and each 2-character pair
+     * T - T: timestamp where timestamp = time of forecast format YYYYMMDD-hhmm
+     * N - string where string is the forecast name
+     * V - timestamp where timestamp = version time YYYYMMDD-hhmmss
+     * R - string where string is the CWMS Run ID.
+     *     value is even number of characters and each 2-character pair
      *     must be either "--" or an upper or lower case alphabetic
      *     character followed by a digit character (not restricted to '0')
      * @param t - time stamp saved in T: tag in F part
@@ -85,14 +85,12 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         // write TimeSeriesCollectionContainer to DSS file
         for (int i = 0; i < containers.size(); i++) {
             TimeSeriesContainer tsc = containers.get(i);
-            hec.heclib.dss.HecDataManager.setMessageLevel(15);
+            //hec.heclib.dss.HecDataManager.setMessageLevel(15);
             dss.write(tsc);
-            break;
         }
 
         // close resources
         dss.close();
-        System.out.println("done.");
     }
     private TimeSeriesCollectionContainer loadContainers(EnsembleTimeSeries ets){
 
@@ -107,9 +105,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                 tsc.setType(ets.getDataType());
                 tsc.setStartTime(getHecStartTime(e));
                 rval.add(tsc);
-                break;
             }
-            break;
         }
         rval.finishedAdding();
         return rval;
