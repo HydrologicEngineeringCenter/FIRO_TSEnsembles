@@ -1,6 +1,6 @@
 package hec.stats;
 
-public class MultiStatComputable implements MultiComputable{
+public class MultiStatComputable implements MultiComputable, Computable {
     Statistics[] statSelection;
 
     /**
@@ -13,6 +13,36 @@ public class MultiStatComputable implements MultiComputable{
 
     public MultiStatComputable(Statistics[] statSelection) {
         this.statSelection = statSelection;
+    }
+
+    @Override
+    public float compute(float[] values) {
+        float results = 0;
+        InlineStats is = new InlineStats();
+
+        for(float f : values){
+            is.AddObservation(f);
+        }
+        switch (statSelection[0]){
+            case MIN:
+                results = is.getMin();
+                break;
+            case MEAN:
+                results = is.getMean();
+                break;
+            case MAX:
+                results = is.getMax();
+                break;
+            case VARIANCE:
+                results = is.getSampleVariance();
+                break;
+            case STANDARDDEVIATION:
+                results = is.getStandardDeviation();
+                break;
+            default:
+                throw new ArithmeticException("stat type not  yet supported in MultiStatComputable.");
+        }
+        return results;
     }
 
     @Override
