@@ -77,7 +77,7 @@ public class ComponentsPanel {
         timeSeriesViewPanel = new JPanel();
 
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        timeSeriesViewPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Transforms", TitledBorder.LEFT, TitledBorder.TOP));
+        timeSeriesViewPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Time Series View", TitledBorder.LEFT, TitledBorder.TOP));
         ((TitledBorder) timeSeriesViewPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
     }
 

@@ -137,7 +137,7 @@ public class EnsembleViewer {
             chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
             boolean randomColor = selectedStats.length <= 1;
             if (isTimeSeriesViewSelected(selectedStats)){  // if the Radio button is selected to Cumulative or Moving Average, compute metric for time series view
-                float[][] cumulativeVals = computeEngine.computeRadioButtonTransform(db.getEnsembleTimeSeries(selectedRid),
+                float[][] cumulativeVals = computeEngine.computeRadioButtonTimeSeriesView(db.getEnsembleTimeSeries(selectedRid),
                         getSelectedTimeSeriesView(selectedStats), selectedZdt, ChartType.TimePlot);
                 EnsembleTimeSeries ets = new EnsembleTimeSeries(selectedRid, "units", "data_type", "version");
                 ets.addEnsemble(new Ensemble(ensemble.getIssueDate(), cumulativeVals, ensemble.getStartDateTime(), ensemble.getInterval(), ensemble.getUnits()));
@@ -373,10 +373,10 @@ public class EnsembleViewer {
         /*
         Create tab spec.
          */
-        tabs.add(new TabSpec("Across Time", new JPanel(), TabType.Chart));
+        tabs.add(new TabSpec("Time Series Plot", new JPanel(), TabType.Chart));
         tabs.get(0).panel = new ChartTab(new EnsembleChartAcrossTime().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.map.get(ChartType.TimePlot)), ChartType.TimePlot);
 
-        tabs.add(new TabSpec("Across Ensembles", new JPanel(), TabType.Chart));
+        tabs.add(new TabSpec("Scatter Plot", new JPanel(), TabType.Chart));
         tabs.get(1).panel = new ChartTab(new EnsembleChartAcrossEnsembles().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.map.get(ChartType.ScatterPlot)), ChartType.ScatterPlot);
 
         tabs.add(new TabSpec("Single Value Summary", new JPanel(), TabType.SingleValueSummary));
@@ -454,9 +454,9 @@ public class EnsembleViewer {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
         float value = computeEngine.computeTwoStepComputable(ets, selectedZdt, tab.getFirstStat(), tab.getFirstTextFieldValue(),
                 tab.getSecondStat(), tab.getSecondTextFieldValue(), tab.getChartType() == ChartType.TimePlot);
-        tab.writeLn(String.join(" ", tab.getChartType().toString(),
-                tab.getFirstStat().toString(),
-                tab.getSecondStat().toString(),
+        tab.writeLn(String.join(" ", "Computing " +
+                tab.getFirstStat().toString() + " across time",
+                "then " + tab.getSecondStat().toString() + " across ensemble members",
                 "=", Float.toString(value)));
     }
 

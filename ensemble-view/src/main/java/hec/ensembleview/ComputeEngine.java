@@ -30,7 +30,7 @@ public class ComputeEngine {
         }
     }
 
-    public float[][] computeRadioButtonTransform(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
+    public float[][] computeRadioButtonTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
         switch(stat) {
             case CUMULATIVE:
                 return computeStatFromCumulativeComputable(ets, selectedZdt);
