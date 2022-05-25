@@ -7,7 +7,8 @@ public class MultiStatComputable implements MultiComputable, Computable {
      * The MultiComputable interface is beneficial for creating multiple time series representations.
      * This method iterates across all traces for each timestep to produce multiple values for each
      * timestep. A good example would be the max and min for all timesteps which would represent the
-     * bounds of the ensemble.
+     * bounds of the ensemble.  Implements Computable interface to allow class to be used by twoStepComputable
+     * which requires two Computable objects.
      * @param statSelection is expected to be a String
      */
 
