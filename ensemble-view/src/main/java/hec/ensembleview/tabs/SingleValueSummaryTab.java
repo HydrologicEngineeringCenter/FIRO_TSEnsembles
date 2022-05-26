@@ -4,6 +4,7 @@ import hec.ensembleview.ChartType;
 import hec.ensembleview.ComputeEngine;
 import hec.ensembleview.StatisticUIType;
 import hec.ensembleview.mappings.ChartTypeStatisticsMap;
+import hec.ensembleview.mappings.ChartTypeStringMap;
 import hec.ensembleview.mappings.StatisticsUITypeMap;
 import hec.stats.Statistics;
 //import javafx.scene.chart.Chart;
@@ -16,7 +17,7 @@ public class SingleValueSummaryTab extends JPanel {
     JPanel leftPanel;
     JPanel rightPanel;
 
-    JComboBox<ChartType> chartTypeComboBox;
+    JComboBox<String> chartTypeComboBox;
     JComboBox<Statistics> statComboBox1;
     JComboBox<Statistics> statComboBox2;
     JTextField textField1;
@@ -46,7 +47,7 @@ public class SingleValueSummaryTab extends JPanel {
     }
 
     public ChartType getChartType() {
-        return (ChartType)chartTypeComboBox.getSelectedItem();
+        return ChartTypeStringMap.map.get((String)chartTypeComboBox.getSelectedItem());
     }
 
     public float[] getFirstTextFieldValue() {
@@ -139,10 +140,11 @@ public class SingleValueSummaryTab extends JPanel {
     }
 
     private void setChartTypeComboBox() {
-        for (ChartType type : ChartType.values())
-            chartTypeComboBox.addItem(type);
+        for (String option : ChartTypeStringMap.map.keySet())
+            chartTypeComboBox.addItem(option);
 
-        chartTypeComboBox.addActionListener(e -> setupStatComboBoxes((ChartType)chartTypeComboBox.getSelectedItem()));
+        chartTypeComboBox.addActionListener(e ->
+                setupStatComboBoxes(ChartTypeStringMap.map.get((String)chartTypeComboBox.getSelectedItem())));
     }
 
     private void setupStatComboBoxes(ChartType selectedItem) {
