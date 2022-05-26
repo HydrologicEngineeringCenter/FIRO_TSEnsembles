@@ -1,6 +1,7 @@
 package hec.stats;
 
 
+import hec.metrics.MetricsConfiguration;
 import org.jdom.Element;
 
 import java.lang.reflect.Field;
@@ -11,9 +12,9 @@ public interface Computable extends StatisticsReportable{
 
     //to xml, from xml here.
     //reflect in
-    //multi computable and single computable dont implement computable. Similar code will be needed to handle those objects.
+    //multi computable and single computable don't implement computable. Similar code will be needed to handle those objects.
 
-    default public org.jdom.Element toXML(Element parent){
+    default public org.jdom.Element toXML(){
         Field[] flds = this.getClass().getDeclaredFields();
         Element ele = new Element(this.getClass().getName());
         for(Field f: flds){
@@ -29,10 +30,12 @@ public interface Computable extends StatisticsReportable{
                         ele.setAttribute(f.getName(),Float.toString(f.getFloat(this)));
                         break;
                     case "float[]":
-                        //UNSUPPORTED
+                        float[] arr = new float[8]; //how do I set this dynamically?
+                        f.get(arr);
+                        ele.setAttribute(f.getName(),arr.toString());
                         break;
                     case "Configuration":
-                        //UNSUPPORTED
+                        Configuration config = new MetricsConfiguration();
                         break;
                     case "Statistics[]":
                         //UNSUPPORTED
@@ -46,7 +49,7 @@ public interface Computable extends StatisticsReportable{
         return ele;
     }
 
-    public static Computable fromXML(Element ele){
+     static Computable fromXML(Element ele){
         Computable computable = null;
         Class<?> c;
 
@@ -79,32 +82,6 @@ public interface Computable extends StatisticsReportable{
             }
         } catch (ClassNotFoundException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
-        }
-
-        switch (computableName){
-            case "MaxAccumDuration":
-                //Unsupported
-                break;
-            case "MaxAvgDuration":
-                //Unsupported
-                break;
-            case "MaxComputable":
-                //Unsupported
-                break;
-            case "MeanComputable":
-                //Unsupported
-                break;
-            case "MedianComputable":
-                //Unsuported
-                break;
-            case "MinComputable":
-                //Unsupported
-                break;
-            case "PercentilesComputable":
-                //Unsupported
-                break;
-            default:
-                break;
         }
         return computable;
     }
