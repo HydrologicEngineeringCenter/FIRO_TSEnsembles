@@ -253,13 +253,13 @@ public class SingleValueSummaryTab extends JPanel {
     public void tryShowingOutput(float result) {
         if (getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles) {
             writeLn(String.join(" ", "Computing",
-                    getFirstStatString() + "across all ensemble members for each time-step,",
-                    "then computing" + getSecondStatString() + "across all time-steps",
+                    getFirstStatString(), "across all ensemble members for each time-step,",
+                    "then computing", getSecondStatString(), "across all time-steps",
                     "=", Float.toString(result)));
         } else if (getSummaryType() == SingleValueSummaryType.ComputeAcrossTime) {
             writeLn(String.join(" ", "Computing",
-                    getFirstStatString() + "for each ensemble across all time-steps,",
-                    "then computing" + getSecondStatString() + "across all ensemble members",
+                    getFirstStatString(), "for each ensemble across all time-steps,",
+                    "then computing", getSecondStatString(), "across all ensemble members",
                     "=", Float.toString(result)));
         } else if (getSummaryType() == SingleValueSummaryType.ComputeCumulative) {
             writeLn(String.join(" ", "Computing", getFirstStatString() + ",",
