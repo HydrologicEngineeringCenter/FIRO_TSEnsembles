@@ -52,7 +52,12 @@ public class ComputeEngine {
     }
 
     public float computeTwoStepComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean acrossTime) {
-        SingleComputable compute = new TwoStepComputable(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), acrossTime);
+        SingleComputable compute;
+        if(stepOne == Statistics.CUMULATIVE) {
+            compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), (int) stepOneValues[0]), getComputable(stepTwo, stepTwoValues), acrossTime);
+        } else {
+            compute = new TwoStepComputable(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), acrossTime);
+        }
         Ensemble e = ets.getEnsemble(selectedZdt);
         return e.singleComputeForEnsemble(compute);
     }
@@ -79,6 +84,10 @@ public class ComputeEngine {
                 return null;
         }
     }
+
+/*    public float computeNDayMultiComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, Statistics stepTwo, float[] stepTwoValues) {
+        SingleComputable compute
+    }*/
 
     private float[] computeStatFromMultiStatComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
         if(chartType == ChartType.TimePlot) {

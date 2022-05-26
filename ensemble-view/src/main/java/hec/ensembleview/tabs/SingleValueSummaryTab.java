@@ -50,7 +50,7 @@ public class SingleValueSummaryTab extends JPanel {
     }
 
     public float[] getFirstTextFieldValue() {
-        if (StatisticsUITypeMap.map.get((Statistics)statComboBox1.getSelectedItem()) != StatisticUIType.TEXTBOX)
+        if (StatisticsUITypeMap.map.get((Statistics)statComboBox1.getSelectedItem()) == StatisticUIType.CHECKBOX)
             return null;
 
         String textValues = textField1.getText();
