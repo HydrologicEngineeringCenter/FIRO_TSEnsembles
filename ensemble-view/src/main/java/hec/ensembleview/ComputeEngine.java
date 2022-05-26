@@ -51,12 +51,12 @@ public class ComputeEngine {
         }
     }
 
-    public float computeTwoStepComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean acrossTime) {
+    public float computeTwoStepComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
         SingleComputable compute;
         if(stepOne == Statistics.CUMULATIVE) {
-            compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), (int) stepOneValues[0]), getComputable(stepTwo, stepTwoValues), acrossTime);
+            compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), (int) stepOneValues[0]), getComputable(stepTwo, stepTwoValues), computeAcrossEnsembles);
         } else {
-            compute = new TwoStepComputable(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), acrossTime);
+            compute = new TwoStepComputable(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), computeAcrossEnsembles);
         }
         Ensemble e = ets.getEnsemble(selectedZdt);
         return e.singleComputeForEnsemble(compute);

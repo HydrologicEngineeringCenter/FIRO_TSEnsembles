@@ -38,8 +38,8 @@ public class EnsembleViewer {
     private JPanel filePathPanel;
     private JTextField filePath;
     private JButton fileSearchButton;
-    private JComboBox<String> locations;
-    private JComboBox<String> dateTimes;
+    private JComboBox<RecordIdentifier> locations;
+    private JComboBox<ZonedDateTime> dateTimes;
     private JTabbedPane tabPane;
 
     public static void main(String[] args) {
@@ -59,18 +59,11 @@ public class EnsembleViewer {
         selectedZdt = getZonedDateTimeFromString(selectedRid, date);
     }
 
-    private void setupDateTimeComboBox(JComboBox<String> dateTimeComboBox) {
-        String[] zdts = db.getEnsembleIssueDates(selectedRid).stream().map(ZonedDateTime::toString).toArray(String[]::new);
-        ComboBoxModel<String> model = new DefaultComboBoxModel<>(zdts);
-        dateTimeComboBox.setModel(model);
-    }
-
-    private void showEmptyChart(JPanel chartPanel) {
-        chartPanel.removeAll();
-        chartPanel.revalidate();
-        chartPanel.setLayout(new BorderLayout());
-        chartPanel.add(new EnsembleChartAcrossTime().generateChart(), BorderLayout.CENTER);
-        chartPanel.repaint();
+    private void setupDateTimeComboBox() {
+        dateTimes.removeAllItems();
+        List<ZonedDateTime> zdts = db.getEnsembleIssueDates(selectedRid);
+        for (ZonedDateTime date : zdts)
+            dateTimes.addItem(date);
     }
 
     private RecordIdentifier getRecordIdentifierFromString(String stringRID){
@@ -96,8 +89,6 @@ public class EnsembleViewer {
     private void tryShowingChart() {
         if (tabs.get(tabPane.getSelectedIndex()).tabType != TabType.Chart)
             return;
-
-
 
         JPanel chartPanel = getCurrentlyShownChart();
 
@@ -407,13 +398,12 @@ public class EnsembleViewer {
                     db = new SqliteDatabase(fileChooser.getSelectedFile().getAbsolutePath(),
                             SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);
                     computeEngine = new ComputeEngine();
+
+                    locations.removeAllItems();
                     List<RecordIdentifier> rids = db.getEnsembleTimeSeriesIDs();
-                    String[] sRids = rids.stream().map(RecordIdentifier::toString).toArray(String[]::new);
-                    ComboBoxModel<String> model = new DefaultComboBoxModel<>(sRids);
-                    locations.setModel(model);
-                    selectedRid = null;
-                    selectedZdt = null;
-                    //showEmptyChart(getCurrentlyShownChart());
+                    for (RecordIdentifier rid : rids)
+                        locations.addItem(rid);
+
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -422,9 +412,9 @@ public class EnsembleViewer {
         });
 
         locations.addActionListener(e -> {
-            setRidFromString(String.valueOf(locations.getSelectedItem()));
-            setupDateTimeComboBox(dateTimes);
-            setDateTimeFromString(String.valueOf(dateTimes.getSelectedItem()));
+            selectedRid = (RecordIdentifier)locations.getSelectedItem();
+            setupDateTimeComboBox();
+            selectedZdt = (ZonedDateTime)dateTimes.getSelectedItem();
             tryShowingChart();
         });
 
@@ -453,18 +443,11 @@ public class EnsembleViewer {
     private void tryShowingSingleValueSummary(SingleValueSummaryTab tab) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
         float value = computeEngine.computeTwoStepComputable(ets, selectedZdt, tab.getFirstStat(), tab.getFirstTextFieldValue(),
-                tab.getSecondStat(), tab.getSecondTextFieldValue(), tab.getChartType() == ChartType.TimePlot);
-        if(tab.getChartType() == ChartType.TimePlot) {
-            tab.writeLn(String.join(" ", "Computing",
-                    tab.getFirstStat().toString() + " across all ensemble members for each time-step,",
-                    "then computing " + tab.getSecondStat().toString() + " across all time-steps ",
-                    "=", Float.toString(value)));
-        } else {
-            tab.writeLn(String.join(" ", "Computing",
-                    tab.getFirstStat().toString() + " for each ensemble across all time-steps,",
-                    "then computing " + tab.getSecondStat().toString() + " across all ensemble members ",
-                    "=", Float.toString(value)));
-        }
+                tab.getSecondStat(), tab.getSecondTextFieldValue(),
+                tab.getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles ||
+                        tab.getSummaryType() == SingleValueSummaryType.ComputeCumulative);
+
+        tab.tryShowingOutput(value);
     }
 
 
