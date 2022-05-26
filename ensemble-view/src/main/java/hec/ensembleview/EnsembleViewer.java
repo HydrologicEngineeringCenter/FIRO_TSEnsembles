@@ -454,10 +454,17 @@ public class EnsembleViewer {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
         float value = computeEngine.computeTwoStepComputable(ets, selectedZdt, tab.getFirstStat(), tab.getFirstTextFieldValue(),
                 tab.getSecondStat(), tab.getSecondTextFieldValue(), tab.getChartType() == ChartType.TimePlot);
-        tab.writeLn(String.join(" ", "Computing " +
-                tab.getFirstStat().toString() + " across time",
-                "then " + tab.getSecondStat().toString() + " across ensemble members",
-                "=", Float.toString(value)));
+        if(tab.getChartType() == ChartType.TimePlot) {
+            tab.writeLn(String.join(" ", "Computing",
+                    tab.getFirstStat().toString() + " across all ensemble members for each time-step,",
+                    "then computing " + tab.getSecondStat().toString() + " across all time-steps ",
+                    "=", Float.toString(value)));
+        } else {
+            tab.writeLn(String.join(" ", "Computing",
+                    tab.getFirstStat().toString() + " for each ensemble across all time-steps,",
+                    "then computing " + tab.getSecondStat().toString() + " across all ensemble members ",
+                    "=", Float.toString(value)));
+        }
     }
 
 
