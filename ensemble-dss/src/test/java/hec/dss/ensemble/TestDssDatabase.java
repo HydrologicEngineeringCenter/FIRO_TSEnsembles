@@ -1,4 +1,5 @@
 package hec.dss.ensemble;
+import java.util.List;
 
 import hec.RecordIdentifier;
 
@@ -45,9 +46,10 @@ public class TestDssDatabase {
         String dssFilename = f.getAbsolutePath();
         createDssFileFromCsv(dssFilename,3);
 
-        DssDatabase db = new hec.dss.ensemble.DssDatabase(dssFilename);
-        db.getEnsembleTimeSeriesIDs();
-        RecordIdentifier id = new RecordIdentifier("","");
+        DssDatabase db = new DssDatabase(dssFilename);
+        List<hec.RecordIdentifier> ids= db.getEnsembleTimeSeriesIDs();
+
+        //RecordIdentifier id = new RecordIdentifier("","");
 
 //  DssDatabase.getEnsemble(),   -- ensemble
 //  DssDatabase.getMetricCollection(...)  -- metrics stored in SQlite.

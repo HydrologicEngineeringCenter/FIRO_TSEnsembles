@@ -10,6 +10,7 @@ import hec.MetricDatabase;
 import hec.ensemble.EnsembleTimeSeries;
 
 import hec.heclib.dss.HecDss;
+import hec.heclib.dss.HecDssCatalog;
 import hec.heclib.dss.HecTimeSeries;
 import hec.io.TimeSeriesCollectionContainer;
 import hec.io.TimeSeriesContainer;
@@ -73,7 +74,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         DateTimeFormatter Vformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
         return String.format("C:%06d", member)
                 +"|T:"+Tformatter.format(t)
-                +"|V:"+Vformatter.format(t);
+                +"|V:"+Vformatter.format(t)+"|";
     }
 
     public Ensemble getEnsemble(RecordIdentifier recordID, ZonedDateTime issue_time){
@@ -177,6 +178,14 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
      */
     public java.util.List<RecordIdentifier> getEnsembleTimeSeriesIDs(){
         // read dss catalog
+        HecDssCatalog  dss = new HecDssCatalog(dssFileName);
+        dss.setUseCollectionGroups(true);
+        hec.heclib.dss.CondensedReference[] catalog = dss.getCondensedCatalog("/*/*/*/*/*/*/");
+        for (int i = 0; i <catalog.length ; i++) {
+            String p = catalog[i].getFirstPathname();
+
+        }
+
         // Get B=ri.location, C=ri.parameter
         // need unique (B,C,F,E-extra if applicable)
 
