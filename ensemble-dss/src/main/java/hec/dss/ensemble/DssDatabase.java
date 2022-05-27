@@ -26,16 +26,29 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         this.dssFileName= dssFileName;
     }
 
-    private static String buildDssPath(int memberNumber,EnsembleTimeSeries ets, Ensemble e){
-        // translation to DSS Path
-        // TO DO :  E-Part (1Hour,1Day, etc..)
+    private static String getEPart(int minutes){
+        int[] status = new int[1];
+        String ePart = hec.heclib.util.Heclib.getEPartFromInterval( minutes, status );
+        return ePart;
+    }
 
-       RecordIdentifier recordID = ets.getTimeSeriesIdentifier();
-       ZonedDateTime issue_time = e.getIssueDate();
+    // blank A/location/parameter//interval/C:000003|T:YYYYMMDD-hhmm|V:YYYYMMDD-hhmmss| f-part extra  /
 
+    /**
+     * translation of ensemble information to a DSS Path
+     * @param e
+     * @param memberNumber
+     * @param recordID
+     * @return
+     */
+    private static String buildDssPath(Ensemble e,int memberNumber, RecordIdentifier recordID ){
+
+        int minutes = (int)e.getInterval().toMinutes();
+        String ePart = getEPart(minutes);
 
         return "//"+recordID.location+"/"+recordID.parameter+"/"
-                + "/1Hour/"+buildFpart(memberNumber,issue_time)+"/";
+                + "/"+ePart+"/"+buildFpart(memberNumber,
+                  e.getStartDateTime(),e.getIssueDate())+"/";
     }
 
     /**
@@ -49,16 +62,29 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
      *     value is even number of characters and each 2-character pair
      *     must be either "--" or an upper or lower case alphabetic
      *     character followed by a digit character (not restricted to '0')
+
      * @param t - time stamp saved in T: tag in F part
+     * @param v - version of ensemble - (issue_date)
      * @param  member - ensemble member number to be in C: tag in F part
      * @return
      */
-    private static String buildFpart(int member , java.time.ZonedDateTime t){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
-        return String.format("C:%06d", member)+"|T:"+formatter.format(t);
+    private static String buildFpart(int member , ZonedDateTime t, ZonedDateTime v){
+        DateTimeFormatter Tformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
+        DateTimeFormatter Vformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        return String.format("C:%06d", member)
+                +"|T:"+Tformatter.format(t)
+                +"|V:"+Vformatter.format(t);
     }
 
     public Ensemble getEnsemble(RecordIdentifier recordID, ZonedDateTime issue_time){
+        TimeSeriesCollectionContainer tscc = new TimeSeriesCollectionContainer();
+        String dssPath = "" ; // to DO ... buildDssPath()
+        tscc.setFullName(dssPath);
+        HecTimeSeries dss = new hec.heclib.dss.HecTimeSeries(this.dssFileName);
+        // try reading TimeSeriesCollectionContainer,
+        // we can loop over collection and read individual members if necessary.
+        dss.read(tscc,false);
+
         Ensemble rval = null; //new hec.ensemble.Ensemble();
         //this.location = location;
         //this.parameter = parameter;
@@ -83,11 +109,12 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         //translate EnsembleTimeSeries into TimeSeriesCollectionContainer
         TimeSeriesCollectionContainer containers = loadContainers(ets);
         // write TimeSeriesCollectionContainer to DSS file
-        for (int i = 0; i < containers.size(); i++) {
-            TimeSeriesContainer tsc = containers.get(i);
+        dss.write(containers);
+//        for (int i = 0; i < containers.size(); i++) {
+  //          TimeSeriesContainer tsc = containers.get(i);
             //hec.heclib.dss.HecDataManager.setMessageLevel(15);
-            dss.write(tsc);
-        }
+//            dss.write(tsc);
+    //    }
 
         // close resources
         dss.close();
@@ -100,7 +127,8 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
             for (int row = 0; row <values.length ; row++) {
                 TimeSeriesContainer tsc = new TimeSeriesContainer();
                 tsc.setValues(convertFloatsToDoubles(values[row]));
-                tsc.setFullName(buildDssPath((row+1),ets,e));
+                String path = buildDssPath(e,(row+1),ets.getTimeSeriesIdentifier());
+                tsc.setFullName(path);
                 tsc.units = e.getUnits();
                 tsc.setType(ets.getDataType());
                 tsc.setStartTime(getHecStartTime(e));
@@ -148,6 +176,10 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
      * @return
      */
     public java.util.List<RecordIdentifier> getEnsembleTimeSeriesIDs(){
+        // read dss catalog
+        // Get B=ri.location, C=ri.parameter
+        // need unique (B,C,F,E-extra if applicable)
+
     return null;
     }
 
