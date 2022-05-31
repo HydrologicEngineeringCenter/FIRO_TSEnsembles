@@ -4,6 +4,8 @@ import java.util.List;
 import hec.RecordIdentifier;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestDssDatabase {
 
@@ -47,11 +49,13 @@ public class TestDssDatabase {
         createDssFileFromCsv(dssFilename,3);
 
         DssDatabase db = new DssDatabase(dssFilename);
-        List<hec.RecordIdentifier> ids= db.getEnsembleTimeSeriesIDs();
+        List<hec.RecordIdentifier> recordIdentifiers= db.getEnsembleTimeSeriesIDs();
 
-        assert.
+        assertEquals(23,recordIdentifiers.size());
 
-        //RecordIdentifier id = new RecordIdentifier("","");
+        RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
+        List<java.time.ZonedDateTime> times = db.getEnsembleIssueDates(id);
+        assertEquals(3,times.size());
 
 //  DssDatabase.getEnsemble(),   -- ensemble
 //  DssDatabase.getMetricCollection(...)  -- metrics stored in SQlite.

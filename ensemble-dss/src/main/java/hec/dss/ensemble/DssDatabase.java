@@ -127,16 +127,10 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         TimeSeriesCollectionContainer containers = loadContainers(ets);
         // write TimeSeriesCollectionContainer to DSS file
         dss.write(containers);
-//        for (int i = 0; i < containers.size(); i++) {
-  //          TimeSeriesContainer tsc = containers.get(i);
-            //hec.heclib.dss.HecDataManager.setMessageLevel(15);
-//            dss.write(tsc);
-    //    }
-
         // close resources
         dss.close();
     }
-    private TimeSeriesCollectionContainer loadContainers(EnsembleTimeSeries ets){
+    private static TimeSeriesCollectionContainer loadContainers(EnsembleTimeSeries ets){
 
         TimeSeriesCollectionContainer rval = new hec.io.TimeSeriesCollectionContainer();
         for (Ensemble e: ets){
