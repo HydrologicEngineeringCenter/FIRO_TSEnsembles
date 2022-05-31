@@ -23,10 +23,15 @@ import hec.heclib.util.HecTime;
  */
 public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     private String dssFileName;
+    Catalog catalog;
     public DssDatabase(String dssFileName){
         this.dssFileName= dssFileName;
     }
-
+     private Catalog getCatalog(){
+        if( this.catalog == null)
+            catalog  = new hec.dss.ensemble.Catalog(this.dssFileName);
+        return catalog;
+     }
     private static String getEPart(int minutes){
         int[] status = new int[1];
         String ePart = hec.heclib.util.Heclib.getEPartFromInterval( minutes, status );
@@ -96,8 +101,19 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     public EnsembleTimeSeries getEnsembleTimeSeries(RecordIdentifier recordID){
     return null;
     }
+
+    /**
+     * Return list of ZonedDateTime for a RecordIdentifier
+     * from DSS f-part T: tag
+     * TO DO?  mapping to T: of DSS (consider renaming to getEnsembleStartDates()
+     *
+     * @param recordID
+     * @return
+     */
     public java.util.List<java.time.ZonedDateTime> getEnsembleIssueDates(RecordIdentifier recordID) {
-        return null;
+
+        return getCatalog().getEnsembleStartDates();
+
     }
     public void write(EnsembleTimeSeries[] etsArray) throws Exception{
         for (EnsembleTimeSeries ets: etsArray){
@@ -174,22 +190,13 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     /**
      * getEnsembleTimeSeriesIDs returns a list of RecordIdentifier's
      *
+     * Limitations:
+     *    - Assuming Interval is consistent for the whole DSS file
+     *    - Assuming fpart beyond C:,T:, V: is ignored
      * @return
      */
     public java.util.List<RecordIdentifier> getEnsembleTimeSeriesIDs(){
-        // read dss catalog
-        HecDssCatalog  dss = new HecDssCatalog(dssFileName);
-        dss.setUseCollectionGroups(true);
-        hec.heclib.dss.CondensedReference[] catalog = dss.getCondensedCatalog("/*/*/*/*/*/*/");
-        for (int i = 0; i <catalog.length ; i++) {
-            String p = catalog[i].getFirstPathname();
-
-        }
-
-        // Get B=ri.location, C=ri.parameter
-        // need unique (B,C,F,E-extra if applicable)
-
-    return null;
+        return getCatalog().getEnsembleTimeSeriesIDs();
     }
 
 

@@ -49,6 +49,8 @@ public class TestDssDatabase {
         DssDatabase db = new DssDatabase(dssFilename);
         List<hec.RecordIdentifier> ids= db.getEnsembleTimeSeriesIDs();
 
+        assert.
+
         //RecordIdentifier id = new RecordIdentifier("","");
 
 //  DssDatabase.getEnsemble(),   -- ensemble
