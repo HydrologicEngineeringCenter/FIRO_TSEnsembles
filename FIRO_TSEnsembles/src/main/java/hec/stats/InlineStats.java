@@ -6,7 +6,6 @@ public class InlineStats {
     private int _sampleSize;
     private float _mean;
     private float _sampleVariance;
-    private float _standardDeviation;
     public float getMin(){
         return _min;
     }
@@ -22,7 +21,7 @@ public class InlineStats {
     public float getSampleVariance(){
         return _sampleVariance;
     }
-    public float getStandardDeviation() {return _standardDeviation; }
+    public float getSampleStandardDeviation() {return (float) Math.sqrt(_sampleVariance); }
     public InlineStats(){
         //no initialization logic necessary.
     }
@@ -44,11 +43,9 @@ public class InlineStats {
             }
             _sampleSize +=1;
 
-
             _sampleVariance = ((float)(_sampleSize - 2) / (_sampleSize - 1)) * _sampleVariance + (float) Math.pow(value-_mean,2)/(float)(_sampleSize);
             _mean += ((value - _mean)/(float)(_sampleSize));
 
         }
-        _standardDeviation = (float) Math.sqrt(_sampleVariance);
     }
 }

@@ -38,7 +38,7 @@ public class MultiStatComputable implements MultiComputable, Computable {
                 results = is.getSampleVariance();
                 break;
             case STANDARDDEVIATION:
-                results = is.getStandardDeviation();
+                results = is.getSampleStandardDeviation();
                 break;
             default:
                 throw new ArithmeticException("stat type not  yet supported in MultiStatComputable.");
@@ -71,7 +71,7 @@ public class MultiStatComputable implements MultiComputable, Computable {
                     results[i] = is.getSampleVariance();
                     break;
                 case STANDARDDEVIATION:
-                    results[i] = is.getStandardDeviation();
+                    results[i] = is.getSampleStandardDeviation();
                     break;
                 default:
                     throw new ArithmeticException("stat type not  yet supported in MultiStatComputable.");
