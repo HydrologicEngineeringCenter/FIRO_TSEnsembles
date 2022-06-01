@@ -2,6 +2,7 @@ package hec.dss.ensemble;
 import java.util.List;
 
 import hec.RecordIdentifier;
+import hec.ensemble.Ensemble;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,6 +58,7 @@ public class TestDssDatabase {
         List<java.time.ZonedDateTime> times = db.getEnsembleIssueDates(id);
         assertEquals(3,times.size());
 
+        Ensemble e = db.getEnsemble(id,times.get(1));
 //  DssDatabase.getEnsemble(),   -- ensemble
 //  DssDatabase.getMetricCollection(...)  -- metrics stored in SQlite.
        // db.getEnsemble(id,)
