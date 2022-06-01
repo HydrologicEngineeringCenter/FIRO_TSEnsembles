@@ -30,7 +30,7 @@ public class MultiStatComputable implements MultiComputable{
                 case MIN:
                     results[i] = is.getMin();
                     break;
-                case MEAN:
+                case AVERAGE:
                     results[i] = is.getMean();
                     break;
                 case MAX:

@@ -11,7 +11,7 @@ public class StatisticsUITypeMap {
     static {
         map.put(Statistics.MAX, StatisticUIType.CHECKBOX);
         map.put(Statistics.MIN, StatisticUIType.CHECKBOX);
-        map.put(Statistics.MEAN, StatisticUIType.CHECKBOX);
+        map.put(Statistics.AVERAGE, StatisticUIType.CHECKBOX);
         map.put(Statistics.MEDIAN, StatisticUIType.CHECKBOX);
         map.put(Statistics.TOTAL, StatisticUIType.CHECKBOX);
         map.put(Statistics.CUMULATIVE, StatisticUIType.RADIOBUTTON);

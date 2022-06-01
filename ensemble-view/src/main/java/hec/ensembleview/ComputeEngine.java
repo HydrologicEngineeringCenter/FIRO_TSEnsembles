@@ -21,7 +21,7 @@ public class ComputeEngine {
         switch(stat){
             case MIN:
             case MAX:
-            case MEAN:
+            case AVERAGE:
                 return computeStatFromMultiStatComputable(ets, stat, selectedZdt, chartType);
             case TOTAL:
                 return computeStatFromTotalComputable(ets, stat, selectedZdt);
@@ -54,7 +54,7 @@ public class ComputeEngine {
     public float computeTwoStepComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
         SingleComputable compute;
         if(stepOne == Statistics.CUMULATIVE) {
-            compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), (int) stepOneValues[0]), getComputable(stepTwo, stepTwoValues), computeAcrossEnsembles);
+            compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), (int) stepOneValues[0]), getComputable(stepTwo, stepTwoValues), false);
         } else {
             compute = new TwoStepComputable(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), computeAcrossEnsembles);
         }
@@ -68,7 +68,7 @@ public class ComputeEngine {
                 return new MinComputable();
             case MAX:
                 return new MaxComputable();
-            case MEAN:
+            case AVERAGE:
                 return new MeanComputable();
             case MEDIAN:
                 return new MedianComputable();

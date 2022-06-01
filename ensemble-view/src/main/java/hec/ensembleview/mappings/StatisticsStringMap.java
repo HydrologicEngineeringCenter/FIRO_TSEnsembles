@@ -11,7 +11,7 @@ public class StatisticsStringMap {
     static {
         map.put(Statistics.MAX, "Max");
         map.put(Statistics.MIN, "Min");
-        map.put(Statistics.MEAN, "Mean");
+        map.put(Statistics.AVERAGE, "Average");
         map.put(Statistics.MEDIAN, "Median");
         map.put(Statistics.PERCENTILE, "Percentile");
         map.put(Statistics.TOTAL, "Total Flow");

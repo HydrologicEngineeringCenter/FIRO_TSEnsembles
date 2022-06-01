@@ -55,7 +55,7 @@ public class ComponentsPanel {
             switch (stat.getStatType()) {
                 case MIN:
                 case MAX:
-                case MEAN:
+                case AVERAGE:
                 case TOTAL:
                     statPanel.add((CheckBoxStat)stat);
                     componentCounter++;

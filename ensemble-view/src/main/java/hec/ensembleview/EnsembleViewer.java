@@ -211,7 +211,7 @@ public class EnsembleViewer {
                                 new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                             1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
-                case MEAN:
+                case AVERAGE:
                     chart.addPoint(
                             new PointSpec(0, computeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), selectedZdt, ChartType.ScatterPlot),
                                 new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
@@ -265,7 +265,7 @@ public class EnsembleViewer {
                                     new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                                 1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
-                case MEAN:
+                case AVERAGE:
                     chart.addLine(
                             new LineSpec(0, computeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), selectedZdt, ChartType.TimePlot), dates,
                                 new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));

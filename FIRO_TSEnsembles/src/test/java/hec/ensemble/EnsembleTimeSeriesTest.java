@@ -1,6 +1,5 @@
 package hec.ensemble;
 
-import hec.EnsembleDatabase;
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.metrics.MetricCollectionTimeSeries;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 
 import static hec.stats.Statistics.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,7 +50,7 @@ class EnsembleTimeSeriesTest {
             //get an ensemble time series
             EnsembleTimeSeries ets = _db.getEnsembleTimeSeries(tsid);
             //create a computable statistic
-            MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MEAN, MAX});
+            MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, AVERAGE, MAX});
             //compute the statistics for the entire ensemble time series
             MetricCollectionTimeSeries output = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(test);
             //verify at the data is properly computing for a set of known values
@@ -77,7 +75,7 @@ class EnsembleTimeSeriesTest {
             //get an ensemble time series
             EnsembleTimeSeries ets = _db.getEnsembleTimeSeries(tsid);
             //create a computable statistic
-            MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MEAN, MAX});
+            MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, AVERAGE, MAX});
             //compute the statistics for the entire ensemble time series
             MetricCollectionTimeSeries output = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(test);
             //verify at the data is properly computing for a set of known values
