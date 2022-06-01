@@ -1,6 +1,5 @@
 package hec.ensembleview.mappings;
 
-import hec.ensembleview.ChartType;
 import hec.ensembleview.SingleValueSummaryType;
 import hec.stats.Statistics;
 
@@ -20,20 +19,20 @@ public class SingleValueComboBoxMap {
 
         summaryStatisticsMap.put(SingleValueSummaryType.ComputeAcrossEnsembles,
                 Arrays.asList(
-                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.MEAN, Statistics.MEDIAN, Statistics.PERCENTILE),
-                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.MEAN, Statistics.MEDIAN, Statistics.PERCENTILE, Statistics.MAXACCUMDURATION, Statistics.MAXAVERAGEDURATION)
+                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.PERCENTILE),
+                        Arrays.asList(Statistics.MIN, Statistics.MAX)
                 )
         );
         summaryStatisticsMap.put(SingleValueSummaryType.ComputeAcrossTime,
                 Arrays.asList(
-                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.MEAN, Statistics.MEDIAN, Statistics.PERCENTILE, Statistics.TOTAL, Statistics.MAXACCUMDURATION, Statistics.MAXAVERAGEDURATION),
-                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.MEAN, Statistics.MEDIAN, Statistics.PERCENTILE)
+                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.TOTAL, Statistics.MAXACCUMDURATION, Statistics.MAXAVERAGEDURATION),
+                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.PERCENTILE)
                 )
         );
         summaryStatisticsMap.put(SingleValueSummaryType.ComputeCumulative,
                 Arrays.asList(
                         Arrays.asList(Statistics.CUMULATIVE),
-                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.MEAN, Statistics.MEDIAN, Statistics.PERCENTILE, Statistics.TOTAL)
+                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.PERCENTILE, Statistics.TOTAL)
                 )
         );
     }
