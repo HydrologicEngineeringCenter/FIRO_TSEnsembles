@@ -29,7 +29,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     }
      private Catalog getCatalog(){
         if( this.catalog == null)
-            catalog  = new hec.dss.ensemble.Catalog(this.dssFileName);
+            catalog  = new Catalog(this.dssFileName);
         return catalog;
      }
     private static String getEPart(int minutes){
@@ -111,9 +111,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
      * @return
      */
     public java.util.List<java.time.ZonedDateTime> getEnsembleIssueDates(RecordIdentifier recordID) {
-
-        return getCatalog().getEnsembleStartDates();
-
+        return getCatalog().getEnsembleStartDates(recordID);
     }
     public void write(EnsembleTimeSeries[] etsArray) throws Exception{
         for (EnsembleTimeSeries ets: etsArray){

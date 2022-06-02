@@ -15,7 +15,7 @@ dependencies {
     implementation project(":FIRO_TSEnsembles")
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-    implementation ('mil.army.usace.hec:hec-monolith:2.0.1'){
+    implementation ('mil.army.usace.hec:hec-monolith:3.0.0-rc5'){
         exclude group: "codebase", module: "*"
         exclude group: "com.sun.media", module: "*"
         exclude group: "javax.media", module: "*"

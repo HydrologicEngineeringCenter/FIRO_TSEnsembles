@@ -1,4 +1,5 @@
 package hec.dss.ensemble;
+import java.io.Console;
 import java.util.List;
 
 import hec.RecordIdentifier;
