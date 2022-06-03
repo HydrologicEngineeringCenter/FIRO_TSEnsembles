@@ -10,6 +10,9 @@ import hec.heclib.dss.HecTimeSeries;
 import hec.heclib.util.HecTime;
 import hec.io.TimeSeriesCollectionContainer;
 import hec.io.TimeSeriesContainer;
+import hec.metrics.MetricCollection;
+import hec.metrics.MetricCollectionTimeSeries;
+import hec.stats.Statistics;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -25,6 +28,9 @@ import java.util.TimeZone;
 public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     private String dssFileName;
     Catalog catalog;
+    static DateTimeFormatter dssDateFormat = DateTimeFormatter.ofPattern("ddMMMyyyy HHmm");
+    static DateTimeFormatter startDateformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
+    static DateTimeFormatter issueDateformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
     public DssDatabase(String dssFileName){
         this.dssFileName= dssFileName;
@@ -61,6 +67,17 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                   e.getStartDateTime(),e.getIssueDate())+"/";
     }
 
+    private String buildStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval, ZonedDateTime startDateTime, ZonedDateTime issueDate, Statistics stat) {
+        DSSPathname path = new DSSPathname();
+        path.setAPart("");
+        path.setBPart(timeSeriesIdentifier.location);
+        path.setCPart(timeSeriesIdentifier.parameter);
+        path.setDPart("");
+        path.setEPart(getEPart((int)interval.toMinutes()));
+        path.setFPart(buildFpart(startDateTime, issueDate) + stat.toString());
+        return path.toString();
+    }
+
     /**
      * Builds F part of DSS path
      *
@@ -79,11 +96,15 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
      * @return
      */
     private static String buildFpart(int member , ZonedDateTime t, ZonedDateTime v){
-        DateTimeFormatter Tformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
-        DateTimeFormatter Vformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
         return String.format("C:%06d", member)
-                +"|T:"+Tformatter.format(t)
-                +"|V:"+Vformatter.format(t)+"|";
+                +"|T:"+startDateformatter.format(t)
+                +"|V:"+issueDateformatter.format(v)+"|";
+    }
+
+    private String buildFpart(ZonedDateTime t, ZonedDateTime v) {
+
+        return "T:" + startDateformatter.format(t)
+                + "|V:" + issueDateformatter.format(v) + "|";
     }
 
     public Ensemble getEnsemble(RecordIdentifier recordID, ZonedDateTime issue_time){
@@ -128,7 +149,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         for (int i = 0; i < paths.size(); i++) {
             TimeSeriesContainer tsc = new TimeSeriesContainer();
             tsc.setFullName(paths.get(i).pathname());
-            dss.read(tsc, false);
+            dss.read(tsc, true);
             tscc.add(tsc);
         }
 
@@ -197,11 +218,9 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     private static HecTime getHecStartTime(Ensemble e) {
         String dateStr = "";
-        DateTimeFormatter dssDateFormat = DateTimeFormatter.ofPattern("ddMMMyyyy HHmm");
         if (e.getTimeCount() > 0)
             dateStr = e.startDateTime()[0].format(dssDateFormat);
-        HecTime rval = new HecTime(dateStr);
-        return rval;
+        return new HecTime(dateStr);
     }
 
     /**
@@ -274,16 +293,102 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     @Override
     public void write(hec.metrics.MetricCollectionTimeSeries[] metricsArray) throws Exception {
-
+        for (MetricCollectionTimeSeries mcts : metricsArray)
+            write(mcts);
     }
 
     @Override
     public void write(hec.metrics.MetricCollectionTimeSeries metrics) throws Exception {
+        HecTimeSeries dss = new HecTimeSeries(dssFileName);
 
+        for (MetricCollection mc : metrics) {
+            Statistics[] stats = mc.getMetricStatistics();
+            for (int i = 0; i < stats.length; i++) {
+                TimeSeriesContainer tsc = new TimeSeriesContainer();
+                tsc.values = convertFloatsToDoubles(mc.getValues()[i]);
+                tsc.numberValues = tsc.values.length;
+                HecTime time = getHecStartTime(mc.getStartDateTime());
+                tsc.setStartTime(time);
+                tsc.fullName = buildStatPathName(metrics.getTimeSeriesIdentifier(),
+                        mc.getInterval(),
+                        mc.getStartDateTime(),
+                        mc.getIssueDate(),
+                        stats[i]);
+                dss.write(tsc);
+            }
+
+        }
+
+        dss.done();
+    }
+
+    private HecTime getHecStartTime(ZonedDateTime startDateTime) {
+        String dateStr = "";
+        dateStr = startDateTime.format(dssDateFormat);
+        return new HecTime(dateStr);
     }
 
     @Override
     public java.util.List<hec.RecordIdentifier> getMetricTimeSeriesIDs() {
         return null;
     }
+
+    /*
+        MetricCollectTimeSeries = {
+            items: [
+                Date1: {
+                    configuration: {
+                        interval: "1Hour",
+                        start_date: day1,
+                        issue_date: some date
+                    },
+                    metrics: [
+                        [5, 6, 7], <-- "MAX"
+                        [1, 2, 3], <-- "MIN"
+                        [3, 4, 5]  <-- "MEAN"
+                    ],
+                    metric_statistics: [MAX, MIN, MEAN]
+                },
+                Date2: {
+
+                },
+                .
+                .
+                .
+            ]
+        }
+
+        Max Time Series = {
+            times: [day1, day2, day3],
+            values: [5, 6, 7]
+        }
+         */
+
+
+    // Using Time Series Path
+        /*
+
+        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|MAX/
+        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|MIN/
+        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|MEAN/
+
+        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131104-1200|V:20131103-120000|MAX/
+        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131104-1200|V:20131103-120000|MIN/
+        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131104-1200|V:20131103-120000|MEAN/
+
+        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131105-1200|V:20131103-120000|MAX/
+        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131105-1200|V:20131103-120000|MIN/
+        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131105-1200|V:20131103-120000|MEAN/
+
+        1. Get compute data.
+        2. Get dates associated with data.
+        3. Combine data with dates into time series container.
+        4. Write time series container to disk.
+         */
+
+
+    // Using Paired Data Path
+    /*
+
+     */
 }

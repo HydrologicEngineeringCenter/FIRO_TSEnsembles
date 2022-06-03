@@ -1,5 +1,4 @@
 package hec.dss.ensemble;
-import java.io.Console;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -7,7 +6,15 @@ import hec.RecordIdentifier;
 import hec.ensemble.Ensemble;
 
 import hec.ensemble.EnsembleTimeSeries;
+import hec.heclib.dss.HecTimeSeries;
+import hec.io.TimeSeriesContainer;
+import hec.metrics.MetricCollectionTimeSeries;
+import hec.stats.MultiComputable;
+import hec.stats.MultiStatComputable;
+import hec.stats.Statistics;
 import org.junit.jupiter.api.Test;
+
+import static hec.stats.Statistics.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -63,20 +70,7 @@ public class TestDssDatabase {
 
         Ensemble e = db.getEnsemble(id,times.get(1));
         assertEquals(59, e.getValues().length);
-        assertEquals(360, e.getValues()[0].length);
-
-        //  DssDatabase.getEnsemble(),   -- ensemble
-        //  DssDatabase.getMetricCollection(...)  -- metrics stored in SQlite.
-        // db.getEnsemble(id,)
-        //db.getEnsembleTimeSeries()
-
-        // Metrics
-        // calc variations of metrics
-
-        // time series  (like average,min,max) -- stored as collection?
-        //               c:0001|T:2022|V:2022|max  ?
-        // paired data  62 members --> 62 max values [0,1...61] float[]
-        // scalar. [126.4]   T:2022|V:2022|scalar=max
+        assertEquals(337, e.getValues()[0].length);
     }
 
     @Test
@@ -103,8 +97,64 @@ public class TestDssDatabase {
         List<ZonedDateTime> zdts = ets.getIssueDates();
         for (ZonedDateTime zdt : zdts) {
             assertEquals(59, ets.getEnsemble(zdt).getValues().length);
-            assertEquals(360, ets.getEnsemble(zdt).getValues()[0].length);
+            assertEquals(337, ets.getEnsemble(zdt).getValues()[0].length);
         }
+    }
+
+    @Test
+    public void CsvToDssEnsembleTimeSeriesStoringMetricCollection() throws Exception{
+
+        java.io.File f = java.io.File.createTempFile("tmp-", ".dss");
+        if( f.exists())
+            f.delete();
+
+        String dssFilename = f.getAbsolutePath();
+        createDssFileFromCsv(dssFilename,3);
+
+        DssDatabase db = new DssDatabase(dssFilename);
+        List<hec.RecordIdentifier> recordIdentifiers= db.getEnsembleTimeSeriesIDs();
+
+        assertEquals(23,recordIdentifiers.size());
+
+        RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
+        List<java.time.ZonedDateTime> times = db.getEnsembleIssueDates(id);
+        assertEquals(3,times.size());
+
+        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
+        assertEquals(3, ets.getCount());
+        List<ZonedDateTime> zdts = ets.getIssueDates();
+        for (ZonedDateTime zdt : zdts) {
+            assertEquals(59, ets.getEnsemble(zdt).getValues().length);
+            assertEquals(337, ets.getEnsemble(zdt).getValues()[0].length);
+        }
+
+        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, MEAN});
+        MetricCollectionTimeSeries output = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(test);
+        db.write(output);
+
+        HecTimeSeries dss = new HecTimeSeries(dssFilename);
+        String[] pathsToFind = new String[] {
+            "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|MAX/",
+            "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|MEAN/",
+            "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|MIN/",
+            "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|MAX/",
+            "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|MEAN/",
+            "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|MIN/",
+            "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|MAX/",
+            "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|MEAN/",
+            "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|MIN/"
+        };
+
+        for (String path : pathsToFind) {
+            TimeSeriesContainer tsc = new TimeSeriesContainer();
+            tsc.fullName = path;
+            int status = dss.read(tsc, true);
+            assertEquals(0, status);
+            assertEquals(337, tsc.values.length);
+            assertEquals(337, tsc.times.length);
+        }
+        dss.done();
+
     }
 
 }
