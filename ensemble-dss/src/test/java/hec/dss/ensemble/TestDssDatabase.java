@@ -1,10 +1,12 @@
 package hec.dss.ensemble;
 import java.io.Console;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import hec.RecordIdentifier;
 import hec.ensemble.Ensemble;
 
+import hec.ensemble.EnsembleTimeSeries;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -41,7 +43,7 @@ public class TestDssDatabase {
     }
 
     @Test
-    public void CsvToDSS() throws Exception{
+    public void CsvToDssEnsemble() throws Exception{
 
         java.io.File f = java.io.File.createTempFile("tmp-", ".dss");
         if( f.exists())
@@ -60,9 +62,12 @@ public class TestDssDatabase {
         assertEquals(3,times.size());
 
         Ensemble e = db.getEnsemble(id,times.get(1));
-//  DssDatabase.getEnsemble(),   -- ensemble
-//  DssDatabase.getMetricCollection(...)  -- metrics stored in SQlite.
-       // db.getEnsemble(id,)
+        assertEquals(59, e.getValues().length);
+        assertEquals(360, e.getValues()[0].length);
+
+        //  DssDatabase.getEnsemble(),   -- ensemble
+        //  DssDatabase.getMetricCollection(...)  -- metrics stored in SQlite.
+        // db.getEnsemble(id,)
         //db.getEnsembleTimeSeries()
 
         // Metrics
@@ -72,6 +77,34 @@ public class TestDssDatabase {
         //               c:0001|T:2022|V:2022|max  ?
         // paired data  62 members --> 62 max values [0,1...61] float[]
         // scalar. [126.4]   T:2022|V:2022|scalar=max
+    }
+
+    @Test
+    public void CsvToDssEnsembleTimeSeries() throws Exception{
+
+        java.io.File f = java.io.File.createTempFile("tmp-", ".dss");
+        if( f.exists())
+            f.delete();
+
+        String dssFilename = f.getAbsolutePath();
+        createDssFileFromCsv(dssFilename,3);
+
+        DssDatabase db = new DssDatabase(dssFilename);
+        List<hec.RecordIdentifier> recordIdentifiers= db.getEnsembleTimeSeriesIDs();
+
+        assertEquals(23,recordIdentifiers.size());
+
+        RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
+        List<java.time.ZonedDateTime> times = db.getEnsembleIssueDates(id);
+        assertEquals(3,times.size());
+
+        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
+        assertEquals(3, ets.getCount());
+        List<ZonedDateTime> zdts = ets.getIssueDates();
+        for (ZonedDateTime zdt : zdts) {
+            assertEquals(59, ets.getEnsemble(zdt).getValues().length);
+            assertEquals(360, ets.getEnsemble(zdt).getValues()[0].length);
+        }
     }
 
 }
