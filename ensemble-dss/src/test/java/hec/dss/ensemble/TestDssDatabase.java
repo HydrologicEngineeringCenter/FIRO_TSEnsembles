@@ -157,4 +157,67 @@ public class TestDssDatabase {
 
     }
 
+    @Test
+    public void CsvToDssEnsembleTimeSeriesGettingStoredMetricTimeSeriesIDs() throws Exception{
+
+        java.io.File f = java.io.File.createTempFile("tmp-", ".dss");
+        if( f.exists())
+            f.delete();
+
+        String dssFilename = f.getAbsolutePath();
+        createDssFileFromCsv(dssFilename,3);
+
+        DssDatabase db = new DssDatabase(dssFilename);
+        List<hec.RecordIdentifier> recordIdentifiers= db.getEnsembleTimeSeriesIDs();
+
+        assertEquals(23,recordIdentifiers.size());
+
+        RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
+        List<java.time.ZonedDateTime> times = db.getEnsembleIssueDates(id);
+        assertEquals(3,times.size());
+
+        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
+        assertEquals(3, ets.getCount());
+        List<ZonedDateTime> zdts = ets.getIssueDates();
+        for (ZonedDateTime zdt : zdts) {
+            assertEquals(59, ets.getEnsemble(zdt).getValues().length);
+            assertEquals(337, ets.getEnsemble(zdt).getValues()[0].length);
+        }
+
+        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, MEAN});
+        MetricCollectionTimeSeries output = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(test);
+        db.write(output);
+
+        HecTimeSeries dss = new HecTimeSeries(dssFilename);
+        String[] pathsToFind = new String[] {
+                "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|MAX/",
+                "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|MEAN/",
+                "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|MIN/",
+                "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|MAX/",
+                "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|MEAN/",
+                "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|MIN/",
+                "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|MAX/",
+                "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|MEAN/",
+                "//Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|MIN/"
+        };
+
+        for (String path : pathsToFind) {
+            TimeSeriesContainer tsc = new TimeSeriesContainer();
+            tsc.fullName = path;
+            int status = dss.read(tsc, true);
+            assertEquals(0, status);
+            assertEquals(337, tsc.values.length);
+            assertEquals(337, tsc.times.length);
+        }
+
+        db.catalog.update();
+
+        List<RecordIdentifier> mtsIds = db.getMetricTimeSeriesIDs();
+        assertEquals(1, mtsIds.size());
+
+
+        dss.done();
+
+    }
+
 }

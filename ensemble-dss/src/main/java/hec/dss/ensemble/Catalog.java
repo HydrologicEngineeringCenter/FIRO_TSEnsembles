@@ -2,6 +2,7 @@ package hec.dss.ensemble;
 
 import hec.RecordIdentifier;
 import hec.heclib.dss.DSSPathname;
+import hec.stats.Statistics;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -18,10 +19,13 @@ public class Catalog {
 
     String dssFilename;
     Pattern startTimePattern = Pattern.compile("T:(\\d{8}-\\d{4})");
+    Pattern metricTimeSeriesPattern = Pattern.compile(getMetricPattern());
     DateTimeFormatter startTimeFormat = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
     ZoneId timeZone;
-    HashMap<RecordIdentifier, List<DSSPathname>> pathnames = new HashMap<>();
     HashMap<RecordIdentifier, List<ZonedDateTime>> rids = new HashMap<>();
+    HashMap<RecordIdentifier, List<DSSPathname>> pathNames = new HashMap<>();
+    HashMap<RecordIdentifier, List<ZonedDateTime>> metricRids = new HashMap<>();
+    HashMap<RecordIdentifier, List<DSSPathname>> metricPathNames = new HashMap<>();
 
     public Catalog(String dssFilename){
         this(dssFilename, "GMT");
@@ -30,10 +34,10 @@ public class Catalog {
     public Catalog(String dssFilename, String timeZone) {
         this.dssFilename = dssFilename;
         this.timeZone = TimeZone.getTimeZone(timeZone).toZoneId();
-        setupEnsembleCatalog();
+        buildEnsembleCatalog();
     }
 
-    private void setupEnsembleCatalog() {
+    private void buildEnsembleCatalog() {
         hec.heclib.dss.HecDssCatalog dss = new hec.heclib.dss.HecDssCatalog(dssFilename);
         dss.setUseCollectionGroups(true);
         hec.heclib.dss.CondensedReference[] catalog = dss.getCondensedCatalog("/*/*/*/*/*/*/");
@@ -44,32 +48,65 @@ public class Catalog {
 
             // Add record identifier for collection
             if (DSSPathname.isaCollectionPath(path.toString())) {
-                String location = path.bPart();
-                String parameter = path.cPart();
-                RecordIdentifier rid = new RecordIdentifier(location, parameter);
-
-                // Add record identifier if it doesn't exist
-                if (!rids.containsKey(rid)) {
-                    rids.put(rid, new ArrayList<>());
-                    pathnames.put(rid, new ArrayList<>());
-                }
-
-                // No version handling for paths at the moment
-                pathnames.get(rid).add(path);
-
-                // Get zoned date time from path
-                ZonedDateTime zdt = getStartDateTime(path);
-
-                // Add zoned data time to record identifier if it doesn't exist
-                if (!rids.get(rid).contains(zdt))
-                    rids.get(rid).add(zdt);
-
+                handleCollection(path);
+            } else if (isMetricTimeSeries(path.toString())) {
+                handleMetricTimeSeries(path);
             }
         }
+
+        dss.done();
+    }
+
+    private void handleMetricTimeSeries(DSSPathname path) {
+        String location = path.bPart();
+        String parameter = path.cPart();
+        RecordIdentifier rid = new RecordIdentifier(location, parameter);
+
+        // Add record identifier if it doesn't exist
+        if (!metricRids.containsKey(rid)) {
+            metricRids.put(rid, new ArrayList<>());
+            metricPathNames.put(rid, new ArrayList<>());
+        }
+
+        // No version handling for paths at the moment
+        metricPathNames.get(rid).add(path);
+
+        // Get zoned date time from path
+        ZonedDateTime zdt = getStartDateTime(path);
+
+        // Add zoned data time to record identifier if it doesn't exist
+        if (!metricRids.get(rid).contains(zdt))
+            metricRids.get(rid).add(zdt);
+    }
+
+    private void handleCollection(DSSPathname path) {
+        String location = path.bPart();
+        String parameter = path.cPart();
+        RecordIdentifier rid = new RecordIdentifier(location, parameter);
+
+        // Add record identifier if it doesn't exist
+        if (!rids.containsKey(rid)) {
+            rids.put(rid, new ArrayList<>());
+            pathNames.put(rid, new ArrayList<>());
+        }
+
+        // No version handling for paths at the moment
+        pathNames.get(rid).add(path);
+
+        // Get zoned date time from path
+        ZonedDateTime zdt = getStartDateTime(path);
+
+        // Add zoned data time to record identifier if it doesn't exist
+        if (!rids.get(rid).contains(zdt))
+            rids.get(rid).add(zdt);
     }
 
     public List<RecordIdentifier> getEnsembleTimeSeriesIDs() {
         return new ArrayList<>(rids.keySet());
+    }
+
+    public List<RecordIdentifier> getMetricTimeSeriesIDs() {
+        return new ArrayList<>(metricRids.keySet());
     }
 
     public java.util.List<java.time.ZonedDateTime> getEnsembleStartDates(RecordIdentifier rid) {
@@ -77,7 +114,7 @@ public class Catalog {
     }
 
     public List<DSSPathname> getPaths(RecordIdentifier recordID, ZonedDateTime startTime) {
-        List<DSSPathname> allPaths = pathnames.get(recordID);
+        List<DSSPathname> allPaths = pathNames.get(recordID);
         List<DSSPathname> rval = new ArrayList<>();
 
         for (DSSPathname path : allPaths) {
@@ -99,5 +136,30 @@ public class Catalog {
         }
 
         return null;
+    }
+
+    public void update() {
+        rids.clear();
+        metricRids.clear();
+        pathNames.clear();
+        metricPathNames.clear();
+        buildEnsembleCatalog();
+    }
+
+    private boolean isMetricTimeSeries(String path) {
+        Matcher matcher = metricTimeSeriesPattern.matcher(path);
+        return matcher.find();
+    }
+
+    private String getMetricPattern() {
+        StringBuilder builder = new StringBuilder();
+        Statistics[] stats = Statistics.values();
+        for (int i = 0; i < stats.length; i++) {
+            if (i == stats.length - 1)
+                builder.append(stats[i].toString());
+            else
+                builder.append(stats[i].toString()).append("|");
+        }
+        return builder.toString();
     }
 }

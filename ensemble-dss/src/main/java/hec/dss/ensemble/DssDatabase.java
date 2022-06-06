@@ -330,7 +330,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     @Override
     public java.util.List<hec.RecordIdentifier> getMetricTimeSeriesIDs() {
-        return null;
+        return getCatalog().getMetricTimeSeriesIDs();
     }
 
     /*
