@@ -6,6 +6,9 @@ import org.jdom.Element;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.Arrays;
 
 public interface Computable extends StatisticsReportable{
     public float compute(float[] values);
@@ -14,33 +17,54 @@ public interface Computable extends StatisticsReportable{
     //reflect in
     //multi computable and single computable don't implement computable. Similar code will be needed to handle those objects.
 
-    default public org.jdom.Element toXML(){
+    default public org.jdom.Element toXML() throws Exception{
         Field[] flds = this.getClass().getDeclaredFields();
         Element ele = new Element(this.getClass().getName());
         for(Field f: flds){
             try {
-                switch(f.getType().getName()){
-                    case "double":
-                        ele.setAttribute(f.getName(),Double.toString(f.getDouble(this)));
+                Type type = f.getType();
+                String stringType = type.getTypeName();
+                String fieldName = f.getName();
+                Object objectFieldValue = f.get(this);
+                String attribute = null;
+
+                int modifiers = f.getModifiers();
+                if(Modifier.isProtected(modifiers)) {
+                    System.out.println("protected");
+                }
+                else if(Modifier.isPrivate(modifiers)) {
+                    f.setAccessible(true);
+                    System.out.println("private");
+                }
+                switch(stringType){
+                    case "java.lang.Double":
+                        double doubleVal = (double) objectFieldValue;
+                        attribute = Double.toString(doubleVal);
                         break;
-                    case "int":
-                        ele.setAttribute(f.getName(),Integer.toString(f.getInt(this)));
+                    case "java.lang.Integer":
+                        int intValue = (int) objectFieldValue;
+                        attribute = Integer.toString(intValue);
                         break;
-                    case "float":
-                        ele.setAttribute(f.getName(),Float.toString(f.getFloat(this)));
+                    case "java.lang.float":
+                        float floatValue = (float) objectFieldValue;
+                        attribute = Float.toString(floatValue);
                         break;
                     case "float[]":
-                        float[] arr = new float[8]; //how do I set this dynamically?
-                        f.get(arr);
-                        ele.setAttribute(f.getName(),arr.toString());
+                        float[] floatArray = (float[])objectFieldValue;
+                        attribute = Arrays.toString(floatArray);
                         break;
-                    case "Configuration":
-                        Configuration config = new MetricsConfiguration();
+                    case "hec.stats.Configuration":
+                        Object objectOfConfig = f.get(this);
+                        Configuration config = (Configuration) objectOfConfig;
+                       // ele.setAttribute(f.getName(),config.toString()); //Complex objects should have a toXML method on them. Attributes are for primatives.
                         break;
                     case "Statistics[]":
-                        //UNSUPPORTED
-                    default:
+                        Object objectOfStatisticsArray = f.get(this);
+                        Statistics[] stats = (Statistics[]) objectOfStatisticsArray;
+                        ele.setAttribute(f.getName(), Arrays.toString(stats));
                         break;
+                    default:
+                        throw new Exception("We didn't catch " + f.getName() + " of Type " + stringType);
                 }
             } catch (IllegalArgumentException | IllegalAccessException ex) {
                 System.out.println("Failed Cast" );
