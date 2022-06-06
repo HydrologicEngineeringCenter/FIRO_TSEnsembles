@@ -18,9 +18,9 @@ public interface Computable extends StatisticsReportable{
     //multi computable and single computable don't implement computable. Similar code will be needed to handle those objects.
 
     default public org.jdom.Element toXML() throws Exception{
-        Field[] flds = this.getClass().getDeclaredFields();
+        Field[] fields = this.getClass().getDeclaredFields();
         Element ele = new Element(this.getClass().getName());
-        for(Field f: flds){
+        for(Field f: fields){
             try {
                 Type type = f.getType();
                 String stringType = type.getTypeName();
@@ -56,7 +56,8 @@ public interface Computable extends StatisticsReportable{
                     case "hec.stats.Configuration":
                         Object objectOfConfig = f.get(this);
                         Configuration config = (Configuration) objectOfConfig;
-                       // ele.setAttribute(f.getName(),config.toString()); //Complex objects should have a toXML method on them. Attributes are for primatives.
+                        Element configEle = config.toXML();
+                        ele.addContent(configEle);
                         break;
                     case "Statistics[]":
                         Object objectOfStatisticsArray = f.get(this);
@@ -65,6 +66,9 @@ public interface Computable extends StatisticsReportable{
                         break;
                     default:
                         throw new Exception("We didn't catch " + f.getName() + " of Type " + stringType);
+                }
+                if(attribute != null){
+                    ele.setAttribute(fieldName,attribute);
                 }
             } catch (IllegalArgumentException | IllegalAccessException ex) {
                 System.out.println("Failed Cast" );
