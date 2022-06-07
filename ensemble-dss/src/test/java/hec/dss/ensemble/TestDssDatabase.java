@@ -8,6 +8,7 @@ import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.heclib.dss.HecTimeSeries;
 import hec.io.TimeSeriesContainer;
+import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.stats.MultiComputable;
 import hec.stats.MultiStatComputable;
@@ -212,9 +213,11 @@ public class TestDssDatabase {
 
         db.catalog.update();
 
-        List<RecordIdentifier> mtsIds = db.getMetricTimeSeriesIDs();
-        assertEquals(1, mtsIds.size());
+        List<RecordIdentifier> mIds = db.getMetricTimeSeriesIDs();
+        assertEquals(1, mIds.size());
 
+        MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mIds.get(0));
+        assertEquals(3, mcts.getIssueDates().size());
 
         dss.done();
 

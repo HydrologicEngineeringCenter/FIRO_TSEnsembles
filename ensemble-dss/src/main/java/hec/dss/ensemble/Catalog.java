@@ -2,7 +2,6 @@ package hec.dss.ensemble;
 
 import hec.RecordIdentifier;
 import hec.heclib.dss.DSSPathname;
-import hec.stats.Statistics;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -19,7 +18,6 @@ public class Catalog {
 
     String dssFilename;
     Pattern startTimePattern = Pattern.compile("T:(\\d{8}-\\d{4})");
-    Pattern metricTimeSeriesPattern = Pattern.compile(getMetricPattern());
     DateTimeFormatter startTimeFormat = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
     ZoneId timeZone;
     HashMap<RecordIdentifier, List<ZonedDateTime>> rids = new HashMap<>();
@@ -126,6 +124,19 @@ public class Catalog {
         return rval;
     }
 
+    public List<DSSPathname> getMetricPaths(RecordIdentifier recordID, ZonedDateTime startTime) {
+        List<DSSPathname> allPaths = metricPathNames.get(recordID);
+        List<DSSPathname> rval = new ArrayList<>();
+
+        for (DSSPathname path : allPaths) {
+            ZonedDateTime zdt = getStartDateTime(path);
+            if (zdt != null && zdt.equals(startTime))
+                rval.add(path);
+        }
+
+        return rval;
+    }
+
     private ZonedDateTime getStartDateTime(DSSPathname path) {
         Matcher matcher = startTimePattern.matcher(path.fPart());
 
@@ -147,19 +158,11 @@ public class Catalog {
     }
 
     private boolean isMetricTimeSeries(String path) {
-        Matcher matcher = metricTimeSeriesPattern.matcher(path);
+        Matcher matcher = MetricPathTools.metricTimeSeriesPattern.matcher(path);
         return matcher.find();
     }
 
-    private String getMetricPattern() {
-        StringBuilder builder = new StringBuilder();
-        Statistics[] stats = Statistics.values();
-        for (int i = 0; i < stats.length; i++) {
-            if (i == stats.length - 1)
-                builder.append(stats[i].toString());
-            else
-                builder.append(stats[i].toString()).append("|");
-        }
-        return builder.toString();
+    public List<ZonedDateTime> getMetricCollectionIssueDates(RecordIdentifier timeseriesID) {
+        return metricRids.get(timeseriesID);
     }
 }

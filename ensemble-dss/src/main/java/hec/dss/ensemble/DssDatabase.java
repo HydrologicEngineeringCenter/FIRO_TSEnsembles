@@ -12,11 +12,13 @@ import hec.io.TimeSeriesCollectionContainer;
 import hec.io.TimeSeriesContainer;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
+import hec.metrics.MetricTypes;
 import hec.stats.Statistics;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -278,17 +280,54 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     @Override
     public hec.metrics.MetricCollection getMetricCollection(hec.RecordIdentifier timeseriesID, java.time.ZonedDateTime issue_time) {
-        return null;
+        List<DSSPathname> paths = getCatalog().getMetricPaths(timeseriesID, issue_time);
+        Statistics[] stats = getMetricStatsFromPaths(paths);
+        float[][] values = getMetricValues(paths);
+        MetricCollection mc = new MetricCollection(issue_time, issue_time, stats, values);
+        return mc;
     }
 
     @Override
     public hec.metrics.MetricCollectionTimeSeries getMetricCollectionTimeSeries(hec.RecordIdentifier timeseriesID) {
-        return null;
+        MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(timeseriesID, "", MetricTypes.TIMESERIES_OF_ARRAY);
+
+        for (ZonedDateTime zdt : getCatalog().getMetricCollectionIssueDates(timeseriesID)) {
+            List<DSSPathname> paths = getCatalog().getMetricPaths(timeseriesID, zdt);
+            Statistics[] stats = getMetricStatsFromPaths(paths);
+            float[][] values = getMetricValues(paths);
+            MetricCollection mc = new MetricCollection(zdt, zdt, stats, values);
+            mcts.addMetricCollection(mc);
+        }
+
+        return mcts;
+    }
+
+    private float[][] getMetricValues(List<DSSPathname> paths) {
+        HecTimeSeries dss = new HecTimeSeries(dssFileName);
+        List<float[]> values = new ArrayList<>();
+        for (DSSPathname path : paths) {
+            TimeSeriesContainer tsc = new TimeSeriesContainer();
+            tsc.fullName = path.toString();
+            dss.read(tsc, true);
+            values.add(convertDoublesToFloats(tsc.values));
+        }
+
+        dss.done();
+
+        return values.toArray(new float[0][0]);
+    }
+
+    private Statistics[] getMetricStatsFromPaths(List<DSSPathname> paths) {
+        Statistics[] stats = new Statistics[paths.size()];
+        for (int i = 0; i < paths.size(); i++) {
+            stats[i] = MetricPathTools.getMetricStatFromPath(paths.get(i).toString());
+        }
+        return stats;
     }
 
     @Override
     public java.util.List<java.time.ZonedDateTime> getMetricCollectionIssueDates(hec.RecordIdentifier timeseriesID) {
-        return null;
+        return getCatalog().getMetricCollectionIssueDates(timeseriesID);
     }
 
     @Override
