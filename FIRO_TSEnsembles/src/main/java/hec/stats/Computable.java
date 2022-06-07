@@ -26,6 +26,9 @@ public interface Computable extends StatisticsReportable{
                 String stringType = type.getTypeName();
                 String fieldName = f.getName();
                 Object objectFieldValue = f.get(this);
+                if(objectFieldValue == null){
+                    continue;
+                }
                 String attribute = null;
 
                 int modifiers = f.getModifiers();
@@ -54,8 +57,7 @@ public interface Computable extends StatisticsReportable{
                         attribute = Arrays.toString(floatArray);
                         break;
                     case "hec.stats.Configuration":
-                        Object objectOfConfig = f.get(this);
-                        Configuration config = (Configuration) objectOfConfig;
+                        Configuration config = (Configuration) objectFieldValue;
                         Element configEle = config.toXML();
                         ele.addContent(configEle);
                         break;
@@ -80,22 +82,21 @@ public interface Computable extends StatisticsReportable{
      static Computable fromXML(Element ele){
         Computable computable = null;
         Class<?> c;
-
         String computableName = ele.getName();
         try {
             c = Class.forName(computableName);
             computable=(Computable) c.getConstructor().newInstance();
-            Field[] flds = c.getDeclaredFields();
-            for (Field f : flds){
-                switch(f.getType().getName()){
+            Field[] fields = c.getDeclaredFields();
+            for (Field field : fields){
+                switch(field.getType().getName()){
                     case "double":
-                        f.set(computable,Double.parseDouble(ele.getAttribute(f.getName()).getValue()));
+                        field.set(computable,Double.parseDouble(ele.getAttribute(field.getName()).getValue()));
                         break;
                     case "int":
-                        f.set(computable,Integer.parseInt(ele.getAttribute(f.getName()).getValue()));
+                        field.set(computable,Integer.parseInt(ele.getAttribute(field.getName()).getValue()));
                         break;
                     case "float":
-                        f.set(computable,Float.parseFloat(ele.getAttributeValue(f.getName())));
+                        field.set(computable,Float.parseFloat(ele.getAttributeValue(field.getName())));
                     case "float[]":
                         //UNSUPPORTED
                         break;

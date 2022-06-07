@@ -29,7 +29,6 @@ class ComputableTest {
 
     @Test
     void toXML() {
-
         try {
             var x = maxTest.toXML();
             x = maxAccumDuration.toXML();
@@ -43,13 +42,20 @@ class ComputableTest {
             exception.printStackTrace();
             fail();
         }
-
     }
 
     @Test
     void fromXML() {
         try {
-            Computable.fromXML(maxTest.toXML());
+            var x = Computable.fromXML(maxTest.toXML());
+            x= Computable.fromXML(maxAccumDuration.toXML());
+            x = Computable.fromXML(maxAvgDuration.toXML());
+            x = Computable.fromXML(maxComputable.toXML());
+            x = Computable.fromXML(meanComputable.toXML());
+            x = Computable.fromXML(medianComputable.toXML());
+            x = Computable.fromXML(medianComputable.toXML());
+            x = Computable.fromXML(minComputable.toXML());
+            x = Computable.fromXML(percientiles.toXML());
         } catch (Exception exception) {
             exception.printStackTrace();
         }
