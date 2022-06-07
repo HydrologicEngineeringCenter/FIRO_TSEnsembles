@@ -13,6 +13,8 @@ public class PercentilesComputable implements Computable, MultiComputable {
     public PercentilesComputable(float percentile) {
         this._percentiles = new float[] {percentile};
     }
+    //empty constructor added to satisfy <init>() function deserializing from XML with reflection
+    public PercentilesComputable(){}
 
     public PercentilesComputable(float[] percentiles) {
         this._percentiles = percentiles;

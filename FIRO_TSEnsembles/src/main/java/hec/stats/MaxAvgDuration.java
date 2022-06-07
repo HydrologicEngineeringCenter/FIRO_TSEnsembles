@@ -12,6 +12,9 @@ public  class MaxAvgDuration implements Computable, Configurable {
         this._duration = duration;
     }
 
+    //empty constructor added to satisfy <init>() function deserializing from XML with reflection
+    public MaxAvgDuration(){}
+
     private Integer timeStepsPerDuration() {
             Integer timeStep = (int) _c.getDuration().toHours();
             if(timeStep == null) {
