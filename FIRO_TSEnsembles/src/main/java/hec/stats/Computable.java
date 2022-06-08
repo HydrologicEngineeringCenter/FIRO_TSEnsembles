@@ -11,13 +11,9 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 public interface Computable extends StatisticsReportable{
-    public float compute(float[] values);
+    float compute(float[] values);
 
-    //to xml, from xml here.
-    //reflect in
-    //multi computable and single computable don't implement computable. Similar code will be needed to handle those objects.
-
-    default public org.jdom.Element toXML() throws Exception{
+    default org.jdom.Element toXML() throws Exception{
         Field[] fields = this.getClass().getDeclaredFields();
         Element ele = new Element(this.getClass().getName());
         for(Field f: fields){
@@ -25,12 +21,6 @@ public interface Computable extends StatisticsReportable{
                 Type type = f.getType();
                 String stringType = type.getTypeName();
                 String fieldName = f.getName();
-                Object objectFieldValue = f.get(this);
-                if(objectFieldValue == null){
-                    continue;
-                }
-                String attribute = null;
-
                 int modifiers = f.getModifiers();
                 if(Modifier.isProtected(modifiers)) {
                     System.out.println("protected");
@@ -38,6 +28,11 @@ public interface Computable extends StatisticsReportable{
                 else if(Modifier.isPrivate(modifiers)) {
                     f.setAccessible(true);
                     System.out.println("private");
+                }
+                String attribute = null;
+                Object objectFieldValue = f.get(this);
+                if(objectFieldValue == null){
+                    continue;
                 }
                 switch(stringType){
                     case "java.lang.Double":
@@ -73,44 +68,71 @@ public interface Computable extends StatisticsReportable{
                     ele.setAttribute(fieldName,attribute);
                 }
             } catch (IllegalArgumentException | IllegalAccessException ex) {
-                System.out.println("Failed Cast" );
+                throw ex;
             }
         }
         return ele;
     }
 
-     static Computable fromXML(Element ele){
-        Computable computable = null;
-        Class<?> c;
-        String computableName = ele.getName();
-        try {
-            c = Class.forName(computableName);
-            computable=(Computable) c.getConstructor().newInstance();
-            Field[] fields = c.getDeclaredFields();
-            for (Field field : fields){
-                switch(field.getType().getName()){
-                    case "double":
-                        field.set(computable,Double.parseDouble(ele.getAttribute(field.getName()).getValue()));
+     static Computable fromXML(Element ele) throws ClassNotFoundException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException {
+              Computable computable;
+                    Class<?> c;
+                    String computableName = ele.getName();
+                    try {
+                        c = Class.forName(computableName);
+                        computable=(Computable) c.getConstructor().newInstance();
+                        Field[] fields = c.getDeclaredFields();
+                        for (Field field : fields){
+                            Type type = field.getType();
+                            String stringType = type.getTypeName();
+                            String fieldName = field.getName();
+                            int modifiers = field.getModifiers();
+                            if(Modifier.isProtected(modifiers)) {
+                                System.out.println("protected");
+                            }
+                            else if(Modifier.isPrivate(modifiers)) {
+                                field.setAccessible(true);
+                                System.out.println("private");
+                            }
+                            switch(stringType){
+                                case "java.lang.Double":
+                        field.set(computable,Double.parseDouble(ele.getAttribute(fieldName).getValue()));
                         break;
-                    case "int":
-                        field.set(computable,Integer.parseInt(ele.getAttribute(field.getName()).getValue()));
+                    case "java.lang.Integer":
+                        field.set(computable,Integer.parseInt(ele.getAttribute(fieldName).getValue()));
                         break;
-                    case "float":
-                        field.set(computable,Float.parseFloat(ele.getAttributeValue(field.getName())));
+                    case "java.lang.float":
+                        field.set(computable,Float.parseFloat(ele.getAttributeValue(fieldName)));
                     case "float[]":
-                        //UNSUPPORTED
+                        String floatArray = ele.getAttributeValue(fieldName);
+                        String[] splitFloatArray = floatArray.split(",");
+                        int numberOfValues = splitFloatArray.length;
+                        float[] floats = new float[numberOfValues];
+                        for(int i=0; i<numberOfValues;i++) {
+                            float value = Float.parseFloat(splitFloatArray[i]);
+                            floats[i] = value;
+                        }
+                        field.set(computable,floats);
                         break;
-                    case "Configuration":
-                        //UNSUPPORTED
+                    case "hec.stats.Configuration":
+                        //unsupported
                         break;
                     case "Statistics[]":
-                        //UNSUPPORTED
+                        String statisticsString = ele.getAttributeValue(fieldName);
+                        String[] statisticsStringSplit = statisticsString.split(",");
+                        int numValues = statisticsStringSplit.length;
+                        Statistics[] statsArray = new Statistics[numValues];
+                        for(int i=0; i<numValues;i++){
+                            Statistics stat = Statistics.valueOf(statisticsStringSplit[i]);
+                            statsArray[i]= stat;
+                        }
+                        field.set(computable,statsArray);
                     default:
                         break;
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-            e.printStackTrace();
+            throw e;
         }
         return computable;
     }
