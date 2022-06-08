@@ -2,10 +2,7 @@ package hec.stats;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
