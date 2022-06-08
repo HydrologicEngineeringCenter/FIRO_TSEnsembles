@@ -1,5 +1,15 @@
+import org.gradle.internal.os.OperatingSystem
+
 plugins {
     id 'java'
+    id 'java-library'
+}
+dependencies {
+    implementation project(":FIRO_TSEnsembles");
+}
+configurations {
+    windows_x64
+    linux_x64
 }
 
 group 'hec.dss.ensemble'
@@ -23,5 +33,40 @@ dependencies {
 }
 
 test {
-    useJUnitPlatform()
+    if (OperatingSystem.current().isWindows()) {
+        useJUnitPlatform()
+        jvmArgs = ["-Djava.library.path=${projectDir}/build/x64"
+                  ]
+    }
+}
+dependencies {
+    windows_x64 'mil.army.usace.hec:javaHeclib:7-IN-2-win-x86_64@zip'
+    linux_x64 'mil.army.usace.hec:javaHeclib:7-IN-2-linux-x86_64@zip'
+}
+
+task copyNatives(type: Copy){
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        configurations.windows_x64.asFileTree.each {
+            from(zipTree(it))
+            into "$buildDir/x64"
+        }
+    }
+    if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        configurations.linux_x64.asFileTree.each {
+            from(zipTree(it))
+            into "$buildDir/x64"
+        }
+    }
+}
+jar {
+    if (OperatingSystem.current().isWindows()) {
+        finalizedBy copyNatives
+    }
+    if (OperatingSystem.current().isLinux()) {
+        finalizedBy copyNatives
+    }
+}
+
+build {
+    dependsOn jar
 }

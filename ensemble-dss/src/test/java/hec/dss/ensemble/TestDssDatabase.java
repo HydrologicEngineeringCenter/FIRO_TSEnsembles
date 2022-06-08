@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestDssDatabase {
 
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(hec.dss.ensemble.TestDssDatabase.class.getName());
+
     private String getTestDataDirectory() {
         String path = new java.io.File(getClass().getResource(
                 "/hefs_cache/2013110312_Kanektok_hefs_csv_hourly.csv").getFile()).toString();
@@ -46,6 +48,8 @@ public class TestDssDatabase {
 
         hec.ensemble.CsvEnsembleReader csvReader = new hec.ensemble.CsvEnsembleReader(cacheDir);
         hec.ensemble.EnsembleTimeSeries[] ets = csvReader.Read("Kanektok", issueDate1, issueDate2);
+
+        LOGGER.info(System.getenv("java.library.path"));
 
         DssDatabase db = new DssDatabase(dssFilename);
 
