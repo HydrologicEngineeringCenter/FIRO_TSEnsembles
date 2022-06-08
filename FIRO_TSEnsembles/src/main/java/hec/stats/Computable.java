@@ -10,31 +10,30 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
-public interface Computable extends StatisticsReportable{
+public interface Computable extends StatisticsReportable {
     float compute(float[] values);
 
-    default org.jdom.Element toXML() throws Exception{
+    default org.jdom.Element toXML() throws Exception {
         Field[] fields = this.getClass().getDeclaredFields();
         Element ele = new Element(this.getClass().getName());
-        for(Field f: fields){
+        for (Field f : fields) {
             try {
                 Type type = f.getType();
                 String stringType = type.getTypeName();
                 String fieldName = f.getName();
                 int modifiers = f.getModifiers();
-                if(Modifier.isProtected(modifiers)) {
+                if (Modifier.isProtected(modifiers)) {
                     System.out.println("protected");
-                }
-                else if(Modifier.isPrivate(modifiers)) {
+                } else if (Modifier.isPrivate(modifiers)) {
                     f.setAccessible(true);
                     System.out.println("private");
                 }
                 String attribute = null;
                 Object objectFieldValue = f.get(this);
-                if(objectFieldValue == null){
+                if (objectFieldValue == null) {
                     continue;
                 }
-                switch(stringType){
+                switch (stringType) {
                     case "java.lang.Double":
                         double doubleVal = (double) objectFieldValue;
                         attribute = Double.toString(doubleVal);
@@ -48,24 +47,25 @@ public interface Computable extends StatisticsReportable{
                         attribute = Float.toString(floatValue);
                         break;
                     case "float[]":
-                        float[] floatArray = (float[])objectFieldValue;
+                        float[] floatArray = (float[]) objectFieldValue;
                         attribute = Arrays.toString(floatArray);
                         break;
                     case "hec.stats.Configuration":
-                        Configuration config = (Configuration) objectFieldValue;
-                        Element configEle = config.toXML();
-                        ele.addContent(configEle);
+                        //unsupported
                         break;
                     case "Statistics[]":
-                        Object objectOfStatisticsArray = f.get(this);
-                        Statistics[] stats = (Statistics[]) objectOfStatisticsArray;
+                        Statistics[] stats = (Statistics[]) objectFieldValue;
                         ele.setAttribute(f.getName(), Arrays.toString(stats));
                         break;
+                    case "hec.stats.Computable":
+                        Computable computable = (Computable) objectFieldValue;
+                        Element computableEle = computable.toXML();
+                        ele.addContent(computableEle);
                     default:
                         throw new Exception("We didn't catch " + f.getName() + " of Type " + stringType);
                 }
-                if(attribute != null){
-                    ele.setAttribute(fieldName,attribute);
+                if (attribute != null) {
+                    ele.setAttribute(fieldName, attribute);
                 }
             } catch (IllegalArgumentException | IllegalAccessException ex) {
                 throw ex;
@@ -74,45 +74,44 @@ public interface Computable extends StatisticsReportable{
         return ele;
     }
 
-     static Computable fromXML(Element ele) throws ClassNotFoundException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException {
-              Computable computable;
-                    Class<?> c;
-                    String computableName = ele.getName();
-                    try {
-                        c = Class.forName(computableName);
-                        computable=(Computable) c.getConstructor().newInstance();
-                        Field[] fields = c.getDeclaredFields();
-                        for (Field field : fields){
-                            Type type = field.getType();
-                            String stringType = type.getTypeName();
-                            String fieldName = field.getName();
-                            int modifiers = field.getModifiers();
-                            if(Modifier.isProtected(modifiers)) {
-                                System.out.println("protected");
-                            }
-                            else if(Modifier.isPrivate(modifiers)) {
-                                field.setAccessible(true);
-                                System.out.println("private");
-                            }
-                            switch(stringType){
-                                case "java.lang.Double":
-                        field.set(computable,Double.parseDouble(ele.getAttribute(fieldName).getValue()));
+    static Computable fromXML(Element ele) throws ClassNotFoundException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException {
+        Computable computable;
+        Class<?> c;
+        String computableName = ele.getName();
+        try {
+            c = Class.forName(computableName);
+            computable = (Computable) c.getConstructor().newInstance();
+            Field[] fields = c.getDeclaredFields();
+            for (Field field : fields) {
+                Type type = field.getType();
+                String stringType = type.getTypeName();
+                String fieldName = field.getName();
+                int modifiers = field.getModifiers();
+                if (Modifier.isProtected(modifiers)) {
+                    System.out.println("protected");
+                } else if (Modifier.isPrivate(modifiers)) {
+                    field.setAccessible(true);
+                    System.out.println("private");
+                }
+                switch (stringType) {
+                    case "java.lang.Double":
+                        field.set(computable, Double.parseDouble(ele.getAttribute(fieldName).getValue()));
                         break;
                     case "java.lang.Integer":
-                        field.set(computable,Integer.parseInt(ele.getAttribute(fieldName).getValue()));
+                        field.set(computable, Integer.parseInt(ele.getAttribute(fieldName).getValue()));
                         break;
                     case "java.lang.float":
-                        field.set(computable,Float.parseFloat(ele.getAttributeValue(fieldName)));
+                        field.set(computable, Float.parseFloat(ele.getAttributeValue(fieldName)));
                     case "float[]":
                         String floatArray = ele.getAttributeValue(fieldName);
                         String[] splitFloatArray = floatArray.split(",");
                         int numberOfValues = splitFloatArray.length;
                         float[] floats = new float[numberOfValues];
-                        for(int i=0; i<numberOfValues;i++) {
+                        for (int i = 0; i < numberOfValues; i++) {
                             float value = Float.parseFloat(splitFloatArray[i]);
                             floats[i] = value;
                         }
-                        field.set(computable,floats);
+                        field.set(computable, floats);
                         break;
                     case "hec.stats.Configuration":
                         //unsupported
@@ -122,11 +121,17 @@ public interface Computable extends StatisticsReportable{
                         String[] statisticsStringSplit = statisticsString.split(",");
                         int numValues = statisticsStringSplit.length;
                         Statistics[] statsArray = new Statistics[numValues];
-                        for(int i=0; i<numValues;i++){
+                        for (int i = 0; i < numValues; i++) {
                             Statistics stat = Statistics.valueOf(statisticsStringSplit[i]);
-                            statsArray[i]= stat;
+                            statsArray[i] = stat;
                         }
-                        field.set(computable,statsArray);
+                        field.set(computable, statsArray);
+                        break;
+                    case "hec.stats.Computable":
+                        Element computableElement = ele.getChild(fieldName);
+                        Computable computer = Computable.fromXML(computableElement);
+                        field.set(computable, computer);
+                        break;
                     default:
                         break;
                 }
