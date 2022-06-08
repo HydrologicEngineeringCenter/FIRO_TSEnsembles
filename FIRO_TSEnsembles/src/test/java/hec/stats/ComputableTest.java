@@ -58,6 +58,7 @@ class ComputableTest {
             x = Computable.fromXML(percientiles.toXML());
         } catch (Exception exception) {
             exception.printStackTrace();
+            fail();
         }
     }
 }
