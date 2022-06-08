@@ -6,8 +6,10 @@ import hec.RecordIdentifier;
 import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.heclib.dss.DSSPathname;
+import hec.heclib.dss.HecPairedData;
 import hec.heclib.dss.HecTimeSeries;
 import hec.heclib.util.HecTime;
+import hec.io.PairedDataContainer;
 import hec.io.TimeSeriesCollectionContainer;
 import hec.io.TimeSeriesContainer;
 import hec.metrics.MetricCollection;
@@ -69,14 +71,26 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                   e.getStartDateTime(),e.getIssueDate())+"/";
     }
 
-    private String buildStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval, ZonedDateTime startDateTime, ZonedDateTime issueDate, Statistics stat) {
+    private String buildTimeSeriesStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval, ZonedDateTime startDateTime, ZonedDateTime issueDate, Statistics stat) {
         DSSPathname path = new DSSPathname();
         path.setAPart("");
         path.setBPart(timeSeriesIdentifier.location);
-        path.setCPart(timeSeriesIdentifier.parameter);
+        path.setCPart(timeSeriesIdentifier.parameter + "-" + stat.toString());
         path.setDPart("");
         path.setEPart(getEPart((int)interval.toMinutes()));
-        path.setFPart(buildFpart(startDateTime, issueDate) + stat.toString());
+        path.setFPart(buildFpart(startDateTime, issueDate));
+        return path.toString();
+    }
+
+
+    private String buildPairedDataStatPathName(RecordIdentifier timeSeriesIdentifier, ZonedDateTime startDateTime, ZonedDateTime issueDate, Statistics[] stats) {
+        DSSPathname path = new DSSPathname();
+        path.setAPart("");
+        path.setBPart(timeSeriesIdentifier.location);
+        path.setCPart("member-" + timeSeriesIdentifier.parameter);
+        path.setDPart("");
+        path.setEPart("");
+        path.setFPart(buildFpart(startDateTime, issueDate));
         return path.toString();
     }
 
@@ -348,7 +362,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                 tsc.numberValues = tsc.values.length;
                 HecTime time = getHecStartTime(mc.getStartDateTime());
                 tsc.setStartTime(time);
-                tsc.fullName = buildStatPathName(metrics.getTimeSeriesIdentifier(),
+                tsc.fullName = buildTimeSeriesStatPathName(metrics.getTimeSeriesIdentifier(),
                         mc.getInterval(),
                         mc.getStartDateTime(),
                         mc.getIssueDate(),
@@ -359,6 +373,45 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         }
 
         dss.done();
+    }
+
+    public void write(MetricCollection metric) {
+        HecPairedData dss = new HecPairedData(dssFileName);
+
+        Statistics[] stats = metric.getMetricStatistics();
+        PairedDataContainer pdc = new PairedDataContainer();
+        pdc.yOrdinates = getYOrdinates(metric.getValues());
+        pdc.xOrdinates = getXOrdinates(metric.getValues()[0].length);
+        pdc.labels = new String[stats.length];
+        pdc.numberCurves = pdc.yOrdinates.length;
+        pdc.numberOrdinates = pdc.xOrdinates.length;
+        for (int i = 0; i < stats.length; i++)
+            pdc.labels[i] = stats[i].toString();
+        pdc.labelsUsed = true;
+        pdc.fullName = buildPairedDataStatPathName(metric.parent.getTimeSeriesIdentifier(),
+                metric.getStartDateTime(),
+                metric.getIssueDate(),
+                stats);
+
+        dss.write(pdc);
+        dss.done();
+    }
+
+
+    private double[] getXOrdinates(int length) {
+        double[] res = new double[length];
+        for (int i = 0; i < length; i++) {
+            res[i] = i + 1;
+        }
+        return res;
+    }
+
+    private double[][] getYOrdinates(float[][] values) {
+        double[][] res = new double[values.length][];
+        for (int i = 0; i < values.length; i++) {
+            res[i] = convertFloatsToDoubles(values[i]);
+        }
+        return res;
     }
 
     private HecTime getHecStartTime(ZonedDateTime startDateTime) {
