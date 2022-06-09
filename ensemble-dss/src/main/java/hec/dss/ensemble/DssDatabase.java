@@ -26,8 +26,12 @@ import java.util.TimeZone;
 
 /**
  * DssDatabase implements EnsembleDatabase.
- * It is used to work with time-series of ensembles.
- * Data is stored in a DSS file, using the Collections and Version features of the DSS F-Part tag.
+ * It is used to work with time-series of ensembles, and associated statistics.
+ * Data is stored in a DSS file, using the  (C) Collections, Time (T),
+ * and  Version (V) features of the DSS F-Part tag.
+ *
+ * Data is stored in DSS regular time series and paired data structures.
+ *
  */
 public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     private String dssFileName;
@@ -40,7 +44,11 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         this.dssFileName= dssFileName;
     }
 
-    private Catalog getCatalog(){
+    private Catalog getCatalog()
+    {
+        return getCatalog(false);
+    }
+    private Catalog getCatalog(boolean rebuild){
         if( this.catalog == null)
             catalog  = new Catalog(this.dssFileName);
         return catalog;
@@ -175,7 +183,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     public EnsembleTimeSeries getEnsembleTimeSeries(RecordIdentifier recordID){
         EnsembleTimeSeries ets = new EnsembleTimeSeries(recordID, "", "", "");
-        List<ZonedDateTime> zdts = catalog.rids.get(recordID);
+        List<ZonedDateTime> zdts = getCatalog().rids.get(recordID);
 
         for (ZonedDateTime zdt : zdts) {
             Ensemble e = getEnsemble(recordID, zdt);
@@ -284,6 +292,11 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
      */
     public java.util.List<RecordIdentifier> getEnsembleTimeSeriesIDs(){
         return getCatalog().getEnsembleTimeSeriesIDs();
+    }
+
+    @Override
+    public String getFileName() {
+        return this.dssFileName;
     }
 
 
@@ -430,63 +443,4 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     public List<RecordIdentifier> getMectricPairedDataIDs() {
         return getCatalog().getMetricPairedDataIDs();
     }
-
-    /*
-        MetricCollectTimeSeries = {
-            items: [
-                Date1: {
-                    configuration: {
-                        interval: "1Hour",
-                        start_date: day1,
-                        issue_date: some date
-                    },
-                    metrics: [
-                        [5, 6, 7], <-- "MAX"
-                        [1, 2, 3], <-- "MIN"
-                        [3, 4, 5]  <-- "MEAN"
-                    ],
-                    metric_statistics: [MAX, MIN, MEAN]
-                },
-                Date2: {
-
-                },
-                .
-                .
-                .
-            ]
-        }
-
-        Max Time Series = {
-            times: [day1, day2, day3],
-            values: [5, 6, 7]
-        }
-         */
-
-
-    // Using Time Series Path
-        /*
-
-        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|MAX/
-        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|MIN/
-        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|MEAN/
-
-        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131104-1200|V:20131103-120000|MAX/
-        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131104-1200|V:20131103-120000|MIN/
-        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131104-1200|V:20131103-120000|MEAN/
-
-        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131105-1200|V:20131103-120000|MAX/
-        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131105-1200|V:20131103-120000|MIN/
-        //Kanektok.BCAC1/flow/01Nov2013/1Hour/T:20131105-1200|V:20131103-120000|MEAN/
-
-        1. Get compute data.
-        2. Get dates associated with data.
-        3. Combine data with dates into time series container.
-        4. Write time series container to disk.
-         */
-
-
-    // Using Paired Data Path
-    /*
-
-     */
 }

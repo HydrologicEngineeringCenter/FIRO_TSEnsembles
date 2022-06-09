@@ -462,6 +462,12 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         }
         return rval;
     }
+
+    @Override
+    public String getFileName() {
+        return this.FileName;
+    }
+
     @Override
     public List<ZonedDateTime> getEnsembleIssueDates(RecordIdentifier timeseriesID) {
         List<ZonedDateTime> rval = new ArrayList<>();

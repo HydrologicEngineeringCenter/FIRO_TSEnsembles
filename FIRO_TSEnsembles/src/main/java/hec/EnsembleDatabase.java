@@ -11,4 +11,5 @@ public interface EnsembleDatabase extends AutoCloseable {
     void write(EnsembleTimeSeries[] etsArray) throws Exception;
     void write(EnsembleTimeSeries ets) throws Exception;
     List<RecordIdentifier> getEnsembleTimeSeriesIDs();
+    String getFileName();
 }

@@ -7,18 +7,29 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MetricPathTools {
+/**
+ * MetricPathTools methods support finding DSS paths that are used to
+ * store statistical results with the following pattern.
+ *
+ * Time-Series:   /A/B/parameter-statName//E/F/
+ *      example:  //Kanektok.BCAC1/flow-MIN/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/
+ *
+ * Paired-Data: /A/B/parameter-stats//E/F/
+ *     example: //Kanektok.BCAC1/flow-stats///T:20131103-1200|V:20131103-120000|/
+ *
+ */
+class MetricPathTools {
 
-    static HashMap<String, Statistics> metricStringMap = new HashMap<>();
-    static public Pattern metricTimeSeriesPattern = Pattern.compile(getMetricPattern());
-    static public Pattern metricPairedDataPattern = Pattern.compile("-(stats)");
+    static private HashMap<String, Statistics> metricStringMap = new HashMap<>();
+    static private Pattern metricTimeSeriesPattern = Pattern.compile(getMetricPattern());
+    static private Pattern metricPairedDataPattern = Pattern.compile("-(stats)");
 
     static {
         for (Statistics stat : Statistics.values())
             metricStringMap.put(stat.toString(), stat);
     }
 
-    static public Statistics getMetricStatFromPath(String toString) {
+    static Statistics getMetricStatFromPath(String toString) {
         Statistics stat;
         Matcher matcher = metricTimeSeriesPattern.matcher(toString);
 
@@ -30,7 +41,7 @@ public class MetricPathTools {
         return null;
     }
 
-    static public String getMetricPattern() {
+    static private String getMetricPattern() {
         StringBuilder builder = new StringBuilder();
         Statistics[] stats = Statistics.values();
 
@@ -45,12 +56,12 @@ public class MetricPathTools {
         return builder.toString();
     }
 
-    static public boolean isMetricTimeSeries(String cPart) {
+    static boolean isMetricTimeSeries(String cPart) {
         Matcher matcher = MetricPathTools.metricTimeSeriesPattern.matcher(cPart);
         return matcher.find();
     }
 
-    static public boolean isMetricPairedData(String cPart) {
+    static boolean isMetricPairedData(String cPart) {
         Matcher matcher = MetricPathTools.metricPairedDataPattern.matcher(cPart);
         return matcher.find();
     }

@@ -40,7 +40,7 @@ public class TestDssDatabase {
      * @param dssFilename name of DSS database to create
      * @param numberOfDates number of forecasts to include
      */
-    public void createDssFileFromCsv(String dssFilename, int numberOfDates) throws Exception {
+    private void createDssFileFromCsv(String dssFilename, int numberOfDates) throws Exception {
 
         String cacheDir = getTestDataDirectory();
         java.time.ZonedDateTime issueDate1 = java.time.ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, java.time.ZoneId.of("GMT"));
@@ -57,21 +57,27 @@ public class TestDssDatabase {
         db.close();
     }
 
-    @Test
-    public void CsvToDssEnsemble() throws Exception{
-
+    private static String getNewDssFileName() throws Exception{
         java.io.File f = java.io.File.createTempFile("tmp-", ".dss");
         if( f.exists())
             f.delete();
+        return f.getAbsolutePath();
+    }
 
-        String dssFilename = f.getAbsolutePath();
+    private DssDatabase getNewTestDssDatabase() throws Exception{
+        String dssFilename = getNewDssFileName();
         createDssFileFromCsv(dssFilename,3);
+        DssDatabase db =  new hec.dss.ensemble.DssDatabase(dssFilename);
+        return db;
+    }
 
-        DssDatabase db = new DssDatabase(dssFilename);
+    @Test
+    public void testEnsemble() throws Exception{
+
+        DssDatabase db = getNewTestDssDatabase();
         List<hec.RecordIdentifier> recordIdentifiers= db.getEnsembleTimeSeriesIDs();
 
         assertEquals(23,recordIdentifiers.size());
-
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
         List<java.time.ZonedDateTime> times = db.getEnsembleIssueDates(id);
         assertEquals(3,times.size());
@@ -82,24 +88,10 @@ public class TestDssDatabase {
     }
 
     @Test
-    public void CsvToDssEnsembleTimeSeries() throws Exception{
+    public void testEnsembleTimeSeries() throws Exception{
 
-        java.io.File f = java.io.File.createTempFile("tmp-", ".dss");
-        if( f.exists())
-            f.delete();
-
-        String dssFilename = f.getAbsolutePath();
-        createDssFileFromCsv(dssFilename,3);
-
-        DssDatabase db = new DssDatabase(dssFilename);
-        List<hec.RecordIdentifier> recordIdentifiers= db.getEnsembleTimeSeriesIDs();
-
-        assertEquals(23,recordIdentifiers.size());
-
+        DssDatabase db = getNewTestDssDatabase();
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
-        List<java.time.ZonedDateTime> times = db.getEnsembleIssueDates(id);
-        assertEquals(3,times.size());
-
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
         assertEquals(3, ets.getCount());
         List<ZonedDateTime> zdts = ets.getIssueDates();
@@ -110,37 +102,16 @@ public class TestDssDatabase {
     }
 
     @Test
-    public void CsvToDssEnsembleTimeSeriesStoringMetricCollection() throws Exception{
+    public void testMetricCollectionAsTimeSeries_DSS_API() throws Exception{
 
-        java.io.File f = java.io.File.createTempFile("tmp-", ".dss");
-        if( f.exists())
-            f.delete();
-
-        String dssFilename = f.getAbsolutePath();
-        createDssFileFromCsv(dssFilename,3);
-
-        DssDatabase db = new DssDatabase(dssFilename);
-        List<hec.RecordIdentifier> recordIdentifiers= db.getEnsembleTimeSeriesIDs();
-
-        assertEquals(23,recordIdentifiers.size());
-
+        DssDatabase db = getNewTestDssDatabase();
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
-        List<java.time.ZonedDateTime> times = db.getEnsembleIssueDates(id);
-        assertEquals(3,times.size());
-
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
-        assertEquals(3, ets.getCount());
-        List<ZonedDateTime> zdts = ets.getIssueDates();
-        for (ZonedDateTime zdt : zdts) {
-            assertEquals(59, ets.getEnsemble(zdt).getValues().length);
-            assertEquals(337, ets.getEnsemble(zdt).getValues()[0].length);
-        }
-
         MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, MEAN});
         MetricCollectionTimeSeries output = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(test);
         db.write(output);
 
-        HecTimeSeries dss = new HecTimeSeries(dssFilename);
+        HecTimeSeries dss = new HecTimeSeries(db.getFileName());
         String[] pathsToFind = new String[] {
             "//Kanektok.BCAC1/flow-MAX/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
             "//Kanektok.BCAC1/flow-MEAN/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
@@ -166,58 +137,14 @@ public class TestDssDatabase {
     }
 
     @Test
-    public void CsvToDssEnsembleTimeSeriesGettingStoredMetricTimeSeriesIDs() throws Exception{
-
-        java.io.File f = java.io.File.createTempFile("tmp-", ".dss");
-        if( f.exists())
-            f.delete();
-
-        String dssFilename = f.getAbsolutePath();
-        createDssFileFromCsv(dssFilename,3);
-
-        DssDatabase db = new DssDatabase(dssFilename);
-        List<hec.RecordIdentifier> recordIdentifiers= db.getEnsembleTimeSeriesIDs();
-
-        assertEquals(23,recordIdentifiers.size());
-
+    public void testStoreMetricTimeSeriesIDs() throws Exception{
+        DssDatabase db = getNewTestDssDatabase();
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
-        List<java.time.ZonedDateTime> times = db.getEnsembleIssueDates(id);
-        assertEquals(3,times.size());
-
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
-        assertEquals(3, ets.getCount());
-        List<ZonedDateTime> zdts = ets.getIssueDates();
-        for (ZonedDateTime zdt : zdts) {
-            assertEquals(59, ets.getEnsemble(zdt).getValues().length);
-            assertEquals(337, ets.getEnsemble(zdt).getValues()[0].length);
-        }
 
         MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, MEAN});
         MetricCollectionTimeSeries output = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(test);
         db.write(output);
-
-        HecTimeSeries dss = new HecTimeSeries(dssFilename);
-        String[] pathsToFind = new String[] {
-                "//Kanektok.BCAC1/flow-MIN/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-                "//Kanektok.BCAC1/flow-MAX/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-                "//Kanektok.BCAC1/flow-MEAN/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-                "//Kanektok.BCAC1/flow-MIN/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-                "//Kanektok.BCAC1/flow-MAX/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-                "//Kanektok.BCAC1/flow-MEAN/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-                "//Kanektok.BCAC1/flow-MIN/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
-                "//Kanektok.BCAC1/flow-MAX/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
-                "//Kanektok.BCAC1/flow-MEAN/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/"
-        };
-
-        for (String path : pathsToFind) {
-            TimeSeriesContainer tsc = new TimeSeriesContainer();
-            tsc.fullName = path;
-            int status = dss.read(tsc, true);
-            assertEquals(0, status);
-            assertEquals(337, tsc.values.length);
-            assertEquals(337, tsc.times.length);
-        }
-
         db.catalog.update();
 
         List<RecordIdentifier> mIds = db.getMetricTimeSeriesIDs();
@@ -226,7 +153,6 @@ public class TestDssDatabase {
         MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mIds.get(0));
         assertEquals(3, mcts.getIssueDates().size());
 
-        dss.done();
 
     }
 
@@ -236,37 +162,17 @@ public class TestDssDatabase {
     }
 
     @Test
-    public void StoringMetricsInPairedData() throws Exception {
-        java.io.File f = java.io.File.createTempFile("tmp-", ".dss");
-        if( f.exists())
-            f.delete();
-
-        String dssFilename = f.getAbsolutePath();
-        createDssFileFromCsv(dssFilename,3);
-
-        DssDatabase db = new DssDatabase(dssFilename);
-        List<hec.RecordIdentifier> recordIdentifiers= db.getEnsembleTimeSeriesIDs();
-
-        assertEquals(23,recordIdentifiers.size());
-
+    public void testStoringMetricsInPairedData() throws Exception {
+        DssDatabase db = getNewTestDssDatabase();
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
-        List<java.time.ZonedDateTime> times = db.getEnsembleIssueDates(id);
-        assertEquals(3,times.size());
-
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
-        assertEquals(3, ets.getCount());
-        List<ZonedDateTime> zdts = ets.getIssueDates();
-        for (ZonedDateTime zdt : zdts) {
-            assertEquals(59, ets.getEnsemble(zdt).getValues().length);
-            assertEquals(337, ets.getEnsemble(zdt).getValues()[0].length);
-        }
-
         MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, MEAN});
         MetricCollectionTimeSeries output = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(test);
         for (MetricCollection mc : output)
             db.write(mc);
+        db.catalog.update();
 
-        HecPairedData dss = new HecPairedData(dssFilename);
+        HecPairedData dss = new HecPairedData(db.getFileName());
         String[] pathsToFind = new String[] {
                 "//Kanektok.BCAC1/flow-stats///T:20131103-1200|V:20131103-120000|/",
                 "//Kanektok.BCAC1/flow-stats///T:20131104-1200|V:20131104-120000|/",
@@ -281,17 +187,8 @@ public class TestDssDatabase {
             assertEquals(3, pdc.yOrdinates.length);
             assertEquals(59, pdc.xOrdinates.length);
         }
-
-        db.catalog.update();
-
+        dss.done();
         List<RecordIdentifier> mIds = db.getMectricPairedDataIDs();
         assertEquals(1, mIds.size());
-
-        dss.done();
-
-
     }
-
-
-
 }
