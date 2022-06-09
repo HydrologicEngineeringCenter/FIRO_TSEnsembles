@@ -1,3 +1,4 @@
+import org.gradle.internal.os.OperatingSystem
 plugins {
     id 'java'
 }
@@ -16,8 +17,10 @@ dependencies {
 }
 
 test {
-    useJUnitPlatform()
-    jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
+     useJUnitPlatform()
+    if (OperatingSystem.current().isWindows()) {
+        jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
+     }
 }
 
 build {finalizedBy javadoc }

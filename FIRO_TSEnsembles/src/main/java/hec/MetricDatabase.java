@@ -14,7 +14,9 @@ public interface MetricDatabase extends AutoCloseable {
     List<ZonedDateTime> getMetricCollectionIssueDates(RecordIdentifier timeseriesID);
     void write(MetricCollectionTimeSeries[] metricsArray) throws Exception;
     void write(MetricCollectionTimeSeries metrics) throws Exception;
+    void write(MetricCollection metrics) throws Exception;
     List<RecordIdentifier> getMetricTimeSeriesIDs();
+    List<RecordIdentifier> getMectricPairedDataIDs();
 
 
 }
