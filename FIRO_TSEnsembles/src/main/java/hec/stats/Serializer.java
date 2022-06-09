@@ -58,7 +58,7 @@ public final class Serializer {
                         break;
                     case "hec.stats.Computable":
                         Computable computable = (Computable) objectFieldValue;
-                        Element computableEle = computable.toXML();
+                        Element computableEle = Serializer.toXML(computable); //recursive call
                         ele.addContent(computableEle);
                     default:
                         throw new Exception("We didn't catch " + f.getName() + " of Type " + stringType);
@@ -111,9 +111,6 @@ public final class Serializer {
                         }
                         field.set(computable, floats);
                         break;
-                    case "hec.stats.Configuration":
-                        //unsupported
-                        break;
                     case "Statistics[]":
                         String statisticsString = ele.getAttributeValue(fieldName);
                         String[] statisticsStringSplit = statisticsString.split(",");
@@ -127,7 +124,7 @@ public final class Serializer {
                         break;
                     case "hec.stats.Computable":
                         Element computableElement = ele.getChild(fieldName);
-                        Computable computer = Computable.fromXML(computableElement);
+                        Computable computer = Serializer.fromXML(computableElement);
                         field.set(computable, computer);
                         break;
                     default:
