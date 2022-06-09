@@ -33,11 +33,8 @@ dependencies {
 }
 
 test {
-    if (OperatingSystem.current().isWindows()) {
-        useJUnitPlatform()
-        jvmArgs = ["-Djava.library.path=${projectDir}/build/x64"
-                  ]
-    }
+    useJUnitPlatform()
+    jvmArgs = ["-Djava.library.path=${buildDir}/x64"]
 }
 dependencies {
     windows_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-win-x86_64@zip'
@@ -59,12 +56,7 @@ task copyNatives(type: Copy){
     }
 }
 jar {
-    if (OperatingSystem.current().isWindows()) {
-        finalizedBy copyNatives
-    }
-    if (OperatingSystem.current().isLinux()) {
-        finalizedBy copyNatives
-    }
+    dependsOn copyNatives
 }
 
 build {
