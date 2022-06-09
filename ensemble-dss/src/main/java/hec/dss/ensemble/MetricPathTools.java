@@ -11,6 +11,7 @@ public class MetricPathTools {
 
     static HashMap<String, Statistics> metricStringMap = new HashMap<>();
     static public Pattern metricTimeSeriesPattern = Pattern.compile(getMetricPattern());
+    static public Pattern metricPairedDataPattern = Pattern.compile("-(stats)");
 
     static {
         for (Statistics stat : Statistics.values())
@@ -33,7 +34,7 @@ public class MetricPathTools {
         StringBuilder builder = new StringBuilder();
         Statistics[] stats = Statistics.values();
 
-        builder.append("(");
+        builder.append("-(");
         for (int i = 0; i < stats.length; i++) {
             if (i == stats.length - 1)
                 builder.append(stats[i].toString());
@@ -42,5 +43,15 @@ public class MetricPathTools {
         }
         builder.append(")");
         return builder.toString();
+    }
+
+    static public boolean isMetricTimeSeries(String cPart) {
+        Matcher matcher = MetricPathTools.metricTimeSeriesPattern.matcher(cPart);
+        return matcher.find();
+    }
+
+    static public boolean isMetricPairedData(String cPart) {
+        Matcher matcher = MetricPathTools.metricPairedDataPattern.matcher(cPart);
+        return matcher.find();
     }
 }

@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,16 +47,18 @@ public class Catalog {
 
             // Add record identifier for collection
             if (DSSPathname.isaCollectionPath(path.toString())) {
-                handleCollection(path);
-            } else if (isMetricTimeSeries(path.toString())) {
-                handleMetricTimeSeries(path);
+                addCollection(path);
+            } else if (MetricPathTools.isMetricTimeSeries(path.cPart()) ||
+                    MetricPathTools.isMetricPairedData(path.cPart())) {
+                addMetric(path);
             }
         }
 
         dss.done();
     }
 
-    private void handleMetricTimeSeries(DSSPathname path) {
+
+    private void addMetric(DSSPathname path) {
         String location = path.bPart();
         String parameter = path.cPart();
         RecordIdentifier rid = new RecordIdentifier(location, parameter);
@@ -77,7 +80,7 @@ public class Catalog {
             metricRids.get(rid).add(zdt);
     }
 
-    private void handleCollection(DSSPathname path) {
+    private void addCollection(DSSPathname path) {
         String location = path.bPart();
         String parameter = path.cPart();
         RecordIdentifier rid = new RecordIdentifier(location, parameter);
@@ -103,7 +106,7 @@ public class Catalog {
         return new ArrayList<>(rids.keySet());
     }
 
-    public List<RecordIdentifier> getMetricTimeSeriesIDs() {
+    public List<RecordIdentifier> getMetricIDs() {
         return new ArrayList<>(metricRids.keySet());
     }
 
@@ -157,12 +160,39 @@ public class Catalog {
         buildEnsembleCatalog();
     }
 
-    private boolean isMetricTimeSeries(String path) {
-        Matcher matcher = MetricPathTools.metricTimeSeriesPattern.matcher(path);
-        return matcher.find();
+
+
+    public List<ZonedDateTime> getMetricIssueDates(RecordIdentifier rid) {
+        return metricRids.get(rid);
     }
 
-    public List<ZonedDateTime> getMetricCollectionIssueDates(RecordIdentifier timeseriesID) {
-        return metricRids.get(timeseriesID);
+    public List<RecordIdentifier> getMetricPairedDataIDs() {
+        List<RecordIdentifier> res = new ArrayList<>();
+        Set<RecordIdentifier> allMetricRids = metricRids.keySet();
+        for (RecordIdentifier rid : allMetricRids) {
+            List<DSSPathname> paths = metricPathNames.get(rid);
+            for (DSSPathname path : paths) {
+                if (MetricPathTools.isMetricPairedData(path.cPart())) {
+                    res.add(rid);
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+
+    public List<RecordIdentifier> getMetricTimeSeriesIDs() {
+        List<RecordIdentifier> res = new ArrayList<>();
+        Set<RecordIdentifier> allMetricRids = metricRids.keySet();
+        for (RecordIdentifier rid : allMetricRids) {
+            List<DSSPathname> paths = metricPathNames.get(rid);
+            for (DSSPathname path : paths) {
+                if (MetricPathTools.isMetricTimeSeries(path.cPart())) {
+                    res.add(rid);
+                    break;
+                }
+            }
+        }
+        return res;
     }
 }

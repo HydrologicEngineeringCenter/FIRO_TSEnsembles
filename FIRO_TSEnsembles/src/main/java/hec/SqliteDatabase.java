@@ -490,6 +490,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
     }
 
     @Override
+    public void write(MetricCollection metrics) throws Exception {
+
+    }
+
+    @Override
     public void write(MetricCollectionTimeSeries[] mtsArray) throws Exception {
         String compress = "gzip";
         int mc_id = GetMaxID(metricCollectionTableName);
@@ -691,6 +696,12 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         }
         return rval;
     }
+
+    @Override
+    public List<RecordIdentifier> getMectricPairedDataIDs() {
+        return null;
+    }
+
     @Override
     public List<ZonedDateTime> getMetricCollectionIssueDates(RecordIdentifier timeseriesID) {
         List<ZonedDateTime> rval = new ArrayList<>();

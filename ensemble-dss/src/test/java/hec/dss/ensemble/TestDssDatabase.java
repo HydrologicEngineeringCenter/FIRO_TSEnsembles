@@ -264,9 +264,9 @@ public class TestDssDatabase {
 
         HecPairedData dss = new HecPairedData(dssFilename);
         String[] pathsToFind = new String[] {
-                "//Kanektok.BCAC1/member-flow///T:20131103-1200|V:20131103-120000|/",
-                "//Kanektok.BCAC1/member-flow///T:20131104-1200|V:20131104-120000|/",
-                "//Kanektok.BCAC1/member-flow///T:20131105-1200|V:20131105-120000|/"
+                "//Kanektok.BCAC1/flow-stats///T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/flow-stats///T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/flow-stats///T:20131105-1200|V:20131105-120000|/"
         };
 
         for (String path : pathsToFind) {
@@ -278,13 +278,10 @@ public class TestDssDatabase {
             assertEquals(59, pdc.xOrdinates.length);
         }
 
-//        db.catalog.update();
-//
-//        List<RecordIdentifier> mIds = db.getMetricTimeSeriesIDs();
-//        assertEquals(1, mIds.size());
-//
-//        MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mIds.get(0));
-//        assertEquals(3, mcts.getIssueDates().size());
+        db.catalog.update();
+
+        List<RecordIdentifier> mIds = db.getMectricPairedDataIDs();
+        assertEquals(1, mIds.size());
 
         dss.done();
 
