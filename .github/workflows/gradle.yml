@@ -32,4 +32,5 @@ jobs:
         path: |
          FIRO_TSEnsembles/build/libs
          firoplugin/build/libs
+         ensemble-dss/build/libs
     
