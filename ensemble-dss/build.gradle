@@ -40,8 +40,8 @@ test {
     }
 }
 dependencies {
-    windows_x64 'mil.army.usace.hec:javaHeclib:7-IN-2-win-x86_64@zip'
-    linux_x64 'mil.army.usace.hec:javaHeclib:7-IN-2-linux-x86_64@zip'
+    windows_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-win-x86_64@zip'
+    linux_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-linux-x86_64@zip'
 }
 
 task copyNatives(type: Copy){
