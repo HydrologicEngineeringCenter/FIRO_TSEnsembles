@@ -107,20 +107,20 @@ public class TestDssDatabase {
         DssDatabase db = getNewTestDssDatabase();
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
-        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, MEAN});
+        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, AVERAGE});
         MetricCollectionTimeSeries output = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(test);
         db.write(output);
 
         HecTimeSeries dss = new HecTimeSeries(db.getFileName());
         String[] pathsToFind = new String[] {
             "//Kanektok.BCAC1/flow-MAX/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-            "//Kanektok.BCAC1/flow-MEAN/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
+            "//Kanektok.BCAC1/flow-AVERAGE/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
             "//Kanektok.BCAC1/flow-MIN/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
             "//Kanektok.BCAC1/flow-MAX/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-            "//Kanektok.BCAC1/flow-MEAN/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
+            "//Kanektok.BCAC1/flow-AVERAGE/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
             "//Kanektok.BCAC1/flow-MIN/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
             "//Kanektok.BCAC1/flow-MAX/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
-            "//Kanektok.BCAC1/flow-MEAN/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
+            "//Kanektok.BCAC1/flow-AVERAGE/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
             "//Kanektok.BCAC1/flow-MIN/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/"
         };
 
@@ -142,7 +142,7 @@ public class TestDssDatabase {
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
 
-        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, MEAN});
+        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, AVERAGE});
         MetricCollectionTimeSeries output = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(test);
         db.write(output);
         db.catalog.update();
@@ -166,7 +166,7 @@ public class TestDssDatabase {
         DssDatabase db = getNewTestDssDatabase();
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
-        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, MEAN});
+        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, AVERAGE});
         MetricCollectionTimeSeries output = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(test);
         for (MetricCollection mc : output)
             db.write(mc);
