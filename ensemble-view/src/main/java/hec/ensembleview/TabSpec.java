@@ -4,14 +4,12 @@ import javax.swing.*;
 
 public class TabSpec {
     public String tabName;
-    public JPanel chartPanel;
-    public ComponentsPanel statPanel;
-    public ChartType chartType;
+    public JPanel panel;
+    public TabType tabType;
 
-    public TabSpec(String tabName, JPanel chartPanel, ComponentsPanel statPanel, ChartType chartType) {
+    public TabSpec(String tabName, JPanel panel, TabType tabType) {
         this.tabName = tabName;
-        this.chartPanel = chartPanel;
-        this.statPanel = statPanel;
-        this.chartType = chartType;
+        this.panel = panel;
+        this.tabType = tabType;
     }
 }

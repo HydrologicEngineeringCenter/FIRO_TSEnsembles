@@ -6,7 +6,7 @@ public enum Statistics {
     NONE,
     MIN,
     MAX,
-    MEAN,
+    AVERAGE,
     MEDIAN,
     TOTAL,
     PERCENTILE,

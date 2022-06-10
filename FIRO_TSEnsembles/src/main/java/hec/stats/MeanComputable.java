@@ -13,6 +13,6 @@ public class MeanComputable implements Computable{
 
     @Override
     public Statistics[] Statistics() {
-        return new Statistics[]{Statistics.MEAN};
+        return new Statistics[]{Statistics.AVERAGE};
     }
 }

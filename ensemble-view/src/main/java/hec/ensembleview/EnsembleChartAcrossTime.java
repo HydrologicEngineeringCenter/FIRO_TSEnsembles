@@ -73,7 +73,7 @@ public class EnsembleChartAcrossTime implements EnsembleChart, LinePlot {
         plot.setRangePannable(true);
 
         timeSeriesCollectionMap.forEach((k, v) -> {
-            rendererMap.put(k, new XYLineAndShapeRenderer());
+            rendererMap.put(k, new XYLineAndShapeRenderer(true, false));
             XYLineAndShapeRenderer renderer = rendererMap.get(k);
             plot.setDataset(k, timeSeriesCollectionMap.get(k));
             plot.setRenderer(k, renderer);
