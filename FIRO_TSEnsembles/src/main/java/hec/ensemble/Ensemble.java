@@ -3,7 +3,6 @@ package hec.ensemble;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 
-import hec.metrics.MetricCollection;
 import hec.stats.Computable;
 import hec.stats.Configurable;
 import hec.stats.MultiComputable;
@@ -129,7 +128,7 @@ public class Ensemble
       float[] rval;
       float[][] val = new float[size2][size];
       for (int i = 0; i <size ; i++) {
-        rval = cmd.MultiCompute(values[i]);
+        rval = cmd.multiCompute(values[i]);
         for (int j = 0; j<size2;j++){
           val[j][i] = rval[j];
         }
@@ -156,7 +155,7 @@ public class Ensemble
         for(int j = 0; j <traces; j++){
           tracevals[j] = values[j][i];//load all trace values for this timestep into an array
         }
-        rval = cmd.MultiCompute(tracevals);//compute a collection of statistics for this timestep and store.
+        rval = cmd.multiCompute(tracevals);//compute a collection of statistics for this timestep and store.
         for (int k = 0; k<size2;k++){
           val[k][i] = rval[k];
         }
@@ -184,7 +183,7 @@ public class Ensemble
       float[] rval;
       float[][] val = new float[traces][time];
       for (int i = 0; i <traces ; i++) {
-        rval = cmd.MultiCompute(values[i]);
+        rval = cmd.multiCompute(values[i]);
         for (int j = 0; j<time;j++){
           val[i][j] = rval[j];
         }

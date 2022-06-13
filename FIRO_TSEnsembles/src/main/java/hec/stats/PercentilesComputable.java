@@ -25,7 +25,7 @@ public class PercentilesComputable implements Computable, MultiComputable {
     }
 
     @Override
-    public float[] MultiCompute(float[] values) {
+    public float[] multiCompute(float[] values) {
         int size = this._percentiles.length;
         float[] result = new float[size];
         int i = 0;

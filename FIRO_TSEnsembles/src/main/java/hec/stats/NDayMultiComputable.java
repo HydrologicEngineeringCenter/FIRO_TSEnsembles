@@ -19,7 +19,7 @@ public class NDayMultiComputable implements Computable, StatisticsReportable, Co
 
     @Override
     public float compute(float[] values) {
-        values = _stepOne.MultiCompute(values);
+        values = _stepOne.multiCompute(values);
         int timestep = (int) _c.getDuration().toHours();
         int timestepDay = 24 / timestep;
         return values[timestepDay * _day];

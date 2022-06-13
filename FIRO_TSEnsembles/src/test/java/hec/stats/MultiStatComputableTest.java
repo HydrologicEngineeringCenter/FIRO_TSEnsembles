@@ -13,7 +13,7 @@ class MultiStatComputableTest {
     public void testMultiStatComputeSimpleArrayMinTwoStat() {
         MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, AVERAGE});
         float[] num = {1,2,3,4,5,6,7,8};
-        float[] results = test.MultiCompute(num);
+        float[] results = test.multiCompute(num);
         assertEquals(1, results[0]);
         assertEquals(4.5, results[1]);
 
@@ -22,14 +22,14 @@ class MultiStatComputableTest {
     public void testMultiStatComputeSimpleArrayTensMedianOneStat() {
         MultiComputable test = new MultiStatComputable(new Statistics[] {MIN});
         float[] num = {10,30,45,80,50};
-        float[] results = test.MultiCompute(num);
+        float[] results = test.multiCompute(num);
         assertEquals(10, results[0]);
     }
     @Test
     public void testMultiStatComputeSimpleArrayTensMedianThreeStat() {
         MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, AVERAGE, MAX});
         float[] num = {10,30,45,80,50};
-        float[] results = test.MultiCompute(num);
+        float[] results = test.multiCompute(num);
         assertEquals(10, results[0]);
         assertEquals(43, results[1]);
         assertEquals(80, results[2]);
@@ -39,7 +39,7 @@ class MultiStatComputableTest {
     public void testMultiStatComputeSimpleArrayTensMedianFiveStat() {
         MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MEAN, MAX, VARIANCE, STANDARDDEVIATION});
         float[] num = {10,30,45,80,50};
-        float[] results = test.MultiCompute(num);
+        float[] results = test.multiCompute(num);
         assertEquals(10, results[0]);
         assertEquals(43, results[1]);
         assertEquals(80, results[2]);
