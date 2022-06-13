@@ -28,13 +28,13 @@ class CumulativeFlowTest {
     @Test
     public void testCumulativeExactSimpleArray() {
         MultiComputable test = new CumulativeComputable();
-        assertArrayEquals(testResults(0), test.MultiCompute(testCases(0)));
+        assertArrayEquals(testResults(0), test.multiCompute(testCases(0)));
     }
 
     @Test
     public void testCumulativeExactSimpleArrayTens() {
         MultiComputable test = new CumulativeComputable();
-        assertArrayEquals(testResults(1), test.MultiCompute(testCases(1)));
+        assertArrayEquals(testResults(1), test.multiCompute(testCases(1)));
     }
 
     @Test

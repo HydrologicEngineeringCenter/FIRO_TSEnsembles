@@ -60,7 +60,7 @@ class PercentileTest {
     public void testPercentileExactTwoValuesSimpleArray() {
         PercentilesComputable test = new PercentilesComputable(new float[] {1.0f, 0.0f});
         float[] num = {1,2,3,4,5,6,7,8};
-        float[] results = test.MultiCompute(num);
+        float[] results = test.multiCompute(num);
         assertEquals(8, results[0]);
         assertEquals(1, results[1]);
     }

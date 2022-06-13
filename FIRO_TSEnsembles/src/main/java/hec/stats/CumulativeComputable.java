@@ -14,7 +14,7 @@ public class CumulativeComputable implements MultiComputable {
 
 
     @Override
-    public float[] MultiCompute(float[] values) {
+    public float[] multiCompute(float[] values) {
         float[] flowVol = new float[values.length];
         for (int i = 0; i < flowVol.length; i++) {
             if(i == 0) {
