@@ -37,7 +37,7 @@ class MultiStatComputableTest {
 
     @Test
     public void testMultiStatComputeSimpleArrayTensMedianFiveStat() {
-        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MEAN, MAX, VARIANCE, STANDARDDEVIATION});
+        MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, AVERAGE, MAX, VARIANCE, STANDARDDEVIATION});
         float[] num = {10,30,45,80,50};
         float[] results = test.multiCompute(num);
         assertEquals(10, results[0]);
