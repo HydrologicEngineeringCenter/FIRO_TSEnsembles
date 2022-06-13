@@ -18,6 +18,7 @@ public class MultiStatComputable implements MultiComputable, Computable {
 
     @Override
     public float compute(float[] values) {
+        float results = 0;
         InlineStats is = new InlineStats();
 
         for(float f : values){
@@ -25,6 +26,7 @@ public class MultiStatComputable implements MultiComputable, Computable {
         }
         return selectedStatCompute(0, is);
     }
+
     @Override
     public float[] multiCompute(float[] values) {
         int size =  statSelection.length;
