@@ -52,7 +52,7 @@ public final class Serializer {
                         float[] floatArray = (float[]) objectFieldValue;
                         attribute = Arrays.toString(floatArray);
                         break;
-                    case "Statistics[]":
+                    case "hec.stats.Statistics[]":
                         Statistics[] stats = (Statistics[]) objectFieldValue;
                         attribute = Arrays.toString(stats);
                         break;
@@ -90,6 +90,7 @@ public final class Serializer {
                 Type type = field.getType();
                 String stringType = type.getTypeName();
                 String fieldName = field.getName();
+
                 int modifiers = field.getModifiers();
                 if (Modifier.isProtected(modifiers)) {
                     System.out.println("protected");
@@ -97,18 +98,23 @@ public final class Serializer {
                     field.setAccessible(true);
                     System.out.println("private");
                 }
+
+                String attributeValue = ele.getAttributeValue(fieldName);
+                if(attributeValue == null){
+                    continue;
+                }
                 switch (stringType) {
                     case "java.lang.Double":
-                        field.set(computable, Double.parseDouble(ele.getAttribute(fieldName).getValue()));
+                        field.set(computable, Double.parseDouble(attributeValue));
                         break;
                     case "java.lang.Integer":
-                        field.set(computable, Integer.parseInt(ele.getAttribute(fieldName).getValue()));
+                        field.set(computable, Integer.parseInt(attributeValue));
                         break;
                     case "java.lang.float":
-                        field.set(computable, Float.parseFloat(ele.getAttributeValue(fieldName)));
+                        field.set(computable, Float.parseFloat(attributeValue));
                     case "float[]":
-                        String floatArray = ele.getAttributeValue(fieldName);
-                        String[] splitFloatArray = floatArray.split(",");
+                        String floatArrayNoBrackets = attributeValue.substring(1, attributeValue.length()-1);
+                        String[] splitFloatArray = floatArrayNoBrackets.split(",");
                         int numberOfValues = splitFloatArray.length;
                         float[] floats = new float[numberOfValues];
                         for (int i = 0; i < numberOfValues; i++) {
@@ -118,8 +124,8 @@ public final class Serializer {
                         field.set(computable, floats);
                         break;
                     case "Statistics[]":
-                        String statisticsString = ele.getAttributeValue(fieldName);
-                        String[] statisticsStringSplit = statisticsString.split(",");
+                        String statisticsStringNoBrackets = attributeValue.substring(1, attributeValue.length()-1);
+                        String[] statisticsStringSplit = statisticsStringNoBrackets.split(",");
                         int numValues = statisticsStringSplit.length;
                         Statistics[] statsArray = new Statistics[numValues];
                         for (int i = 0; i < numValues; i++) {
