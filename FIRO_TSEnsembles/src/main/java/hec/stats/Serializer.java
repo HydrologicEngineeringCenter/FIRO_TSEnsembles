@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class Serializer {
-    static <T> Element toXML(T computableThing) throws Exception {
+    public static <T> Element toXML(T computableThing) {
         //Get this class's fields and create an element with this class's name.
         Field[] fields = computableThing.getClass().getDeclaredFields();
         Element ele = new Element(computableThing.getClass().getName());
@@ -66,20 +66,18 @@ public final class Serializer {
                         boolean bool = (boolean)objectFieldValue;
                         attribute = Boolean.toString(bool);
                         break;
-                    default:
-                        throw new Exception("We didn't catch " + f.getName() + " of Type " + stringType);
                 }
                 if (attribute != null) {
                     ele.setAttribute(fieldName, attribute);
                 }
             } catch (IllegalArgumentException | IllegalAccessException ex) {
-                throw ex;
+                System.out.println("toXML failed");
             }
         }
         return ele;
     }
-    public static <T> T fromXML(Element ele) throws ClassNotFoundException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException {
-        T computable;
+    public static <T> T fromXML(Element ele)  {
+        T computable = null;
         Class<?> c;
         String computableName = ele.getName();
         try {
@@ -150,7 +148,7 @@ public final class Serializer {
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-            throw e;
+            System.out.println("fromXML Failed");
         }
         return computable;
 
