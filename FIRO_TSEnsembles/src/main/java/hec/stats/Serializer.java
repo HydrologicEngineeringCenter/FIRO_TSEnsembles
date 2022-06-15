@@ -18,7 +18,6 @@ public final class Serializer {
             try {
                 //Get information on the field
                 Type type = f.getType();
-                String stringClassName = f.getClass().getName();
                 String stringType = type.getTypeName();
                 String fieldName = f.getName();
                 //Make sure we can access it even if it's private
