@@ -15,6 +15,9 @@ public class MultiStatComputable implements MultiComputable{
         this.statSelection = statSelection;
     }
 
+    //empty constructor for reflection
+    public MultiStatComputable(){};
+
     @Override
     public float[] MultiCompute(float[] values) {
         int size =  statSelection.length;
