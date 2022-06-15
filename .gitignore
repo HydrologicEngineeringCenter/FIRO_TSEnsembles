@@ -39,3 +39,9 @@ hs_err_pid*
 /firoplugin/build/*
 /FIRO_TSEnsembles/build/*
 /firoplugin/.idea/*
+
+FIRO_TSEnsembles/bin/**
+FIRO_TSEnsembles/build/**
+ensemble-view/build/**
+ensemble-dss/bin/**
+ensemble-dss/build/**

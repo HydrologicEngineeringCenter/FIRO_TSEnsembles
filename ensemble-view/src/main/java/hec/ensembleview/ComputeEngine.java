@@ -1,14 +1,9 @@
 package hec.ensembleview;
 
+import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.metrics.MetricCollectionTimeSeries;
-import hec.stats.CumulativeComputable;
-import hec.stats.MaxAccumDuration;
-import hec.stats.MaxAvgDuration;
-import hec.stats.MultiStatComputable;
-import hec.stats.PercentilesComputable;
-import hec.stats.Statistics;
-import hec.stats.Total;
+import hec.stats.*;
 
 import java.time.ZonedDateTime;
 
@@ -26,7 +21,7 @@ public class ComputeEngine {
         switch(stat){
             case MIN:
             case MAX:
-            case MEAN:
+            case AVERAGE:
                 return computeStatFromMultiStatComputable(ets, stat, selectedZdt, chartType);
             case TOTAL:
                 return computeStatFromTotalComputable(ets, stat, selectedZdt);
@@ -35,7 +30,7 @@ public class ComputeEngine {
         }
     }
 
-    public float[][] computeRadioButtonTransform(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
+    public float[][] computeRadioButtonTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
         switch(stat) {
             case CUMULATIVE:
                 return computeStatFromCumulativeComputable(ets, selectedZdt);
@@ -55,6 +50,44 @@ public class ComputeEngine {
                 return new float[0];
         }
     }
+
+    public float computeTwoStepComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
+        SingleComputable compute;
+        if(stepOne == Statistics.CUMULATIVE) {
+            compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), (int) stepOneValues[0]), getComputable(stepTwo, stepTwoValues), false);
+        } else {
+            compute = new TwoStepComputable(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), computeAcrossEnsembles);
+        }
+        Ensemble e = ets.getEnsemble(selectedZdt);
+        return e.singleComputeForEnsemble(compute);
+    }
+
+    private Computable getComputable(Statistics stat, float[] values) {
+        switch (stat) {
+            case MIN:
+                return new MinComputable();
+            case MAX:
+                return new MaxComputable();
+            case AVERAGE:
+                return new MeanComputable();
+            case MEDIAN:
+                return new MedianComputable();
+            case PERCENTILE:
+                return new PercentilesComputable(values);
+            case TOTAL:
+                return new Total();
+            case MAXACCUMDURATION:
+                return new MaxAccumDuration((int) values[0]);
+            case MAXAVERAGEDURATION:
+                return new MaxAvgDuration((int) values[0]);
+            default:
+                return null;
+        }
+    }
+
+/*    public float computeNDayMultiComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, Statistics stepTwo, float[] stepTwoValues) {
+        SingleComputable compute
+    }*/
 
     private float[] computeStatFromMultiStatComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
         if(chartType == ChartType.TimePlot) {

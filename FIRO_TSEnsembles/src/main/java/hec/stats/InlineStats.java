@@ -19,12 +19,16 @@ public class InlineStats {
         return _sampleSize;
     }
     public float getSampleVariance(){
-        return _mean;
+        return _sampleVariance;
     }
+    public float getSampleStandardDeviation() {return (float) Math.sqrt(_sampleVariance); }
     public InlineStats(){
         //no initialization logic necessary.
     }
     public void AddObservation(float value){
+        float sampleVariance = 0;
+        float part1 = 0;
+        float part2 = 0;
         if (_sampleSize == 0){
             _min = value;
             _max = value;
@@ -38,8 +42,10 @@ public class InlineStats {
                 _min = value;
             }
             _sampleSize +=1;
-            _sampleVariance = (float) ((_sampleSize -2)/(_sampleSize-1))*_sampleVariance + (float)java.lang.Math.pow(value-_mean,2)/(float)(_sampleSize);
+
+            _sampleVariance = ((float)(_sampleSize - 2) / (_sampleSize - 1)) * _sampleVariance + (float) Math.pow(value-_mean,2)/(float)(_sampleSize);
             _mean += ((value - _mean)/(float)(_sampleSize));
+
         }
     }
 }

@@ -19,7 +19,7 @@ class TwoStepComputableTest {
         float[] num2 = {1,2,3,2,5,6,9,9};
         float[][] vals = {num1,num2};
         float results = test.compute(vals);
-        assertEquals(10, results);
+        assertEquals(6.5, results);
     }
 
     @Test
@@ -32,7 +32,7 @@ class TwoStepComputableTest {
         float[] num2 = {1,2,3,2,5,6,9,9,4,35};
         float[][] vals = {num1,num2};
         float results = test.compute(vals);
-        assertEquals(36.5, results);
+        assertEquals(15.899999618530273, results);
     }
 
     @Test
@@ -45,7 +45,7 @@ class TwoStepComputableTest {
         float[] num2 = {1,2,3,2,5,6,9,9,4,35};
         float[][] vals = {num1,num2};
         float results = test.compute(vals);
-        assertEquals(26.49999237060547, results);
+        assertEquals(38.5, results);
     }
 
     @Test
@@ -55,7 +55,7 @@ class TwoStepComputableTest {
         float[] num2 = {1,2,3,2,5,6,9,9};
         float[][] vals = {num1,num2};
         float results = test.compute(vals);
-        assertEquals(6.5, results);
+        assertEquals(10, results);
     }
 
 
@@ -65,7 +65,7 @@ class TwoStepComputableTest {
             Ensemble e = TestData.getSampleEnsemble();
             SingleComputable test = new TwoStepComputable(new MaxAccumDuration(48), new MeanComputable(), true);
             float output = e.singleComputeForEnsemble(test);
-            assertEquals(210.24407958984375, output);
+            assertEquals(-3403.642822265625, output);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
@@ -78,7 +78,7 @@ class TwoStepComputableTest {
             Ensemble e = TestData.getSampleEnsemble();
             SingleComputable test = new TwoStepComputable(new MaxAccumDuration(2), new PercentilesComputable(0.9f), true);
             float output = e.singleComputeForEnsemble(test);
-            assertEquals(63.331871032714844, output);
+            assertEquals(32.24934387207031, output);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
@@ -91,7 +91,7 @@ class TwoStepComputableTest {
             Ensemble e = TestData.getSampleEnsemble();
             SingleComputable test = new TwoStepComputable(new MaxAccumDuration(2), new PercentilesComputable(0.9f), false);
             float output = e.singleComputeForEnsemble(test);
-            assertEquals(32.24934387207031, output);
+            assertEquals(63.331871032714844, output);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
@@ -105,7 +105,7 @@ class TwoStepComputableTest {
             SingleComputable test = new TwoStepComputable(new MaxComputable(), new MeanComputable(), true);
 
             float output = e.singleComputeForEnsemble(test);
-            assertEquals(12.504984855651855, output);
+            assertEquals(8.83727741241455, output);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
@@ -119,7 +119,7 @@ class TwoStepComputableTest {
             SingleComputable test = new TwoStepComputable(new MaxComputable(), new MeanComputable(), false);
 
             float output = e.singleComputeForEnsemble(test);
-            assertEquals(8.83727741241455, output);
+            assertEquals(12.504984855651855, output);
         } catch (Exception e) {
             Logger.logError(e);
             fail();

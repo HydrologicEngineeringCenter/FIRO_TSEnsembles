@@ -252,8 +252,8 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
 
     /**
      * Writes an array of EnsembleTimeSeries to the database.
-     * @param etsArray
-     * @throws Exception
+     * @param etsArray array of EnsembleTimeSeries
+     * @throws Exception throws exception if an error occurs during write.
      */
     @Override
     public void write(EnsembleTimeSeries[] etsArray) throws Exception {
@@ -462,6 +462,12 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         }
         return rval;
     }
+
+    @Override
+    public String getFileName() {
+        return this.FileName;
+    }
+
     @Override
     public List<ZonedDateTime> getEnsembleIssueDates(RecordIdentifier timeseriesID) {
         List<ZonedDateTime> rval = new ArrayList<>();
@@ -487,6 +493,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
     @Override
     public void write(MetricCollectionTimeSeries mts) throws Exception {
         write(new MetricCollectionTimeSeries[] { mts });
+    }
+
+    @Override
+    public void write(MetricCollection metrics) throws Exception {
+
     }
 
     @Override
@@ -691,6 +702,12 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         }
         return rval;
     }
+
+    @Override
+    public List<RecordIdentifier> getMectricPairedDataIDs() {
+        return null;
+    }
+
     @Override
     public List<ZonedDateTime> getMetricCollectionIssueDates(RecordIdentifier timeseriesID) {
         List<ZonedDateTime> rval = new ArrayList<>();

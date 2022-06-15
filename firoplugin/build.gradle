@@ -21,7 +21,11 @@ jar {
 }
 dependencies {
     implementation project(":FIRO_TSEnsembles")
-    implementation 'mil.army.usace.hec:hec-core:6.0-20210210.230316-12'
+    implementation ('mil.army.usace.hec:hec-monolith:2.0.1'){
+        exclude group: "codebase", module: "*"
+        exclude group: "com.sun.media", module: "*"
+        exclude group: "javax.media", module: "*"
+    }
     implementation 'mil.army.usace.hec:hec-externaldata:1.0.3@jar'
 }
 

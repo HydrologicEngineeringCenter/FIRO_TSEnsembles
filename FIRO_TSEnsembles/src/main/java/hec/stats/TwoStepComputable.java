@@ -2,20 +2,21 @@ package hec.stats;
 
 public class TwoStepComputable implements SingleComputable, Configurable {
 
-    private  Computable _stepOne;
-    private  Computable _stepTwo;
-    private boolean _acrossTime;
+    private Computable _stepOne;
+    private Computable _stepTwo;
+    private boolean _computeAcrossEnsembles;
+
     Configuration _c;
 
     /**
      * The two step computable computes two computable object in sequence either across time or across ensembles.
-     * Across time or across ensembles can be computed first or second
+     * Compute across time outputs a single value per ensemble.  Compute across ensembles outputs a single timeseries
      */
 
-    public TwoStepComputable(Computable stepOne, Computable stepTwo, boolean acrossTime) {
+    public TwoStepComputable(Computable stepOne, Computable stepTwo, boolean computeAcrossEnsembles) {
         _stepOne = stepOne;
         _stepTwo = stepTwo;
-        _acrossTime = acrossTime;
+        _computeAcrossEnsembles = computeAcrossEnsembles;
     }
 
     //necessary for reflection.
@@ -28,7 +29,7 @@ public class TwoStepComputable implements SingleComputable, Configurable {
         if (_stepOne instanceof hec.stats.Configurable && _c != null){
             ((Configurable)_stepOne).configure(_c);
         }
-        if (_acrossTime) { // iterates over the traces for all of their timesteps, then computes then computes a single summary value across ensembles
+        if (!_computeAcrossEnsembles) { // iterates over the traces for all of their timesteps, then computes then computes a single summary value across ensembles
 
             float[] rows = new float[values.length];  //returns the length of rows
             for (int i = 0; i < values.length; i++) {

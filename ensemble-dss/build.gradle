@@ -1,0 +1,64 @@
+import org.gradle.internal.os.OperatingSystem
+
+plugins {
+    id 'java'
+    id 'java-library'
+}
+dependencies {
+    implementation project(":FIRO_TSEnsembles");
+}
+configurations {
+    windows_x64
+    linux_x64
+}
+
+group 'hec.dss.ensemble'
+version '0.1'
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://www.hec.usace.army.mil/nexus/repository/maven-public'
+    }
+}
+dependencies {
+    implementation project(":FIRO_TSEnsembles")
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    implementation ('mil.army.usace.hec:hec-monolith:3.0.0-rc5'){
+        exclude group: "codebase", module: "*"
+        exclude group: "com.sun.media", module: "*"
+        exclude group: "javax.media", module: "*"
+    }
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs = ["-Djava.library.path=${buildDir}/x64"]
+}
+dependencies {
+    windows_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-win-x86_64@zip'
+    linux_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-linux-x86_64@zip'
+}
+
+task copyNatives(type: Copy){
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        configurations.windows_x64.asFileTree.each {
+            from(zipTree(it))
+            into "$buildDir/x64"
+        }
+    }
+    if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        configurations.linux_x64.asFileTree.each {
+            from(zipTree(it))
+            into "$buildDir/x64"
+        }
+    }
+}
+jar {
+    dependsOn copyNatives
+}
+
+build {
+    dependsOn jar
+}
