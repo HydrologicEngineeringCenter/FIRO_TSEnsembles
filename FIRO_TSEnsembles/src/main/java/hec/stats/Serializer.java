@@ -121,7 +121,7 @@ public final class Serializer {
                         }
                         field.set(computable, floats);
                         break;
-                    case "Statistics[]":
+                    case "hec.stats.Statistics[]":
                         String statisticsStringNoBrackets = attributeValue.substring(1, attributeValue.length()-1);
                         String[] statisticsStringSplit = statisticsStringNoBrackets.split(",");
                         int numValues = statisticsStringSplit.length;
