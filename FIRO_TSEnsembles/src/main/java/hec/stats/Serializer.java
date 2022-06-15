@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.List;
 
 public final class Serializer {
     static <T> Element toXML(T computableThing) throws Exception {
@@ -17,6 +18,7 @@ public final class Serializer {
             try {
                 //Get information on the field
                 Type type = f.getType();
+                String stringClassName = f.getClass().getName();
                 String stringType = type.getTypeName();
                 String fieldName = f.getName();
                 //Make sure we can access it even if it's private
@@ -53,13 +55,18 @@ public final class Serializer {
                         break;
                     case "Statistics[]":
                         Statistics[] stats = (Statistics[]) objectFieldValue;
-                        String statsString = Arrays.toString(stats);
-                        ele.setAttribute(f.getName(), statsString);
+                        attribute = Arrays.toString(stats);
                         break;
                     case "hec.stats.Computable":
                         Computable computable = (Computable) objectFieldValue;
                         Element computableEle = Serializer.toXML(computable); //recursive call
+                        computableEle.setAttribute("fieldName", fieldName);
                         ele.addContent(computableEle);
+                        break;
+                    case "boolean":
+                        boolean bool = (boolean)objectFieldValue;
+                        attribute = Boolean.toString(bool);
+                        break;
                     default:
                         throw new Exception("We didn't catch " + f.getName() + " of Type " + stringType);
                 }
@@ -123,9 +130,15 @@ public final class Serializer {
                         field.set(computable, statsArray);
                         break;
                     case "hec.stats.Computable":
-                        Element computableElement = ele.getChild(fieldName);
-                        Computable computer = Serializer.fromXML(computableElement);
-                        field.set(computable, computer);
+                        List<Object> childs =  ele.getChildren();
+                        for( Object child: childs){
+                            Element childElement = (Element)child;
+                            String elementFieldName = childElement.getAttribute("fieldName").toString();
+                            if(elementFieldName.equals(fieldName)){
+                                Computable computer = Serializer.fromXML(childElement);
+                                field.set(computable, computer);
+                            }
+                        }
                         break;
                     default:
                         break;
