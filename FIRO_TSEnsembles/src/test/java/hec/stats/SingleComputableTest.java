@@ -1,5 +1,6 @@
 package hec.stats;
 
+import org.jdom.Element;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,11 +12,11 @@ class SingleComputableTest {
     @Test
     void ToAndFromXML() {
         try {
-            var a= Serializer.toXML(maxOfMax);
-            var b = Serializer.toXML( twostep);
+            Element a= Serializer.toXML(maxOfMax);
+            Element b = Serializer.toXML( twostep);
 
-            var A = Serializer.fromXML(a);
-            var B = Serializer.fromXML(b);
+            SingleComputable A = Serializer.fromXML(a);
+            SingleComputable B = Serializer.fromXML(b);
 
         } catch (Exception exception) {
             exception.printStackTrace();

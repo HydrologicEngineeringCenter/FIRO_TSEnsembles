@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MultiComputableTest {
 
-    Statistics[] stats = new Statistics[]{Statistics.MAX, Statistics.MEAN, Statistics.MIN};
+    Statistics[] stats = new Statistics[]{Statistics.MAX, Statistics.AVERAGE, Statistics.MIN};
     MultiComputable multiStatComputable = new MultiStatComputable(stats);
     MultiComputable cumulativeComputable = new CumulativeComputable();
     MultiComputable percentilesComputable = new PercentilesComputable((float).001);
@@ -15,13 +15,13 @@ class MultiComputableTest {
     @Test
     void toAndFromXML() { ;
         try {
-            var a = Serializer.toXML(multiStatComputable);
-            var b = Serializer.toXML(cumulativeComputable);
-            var c = Serializer.toXML(percentilesComputable);
+            Element a = Serializer.toXML(multiStatComputable);
+            Element b = Serializer.toXML(cumulativeComputable);
+            Element c = Serializer.toXML(percentilesComputable);
 
-            var A = Serializer.fromXML(a);
-            var B = Serializer.fromXML(b);
-            var C = Serializer.fromXML(c);
+            MultiComputable A = Serializer.fromXML(a);
+            MultiComputable B = Serializer.fromXML(b);
+            MultiComputable C = Serializer.fromXML(c);
         } catch (Exception e) {
             e.printStackTrace();
             fail();

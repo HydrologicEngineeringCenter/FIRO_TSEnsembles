@@ -1,11 +1,9 @@
 package hec.stats;
 
-import hec.ensemble.Ensemble;
-import hec.ensemble.TestData;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.jdom.Element;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 class ComputableTest {
     Computable maxAccumDuration = new MaxAccumDuration(3);
@@ -19,21 +17,21 @@ class ComputableTest {
     @Test
     void ToAndFromXML() {
         try {
-            var a= Serializer.toXML(maxAccumDuration);
-            var b = Serializer.toXML( maxAvgDuration);
-            var c = Serializer.toXML( maxComputable);
-            var d = Serializer.toXML(meanComputable);
-            var e = Serializer.toXML(medianComputable);
-            var f = Serializer.toXML(minComputable);
-            var g = Serializer.toXML(percentiles);
+            Element a= Serializer.toXML(maxAccumDuration);
+            Element b = Serializer.toXML( maxAvgDuration);
+            Element c = Serializer.toXML( maxComputable);
+            Element d = Serializer.toXML(meanComputable);
+            Element e = Serializer.toXML(medianComputable);
+            Element f = Serializer.toXML(minComputable);
+            Element g = Serializer.toXML(percentiles);
 
-            var A = Serializer.fromXML(a);
-            var B = Serializer.fromXML(b);
-            var C = Serializer.fromXML(c);
-            var D = Serializer.fromXML(d);
-            var E = Serializer.fromXML(e);
-            var F = Serializer.fromXML(f);
-            var G = Serializer.fromXML(g);
+            Computable A = Serializer.fromXML(a);
+            Computable B = Serializer.fromXML(b);
+            Computable C = Serializer.fromXML(c);
+            Computable D = Serializer.fromXML(d);
+            Computable E = Serializer.fromXML(e);
+            Computable F = Serializer.fromXML(f);
+            Computable G = Serializer.fromXML(g);
 
         } catch (Exception exception) {
             exception.printStackTrace();
