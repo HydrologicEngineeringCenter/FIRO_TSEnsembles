@@ -111,22 +111,18 @@ public final class Serializer {
                     case "java.lang.float":
                         field.set(computable, Float.parseFloat(attributeValue));
                     case "float[]":
-                        String floatArrayNoBrackets = attributeValue.substring(1, attributeValue.length()-1);
-                        String[] splitFloatArray = floatArrayNoBrackets.split(",");
-                        int numberOfValues = splitFloatArray.length;
-                        float[] floats = new float[numberOfValues];
-                        for (int i = 0; i < numberOfValues; i++) {
-                            float value = Float.parseFloat(splitFloatArray[i]);
+                        String[] floatStringSplit = prepareXMLArray(attributeValue);
+                        float[] floats = new float[floatStringSplit.length];
+                        for (int i = 0; i < floatStringSplit.length; i++) {
+                            float value = Float.parseFloat(floatStringSplit[i]);
                             floats[i] = value;
                         }
                         field.set(computable, floats);
                         break;
                     case "hec.stats.Statistics[]":
-                        String statisticsStringNoBrackets = attributeValue.substring(1, attributeValue.length()-1);
-                        String[] statisticsStringSplit = statisticsStringNoBrackets.split(",");
-                        int numValues = statisticsStringSplit.length;
-                        Statistics[] statsArray = new Statistics[numValues];
-                        for (int i = 0; i < numValues; i++) {
+                        String[] statisticsStringSplit = prepareXMLArray(attributeValue);
+                        Statistics[] statsArray = new Statistics[statisticsStringSplit.length];
+                        for (int i = 0; i < statisticsStringSplit.length; i++) {
                             Statistics stat = Statistics.valueOf(statisticsStringSplit[i]);
                             statsArray[i] = stat;
                         }
@@ -152,6 +148,16 @@ public final class Serializer {
         }
         return computable;
 
+    }
+
+    private static String[] prepareXMLArray(String attributeValue){
+        String stringNoBrackets = attributeValue.substring(1, attributeValue.length()-1);
+        String[] StringSplit = stringNoBrackets.split(",");
+        int numValues = StringSplit.length;
+        for(int i = 0; i< numValues; i++){
+            StringSplit[i] = StringSplit[i].trim();
+        }
+        return StringSplit;
     }
 
 }
