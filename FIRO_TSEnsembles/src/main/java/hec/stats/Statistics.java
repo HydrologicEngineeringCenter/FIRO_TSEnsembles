@@ -15,6 +15,7 @@ public enum Statistics {
     CUMULATIVE,
     MAXAVERAGEDURATION,
     MAXACCUMDURATION,
+    MOVINGAVG,
     COMPUTABLE;
 
     public static String pack(EnumSet<Statistics> set){ //returns a list of the statistics in a string format

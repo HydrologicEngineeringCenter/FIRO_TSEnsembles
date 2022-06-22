@@ -19,6 +19,10 @@ public class NDayMultiComputable implements Computable, StatisticsReportable, Co
 
     @Override
     public float compute(float[] values) {
+        if (_stepOne instanceof hec.stats.Configurable && _c != null){
+            ((Configurable)_stepOne).configure(_c);
+        }
+
         values = _stepOne.multiCompute(values);
         int timestep = (int) _c.getDuration().toHours();
         int timestepDay = 24 / timestep;

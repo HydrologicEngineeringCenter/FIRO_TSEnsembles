@@ -18,6 +18,7 @@ public class StatisticsStringMap {
         map.put(Statistics.CUMULATIVE, "Cumulative");
         map.put(Statistics.NONE, "Original");
         map.put(Statistics.MAXAVERAGEDURATION, "Max Average Duration");
+        map.put(Statistics.MOVINGAVG, "Moving Average");
         map.put(Statistics.MAXACCUMDURATION, "Max Accum Duration");
     }
 }

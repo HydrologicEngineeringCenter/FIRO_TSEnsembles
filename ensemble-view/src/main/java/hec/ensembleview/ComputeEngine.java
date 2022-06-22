@@ -37,6 +37,13 @@ public class ComputeEngine {
         }
         return new float[0][0];
     }
+    public float[][] computeTextBoxRadioTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] values, ChartType chartType) {
+        switch(stat) {
+            case MOVINGAVG:
+                return computeStatFromMovingAvg(ets, selectedZdt, (int) values[0]);
+        }
+        return new float[0][0];
+    }
 
     public float[] computeTextBoxStat(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] values, ChartType chartType) {
         switch(stat){
@@ -53,11 +60,19 @@ public class ComputeEngine {
 
     public float computeTwoStepComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
         SingleComputable compute;
-        if(stepOne == Statistics.CUMULATIVE) {
+        if (stepOne == Statistics.CUMULATIVE) {
             compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), (int) stepOneValues[0]), getComputable(stepTwo, stepTwoValues), false);
         } else {
             compute = new TwoStepComputable(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), computeAcrossEnsembles);
         }
+        Ensemble e = ets.getEnsemble(selectedZdt);
+        return e.singleComputeForEnsemble(compute);
+    }
+
+    public float computeTwoStepComputableMovingAvg(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, float[] stepOneValues, float [] movingAvgStatValue, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
+        SingleComputable compute;
+        compute = new TwoStepComputable(new NDayMultiComputable(new MovingAvg((int) movingAvgStatValue[0]), (int) stepOneValues[0]), getComputable(stepTwo, stepTwoValues), false);
+
         Ensemble e = ets.getEnsemble(selectedZdt);
         return e.singleComputeForEnsemble(compute);
     }
@@ -135,6 +150,13 @@ public class ComputeEngine {
     private float[][] computeStatFromCumulativeComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt) {
         MetricCollectionTimeSeries mct = ets.iterateTracesOfEnsemblesWithMultiComputable(
                 new CumulativeComputable());
+
+        return mct.getMetricCollection(selectedZdt).getValues();
+    }
+
+    private float[][] computeStatFromMovingAvg(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, int values) {
+        MetricCollectionTimeSeries mct = ets.iterateTracesOfEnsemblesWithMultiComputable(
+                new MovingAvg(values));
 
         return mct.getMetricCollection(selectedZdt).getValues();
     }

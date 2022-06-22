@@ -2,6 +2,7 @@ package hec.ensembleview;
 
 import hec.ensembleview.mappings.StatisticsUITypeMap;
 import hec.stats.Statistics;
+import org.jfree.chart.text.TextBox;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -32,6 +33,7 @@ public class ComponentsPanel {
         addComponentsToTimeSeriesViewPanel();
     }
 
+
     private void addComponentsToTimeSeriesViewPanel() {
         ButtonGroup buttonGroup = new ButtonGroup();
 
@@ -42,6 +44,11 @@ public class ComponentsPanel {
                 case CUMULATIVE:
                     timeSeriesViewPanel.add((RadioButtonStat)stat);
                     buttonGroup.add(((RadioButtonStat)stat).getRadioButton());
+                    break;
+
+                case MOVINGAVG:
+                    timeSeriesViewPanel.add((TextBoxRadioStat) stat);
+                    buttonGroup.add(((TextBoxRadioStat)stat).getRadioButton());
                     break;
             }
         }
@@ -110,6 +117,9 @@ public class ComponentsPanel {
                     break;
                 case RADIOBUTTON:
                     statsMapping.put(stat, new RadioButtonStat(stat));
+                    break;
+                case TEXTBOXRADIO:
+                    statsMapping.put(stat, new TextBoxRadioStat(stat));
                     break;
             }
         }

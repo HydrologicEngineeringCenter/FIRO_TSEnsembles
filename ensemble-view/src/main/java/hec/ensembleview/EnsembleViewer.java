@@ -127,16 +127,31 @@ public class EnsembleViewer {
             chart.setXLabel("Date/Time");
             chart.setYLabel(String.join(" ", selectedRid.parameter, ensemble.getUnits()));
             boolean randomColor = selectedStats.length <= 1;
-            if (isTimeSeriesViewSelected(selectedStats)){  // if the Radio button is selected to Cumulative or Moving Average, compute metric for time series view
-                float[][] cumulativeVals = computeEngine.computeRadioButtonTimeSeriesView(db.getEnsembleTimeSeries(selectedRid),
-                        getSelectedTimeSeriesView(selectedStats), selectedZdt, ChartType.TimePlot);
-                EnsembleTimeSeries ets = new EnsembleTimeSeries(selectedRid, "units", "data_type", "version");
-                ets.addEnsemble(new Ensemble(ensemble.getIssueDate(), cumulativeVals, ensemble.getStartDateTime(), ensemble.getInterval(), ensemble.getUnits()));
-                addStatisticsToTimePlot(chart, selectedStats, ets, dates);
-                addLineMembersToChart(chart, cumulativeVals, dates, randomColor);
-            }
-            else
-            {
+            if (isTimeSeriesViewSelected(selectedStats)) {  // if the Radio button is selected to Cumulative or Moving Average, compute metric for time series view
+                for (EnsembleViewStat stat : selectedStats) {
+                    switch (stat.getStatType()) {
+                        case CUMULATIVE: {
+                            float[][] cumulativeVals = computeEngine.computeRadioButtonTimeSeriesView(db.getEnsembleTimeSeries(selectedRid),
+                                    getSelectedTimeSeriesView(selectedStats), selectedZdt, ChartType.TimePlot);
+                            EnsembleTimeSeries ets = new EnsembleTimeSeries(selectedRid, "units", "data_type", "version");
+                            ets.addEnsemble(new Ensemble(ensemble.getIssueDate(), cumulativeVals, ensemble.getStartDateTime(), ensemble.getInterval(), ensemble.getUnits()));
+                            addStatisticsToTimePlot(chart, selectedStats, ets, dates);
+                            addLineMembersToChart(chart, cumulativeVals, dates, randomColor);
+                            break;
+                        }
+
+                        case MOVINGAVG: {
+                            float[][] MovingAvgVals = computeEngine.computeTextBoxRadioTimeSeriesView(db.getEnsembleTimeSeries(selectedRid),
+                                    getSelectedTimeSeriesView(selectedStats), selectedZdt, ((TextBoxRadioStat) stat).getTextFieldValue(), ChartType.TimePlot);
+                            EnsembleTimeSeries ets = new EnsembleTimeSeries(selectedRid, "units", "data_type", "version");
+                            ets.addEnsemble(new Ensemble(ensemble.getIssueDate(), MovingAvgVals, ensemble.getStartDateTime(), ensemble.getInterval(), ensemble.getUnits()));
+                            addStatisticsToTimePlot(chart, selectedStats, ets, dates);
+                            addLineMembersToChart(chart, MovingAvgVals, dates, randomColor);
+                            break;
+                        }
+                    }
+                }
+            } else {
                 addStatisticsToTimePlot(chart, selectedStats, db.getEnsembleTimeSeries(selectedRid), dates);
                 addLineMembersToChart(chart, vals, dates, randomColor);
             }
@@ -153,7 +168,7 @@ public class EnsembleViewer {
 
     private Statistics getSelectedTimeSeriesView(EnsembleViewStat[] selectedStats) {
         for (EnsembleViewStat stat : selectedStats) {
-            if (stat.getStatUIType() == StatisticUIType.RADIOBUTTON && stat.hasInput())
+            if (stat.getStatUIType() == StatisticUIType.RADIOBUTTON || stat.getStatUIType() == StatisticUIType.TEXTBOXRADIO && stat.hasInput())
                 return stat.getStatType();
         }
         return null;
@@ -161,11 +176,12 @@ public class EnsembleViewer {
 
     private boolean isTimeSeriesViewSelected(EnsembleViewStat[] selectedStats) {
         for (EnsembleViewStat stat : selectedStats) {
-            if (stat.getStatUIType() == StatisticUIType.RADIOBUTTON && stat.hasInput() && stat.getStatType() != Statistics.NONE)
+            if (stat.getStatUIType() == StatisticUIType.RADIOBUTTON && stat.hasInput() && stat.getStatType() != Statistics.NONE || stat.getStatUIType() == StatisticUIType.TEXTBOXRADIO)
                 return true;
         }
         return false;
     }
+
 
     private void addLineMembersToChart(EnsembleChart chart, float[][] vals, ZonedDateTime[] dates, boolean randomColor) throws ParseException {
         Color c = null;
@@ -442,12 +458,19 @@ public class EnsembleViewer {
 
     private void tryShowingSingleValueSummary(SingleValueSummaryTab tab) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
-        float value = computeEngine.computeTwoStepComputable(ets, selectedZdt, tab.getFirstStat(), tab.getFirstTextFieldValue(),
-                tab.getSecondStat(), tab.getSecondTextFieldValue(),
-                tab.getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles ||
-                        tab.getSummaryType() == SingleValueSummaryType.ComputeCumulative);
-
-        tab.tryShowingOutput(value);
+        if(tab.getSummaryType() == SingleValueSummaryType.ComputeMovingAvg) {
+            float value = computeEngine.computeTwoStepComputableMovingAvg(ets, selectedZdt, tab.getFirstStat(), tab.getFirstTextFieldValue(), tab.getFirstATextFieldValue(),
+                    tab.getSecondStat(), tab.getSecondTextFieldValue(),
+                    tab.getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles ||
+                            tab.getSummaryType() == SingleValueSummaryType.ComputeCumulative || tab.getSummaryType() == SingleValueSummaryType.ComputeMovingAvg);
+            tab.tryShowingOutput(value);
+        } else {
+            float value = computeEngine.computeTwoStepComputable(ets, selectedZdt, tab.getFirstStat(), tab.getFirstTextFieldValue(),
+                    tab.getSecondStat(), tab.getSecondTextFieldValue(),
+                    tab.getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles ||
+                            tab.getSummaryType() == SingleValueSummaryType.ComputeCumulative);
+            tab.tryShowingOutput(value);
+        }
     }
 
 

@@ -16,6 +16,7 @@ public class SingleValueComboBoxMap {
         summaryComboBoxMap.put(SingleValueSummaryType.ComputeAcrossEnsembles, "Compute Across Ensembles for Each Time Step");
         summaryComboBoxMap.put(SingleValueSummaryType.ComputeAcrossTime, "Compute Across Time Steps for Each Ensemble");
         summaryComboBoxMap.put(SingleValueSummaryType.ComputeCumulative, "Computing Cumulative");
+        summaryComboBoxMap.put(SingleValueSummaryType.ComputeMovingAvg, "Computing Moving Average");
 
         summaryStatisticsMap.put(SingleValueSummaryType.ComputeAcrossEnsembles,
                 Arrays.asList(
@@ -32,6 +33,12 @@ public class SingleValueComboBoxMap {
         summaryStatisticsMap.put(SingleValueSummaryType.ComputeCumulative,
                 Arrays.asList(
                         Arrays.asList(Statistics.CUMULATIVE),
+                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.PERCENTILE, Statistics.TOTAL)
+                )
+        );
+        summaryStatisticsMap.put(SingleValueSummaryType.ComputeMovingAvg,
+                Arrays.asList(
+                        Arrays.asList(Statistics.MOVINGAVG),
                         Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.PERCENTILE, Statistics.TOTAL)
                 )
         );

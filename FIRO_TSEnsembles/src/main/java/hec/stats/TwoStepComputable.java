@@ -25,7 +25,7 @@ public class TwoStepComputable implements SingleComputable, Configurable {
         if (_stepOne instanceof hec.stats.Configurable && _c != null){
             ((Configurable)_stepOne).configure(_c);
         }
-        if (!_computeAcrossEnsembles) { // iterates over the traces for all of their timesteps, then computes then computes a single summary value across ensembles
+        if (!_computeAcrossEnsembles) { // iterates over the traces for all of their timestep, then computes then computes a single summary value across ensembless
 
             float[] rows = new float[values.length];  //returns the length of rows
             for (int i = 0; i < values.length; i++) {
