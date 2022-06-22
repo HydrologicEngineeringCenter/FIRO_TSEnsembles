@@ -2,9 +2,10 @@ package hec.stats;
 
 public class TwoStepComputable implements SingleComputable, Configurable {
 
-    private final Computable _stepOne;
-    private final Computable _stepTwo;
+    private Computable _stepOne;
+    private Computable _stepTwo;
     private boolean _computeAcrossEnsembles;
+
     Configuration _c;
 
     /**
@@ -17,6 +18,9 @@ public class TwoStepComputable implements SingleComputable, Configurable {
         _stepTwo = stepTwo;
         _computeAcrossEnsembles = computeAcrossEnsembles;
     }
+
+    //necessary for reflection.
+    public TwoStepComputable(){ }
 
     @Override
     public float compute(float[][] values) {

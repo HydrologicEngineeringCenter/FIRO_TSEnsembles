@@ -12,6 +12,9 @@ public  class MaxAccumDuration implements Computable, Configurable {
         this._duration = duration;
     }
 
+    //empty constructor added to satisfy <init> requirement when deserializing from XML with reflection
+    public MaxAccumDuration(){}
+
     public MaxAccumDuration(Integer duration, Configuration c) {
         this._duration = duration;
         _c = c;

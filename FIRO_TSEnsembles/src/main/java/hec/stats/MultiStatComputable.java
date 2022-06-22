@@ -16,6 +16,9 @@ public class MultiStatComputable implements MultiComputable, Computable {
         this.statSelection = statSelection;
     }
 
+    //empty constructor for reflection
+    public MultiStatComputable(){};
+
     @Override
     public float compute(float[] values) {
         float results = 0;

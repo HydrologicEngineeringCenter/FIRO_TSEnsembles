@@ -1,5 +1,5 @@
 package hec.stats;
 
-public interface Computable extends StatisticsReportable{
-    public float compute(float[] values);
+public interface Computable extends StatisticsReportable {
+    float compute(float[] values);
 }
