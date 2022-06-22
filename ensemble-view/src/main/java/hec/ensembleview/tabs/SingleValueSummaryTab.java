@@ -1,6 +1,10 @@
 package hec.ensembleview.tabs;
 
+import hec.EnsembleDatabase;
+import hec.RecordIdentifier;
+import hec.ensemble.EnsembleTimeSeries;
 import hec.ensembleview.ChartType;
+import hec.ensembleview.ComputeEngine;
 import hec.ensembleview.SingleValueSummaryType;
 import hec.ensembleview.StatisticUIType;
 import hec.ensembleview.mappings.SingleValueComboBoxMap;
@@ -10,9 +14,10 @@ import hec.stats.Statistics;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
-public class SingleValueSummaryTab extends JPanel {
+public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
     JPanel leftPanel;
     JPanel rightPanel;
 
@@ -28,7 +33,14 @@ public class SingleValueSummaryTab extends JPanel {
 
     JTextArea outputArea;
 
+    EnsembleDatabase db;
+    RecordIdentifier rid;
+    ZonedDateTime zdt;
+    ComputeEngine computeEngine;
+
     public SingleValueSummaryTab() {
+        computeEngine = new ComputeEngine();
+
         initializeUI();
         organizeUI();
         setSummaryTypeComboBox();
@@ -158,6 +170,16 @@ public class SingleValueSummaryTab extends JPanel {
         cleanButton.addActionListener(e -> {
             outputArea.setText("");
         });
+
+        computeButton.addActionListener(e -> {
+            EnsembleTimeSeries ets = db.getEnsembleTimeSeries(rid);
+            float value = computeEngine.computeTwoStepComputable(ets, zdt, getFirstStat(), getFirstTextFieldValue(),
+                    getSecondStat(), getSecondTextFieldValue(),
+                    getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles ||
+                            getSummaryType() == SingleValueSummaryType.ComputeCumulative);
+
+            tryShowingOutput(value);
+        });
     }
 
     private void organizeUI() {
@@ -265,5 +287,20 @@ public class SingleValueSummaryTab extends JPanel {
             writeLn(String.join(" ", "Computing", getFirstStatString() + ",",
                     "then computing", getSecondStatString(), "across all ensemble members =", Float.toString(result)));
         }
+    }
+
+    @Override
+    public void setDatabase(EnsembleDatabase db) {
+        this.db = db;
+    }
+
+    @Override
+    public void setRecordIdentifier(RecordIdentifier rid) {
+        this.rid = rid;
+    }
+
+    @Override
+    public void setZonedDateTime(ZonedDateTime zdt) {
+        this.zdt = zdt;
     }
 }
