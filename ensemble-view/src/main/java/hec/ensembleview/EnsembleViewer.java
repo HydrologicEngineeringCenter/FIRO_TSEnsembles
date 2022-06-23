@@ -1,31 +1,26 @@
 package hec.ensembleview;
 
+import hec.EnsembleDatabase;
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
-import hec.ensemble.Ensemble;
-import hec.ensemble.EnsembleTimeSeries;
+import hec.dss.ensemble.DssDatabase;
 import hec.ensembleview.mappings.ChartTypeStatisticsMap;
-import hec.ensembleview.mappings.StatisticsStringMap;
 import hec.ensembleview.tabs.ChartTab;
 import hec.ensembleview.tabs.EnsembleTab;
 import hec.ensembleview.tabs.SingleValueSummaryTab;
-import hec.stats.Statistics;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.List;
-import java.util.Random;
+import java.util.Objects;
 
 public class EnsembleViewer {
-    public SqliteDatabase db;
+    public EnsembleDatabase db;
 
     private RecordIdentifier selectedRid = null;
     private ZonedDateTime selectedZdt = null;
@@ -189,13 +184,22 @@ public class EnsembleViewer {
         fileSearchButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setAcceptAllFileFilterUsed(false);
-            fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("SQLite Database File", "db"));
+            fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Database File", "db", "dss"));
             if (fileChooser.showOpenDialog(filePathPanel) == 0)
             {
-                filePath.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                String fileName = fileChooser.getSelectedFile().getAbsolutePath();
+                filePath.setText(fileName);
                 try {
-                    db = new SqliteDatabase(fileChooser.getSelectedFile().getAbsolutePath(),
-                            SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);
+                    int index = fileName.lastIndexOf('.');
+                    String extension = fileName.substring(index + 1);
+                    if (extension.equals("dss")) {
+                        db = new DssDatabase(fileName);
+                    } else if (extension.equals("db")) {
+                        db = new SqliteDatabase(fileName, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);
+                    } else {
+                        throw new Exception("File not supported");
+                    }
+
                     for (TabSpec tab : tabs) {
                         EnsembleTab et = (EnsembleTab)tab.panel;
                         et.setDatabase(db);
