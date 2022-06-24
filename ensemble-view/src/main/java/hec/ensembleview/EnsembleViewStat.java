@@ -5,7 +5,6 @@ import hec.SqliteDatabase;
 import hec.stats.Statistics;
 
 import java.awt.event.ActionListener;
-import java.time.ZonedDateTime;
 
 public interface EnsembleViewStat { //is implemented by the buttons.
     StatisticUIType getStatUIType();
