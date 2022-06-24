@@ -1,14 +1,11 @@
 package hec.ensembleview;
 
-import hec.RecordIdentifier;
-import hec.SqliteDatabase;
 import hec.ensembleview.mappings.StatisticsStringMap;
 import hec.stats.Statistics;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.time.ZonedDateTime;
 
 public class CheckBoxStat extends JPanel implements EnsembleViewStat {
     private final JCheckBox checkBox;

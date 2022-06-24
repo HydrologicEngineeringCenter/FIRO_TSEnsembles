@@ -6,7 +6,7 @@ import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensembleview.ChartType;
 import hec.ensembleview.ComponentsPanel;
-import hec.ensembleview.ComputeEngine;
+import hec.ensembleview.StatComputationHelper;
 import hec.ensembleview.EnsembleChart;
 import hec.ensembleview.EnsembleChartAcrossEnsembles;
 import hec.ensembleview.EnsembleChartAcrossTime;
@@ -36,13 +36,11 @@ public class ChartTab extends JPanel implements EnsembleTab {
     EnsembleDatabase db;
     RecordIdentifier rid;
     ZonedDateTime zdt;
-    ComputeEngine computeEngine;
 
     public ChartTab(JPanel chartPanel, ComponentsPanel componentsPanel, ChartType chartType) {
         this.chartPanel = chartPanel;
         this.componentsPanel = componentsPanel;
         this.chartType = chartType;
-        computeEngine = new ComputeEngine();
 
         setLayout(new BorderLayout());
         add(componentsPanel.getPanel(), BorderLayout.NORTH);
@@ -96,7 +94,7 @@ public class ChartTab extends JPanel implements EnsembleTab {
             chart.setYLabel(String.join(" ", rid.parameter, ensemble.getUnits()));
             boolean randomColor = selectedStats.length <= 1;
             if (isTimeSeriesViewSelected(selectedStats)){  // if the Radio button is selected to Cumulative or Moving Average, compute metric for time series view
-                float[][] cumulativeVals = computeEngine.computeRadioButtonTimeSeriesView(db.getEnsembleTimeSeries(rid),
+                float[][] cumulativeVals = StatComputationHelper.computeTimeSeriesView(db.getEnsembleTimeSeries(rid),
                         getSelectedTimeSeriesView(selectedStats), zdt, ChartType.TimePlot);
                 EnsembleTimeSeries ets = new EnsembleTimeSeries(rid, "units", "data_type", "version");
                 ets.addEnsemble(new Ensemble(ensemble.getIssueDate(), cumulativeVals, ensemble.getStartDateTime(), ensemble.getInterval(), ensemble.getUnits()));
@@ -125,18 +123,18 @@ public class ChartTab extends JPanel implements EnsembleTab {
                 case MIN:
                 case MAX:
                     chart.addLine(
-                            new LineSpec(0, computeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
+                            new LineSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
                                     new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                                             1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case AVERAGE:
                     chart.addLine(
-                            new LineSpec(0, computeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
+                            new LineSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
                                     new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MEDIAN:
                     chart.addLine(
-                            new LineSpec(0, computeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
+                            new LineSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
                                     new BasicStroke(3.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case PERCENTILE:
@@ -145,7 +143,7 @@ public class ChartTab extends JPanel implements EnsembleTab {
 
                     for(int i = 0; i < percentiles.length; i++) {
                         chart.addLine(
-                                new LineSpec(0, computeEngine.computeTextBoxStat(ets, selectedStat.getStatType(), zdt, new float[] {(percentiles[i])}, ChartType.TimePlot), dates,
+                                new LineSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, new float[] {(percentiles[i])}, ChartType.TimePlot), dates,
                                         new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                                                 1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
                     }
@@ -159,29 +157,29 @@ public class ChartTab extends JPanel implements EnsembleTab {
             switch (selectedStat.getStatType()) {
                 case MIN:
                     chart.addPoint(
-                            new PointSpec(0, computeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
+                            new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
                                     new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                                             1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.RED, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MAX:
                     chart.addPoint(
-                            new PointSpec(0, computeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
+                            new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
                                     new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                                             1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case AVERAGE:
                     chart.addPoint(
-                            new PointSpec(0, computeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
+                            new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
                                     new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MEDIAN:
                     chart.addPoint(
-                            new PointSpec(0, computeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
+                            new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
                                     new BasicStroke(3.0f), Color.ORANGE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case TOTAL:
                     chart.addPoint(
-                            new PointSpec(1, computeEngine.computeCheckBoxStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
+                            new PointSpec(1, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
                                     new BasicStroke(3.0f), Color.GRAY, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case PERCENTILE:
@@ -191,19 +189,19 @@ public class ChartTab extends JPanel implements EnsembleTab {
                     for(int i = 0; i < percentiles.length; i++) {
 
                         chart.addPoint(
-                                new PointSpec(0, computeEngine.computeTextBoxStat(ets, selectedStat.getStatType(), zdt, new float[] {(percentiles[i])}, ChartType.ScatterPlot),
+                                new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, new float[] {(percentiles[i])}, ChartType.ScatterPlot),
                                         new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                                                 1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
                     }
                     break;
                 case MAXAVERAGEDURATION:
                     chart.addPoint(
-                            new PointSpec(0, computeEngine.computeTextBoxStat(db.getEnsembleTimeSeries(rid), selectedStat.getStatType(), zdt, ((TextBoxStat) selectedStat).getTextFieldValue(), ChartType.ScatterPlot),
+                            new PointSpec(0, StatComputationHelper.computeStat(db.getEnsembleTimeSeries(rid), selectedStat.getStatType(), zdt, ((TextBoxStat) selectedStat).getTextFieldValue(), ChartType.ScatterPlot),
                                     new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case MAXACCUMDURATION:
                     chart.addPoint(
-                            new PointSpec(0, computeEngine.computeTextBoxStat(db.getEnsembleTimeSeries(rid), selectedStat.getStatType(), zdt, ((TextBoxStat) selectedStat).getTextFieldValue(), ChartType.ScatterPlot),
+                            new PointSpec(0, StatComputationHelper.computeStat(db.getEnsembleTimeSeries(rid), selectedStat.getStatType(), zdt, ((TextBoxStat) selectedStat).getTextFieldValue(), ChartType.ScatterPlot),
                                     new BasicStroke(3.0f), Color.GREEN, StatisticsStringMap.map.get(selectedStat.getStatType())));
             }
         }

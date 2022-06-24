@@ -187,6 +187,9 @@ public class EnsembleViewer {
             fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Database File", "db", "dss"));
             if (fileChooser.showOpenDialog(filePathPanel) == 0)
             {
+                dateTimes.removeAllItems();
+                locations.removeAllItems();
+
                 String fileName = fileChooser.getSelectedFile().getAbsolutePath();
                 filePath.setText(fileName);
                 try {

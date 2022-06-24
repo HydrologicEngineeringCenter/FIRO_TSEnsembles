@@ -2,22 +2,34 @@ package hec.ensembleview;
 
 import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
+import hec.stats.Computable;
+import hec.stats.CumulativeComputable;
+import hec.stats.MaxAccumDuration;
+import hec.stats.MaxAvgDuration;
+import hec.stats.MaxComputable;
+import hec.stats.MeanComputable;
+import hec.stats.MedianComputable;
+import hec.stats.MinComputable;
+import hec.stats.MultiStatComputable;
+import hec.stats.NDayMultiComputable;
+import hec.stats.PercentilesComputable;
+import hec.stats.SingleComputable;
+import hec.stats.Statistics;
+import hec.stats.Total;
+import hec.stats.TwoStepComputable;
 import hec.metrics.MetricCollectionTimeSeries;
-import hec.stats.*;
 
 import java.time.ZonedDateTime;
 
-public class ComputeEngine {
+public class StatComputationHelper {
 
     /**
-     * The Compute Engine class calls the metrics class and passes the compute as a checkbox, textbox, or radio button.  Compute iterates across timesteps of ensembles
+     * The StatComputationHelper class calls the metric classes and passes the ensemble time series with
+     * necesary information to return computed statistics. The computes can iterate across timesteps of ensembles
      * for the time series plot or the compute can iterate across traces of ensembles for the scatterplot
      */
 
-    public ComputeEngine() {
-    }
-
-    public float[] computeCheckBoxStat(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
+    static public float[] computeStat(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
         switch(stat){
             case MIN:
             case MAX:
@@ -30,7 +42,7 @@ public class ComputeEngine {
         }
     }
 
-    public float[][] computeRadioButtonTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
+    static public float[][] computeTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
         switch(stat) {
             case CUMULATIVE:
                 return computeStatFromCumulativeComputable(ets, selectedZdt);
@@ -38,7 +50,7 @@ public class ComputeEngine {
         return new float[0][0];
     }
 
-    public float[] computeTextBoxStat(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] values, ChartType chartType) {
+    static public float[] computeStat(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] values, ChartType chartType) {
         switch(stat){
             case PERCENTILE:
                 return computeStatFromPercentilesComputable(ets, stat, selectedZdt, values, chartType);
@@ -51,7 +63,7 @@ public class ComputeEngine {
         }
     }
 
-    public float computeTwoStepComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
+    static public float computeTwoStepComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
         SingleComputable compute;
         if(stepOne == Statistics.CUMULATIVE) {
             compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), (int) stepOneValues[0]), getComputable(stepTwo, stepTwoValues), false);
@@ -62,7 +74,7 @@ public class ComputeEngine {
         return e.singleComputeForEnsemble(compute);
     }
 
-    private Computable getComputable(Statistics stat, float[] values) {
+    static private Computable getComputable(Statistics stat, float[] values) {
         switch (stat) {
             case MIN:
                 return new MinComputable();
@@ -85,11 +97,7 @@ public class ComputeEngine {
         }
     }
 
-/*    public float computeNDayMultiComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, Statistics stepTwo, float[] stepTwoValues) {
-        SingleComputable compute
-    }*/
-
-    private float[] computeStatFromMultiStatComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
+    static private float[] computeStatFromMultiStatComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
         if(chartType == ChartType.TimePlot) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(new MultiStatComputable(new Statistics[]{stat}));
             return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
@@ -100,7 +108,7 @@ public class ComputeEngine {
         return null;
     }
 
-    private float[] computeStatFromPercentilesComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] percentiles, ChartType chartType) {
+    static private float[] computeStatFromPercentilesComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] percentiles, ChartType chartType) {
         if(chartType == ChartType.TimePlot) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(new PercentilesComputable(percentiles));
             return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
@@ -111,28 +119,28 @@ public class ComputeEngine {
         return null;
     }
 
-    private float[] computeStatFromMaxAvgDurationComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, int value) {
+    static private float[] computeStatFromMaxAvgDurationComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, int value) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new MaxAvgDuration(value));
 
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }
 
-    private float[] computeStatFromMaxAccumDurationComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, int value) {
+    static private float[] computeStatFromMaxAccumDurationComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, int value) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new MaxAccumDuration(value));
 
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }
 
-    private float[] computeStatFromTotalComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt) {
+    static private float[] computeStatFromTotalComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new Total());
 
         return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
     }
 
-    private float[][] computeStatFromCumulativeComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt) {
+    static private float[][] computeStatFromCumulativeComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt) {
         MetricCollectionTimeSeries mct = ets.iterateTracesOfEnsemblesWithMultiComputable(
                 new CumulativeComputable());
 

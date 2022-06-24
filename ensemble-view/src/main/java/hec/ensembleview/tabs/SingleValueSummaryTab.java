@@ -3,8 +3,7 @@ package hec.ensembleview.tabs;
 import hec.EnsembleDatabase;
 import hec.RecordIdentifier;
 import hec.ensemble.EnsembleTimeSeries;
-import hec.ensembleview.ChartType;
-import hec.ensembleview.ComputeEngine;
+import hec.ensembleview.StatComputationHelper;
 import hec.ensembleview.SingleValueSummaryType;
 import hec.ensembleview.StatisticUIType;
 import hec.ensembleview.mappings.SingleValueComboBoxMap;
@@ -36,11 +35,8 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
     EnsembleDatabase db;
     RecordIdentifier rid;
     ZonedDateTime zdt;
-    ComputeEngine computeEngine;
 
     public SingleValueSummaryTab() {
-        computeEngine = new ComputeEngine();
-
         initializeUI();
         organizeUI();
         setSummaryTypeComboBox();
@@ -173,7 +169,7 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
 
         computeButton.addActionListener(e -> {
             EnsembleTimeSeries ets = db.getEnsembleTimeSeries(rid);
-            float value = computeEngine.computeTwoStepComputable(ets, zdt, getFirstStat(), getFirstTextFieldValue(),
+            float value = StatComputationHelper.computeTwoStepComputable(ets, zdt, getFirstStat(), getFirstTextFieldValue(),
                     getSecondStat(), getSecondTextFieldValue(),
                     getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles ||
                             getSummaryType() == SingleValueSummaryType.ComputeCumulative);
