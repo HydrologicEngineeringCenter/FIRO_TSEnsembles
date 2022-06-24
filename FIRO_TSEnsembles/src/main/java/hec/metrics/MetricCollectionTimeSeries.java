@@ -1,8 +1,7 @@
 package hec.metrics;
 
-import hec.MetricDatabase;
 import hec.RecordIdentifier;
-import hec.stats.Statistics;
+import hec.ensemble.stats.Statistics;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;

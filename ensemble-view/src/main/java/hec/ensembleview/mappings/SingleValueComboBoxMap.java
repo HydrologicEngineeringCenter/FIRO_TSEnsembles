@@ -1,7 +1,7 @@
 package hec.ensembleview.mappings;
 
 import hec.ensembleview.SingleValueSummaryType;
-import hec.stats.Statistics;
+import hec.ensemble.stats.Statistics;
 
 import java.util.Arrays;
 import java.util.HashMap;

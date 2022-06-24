@@ -2,8 +2,8 @@ package hec.ensemble;
 
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
+import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
-import hec.stats.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import static hec.stats.Statistics.*;
+import static hec.ensemble.stats.Statistics.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EnsembleTimeSeriesTest {

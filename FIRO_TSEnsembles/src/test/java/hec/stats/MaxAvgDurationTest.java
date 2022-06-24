@@ -2,6 +2,9 @@ package hec.stats;
 
 
 import hec.ensemble.*;
+import hec.ensemble.stats.Computable;
+import hec.ensemble.stats.Configurable;
+import hec.ensemble.stats.MaxAvgDuration;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;

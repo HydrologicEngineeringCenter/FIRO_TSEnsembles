@@ -1,6 +1,6 @@
 package hec.ensembleview.mappings;
 
-import hec.stats.Statistics;
+import hec.ensemble.stats.Statistics;
 
 import java.util.HashMap;
 import java.util.Map;

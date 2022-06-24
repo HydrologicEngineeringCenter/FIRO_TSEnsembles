@@ -1,9 +1,8 @@
 package hec.metrics;
 
-import hec.stats.Configuration;
-import hec.stats.Statistics;
+import hec.ensemble.stats.Configuration;
+import hec.ensemble.stats.Statistics;
 
-import java.lang.reflect.Array;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Arrays;

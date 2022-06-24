@@ -4,9 +4,9 @@ import hec.RecordIdentifier;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.metrics.MetricTypes;
-import hec.stats.Computable;
-import hec.stats.MultiComputable;
-import hec.stats.SingleComputable;
+import hec.ensemble.stats.Computable;
+import hec.ensemble.stats.MultiComputable;
+import hec.ensemble.stats.SingleComputable;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;

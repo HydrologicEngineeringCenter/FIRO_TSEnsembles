@@ -1,6 +1,4 @@
-package hec.stats;
-
-import java.util.Arrays;
+package hec.ensemble.stats;
 
 public class CumulativeComputable implements MultiComputable {
     private float[] _cumulative;

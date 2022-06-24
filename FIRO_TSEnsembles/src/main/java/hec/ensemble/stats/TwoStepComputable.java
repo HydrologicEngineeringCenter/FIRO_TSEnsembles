@@ -1,4 +1,4 @@
-package hec.stats;
+package hec.ensemble.stats;
 
 public class TwoStepComputable implements SingleComputable, Configurable {
 
@@ -26,7 +26,7 @@ public class TwoStepComputable implements SingleComputable, Configurable {
     public float compute(float[][] values) {
     /*    row represents ensemble members
      columns are time steps*/
-        if (_stepOne instanceof hec.stats.Configurable && _c != null){
+        if (_stepOne instanceof Configurable && _c != null){
             ((Configurable)_stepOne).configure(_c);
         }
         if (!_computeAcrossEnsembles) { // iterates over the traces for all of their timesteps, then computes then computes a single summary value across ensembles

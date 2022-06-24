@@ -1,8 +1,6 @@
 package hec.ensembleview;
 
-import hec.RecordIdentifier;
-import hec.SqliteDatabase;
-import hec.stats.Statistics;
+import hec.ensemble.stats.Statistics;
 
 import java.awt.event.ActionListener;
 

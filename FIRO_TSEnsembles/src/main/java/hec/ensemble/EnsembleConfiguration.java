@@ -1,7 +1,7 @@
 package hec.ensemble;
 import java.time.Duration;
 import java.time.ZonedDateTime;
-import hec.stats.Configuration;
+import hec.ensemble.stats.Configuration;
 
 
 public class EnsembleConfiguration implements Configuration{

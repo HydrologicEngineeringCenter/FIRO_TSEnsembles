@@ -12,13 +12,13 @@ import hec.io.PairedDataContainer;
 import hec.io.TimeSeriesContainer;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
-import hec.stats.MultiComputable;
-import hec.stats.MultiStatComputable;
-import hec.stats.Statistics;
+import hec.ensemble.stats.MultiComputable;
+import hec.ensemble.stats.MultiStatComputable;
+import hec.ensemble.stats.Statistics;
 import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Test;
 
-import static hec.stats.Statistics.*;
+import static hec.ensemble.stats.Statistics.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 

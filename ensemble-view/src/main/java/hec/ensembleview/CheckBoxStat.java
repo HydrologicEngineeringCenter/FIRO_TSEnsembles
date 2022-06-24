@@ -1,7 +1,7 @@
 package hec.ensembleview;
 
 import hec.ensembleview.mappings.StatisticsStringMap;
-import hec.stats.Statistics;
+import hec.ensemble.stats.Statistics;
 
 import javax.swing.*;
 import java.awt.*;
