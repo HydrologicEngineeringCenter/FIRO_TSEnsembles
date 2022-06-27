@@ -2,6 +2,9 @@ package hec.stats;
 
 
 import hec.ensemble.*;
+import hec.ensemble.stats.Computable;
+import hec.ensemble.stats.MultiComputable;
+import hec.ensemble.stats.PercentilesComputable;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

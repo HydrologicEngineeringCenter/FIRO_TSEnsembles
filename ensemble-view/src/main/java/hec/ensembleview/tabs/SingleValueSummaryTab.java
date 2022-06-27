@@ -8,7 +8,7 @@ import hec.ensembleview.SingleValueSummaryType;
 import hec.ensembleview.StatisticUIType;
 import hec.ensembleview.mappings.SingleValueComboBoxMap;
 import hec.ensembleview.mappings.StatisticsUITypeMap;
-import hec.stats.Statistics;
+import hec.ensemble.stats.Statistics;
 //import javafx.scene.chart.Chart;
 
 import javax.swing.*;

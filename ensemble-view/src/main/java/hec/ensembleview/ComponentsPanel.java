@@ -1,7 +1,7 @@
 package hec.ensembleview;
 
 import hec.ensembleview.mappings.StatisticsUITypeMap;
-import hec.stats.Statistics;
+import hec.ensemble.stats.Statistics;
 
 import javax.swing.*;
 import javax.swing.border.Border;

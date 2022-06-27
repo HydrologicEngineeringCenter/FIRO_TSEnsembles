@@ -1,4 +1,4 @@
-package hec.stats;
+package hec.ensemble.stats;
 
 public  class MaxAccumDuration implements Computable, Configurable {
     Integer _duration; //duration in hours

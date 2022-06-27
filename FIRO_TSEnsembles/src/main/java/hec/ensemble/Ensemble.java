@@ -3,10 +3,10 @@ package hec.ensemble;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 
-import hec.stats.Computable;
-import hec.stats.Configurable;
-import hec.stats.MultiComputable;
-import hec.stats.SingleComputable;
+import hec.ensemble.stats.Computable;
+import hec.ensemble.stats.Configurable;
+import hec.ensemble.stats.MultiComputable;
+import hec.ensemble.stats.SingleComputable;
 
 /**
  * an Ensemble is an array of time-series data
@@ -81,7 +81,7 @@ public class Ensemble
      * @return A summary of float for each trace.
      */
     public float[] iterateForTracesAcrossTime(Computable cmd){
-      if (cmd instanceof hec.stats.Configurable){
+      if (cmd instanceof Configurable){
         ((Configurable)cmd).configure(_configuration);
       }
       int size= values.length;
@@ -99,7 +99,7 @@ public class Ensemble
      * @return a timeseries summary of float (representing all traces with a statistic for each timestep)
      */
     public float[] iterateForTimeAcrossTraces(Computable cmd){
-      if (cmd instanceof hec.stats.Configurable){
+      if (cmd instanceof Configurable){
         ((Configurable)cmd).configure(_configuration);
       }
       int size= values[0].length;//number of timesteps
@@ -120,7 +120,7 @@ public class Ensemble
      * @return A summary of float[] for each trace representing all of the statistics computed for that trace.
      */
     public float[][] multiComputeForTracesAcrossTime(MultiComputable cmd){
-      if (cmd instanceof hec.stats.Configurable){
+      if (cmd instanceof Configurable){
         ((Configurable)cmd).configure(_configuration);
       }
       int size= values.length;
@@ -142,7 +142,7 @@ public class Ensemble
      * @return a timeseries  represented as [timesteps][statistics]float summary of []float (representing all traces with a collection of statistics for each timestep)
      */
     public float[][] multiComputeForTimeAcrossTraces(MultiComputable cmd){
-      if (cmd instanceof hec.stats.Configurable){
+      if (cmd instanceof Configurable){
         ((Configurable)cmd).configure(_configuration);
       }
       int size= values[0].length;//number of timesteps
@@ -163,7 +163,7 @@ public class Ensemble
       return val;//a time series of a collection of statistics.
     }
     public float singleComputeForEnsemble(SingleComputable cmd){
-      if (cmd instanceof hec.stats.Configurable){
+      if (cmd instanceof Configurable){
         ((Configurable)cmd).configure(_configuration);
       }
       return cmd.compute(values);
@@ -175,7 +175,7 @@ public class Ensemble
      * @return a time series represented as []float
      */
     public float[][] multiComputeForEachTraces(MultiComputable cmd){
-      if (cmd instanceof hec.stats.Configurable){
+      if (cmd instanceof Configurable){
         ((Configurable)cmd).configure(_configuration);
       }
       int traces= values.length;  //number of traces

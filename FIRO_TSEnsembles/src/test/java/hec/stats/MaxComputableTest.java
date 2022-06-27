@@ -1,13 +1,9 @@
 package hec.stats;
 
-import hec.EnsembleDatabase;
-import hec.RecordIdentifier;
 import hec.ensemble.*;
+import hec.ensemble.stats.Computable;
+import hec.ensemble.stats.MaxComputable;
 import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.time.ZonedDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;

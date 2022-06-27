@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import hec.ensemble.*;
 import hec.paireddata.*;
 import hec.metrics.*;
-import hec.stats.Statistics;
+import hec.ensemble.stats.Statistics;
 
 /**
  * A database with Read/Write abilities for various data types.

@@ -1,9 +1,13 @@
 package hec.stats;
 
 import hec.ensemble.*;
+import hec.ensemble.stats.Computable;
+import hec.ensemble.stats.MultiComputable;
+import hec.ensemble.stats.MultiStatComputable;
+import hec.ensemble.stats.Statistics;
 import org.junit.jupiter.api.Test;
 
-import static hec.stats.Statistics.*;
+import static hec.ensemble.stats.Statistics.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 

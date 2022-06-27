@@ -17,7 +17,7 @@ import hec.ensembleview.StatisticUIType;
 import hec.ensembleview.TextBoxStat;
 import hec.ensembleview.mappings.ChartTypeStatisticsMap;
 import hec.ensembleview.mappings.StatisticsStringMap;
-import hec.stats.Statistics;
+import hec.ensemble.stats.Statistics;
 
 import javax.swing.*;
 import java.awt.*;

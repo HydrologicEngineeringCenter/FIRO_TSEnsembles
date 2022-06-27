@@ -15,7 +15,7 @@ import hec.io.TimeSeriesContainer;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.metrics.MetricTypes;
-import hec.stats.Statistics;
+import hec.ensemble.stats.Statistics;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
