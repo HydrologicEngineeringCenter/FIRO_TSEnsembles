@@ -18,6 +18,17 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
 //        label = new JLabel(StatisticsStringMap.map.get(stat));
         checkBox = new JCheckBox(StatisticsStringMap.map.get(stat));
         textField = new JTextField();
+
+        ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+
+        if(stat == Statistics.CUMULATIVE) {
+            textField.setToolTipText("Enter value in days");
+        } else if (stat == Statistics.PERCENTILE) {
+            textField.setToolTipText("Enter percentile as decimal.  Multiple percentiles can be entered by adding commas");
+        } else {
+            textField.setToolTipText("Enter value in hours");
+        }
+
         setLayout(new GridLayout(1, 2));
         add(checkBox);
         add(textField);
