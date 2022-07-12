@@ -18,6 +18,8 @@ class SingleComputableTest {
             SingleComputable A = Serializer.fromXML(a);
             SingleComputable B = Serializer.fromXML(b);
 
+            System.out.println("uhhh");
+
         } catch (Exception exception) {
             exception.printStackTrace();
             fail();

@@ -91,26 +91,36 @@ public final class Serializer {
 
                 int modifiers = field.getModifiers();
                 if (Modifier.isProtected(modifiers)) {
-                    System.out.println("protected");
+                    System.out.println("protected, so we did nothing: " +fieldName);
                 } else if (Modifier.isPrivate(modifiers)) {
                     field.setAccessible(true);
-                    System.out.println("private");
+                    System.out.println("private field set accessible: " + fieldName );
                 }
 
                 String attributeValue = ele.getAttributeValue(fieldName);
-                if(attributeValue == null){
-                    continue;
-                }
+
                 switch (stringType) {
                     case "java.lang.Double":
+                        if(attributeValue == null){
+                            continue;
+                        }
                         field.set(computable, Double.parseDouble(attributeValue));
                         break;
                     case "java.lang.Integer":
+                        if(attributeValue == null){
+                            continue;
+                        }
                         field.set(computable, Integer.parseInt(attributeValue));
                         break;
                     case "java.lang.float":
+                        if(attributeValue == null){
+                            continue;
+                        }
                         field.set(computable, Float.parseFloat(attributeValue));
                     case "float[]":
+                        if(attributeValue == null){
+                            continue;
+                        }
                         String[] floatStringSplit = prepareXMLArray(attributeValue);
                         float[] floats = new float[floatStringSplit.length];
                         for (int i = 0; i < floatStringSplit.length; i++) {
@@ -120,6 +130,9 @@ public final class Serializer {
                         field.set(computable, floats);
                         break;
                     case "hec.stats.Statistics[]":
+                        if(attributeValue == null){
+                            continue;
+                        }
                         String[] statisticsStringSplit = prepareXMLArray(attributeValue);
                         Statistics[] statsArray = new Statistics[statisticsStringSplit.length];
                         for (int i = 0; i < statisticsStringSplit.length; i++) {
@@ -132,7 +145,7 @@ public final class Serializer {
                         List<Object> childs =  ele.getChildren();
                         for( Object child: childs){
                             Element childElement = (Element)child;
-                            String elementFieldName = childElement.getAttribute("fieldName").toString();
+                            String elementFieldName = childElement.getAttributeValue("fieldName");
                             if(elementFieldName.equals(fieldName)){
                                 Computable computer = Serializer.fromXML(childElement);
                                 field.set(computable, computer);
