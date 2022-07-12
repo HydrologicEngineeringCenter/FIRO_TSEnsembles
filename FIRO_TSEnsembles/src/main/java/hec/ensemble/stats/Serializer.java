@@ -52,11 +52,11 @@ public final class Serializer {
                         float[] floatArray = (float[]) objectFieldValue;
                         attribute = Arrays.toString(floatArray);
                         break;
-                    case "hec.stats.Statistics[]":
+                    case "hec.ensemble.stats.Statistics[]":
                         Statistics[] stats = (Statistics[]) objectFieldValue;
                         attribute = Arrays.toString(stats);
                         break;
-                    case "hec.stats.Computable":
+                    case "hec.ensemble.stats.Computable":
                         Computable computable = (Computable) objectFieldValue;
                         Element computableEle = Serializer.toXML(computable); //recursive call
                         computableEle.setAttribute("fieldName", fieldName);
@@ -129,7 +129,7 @@ public final class Serializer {
                         }
                         field.set(computable, floats);
                         break;
-                    case "hec.stats.Statistics[]":
+                    case "hec.ensemble.stats.Statistics[]":
                         if(attributeValue == null){
                             continue;
                         }
@@ -141,7 +141,7 @@ public final class Serializer {
                         }
                         field.set(computable, statsArray);
                         break;
-                    case "hec.stats.Computable":
+                    case "hec.ensemble.stats.Computable":
                         List<Object> childs =  ele.getChildren();
                         for( Object child: childs){
                             Element childElement = (Element)child;
