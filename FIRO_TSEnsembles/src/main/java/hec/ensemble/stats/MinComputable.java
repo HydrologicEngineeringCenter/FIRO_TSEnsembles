@@ -1,4 +1,4 @@
-package hec.stats;
+package hec.ensemble.stats;
 
 public class MinComputable implements Computable{
     @Override

@@ -4,6 +4,8 @@ package hec.stats;
 import hec.ensemble.Ensemble;
 import hec.ensemble.Logger;
 import hec.ensemble.TestData;
+import hec.ensemble.stats.CumulativeComputable;
+import hec.ensemble.stats.MultiComputable;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

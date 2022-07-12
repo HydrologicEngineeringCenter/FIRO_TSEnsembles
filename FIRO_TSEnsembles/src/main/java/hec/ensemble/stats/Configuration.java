@@ -1,4 +1,4 @@
-package hec.stats;
+package hec.ensemble.stats;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 

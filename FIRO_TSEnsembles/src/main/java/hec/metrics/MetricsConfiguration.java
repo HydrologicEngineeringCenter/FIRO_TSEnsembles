@@ -1,6 +1,6 @@
 package hec.metrics;
 
-import hec.stats.Configuration;
+import hec.ensemble.stats.Configuration;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
