@@ -40,7 +40,7 @@ public final class Serializer {
                         double doubleVal = (double) objectFieldValue;
                         attribute = Double.toString(doubleVal);
                         break;
-                    case "java.lang.Integer":
+                    case "int":
                         int intValue = (int) objectFieldValue;
                         attribute = Integer.toString(intValue);
                         break;
@@ -61,6 +61,18 @@ public final class Serializer {
                         Element computableEle = Serializer.toXML(computable); //recursive call
                         computableEle.setAttribute("fieldName", fieldName);
                         ele.addContent(computableEle);
+                        break;
+                    case "hec.ensemble.stats.MultiComputable":
+                        MultiComputable mcomputable = (MultiComputable) objectFieldValue;
+                        Element mcomputableEle = Serializer.toXML(mcomputable); //recursive call
+                        mcomputableEle.setAttribute("fieldName", fieldName);
+                        ele.addContent(mcomputableEle);
+                        break;
+                    case "hec.ensemble.stats.SingleComputable":
+                        SingleComputable scomputable = (SingleComputable) objectFieldValue;
+                        Element scomputableEle = Serializer.toXML(scomputable); //recursive call
+                        scomputableEle.setAttribute("fieldName", fieldName);
+                        ele.addContent(scomputableEle);
                         break;
                     case "boolean":
                         boolean bool = (boolean)objectFieldValue;
@@ -148,6 +160,28 @@ public final class Serializer {
                             String elementFieldName = childElement.getAttributeValue("fieldName");
                             if(elementFieldName.equals(fieldName)){
                                 Computable computer = Serializer.fromXML(childElement);
+                                field.set(computable, computer);
+                            }
+                        }
+                        break;
+                    case "hec.ensemble.stats.MultiComputable":
+                        List<Object> mchilds =  ele.getChildren();
+                        for( Object child: mchilds){
+                            Element childElement = (Element)child;
+                            String elementFieldName = childElement.getAttributeValue("fieldName");
+                            if(elementFieldName.equals(fieldName)){
+                                MultiComputable computer = Serializer.fromXML(childElement);
+                                field.set(computable, computer);
+                            }
+                        }
+                        break;
+                    case "hec.ensemble.stats.SingleComputable":
+                        List<Object> schilds =  ele.getChildren();
+                        for( Object child: schilds){
+                            Element childElement = (Element)child;
+                            String elementFieldName = childElement.getAttributeValue("fieldName");
+                            if(elementFieldName.equals(fieldName)){
+                                SingleComputable computer = Serializer.fromXML(childElement);
                                 field.set(computable, computer);
                             }
                         }
