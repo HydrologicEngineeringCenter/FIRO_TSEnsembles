@@ -2,16 +2,15 @@ package hec.ensemble.stats;
 
 public class NDayMultiComputable implements Computable, StatisticsReportable, Configurable {
 
-    private final MultiComputable _stepOne;
-    private final int _day;
+    private  MultiComputable _stepOne;
+    private  int _day;
     Configuration _c;
 
     /**
      * The n day multi computable computes a multiComputable stat (cumulative) and gets the cumulative value for the specified day.
      * Intended to be used for iterating for traces across time and does not account for daylight savings
-     * @param numberDays this is expected to be in integer days
      */
-
+    public NDayMultiComputable(){ } // necessary for reflection deserializing serializing
     public NDayMultiComputable(MultiComputable stepOne, int numberDays) {
         _stepOne = stepOne;
         _day = numberDays;
