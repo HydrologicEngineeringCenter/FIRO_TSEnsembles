@@ -10,6 +10,18 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class Serializer {
+    private static final String DOUBLE =  "java.lang.Double";
+    private static final String INTEGER =  "int";
+    private static final String FLOAT =  "java.lang.float";
+    private static final String FLOATARRAY =  "float[]";
+    private static final String STATISTICSARRAY =  "hec.ensemble.stats.Statistics[]";
+    private static final String COMPUTABLE =  "hec.ensemble.stats.Computable";
+    private static final String MULTICOMPUTABLE =  "hec.ensemble.stats.MultiComputable";
+    private static final String SINGLECOMPUTABLE =  "hec.ensemble.stats.SingleComputable";
+    private static final String BOOLEAN =  "boolean";
+    private static final String FIELDNAMEATTRIBUTE =  "fieldName";
+
+
     public static <T> Element toXML(T computableThing) {
         //Get this class's fields and create an element with this class's name.
         Field[] fields = computableThing.getClass().getDeclaredFields();
@@ -36,45 +48,45 @@ public final class Serializer {
                 }
                 //Check what type the field holds,and serialize it appropriately.
                 switch (stringType) {
-                    case "java.lang.Double":
+                    case DOUBLE:
                         double doubleVal = (double) objectFieldValue;
                         attribute = Double.toString(doubleVal);
                         break;
-                    case "int":
+                    case INTEGER:
                         int intValue = (int) objectFieldValue;
                         attribute = Integer.toString(intValue);
                         break;
-                    case "java.lang.float":
+                    case FLOAT:
                         float floatValue = (float) objectFieldValue;
                         attribute = Float.toString(floatValue);
                         break;
-                    case "float[]":
+                    case FLOATARRAY:
                         float[] floatArray = (float[]) objectFieldValue;
                         attribute = Arrays.toString(floatArray);
                         break;
-                    case "hec.ensemble.stats.Statistics[]":
+                    case STATISTICSARRAY:
                         Statistics[] stats = (Statistics[]) objectFieldValue;
                         attribute = Arrays.toString(stats);
                         break;
-                    case "hec.ensemble.stats.Computable":
+                    case COMPUTABLE:
                         Computable computable = (Computable) objectFieldValue;
                         Element computableEle = Serializer.toXML(computable); //recursive call
-                        computableEle.setAttribute("fieldName", fieldName);
+                        computableEle.setAttribute(FIELDNAMEATTRIBUTE, fieldName);
                         ele.addContent(computableEle);
                         break;
-                    case "hec.ensemble.stats.MultiComputable":
+                    case MULTICOMPUTABLE:
                         MultiComputable mcomputable = (MultiComputable) objectFieldValue;
                         Element mcomputableEle = Serializer.toXML(mcomputable); //recursive call
-                        mcomputableEle.setAttribute("fieldName", fieldName);
+                        mcomputableEle.setAttribute(FIELDNAMEATTRIBUTE, fieldName);
                         ele.addContent(mcomputableEle);
                         break;
-                    case "hec.ensemble.stats.SingleComputable":
+                    case SINGLECOMPUTABLE:
                         SingleComputable scomputable = (SingleComputable) objectFieldValue;
                         Element scomputableEle = Serializer.toXML(scomputable); //recursive call
-                        scomputableEle.setAttribute("fieldName", fieldName);
+                        scomputableEle.setAttribute(FIELDNAMEATTRIBUTE, fieldName);
                         ele.addContent(scomputableEle);
                         break;
-                    case "boolean":
+                    case BOOLEAN:
                         boolean bool = (boolean)objectFieldValue;
                         attribute = Boolean.toString(bool);
                         break;
@@ -112,27 +124,23 @@ public final class Serializer {
                 String attributeValue = ele.getAttributeValue(fieldName);
 
                 switch (stringType) {
-                    case "java.lang.Double":
-                        if(attributeValue == null){
-                            continue;
-                        }
+                    case DOUBLE:
+                        if(attributeValue == null){ continue;}
                         field.set(computable, Double.parseDouble(attributeValue));
                         break;
-                    case "java.lang.Integer":
-                        if(attributeValue == null){
-                            continue;
-                        }
+                    case BOOLEAN:
+                        if(attributeValue == null){ continue;}
+                        field.set(computable, Boolean.parseBoolean(attributeValue));
+                        break;
+                    case INTEGER:
+                        if(attributeValue == null){ continue;}
                         field.set(computable, Integer.parseInt(attributeValue));
                         break;
-                    case "java.lang.float":
-                        if(attributeValue == null){
-                            continue;
-                        }
+                    case FLOAT:
+                        if(attributeValue == null){continue;}
                         field.set(computable, Float.parseFloat(attributeValue));
-                    case "float[]":
-                        if(attributeValue == null){
-                            continue;
-                        }
+                    case FLOATARRAY:
+                        if(attributeValue == null){continue;}
                         String[] floatStringSplit = prepareXMLArray(attributeValue);
                         float[] floats = new float[floatStringSplit.length];
                         for (int i = 0; i < floatStringSplit.length; i++) {
@@ -141,10 +149,8 @@ public final class Serializer {
                         }
                         field.set(computable, floats);
                         break;
-                    case "hec.ensemble.stats.Statistics[]":
-                        if(attributeValue == null){
-                            continue;
-                        }
+                    case STATISTICSARRAY:
+                        if(attributeValue == null){continue;}
                         String[] statisticsStringSplit = prepareXMLArray(attributeValue);
                         Statistics[] statsArray = new Statistics[statisticsStringSplit.length];
                         for (int i = 0; i < statisticsStringSplit.length; i++) {
@@ -153,33 +159,33 @@ public final class Serializer {
                         }
                         field.set(computable, statsArray);
                         break;
-                    case "hec.ensemble.stats.Computable":
+                    case COMPUTABLE:
                         List<Object> childs =  ele.getChildren();
                         for( Object child: childs){
                             Element childElement = (Element)child;
-                            String elementFieldName = childElement.getAttributeValue("fieldName");
+                            String elementFieldName = childElement.getAttributeValue(FIELDNAMEATTRIBUTE);
                             if(elementFieldName.equals(fieldName)){
                                 Computable computer = Serializer.fromXML(childElement);
                                 field.set(computable, computer);
                             }
                         }
                         break;
-                    case "hec.ensemble.stats.MultiComputable":
+                    case MULTICOMPUTABLE:
                         List<Object> mchilds =  ele.getChildren();
                         for( Object child: mchilds){
                             Element childElement = (Element)child;
-                            String elementFieldName = childElement.getAttributeValue("fieldName");
+                            String elementFieldName = childElement.getAttributeValue(FIELDNAMEATTRIBUTE);
                             if(elementFieldName.equals(fieldName)){
                                 MultiComputable computer = Serializer.fromXML(childElement);
                                 field.set(computable, computer);
                             }
                         }
                         break;
-                    case "hec.ensemble.stats.SingleComputable":
+                    case SINGLECOMPUTABLE:
                         List<Object> schilds =  ele.getChildren();
                         for( Object child: schilds){
                             Element childElement = (Element)child;
-                            String elementFieldName = childElement.getAttributeValue("fieldName");
+                            String elementFieldName = childElement.getAttributeValue(FIELDNAMEATTRIBUTE);
                             if(elementFieldName.equals(fieldName)){
                                 SingleComputable computer = Serializer.fromXML(childElement);
                                 field.set(computable, computer);
