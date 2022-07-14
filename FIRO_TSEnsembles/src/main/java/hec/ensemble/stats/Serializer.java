@@ -21,54 +21,6 @@ public final class Serializer {
     private static final String BOOLEAN =  "boolean";
     private static final String FIELDNAMEATTRIBUTE =  "fieldName";
 
-    //Supported Computables
-    private static final String CUMULATIVECOMPUTABLE =  "hec.ensemble.stats.CumulativeComputable";
-    private static final String NDAYMULTICOMPUTABLE =  "hec.ensemble.stats.NDayMultiComputable";
-    private static final String MULTISTATCOMPUTABLE =  "hec.ensemble.stats.MultiStatComputable";
-    private static final String TWOSTEPCOMPUTABLE =  "hec.ensemble.stats.TwoStepComputable";
-    private static final String MAXACCUMDURATION =  "hec.ensemble.stats.MaxAccumDuration";
-    private static final String MAXAVGDURATION =  "hec.ensemble.stats.MaxAvgDuration";
-    private static final String MAXCOMPUTABLE =  "hec.ensemble.stats.MaxComputable";
-    private static final String MAXOFMAXIMUMSCOMPUTABLE =  "hec.ensemble.stats.MaxOfMaximumsComputable";
-    private static final String MEANCOMPUTABLE =  "hec.ensemble.stats.MeanComputable";
-    private static final String MEDIANCOMPUTABLE =  "hec.ensemble.stats.MedianComputable";
-    private static final String MINCOMPUTABLE =  "hec.ensemble.stats.MinComputable";
-    private static final String PERCENTILESCOMPUTABLE =  "hec.ensemble.stats.PercentilesComputable";
-    private static final String TOTAL =  "hec.ensemble.stats.Total";
-
-    private static Object fromClassname(String classname){
-        switch (classname){
-            case CUMULATIVECOMPUTABLE:
-                return new CumulativeComputable();
-            case NDAYMULTICOMPUTABLE:
-                return new NDayMultiComputable();
-            case MULTISTATCOMPUTABLE:
-                return new MultiStatComputable();
-            case TWOSTEPCOMPUTABLE:
-                return new TwoStepComputable();
-            case MAXACCUMDURATION:
-                return new MaxAccumDuration();
-            case MAXAVGDURATION:
-                return new MaxAvgDuration();
-            case MAXCOMPUTABLE:
-                return new MaxComputable();
-            case MAXOFMAXIMUMSCOMPUTABLE:
-                return new MaxOfMaximumsComputable();
-            case MEANCOMPUTABLE:
-                return new MeanComputable();
-            case MEDIANCOMPUTABLE:
-                return new MedianComputable();
-            case MINCOMPUTABLE:
-                return new MinComputable();
-            case PERCENTILESCOMPUTABLE:
-                return new PercentilesComputable();
-            case TOTAL:
-                return new Total();
-            default:
-                System.out.println("The Computable you're using has not been added to the list of available.");
-                return null;
-        }
-    }
 
     public static <T> Element toXML(T computableThing) {
         //Get this class's fields and create an element with this class's name.
@@ -148,16 +100,14 @@ public final class Serializer {
         }
         return ele;
     }
-
-
-
     public static <T> T fromXML(Element ele)  {
         T computable = null;
         Class<?> c;
         String computableName = ele.getName();
         try {
-           computable = (T)fromClassname(computableName);
-            Field[] fields = computable.getClass().getDeclaredFields();
+            c = Class.forName(computableName);
+            computable = (T) c.getConstructor().newInstance();
+            Field[] fields = c.getDeclaredFields();
             for (Field field : fields) {
                 Type type = field.getType();
                 String stringType = type.getTypeName();
@@ -246,7 +196,7 @@ public final class Serializer {
                         break;
                 }
             }
-        } catch (IllegalAccessException e) {
+        } catch (ClassNotFoundException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             System.out.println("fromXML Failed");
         }
         return computable;
