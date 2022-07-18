@@ -37,10 +37,10 @@ public class ComputeEngine {
         }
         return new float[0][0];
     }
-    public float[][] computeTextBoxRadioTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] values, ChartType chartType) {
+    public float[][] computeTextBoxRadioTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] values, String Start, ChartType chartType) {
         switch(stat) {
             case MOVINGAVG:
-                return computeStatFromMovingAvg(ets, selectedZdt, (int) values[0]);
+                return computeStatFromMovingAvg(ets, selectedZdt, (int) values[0], Start);
         }
         return new float[0][0];
     }
@@ -71,7 +71,7 @@ public class ComputeEngine {
 
     public float computeTwoStepComputableMovingAvg(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, Statistics stepOne, float[] stepOneValues, float [] movingAvgStatValue, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
         SingleComputable compute;
-        compute = new TwoStepComputable(new NDayMultiComputable(new MovingAvg((int) movingAvgStatValue[0]), (int) stepOneValues[0]), getComputable(stepTwo, stepTwoValues), false);
+        compute = new TwoStepComputable(new NDayMultiComputable(new MovingAvg((int) movingAvgStatValue[0],"hold"), (int) stepOneValues[0]), getComputable(stepTwo, stepTwoValues), false);
 
         Ensemble e = ets.getEnsemble(selectedZdt);
         return e.singleComputeForEnsemble(compute);
@@ -154,9 +154,9 @@ public class ComputeEngine {
         return mct.getMetricCollection(selectedZdt).getValues();
     }
 
-    private float[][] computeStatFromMovingAvg(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, int values) {
+    private float[][] computeStatFromMovingAvg(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, int values, String Start) {
         MetricCollectionTimeSeries mct = ets.iterateTracesOfEnsemblesWithMultiComputable(
-                new MovingAvg(values));
+                new MovingAvg(values, Start));
 
         return mct.getMetricCollection(selectedZdt).getValues();
     }

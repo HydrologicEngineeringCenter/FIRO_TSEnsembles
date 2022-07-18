@@ -1,35 +1,57 @@
 package hec.ensembleview;
 
+import hec.ensembleview.mappings.MovingAvgComboBoxMap;
+import hec.ensembleview.RadioButtonStat;
 import hec.ensembleview.mappings.StatisticsStringMap;
+import hec.ensembleview.mappings.StatisticsUITypeMap;
+import hec.stats.MovingAvg;
 import hec.stats.Statistics;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.Objects;
 
 public class TextBoxRadioStat extends JPanel implements EnsembleViewStat {
-//    private JLabel label;
+    //    private JLabel label;
     private JTextField textField;
     private JRadioButton radioButton;
+    private JComboBox <String> comboBox;
     private final Statistics stat;
 
 
     public TextBoxRadioStat(Statistics stat) {
 //        label = new JLabel(StatisticsStringMap.map.get(stat));
+
         radioButton = new JRadioButton(StatisticsStringMap.map.get(stat));
         textField = new JTextField();
-        setLayout(new GridLayout(1, 2));
+        comboBox = new JComboBox<String>();
+        setMovingAvgComboBox();
+
+        GridLayout layout = new GridLayout(1,3);
+        setLayout(layout);
+
         add(radioButton);
+        layout.setHgap(0);
+        add(comboBox);
+        layout.setHgap(25);
         add(textField);
+
+
         this.stat = stat;
         textField.setEditable(false);
+        comboBox.setEnabled(false);
+
         radioButton.addActionListener(e -> {
-            if(radioButton.isSelected()) {
+            if (radioButton.isSelected()) {
                 textField.setEditable(true);
-            } else if(!radioButton.isSelected()) {
+                comboBox.setEnabled(true);
+            } else if (!radioButton.isSelected()) {
                 textField.setEditable(false);
+                comboBox.setEnabled(false);
             }
         });
+
         setPreferredSize(getPreferredSize());
         validate();
     }
@@ -38,10 +60,17 @@ public class TextBoxRadioStat extends JPanel implements EnsembleViewStat {
         String textValues = textField.getText();
         String[] textValuesParse = textValues.trim().split("[,:;]");
         float[] floatValuesParse = new float[textValuesParse.length];
-        for(int i = 0; i < textValuesParse.length; i++) {
+        for (int i = 0; i < textValuesParse.length; i++) {
             floatValuesParse[i] = Float.parseFloat(textValuesParse[i]);
         }
         return floatValuesParse;
+    }
+    public String getMovingAvgType() {
+       for (MovingAvgType type : MovingAvgComboBoxMap.MovingAvgComboBoxMap.keySet()) {
+            if (MovingAvgComboBoxMap.MovingAvgComboBoxMap.get(type) == comboBox.getSelectedItem())
+                return comboBox.getSelectedItem().toString();
+        }
+        return null;
     }
 
     @Override
@@ -53,6 +82,7 @@ public class TextBoxRadioStat extends JPanel implements EnsembleViewStat {
     public Statistics getStatType() {
         return stat;
     }
+
     public JRadioButton getRadioButton() {
         return radioButton;
     }
@@ -61,14 +91,24 @@ public class TextBoxRadioStat extends JPanel implements EnsembleViewStat {
     public void addActionListener(ActionListener l) {
         radioButton.addActionListener(l);
         textField.addActionListener(l);
+        comboBox.addActionListener(l);
 
     }
 
     @Override
     public boolean hasInput() {
-        if(radioButton.isSelected() && !textField.getText().isEmpty()) {
+        if (radioButton.isSelected() && !textField.getText().isEmpty()){
             return radioButton.isSelected();
         }
         return false;
     }
+
+    private void setMovingAvgComboBox() {
+        for (String option : MovingAvgComboBoxMap.MovingAvgComboBoxMap.values())
+            comboBox.addItem(option);
+
+        comboBox.setSelectedItem(null);
+    }
+
+
 }

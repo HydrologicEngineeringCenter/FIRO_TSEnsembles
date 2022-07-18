@@ -142,7 +142,8 @@ public class EnsembleViewer {
 
                         case MOVINGAVG: {
                             float[][] MovingAvgVals = computeEngine.computeTextBoxRadioTimeSeriesView(db.getEnsembleTimeSeries(selectedRid),
-                                    getSelectedTimeSeriesView(selectedStats), selectedZdt, ((TextBoxRadioStat) stat).getTextFieldValue(), ChartType.TimePlot);
+                                    getSelectedTimeSeriesView(selectedStats), selectedZdt, ((TextBoxRadioStat) stat).getTextFieldValue(), ((TextBoxRadioStat) stat).getMovingAvgType(), ChartType.TimePlot);
+
                             EnsembleTimeSeries ets = new EnsembleTimeSeries(selectedRid, "units", "data_type", "version");
                             ets.addEnsemble(new Ensemble(ensemble.getIssueDate(), MovingAvgVals, ensemble.getStartDateTime(), ensemble.getInterval(), ensemble.getUnits()));
                             addStatisticsToTimePlot(chart, selectedStats, ets, dates);
@@ -458,19 +459,12 @@ public class EnsembleViewer {
 
     private void tryShowingSingleValueSummary(SingleValueSummaryTab tab) {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(selectedRid);
-        if(tab.getSummaryType() == SingleValueSummaryType.ComputeMovingAvg) {
-            float value = computeEngine.computeTwoStepComputableMovingAvg(ets, selectedZdt, tab.getFirstStat(), tab.getFirstTextFieldValue(), tab.getFirstATextFieldValue(),
-                    tab.getSecondStat(), tab.getSecondTextFieldValue(),
-                    tab.getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles ||
-                            tab.getSummaryType() == SingleValueSummaryType.ComputeCumulative || tab.getSummaryType() == SingleValueSummaryType.ComputeMovingAvg);
-            tab.tryShowingOutput(value);
-        } else {
+
             float value = computeEngine.computeTwoStepComputable(ets, selectedZdt, tab.getFirstStat(), tab.getFirstTextFieldValue(),
                     tab.getSecondStat(), tab.getSecondTextFieldValue(),
                     tab.getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles ||
                             tab.getSummaryType() == SingleValueSummaryType.ComputeCumulative);
             tab.tryShowingOutput(value);
-        }
     }
 
 

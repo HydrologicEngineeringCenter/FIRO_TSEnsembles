@@ -1,8 +1,11 @@
 package hec.ensembleview;
 
+import hec.ensembleview.mappings.MovingAvgComboBoxMap;
+import hec.ensembleview.mappings.SingleValueComboBoxMap;
 import hec.ensembleview.mappings.StatisticsUITypeMap;
 import hec.stats.Statistics;
 import org.jfree.chart.text.TextBox;
+import hec.ensembleview.MovingAvgType;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -132,6 +135,7 @@ public class ComponentsPanel {
     public EnsembleViewStat getStat(Statistics stat) {
         return statsMapping.get(stat);
     }
+
 
 
 }

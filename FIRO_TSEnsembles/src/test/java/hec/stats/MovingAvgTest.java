@@ -32,7 +32,7 @@ class MovingAvgTest {
 
     @Test
     public void testMovingAvgExactSimpleArray2() {
-        MovingAvg test = new MovingAvg(3);
+        MovingAvg test = new MovingAvg(3,"Middle");
         test.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),"hours"));
         assertArrayEquals(testResults(1), test.multiCompute(testCases(1)));
     }
@@ -41,14 +41,14 @@ class MovingAvgTest {
 
     @Test
     public void testMovingAvgExactSimpleArray3() {
-        MovingAvg test = new MovingAvg(4);
+        MovingAvg test = new MovingAvg(4, "Middle");
         test.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),""));
         assertArrayEquals(testResults(2), test.multiCompute(testCases(2)));
     }
 
     @Test
     public void testMovingAvgExactSimpleArray4() {
-        MovingAvg test = new MovingAvg(4);
+        MovingAvg test = new MovingAvg(4,"Middle");
         test.configure(new EnsembleConfiguration(null, null, Duration.ofHours(2),""));
         assertArrayEquals(testResults(3), test.multiCompute(testCases(2)));
     }
@@ -57,7 +57,7 @@ class MovingAvgTest {
     public void testMovingAvgWithEnsembleforEachTrace() {
         try {
             Ensemble e = TestData.getSampleEnsemble();
-            MultiComputable test = new MovingAvg(3);
+            MultiComputable test = new MovingAvg(3,"Middle");
             float[][] output = e.multiComputeForEachTraces(test);
             float[] output1 = output[0];
             assertEquals(-2066.6667f, output1[1]);
@@ -71,7 +71,7 @@ class MovingAvgTest {
     public void testMovingAvgWithEnsembleForEachTrace6() {
         try {
             Ensemble e = TestData.getSampleEnsemble();
-            MultiComputable test = new MovingAvg(4);
+            MultiComputable test = new MovingAvg(4,"Middle");
             float[][] output = e.multiComputeForEachTraces(test);
             float[] output1 = output[6];
             assertEquals(-1749.267333984375, output1[1]);

@@ -20,11 +20,9 @@ public class SingleValueSummaryTab extends JPanel {
     JComboBox<Statistics> statComboBox1;
     JComboBox<Statistics> statComboBox2;
     JTextField textField1;
-    JTextField textField1a;
     JTextField textField2;
 
     JLabel textField1Label;
-    JLabel textField1aLabel;
 
     JPanel buttonPanel;
     public JButton computeButton;
@@ -58,23 +56,10 @@ public class SingleValueSummaryTab extends JPanel {
                 r = stat.toString();
             }
         } else {
-            if (stat == Statistics.CUMULATIVE || stat == Statistics.MOVINGAVG) {
+            if (stat == Statistics.CUMULATIVE) {
                 r = String.format("%s value on day %d", stat, (int)vals[0]);
             } else
                 r = stat.toString();
-        }
-
-        return r;
-    }
-
-    public String getMovingAvgStatString() {
-        String r;
-        Statistics stat = getFirstStat();
-        float[] vals = getFirstATextFieldValue();
-        if (StatisticsUITypeMap.map.get(stat) == StatisticUIType.TEXTBOXRADIO) {
-            r = String.format("%d hour %s", (int)vals[0], stat);
-        } else {
-            r = stat.toString();
         }
 
         return r;
@@ -130,22 +115,6 @@ public class SingleValueSummaryTab extends JPanel {
         return floatValuesParse;
     }
 
-    public float[] getFirstATextFieldValue() {
-        if (StatisticsUITypeMap.map.get((Statistics)statComboBox1.getSelectedItem()) != StatisticUIType.TEXTBOXRADIO)
-            return null;
-
-        String textValues = textField1a.getText();
-
-        if (Objects.equals(textValues, ""))
-            return null;
-
-        String[] textValuesParse = textValues.trim().split("[,:;]");
-        float[] floatValuesParse = new float[textValuesParse.length];
-        for(int i = 0; i < textValuesParse.length; i++) {
-            floatValuesParse[i] = Float.parseFloat(textValuesParse[i]);
-        }
-        return floatValuesParse;
-    }
     public float[] getSecondTextFieldValue() {
         if (StatisticsUITypeMap.map.get((Statistics)statComboBox2.getSelectedItem()) != StatisticUIType.TEXTBOX)
             return null;
@@ -182,14 +151,10 @@ public class SingleValueSummaryTab extends JPanel {
 
         });
         textField1.setEditable(false);
-        textField1a.setEditable(false);
         textField2.setEditable(false);
 
         statComboBox1.addActionListener(e ->
                 textField1.setEditable(StatisticsUITypeMap.map.get((Statistics) (statComboBox1.getSelectedItem())) != StatisticUIType.CHECKBOX));
-
-        statComboBox1.addActionListener(e ->
-                textField1a.setEditable(StatisticsUITypeMap.map.get((Statistics) (statComboBox1.getSelectedItem())) == StatisticUIType.TEXTBOXRADIO));
 
         statComboBox2.addActionListener(e ->
                 textField2.setEditable(StatisticsUITypeMap.map.get((Statistics) (statComboBox2.getSelectedItem())) != StatisticUIType.CHECKBOX));
@@ -212,37 +177,26 @@ public class SingleValueSummaryTab extends JPanel {
 
         layout.setHorizontalGroup(
                 layout.createSequentialGroup()
-                    .addGroup(layout.createParallelGroup()
-                        .addComponent(summaryTypeComboBox)
-                        .addComponent(statComboBox1)
-                        .addComponent(statComboBox2)
-                        .addComponent(textField1Label)
-                        .addComponent(textField1)
-                        .addComponent(textField1aLabel)
-                        .addComponent(textField1a)
-                        .addComponent(textField2))
+                        .addGroup(layout.createParallelGroup()
+                                .addComponent(summaryTypeComboBox)
+                                .addComponent(statComboBox1)
+                                .addComponent(statComboBox2))
                         .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                .addComponent(textField1)
+                                .addComponent(textField2)
                                 .addComponent(computeButton))
         );
 
         layout.setVerticalGroup(
                 layout.createSequentialGroup()
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(summaryTypeComboBox)).addContainerGap().addGap(30)
                         .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(statComboBox1)).addContainerGap().addGap(30)
+                                .addComponent(summaryTypeComboBox)).addContainerGap().addGap(50)
                         .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(textField1Label)).addContainerGap().addGap(10)
+                                .addComponent(statComboBox1)
+                                .addComponent(textField1)).addContainerGap().addGap(50)
                         .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(textField1)).addContainerGap().addGap(30)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(textField1aLabel)).addContainerGap().addGap(10)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(textField1a)).addContainerGap().addGap(30)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(statComboBox2)).addContainerGap().addGap(30)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(textField2)).addContainerGap().addGap(30)
+                                .addComponent(statComboBox2)
+                                .addComponent(textField2))
                         .addComponent(computeButton)
         );
         BorderLayout rightArea = new BorderLayout(10,10);
@@ -289,11 +243,9 @@ public class SingleValueSummaryTab extends JPanel {
         statComboBox2 = new JComboBox<>();
 
         textField1 = new JTextField();
-        textField1a = new JTextField();
         textField2 = new JTextField();
 
         textField1Label = new JLabel("Input: ");
-        textField1aLabel = new JLabel("Moving Average: ");
 
         buttonPanel = new JPanel();
         computeButton = new JButton("Compute");
@@ -318,9 +270,6 @@ public class SingleValueSummaryTab extends JPanel {
         } else if (getSummaryType() == SingleValueSummaryType.ComputeCumulative) {
             writeLn(String.join(" ", "Computing", getFirstStatString() + ",",
                     "then computing", getSecondStatString(), "across all ensemble members =", Float.toString(result)));
-        } else if (getSummaryType() == SingleValueSummaryType.ComputeMovingAvg) {
-        writeLn(String.join(" ", "Computing", getFirstStatString() + ",", "over", getMovingAvgStatString(),
-                "days, then computing", getSecondStatString(), "across all ensemble members =", Float.toString(result)));
-    }
+        }
     }
 }
