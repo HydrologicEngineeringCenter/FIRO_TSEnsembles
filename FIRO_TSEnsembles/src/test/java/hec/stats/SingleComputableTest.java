@@ -8,7 +8,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SingleComputableTest {
     SingleComputable maxOfMax = new MaxOfMaximumsComputable();
-    SingleComputable twostep = new TwoStepComputable(new MaxComputable(),new MeanComputable(), true);
+    Statistics[] stats = new Statistics[]{Statistics.MAX};
+    MultiComputable mc = new MultiStatComputable(stats);
+    NDayMultiComputable nday = new NDayMultiComputable(mc,2);
+    SingleComputable twostep = new TwoStepComputable(nday,new MeanComputable(), true);
 
     @Test
     void ToAndFromXML() {
@@ -18,6 +21,8 @@ class SingleComputableTest {
 
             SingleComputable A = Serializer.fromXML(a);
             SingleComputable B = Serializer.fromXML(b);
+
+            System.out.println("uhhh");
 
         } catch (Exception exception) {
             exception.printStackTrace();
