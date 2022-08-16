@@ -72,23 +72,6 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         return r;
     }
 
-    public void setToolTipTextBox1() {
-        Statistics stat = (Statistics)statComboBox1.getSelectedItem();
-
-        if (StatisticsUITypeMap.map.get(stat) == StatisticUIType.TEXTBOX) {
-            if (stat == Statistics.PERCENTILE) {
-                textField1.setToolTipText("test1");
-            } else  {
-                textField1.setToolTipText("test2");
-            }
-        } else {
-            if (stat == Statistics.CUMULATIVE) {
-                textField1.setToolTipText("test4");
-            }
-        }
-        add(textField1);
-    }
-
     public String getSecondStatString() {
         String r;
         Statistics stat = getSecondStat();
