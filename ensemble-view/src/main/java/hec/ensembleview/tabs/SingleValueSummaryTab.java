@@ -41,6 +41,7 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         organizeUI();
         setSummaryTypeComboBox();
         setActionListeners();
+
     }
 
     public Statistics getFirstStat()
@@ -165,6 +166,26 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
 
         cleanButton.addActionListener(e -> {
             outputArea.setText("");
+        });
+
+        statComboBox1.addActionListener(e -> {
+            if(statComboBox1.getSelectedItem() == Statistics.MAXACCUMDURATION || statComboBox1.getSelectedItem() == Statistics.MAXAVERAGEDURATION) {
+                textField1.setToolTipText("Enter value in Hours");
+            } else if (statComboBox1.getSelectedItem() == Statistics.PERCENTILE) {
+                textField1.setToolTipText("Enter percentile as Decimal");
+            } else if (statComboBox1.getSelectedItem() == Statistics.CUMULATIVE) {
+                textField1.setToolTipText("Enter value in Days");
+            } else {
+                textField1.setToolTipText(null);
+            }
+        });
+
+        statComboBox2.addActionListener(e -> {
+            if (statComboBox2.getSelectedItem() == Statistics.PERCENTILE) {
+                textField2.setToolTipText("Enter percentile as Decimal");
+            } else {
+                textField2.setToolTipText(null);
+            }
         });
 
         computeButton.addActionListener(e -> {
