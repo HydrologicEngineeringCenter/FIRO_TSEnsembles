@@ -137,6 +137,17 @@ public class ChartTab extends JPanel implements EnsembleTab {
                             new LineSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
                                     new BasicStroke(3.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
+                case STANDARDDEVIATION:
+                    chart.addLine(
+                            new LineSpec(1, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
+                                    new BasicStroke(3.0f), Color.GREEN, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
+                case VARIANCE:
+                    chart.addLine(
+                            new LineSpec(1, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
+                                    new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
+
                 case PERCENTILE:
                     float[] percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();
                     DecimalFormat df = new DecimalFormat("0.0");
@@ -176,6 +187,16 @@ public class ChartTab extends JPanel implements EnsembleTab {
                     chart.addPoint(
                             new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
                                     new BasicStroke(3.0f), Color.ORANGE, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
+                case STANDARDDEVIATION:
+                    chart.addPoint(
+                            new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
+                                    new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
+                    break;
+                case VARIANCE:
+                    chart.addPoint(
+                            new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
+                                    new BasicStroke(3.0f), Color.MAGENTA, StatisticsStringMap.map.get(selectedStat.getStatType())));
                     break;
                 case TOTAL:
                     chart.addPoint(
