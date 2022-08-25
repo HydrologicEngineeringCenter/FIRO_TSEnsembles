@@ -6,6 +6,7 @@ import hec.RecordIdentifier;
 import hec.ensemble.Ensemble;
 
 import hec.ensemble.EnsembleTimeSeries;
+import hec.heclib.dss.DssDataType;
 import hec.heclib.dss.HecPairedData;
 import hec.heclib.dss.HecTimeSeries;
 import hec.io.PairedDataContainer;
@@ -75,6 +76,7 @@ public class TestDssDatabase {
     public void testEnsemble() throws Exception{
 
         DssDatabase db = getNewTestDssDatabase();
+        System.out.println("testEnsemble: "+db.getFileName());
         List<hec.RecordIdentifier> recordIdentifiers= db.getEnsembleTimeSeriesIDs();
 
         assertEquals(23,recordIdentifiers.size());
@@ -85,6 +87,15 @@ public class TestDssDatabase {
         Ensemble e = db.getEnsemble(id,times.get(1));
         assertEquals(59, e.getValues().length);
         assertEquals(337, e.getValues()[0].length);
+
+        // read a record using the DSS API
+        HecTimeSeries dss = new HecTimeSeries(db.getFileName());
+        TimeSeriesContainer tsc = new TimeSeriesContainer();
+        tsc.fullName = "//Kanektok.BCAC1/flow/01Nov2013/1Hour/C:000007|T:20131103-1200|V:20131103-120000|/";
+        int status = dss.read(tsc, true);
+        assertEquals(0, status);
+        assertEquals(DssDataType.PER_AVER.toString(),tsc.type);
+        dss.done();
     }
 
     @Test
