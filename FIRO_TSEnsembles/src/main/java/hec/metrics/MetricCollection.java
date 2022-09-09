@@ -12,27 +12,29 @@ public class MetricCollection {
     public MetricCollectionTimeSeries parent;
     private Configuration _configuration;
     private float[][] metrics;
-    private Statistics[] metric_statistics;
+    private String metric_statisticsLabel;
 
-    public MetricCollection(Configuration c, Statistics[] statistics, float[][] values)
+    public MetricCollection(Configuration c, String statisticsLabel, float[][] values)
     {
         this._configuration = c;
-        this.metric_statistics = statistics;
+        this.metric_statisticsLabel = statisticsLabel;
         this.metrics = values;
     }
-    public MetricCollection(ZonedDateTime issueDate,ZonedDateTime startDate, Statistics[] statistics, float[][] values)
+    public MetricCollection(ZonedDateTime issueDate,ZonedDateTime startDate, String statisticsLabel, float[][] values)
     {
-        this(new MetricsConfiguration(issueDate,startDate), statistics, values);
+        this(new MetricsConfiguration(issueDate,startDate), statisticsLabel, values);
     }
 
-    public Statistics[] getMetricStatistics() {
-        return metric_statistics;
+    public  String getMetricStatistics() {
+        return metric_statisticsLabel;
     }
 
+    //TODO: fix this to be specific to string label. Contains will catch on first instance every time if multiple.
     public int parameterIndex(Statistics parameterName){
+        String[] strings = metric_statisticsLabel.split(",");
         int index = -1;
-        for (int i=0;i<metric_statistics.length;i++) {
-            if (metric_statistics[i].equals(parameterName)) {
+        for (int i = 0; i< strings.length; i++) {
+            if (strings[i].contains(parameterName.toString())) {
                 index = i;
                 break;
             }
@@ -40,12 +42,7 @@ public class MetricCollection {
         return index;
     }
     public String metricStatisticsToString(){
-        String s = "";
-        for (int i=0;i<metric_statistics.length;i++) {
-            s += metric_statistics[i] + ",";
-        }
-        s = s.substring(0,s.length()-1);
-        return s;
+        return metric_statisticsLabel;
     }
     public ZonedDateTime getIssueDate() {
         return _configuration.getIssueDate();
@@ -65,7 +62,7 @@ public class MetricCollection {
     //probably need getdataforparametername.
 
     public float[] getDateForStatistic(Statistics stat){
-        int index = Arrays.asList(metric_statistics).indexOf(stat);
+        int index = Arrays.asList(metric_statisticsLabel).indexOf(stat);
         if (index >= 0) {
             return metrics[index];
         }
