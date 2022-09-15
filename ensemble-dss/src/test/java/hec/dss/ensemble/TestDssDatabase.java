@@ -16,7 +16,6 @@ import hec.metrics.MetricCollectionTimeSeries;
 import hec.ensemble.stats.MultiComputable;
 import hec.ensemble.stats.MultiStatComputable;
 import hec.ensemble.stats.Statistics;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Test;
 
 import static hec.ensemble.stats.Statistics.*;
@@ -164,11 +163,6 @@ public class TestDssDatabase {
         MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mIds.get(0));
         assertEquals(3, mcts.getIssueDates().size());
 
-
-    }
-
-    @Ignore
-    public void StoringPercentilesInTimeSeries() throws Exception {
 
     }
 
