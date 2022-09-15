@@ -21,4 +21,9 @@ public class MinComputable implements Computable{
     public Statistics[] Statistics() {
         return new Statistics[]{Statistics.MIN};
     }
+
+    @Override
+    public String StatisticsLabel() {
+        return "MIN";
+    }
 }

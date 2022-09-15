@@ -72,4 +72,9 @@ public class MultiStatComputable implements MultiComputable, Computable {
     public Statistics[] Statistics() {
         return statSelection;
     }
+
+    @Override
+    public String StatisticsLabel() {
+        return null;
+    }
 }

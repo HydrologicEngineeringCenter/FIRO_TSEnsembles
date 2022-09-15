@@ -13,4 +13,9 @@ public class MaxComputable implements Computable{
     public Statistics[] Statistics() {
         return new Statistics[]{Statistics.MAX};
     }
+
+    @Override
+    public String StatisticsLabel() {
+        return "MAX";
+    }
 }
