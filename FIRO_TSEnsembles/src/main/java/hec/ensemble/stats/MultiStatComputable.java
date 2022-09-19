@@ -1,5 +1,7 @@
 package hec.ensemble.stats;
 
+import java.util.Arrays;
+
 public class MultiStatComputable implements MultiComputable, Computable {
     Statistics[] statSelection;
 
@@ -75,6 +77,6 @@ public class MultiStatComputable implements MultiComputable, Computable {
 
     @Override
     public String StatisticsLabel() {
-        return null;
+        return Arrays.toString(statSelection);
     }
 }
