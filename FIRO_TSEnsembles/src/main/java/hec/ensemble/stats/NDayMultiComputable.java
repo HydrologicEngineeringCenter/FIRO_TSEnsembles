@@ -45,7 +45,7 @@ public class NDayMultiComputable implements Computable, StatisticsReportable, Co
 
     @Override
     public String StatisticsLabel() {
-        return _day+"day"+_stepOne.StatisticsLabel();
+        return _stepOne.StatisticsLabel()+"("+_day+"DAY)";
     }
 
 
