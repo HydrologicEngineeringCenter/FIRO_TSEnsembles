@@ -98,7 +98,7 @@ public class PercentilesComputable implements Computable, MultiComputable {
                 label += Statistics.PERCENTILE + "(" +_percentiles[i] + ")";
             }
             else{
-                label += Statistics.PERCENTILE + "(" +_percentiles[i] + "),";
+                label += Statistics.PERCENTILE + "(" +_percentiles[i] + ")|";
             }
 
         }

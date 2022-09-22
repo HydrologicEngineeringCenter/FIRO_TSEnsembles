@@ -66,7 +66,7 @@ public class TwoStepComputable implements SingleComputable, Configurable {
 
     @Override
     public String StatisticsLabel() {
-        return _stepOne.StatisticsLabel() +"|" + _stepTwo.StatisticsLabel();
+        return  _stepOne.StatisticsLabel() +"," + _stepTwo.StatisticsLabel();
     }
 
 
