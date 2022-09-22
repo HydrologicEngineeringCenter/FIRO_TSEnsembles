@@ -1,6 +1,7 @@
 package hec.dss.ensemble;
 
 import hec.ensemble.stats.Statistics;
+import hec.heclib.dss.DSSPathname;
 
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -38,6 +39,11 @@ class MetricPathTools {
         }
 
         return null;
+    }
+
+    static String getMetricStatLabelFromPath(DSSPathname path) {
+        String[] splitPath = path.cPart().split("-");
+        return splitPath[1];
     }
 
     static private String getMetricPattern() {

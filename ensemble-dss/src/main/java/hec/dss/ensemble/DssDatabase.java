@@ -79,11 +79,11 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                   e.getStartDateTime(),e.getIssueDate())+"/";
     }
 
-    private String buildTimeSeriesStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval, ZonedDateTime startDateTime, ZonedDateTime issueDate, Statistics stat) {
+    private String buildTimeSeriesStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval, ZonedDateTime startDateTime, ZonedDateTime issueDate, String stat) {
         DSSPathname path = new DSSPathname();
         path.setAPart("");
         path.setBPart(timeSeriesIdentifier.location);
-        path.setCPart(timeSeriesIdentifier.parameter + "-" + stat.toString());
+        path.setCPart(timeSeriesIdentifier.parameter + "-" + stat);
         path.setDPart("");
         path.setEPart(getEPart((int)interval.toMinutes()));
         path.setFPart(buildFpart(startDateTime, issueDate));
@@ -91,7 +91,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     }
 
 
-    private String buildPairedDataStatPathName(RecordIdentifier timeSeriesIdentifier, ZonedDateTime startDateTime, ZonedDateTime issueDate, Statistics[] stats) {
+    private String buildPairedDataStatPathName(RecordIdentifier timeSeriesIdentifier, ZonedDateTime startDateTime, ZonedDateTime issueDate) {
         DSSPathname path = new DSSPathname();
         path.setAPart("");
         path.setBPart(timeSeriesIdentifier.location);
@@ -308,7 +308,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     @Override
     public hec.metrics.MetricCollection getMetricCollection(hec.RecordIdentifier timeseriesID, java.time.ZonedDateTime issue_time) {
         List<DSSPathname> paths = getCatalog().getMetricPaths(timeseriesID, issue_time);
-        Statistics[] stats = getMetricStatsFromPaths(paths);
+        String stats = getMetricStatsLabelsFromPaths(paths);
         float[][] values = getMetricValues(paths);
         MetricCollection mc = new MetricCollection(issue_time, issue_time, stats, values);
         return mc;
@@ -317,15 +317,13 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     @Override
     public hec.metrics.MetricCollectionTimeSeries getMetricCollectionTimeSeries(hec.RecordIdentifier timeseriesID) {
         MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(timeseriesID, "", MetricTypes.TIMESERIES_OF_ARRAY);
-
         for (ZonedDateTime zdt : getCatalog().getMetricIssueDates(timeseriesID)) {
             List<DSSPathname> paths = getCatalog().getMetricPaths(timeseriesID, zdt);
-            Statistics[] stats = getMetricStatsFromPaths(paths);
+            String stats = getMetricStatsLabelsFromPaths(paths);
             float[][] values = getMetricValues(paths);
             MetricCollection mc = new MetricCollection(zdt, zdt, stats, values);
             mcts.addMetricCollection(mc);
         }
-
         return mcts;
     }
 
@@ -352,6 +350,17 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         return stats;
     }
 
+    private String getMetricStatsLabelsFromPaths(List<DSSPathname> paths) {
+        String stats = "";
+        for (int i = 0; i < paths.size(); i++) {
+            stats += MetricPathTools.getMetricStatLabelFromPath(paths.get(i));
+            if(i != paths.size()-1){
+                stats+= "|";
+            }
+        }
+        return stats;
+    }
+
     @Override
     public java.util.List<java.time.ZonedDateTime> getMetricCollectionIssueDates(hec.RecordIdentifier timeseriesID) {
         return getCatalog().getMetricIssueDates(timeseriesID);
@@ -363,13 +372,16 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
             write(mcts);
     }
 
+
+
     @Override
     public void write(hec.metrics.MetricCollectionTimeSeries metrics) throws Exception {
         HecTimeSeries dss = new HecTimeSeries(dssFileName);
-
         for (MetricCollection mc : metrics) {
-            Statistics[] stats = mc.getMetricStatistics();
-            for (int i = 0; i < stats.length; i++) {
+            String stats = mc.getMetricStatistics();
+            String[] statsAsSeparateTimeseries = stats.split("\\|");
+
+            for (int i = 0; i < statsAsSeparateTimeseries.length; i++) {
                 TimeSeriesContainer tsc = new TimeSeriesContainer();
                 tsc.values = convertFloatsToDoubles(mc.getValues()[i]);
                 tsc.numberValues = tsc.values.length;
@@ -379,33 +391,31 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                         mc.getInterval(),
                         mc.getStartDateTime(),
                         mc.getIssueDate(),
-                        stats[i]);
+                        statsAsSeparateTimeseries[i]);
                 dss.write(tsc);
             }
-
         }
-
         dss.done();
     }
 
     @Override
     public void write(MetricCollection metrics) {
         HecPairedData dss = new HecPairedData(dssFileName);
+        String stats = metrics.getMetricStatistics();
+        String[] statsAsSeparateSeries = stats.split("\\|");
 
-        Statistics[] stats = metrics.getMetricStatistics();
         PairedDataContainer pdc = new PairedDataContainer();
         pdc.yOrdinates = getYOrdinates(metrics.getValues());
         pdc.xOrdinates = getXOrdinates(metrics.getValues()[0].length);
-        pdc.labels = new String[stats.length];
+        pdc.labels = new String[statsAsSeparateSeries.length];
         pdc.numberCurves = pdc.yOrdinates.length;
         pdc.numberOrdinates = pdc.xOrdinates.length;
-        for (int i = 0; i < stats.length; i++)
-            pdc.labels[i] = stats[i].toString();
+        for (int i = 0; i < statsAsSeparateSeries.length; i++)
+            pdc.labels[i] = statsAsSeparateSeries[i];
         pdc.labelsUsed = true;
         pdc.fullName = buildPairedDataStatPathName(metrics.parent.getTimeSeriesIdentifier(),
                 metrics.getStartDateTime(),
-                metrics.getIssueDate(),
-                stats);
+                metrics.getIssueDate());
 
         dss.write(pdc);
         dss.done();
