@@ -43,6 +43,9 @@ class MetricPathTools {
 
     static String getMetricStatLabelFromPath(DSSPathname path) {
         String[] splitPath = path.cPart().split("-");
+        if(splitPath[1].contains("stat")){
+            //this is a paired data container, and we cant actually get the stats without the pdc.
+        }
         return splitPath[1];
     }
 

@@ -308,7 +308,8 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     @Override
     public hec.metrics.MetricCollection getMetricCollection(hec.RecordIdentifier timeseriesID, java.time.ZonedDateTime issue_time) {
         List<DSSPathname> paths = getCatalog().getMetricPaths(timeseriesID, issue_time);
-        String stats = getMetricStatsLabelsFromPaths(paths);
+
+        String stats = getMetricStatsLabelsFromPaths(paths); // this does not work for paired data, because the stats labels are stored in the labels of the pdc. Need to access the pdc.
         float[][] values = getMetricValues(paths);
         MetricCollection mc = new MetricCollection(issue_time, issue_time, stats, values);
         return mc;
