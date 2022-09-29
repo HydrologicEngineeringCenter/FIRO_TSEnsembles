@@ -65,12 +65,16 @@ class MetricPathTools {
     }
 
     static boolean isMetricTimeSeries(String cPart) {
-        Matcher matcher = MetricPathTools.metricTimeSeriesPattern.matcher(cPart);
-        return matcher.find();
+        if(cPart.startsWith(DssDatabase.metricTimeseriesIdentifier)){
+            return true;
+        }
+        return false;
     }
 
     static boolean isMetricPairedData(String cPart) {
-        Matcher matcher = MetricPathTools.metricPairedDataPattern.matcher(cPart);
-        return matcher.find();
+        if(cPart.startsWith(DssDatabase.metricPairedDataIdentifier)){
+            return true;
+        }
+        return false;
     }
 }
