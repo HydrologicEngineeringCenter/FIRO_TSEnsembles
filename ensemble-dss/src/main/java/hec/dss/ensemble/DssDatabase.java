@@ -35,10 +35,13 @@ import java.util.TimeZone;
  */
 public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     private String dssFileName;
-    Catalog catalog;
+    private Catalog catalog;
     static DateTimeFormatter dssDateFormat = DateTimeFormatter.ofPattern("ddMMMyyyy HHmm");
     static DateTimeFormatter startDateformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
     static DateTimeFormatter issueDateformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+    static String metricTimeseriesIdentifier = "Metric Timeseries";
+    static String metricPairedDataIdentifier = "Metric Paired Data";
+    boolean CatalogIsUpToDate = false;
 
     public DssDatabase(String dssFileName){
         this.dssFileName= dssFileName;
@@ -46,11 +49,18 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     private Catalog getCatalog()
     {
-        return getCatalog(false);
+        Catalog cat = getCatalog(!CatalogIsUpToDate);
+        CatalogIsUpToDate = true;
+        return cat;
+
     }
     private Catalog getCatalog(boolean rebuild){
-        if( this.catalog == null)
-            catalog  = new Catalog(this.dssFileName);
+        if( this.catalog == null) {
+            catalog = new Catalog(this.dssFileName);
+        }
+        else if(rebuild){
+            catalog.update();
+        }
         return catalog;
     }
 
@@ -83,7 +93,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         DSSPathname path = new DSSPathname();
         path.setAPart("");
         path.setBPart(timeSeriesIdentifier.location);
-        path.setCPart(timeSeriesIdentifier.parameter + "-" + stat);
+        path.setCPart(metricTimeseriesIdentifier+ "-" + timeSeriesIdentifier.parameter + "-" + stat);
         path.setDPart("");
         path.setEPart(getEPart((int)interval.toMinutes()));
         path.setFPart(buildFpart(startDateTime, issueDate));
@@ -95,7 +105,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         DSSPathname path = new DSSPathname();
         path.setAPart("");
         path.setBPart(timeSeriesIdentifier.location);
-        path.setCPart(timeSeriesIdentifier.parameter + "-stats");
+        path.setCPart(metricPairedDataIdentifier + "-" + timeSeriesIdentifier.parameter + "-stats");
         path.setDPart("");
         path.setEPart("");
         path.setFPart(buildFpart(startDateTime, issueDate));
@@ -208,6 +218,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         for (EnsembleTimeSeries ets: etsArray){
             write(ets);
         }
+        CatalogIsUpToDate = false;
     }
     public void write(EnsembleTimeSeries ets) throws Exception{
         // get access to DSS
@@ -218,6 +229,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         dss.write(containers);
         // close resources
         dss.close();
+        CatalogIsUpToDate = false;
     }
     private static TimeSeriesCollectionContainer loadContainers(EnsembleTimeSeries ets){
 
@@ -371,6 +383,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     public void write(hec.metrics.MetricCollectionTimeSeries[] metricsArray) throws Exception {
         for (MetricCollectionTimeSeries mcts : metricsArray)
             write(mcts);
+        CatalogIsUpToDate = false;
     }
 
 
@@ -397,6 +410,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
             }
         }
         dss.done();
+        CatalogIsUpToDate = false;
     }
 
     @Override
@@ -420,6 +434,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
         dss.write(pdc);
         dss.done();
+        CatalogIsUpToDate = false;
     }
 
 
