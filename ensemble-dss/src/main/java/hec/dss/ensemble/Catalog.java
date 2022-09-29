@@ -48,9 +48,19 @@ public class Catalog {
             // Add record identifier for collection
             if (DSSPathname.isaCollectionPath(path.toString())) {
                 addCollection(path);
-            } else if (MetricPathTools.isMetricTimeSeries(path.cPart()) ||
-                    MetricPathTools.isMetricPairedData(path.cPart())) {
-                addMetric(path);
+            }
+            else {
+                boolean isMetricTimeseries = MetricPathTools.isMetricTimeSeries(path.cPart());
+                boolean isMetricPairedData = MetricPathTools.isMetricPairedData(path.cPart());
+                if (isMetricPairedData){
+                    addMetric(path);
+                }
+                else if (isMetricTimeseries){
+                    addMetric(path);
+                }
+                else{
+                    System.out.println("uhoh.");
+                }
             }
         }
 
