@@ -39,8 +39,8 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     static DateTimeFormatter dssDateFormat = DateTimeFormatter.ofPattern("ddMMMyyyy HHmm");
     static DateTimeFormatter startDateformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
     static DateTimeFormatter issueDateformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
-    static String metricTimeseriesIdentifier = "Metric Timeseries";
-    static String metricPairedDataIdentifier = "Metric Paired Data";
+    static String metricTimeseriesIdentifier = "MetricTimeseries";
+    static String metricPairedDataIdentifier = "MetricPairedData";
     boolean CatalogIsUpToDate = false;
 
     public DssDatabase(String dssFileName){

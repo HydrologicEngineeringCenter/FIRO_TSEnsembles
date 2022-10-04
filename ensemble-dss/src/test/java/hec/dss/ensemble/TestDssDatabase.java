@@ -122,15 +122,15 @@ public class TestDssDatabase {
 
         HecTimeSeries dss = new HecTimeSeries(db.getFileName());
         String[] pathsToFind = new String[] {
-            "//Kanektok.BCAC1/Metric Timeseries-flow-MAX/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-            "//Kanektok.BCAC1/Metric Timeseries-flow-AVERAGE/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-            "//Kanektok.BCAC1/Metric Timeseries-flow-MIN/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-            "//Kanektok.BCAC1/Metric Timeseries-flow-MAX/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-            "//Kanektok.BCAC1/Metric Timeseries-flow-AVERAGE/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-            "//Kanektok.BCAC1/Metric Timeseries-flow-MIN/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-            "//Kanektok.BCAC1/Metric Timeseries-flow-MAX/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
-            "//Kanektok.BCAC1/Metric Timeseries-flow-AVERAGE/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
-            "//Kanektok.BCAC1/Metric Timeseries-flow-MIN/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/"
+            "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-MAX/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-AVERAGE/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-MIN/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-MAX/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-AVERAGE/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-MIN/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-MAX/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-AVERAGE/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-MIN/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/"
         };
 
         for (String path : pathsToFind) {
@@ -216,9 +216,9 @@ public class TestDssDatabase {
 
         HecPairedData dss = new HecPairedData(db.getFileName());
         String[] pathsToFind = new String[] {
-                "//Kanektok.BCAC1/Metric Paired Data-flow-stats///T:20131103-1200|V:20131103-120000|/",
-                "//Kanektok.BCAC1/Metric Paired Data-flow-stats///T:20131104-1200|V:20131104-120000|/",
-                "//Kanektok.BCAC1/Metric Paired Data-flow-stats///T:20131105-1200|V:20131105-120000|/"
+                "//Kanektok.BCAC1/"+ DssDatabase.metricPairedDataIdentifier+ "-flow-stats///T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/"+ DssDatabase.metricPairedDataIdentifier+ "-flow-stats///T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/"+ DssDatabase.metricPairedDataIdentifier+ "-flow-stats///T:20131105-1200|V:20131105-120000|/"
         };
 
         for (String path : pathsToFind) {
