@@ -13,6 +13,8 @@ public class StatisticsStringMap {
         map.put(Statistics.MIN, "Min");
         map.put(Statistics.AVERAGE, "Average");
         map.put(Statistics.MEDIAN, "Median");
+        map.put(Statistics.STANDARDDEVIATION, "Standard Deviation");
+        map.put(Statistics.VARIANCE, "Variance");
         map.put(Statistics.PERCENTILE, "Percentile");
         map.put(Statistics.TOTAL, "Total Flow");
         map.put(Statistics.CUMULATIVE, "Cumulative");

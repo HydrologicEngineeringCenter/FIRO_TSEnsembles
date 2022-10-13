@@ -56,6 +56,8 @@ public class ComponentsPanel {
                 case MIN:
                 case MAX:
                 case AVERAGE:
+                case STANDARDDEVIATION:
+                case VARIANCE:
                 case TOTAL:
                     statPanel.add((CheckBoxStat)stat);
                     componentCounter++;

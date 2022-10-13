@@ -33,6 +33,8 @@ public class StatComputationHelper {
         switch(stat){
             case MIN:
             case MAX:
+            case STANDARDDEVIATION:
+            case VARIANCE:
             case AVERAGE:
                 return computeStatFromMultiStatComputable(ets, stat, selectedZdt, chartType);
             case TOTAL:
@@ -84,6 +86,10 @@ public class StatComputationHelper {
                 return new MeanComputable();
             case MEDIAN:
                 return new MedianComputable();
+            case STANDARDDEVIATION:
+                return new MultiStatComputable(new Statistics[] {Statistics.STANDARDDEVIATION});
+            case VARIANCE:
+                return new MultiStatComputable(new Statistics[] {Statistics.VARIANCE});
             case PERCENTILE:
                 return new PercentilesComputable(values);
             case TOTAL:
