@@ -16,12 +16,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 class MaxAvgDurationTest {
     @Test
     public void testMaxAvgDurationSimpleArray() {
-        MaxAvgDuration test = new MaxAvgDuration(3);
+        MaxAvgDuration test = new MaxAvgDuration(6);
         float[] num = {1,2,3,4,5,6,7,8};
         test.configure(new EnsembleConfiguration(null, null, Duration.ofHours(3),""));
 
         float results = test.compute(num);
-        assertEquals(21, results);
+        assertEquals(7.5, results);
     }
     @Test
     public void testMaxAvgDurationSimpleArrayTens() {

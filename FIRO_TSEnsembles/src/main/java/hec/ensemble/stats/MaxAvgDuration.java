@@ -33,21 +33,37 @@ public  class MaxAvgDuration implements Computable, Configurable {
 
     @Override
     public float compute(float[] values) {
-
+        Integer timeStep = (int) _c.getDuration().toHours();
         Integer denominator = timeStepsPerDuration();
         float maxVal = Float.MIN_VALUE;
         float avg = 0;
         float durationVolume = 0;
-        for(int i = 0; i<values.length;i++){
-            durationVolume += values[i];
-            if(i==(this._duration -1)){
-                avg =durationVolume/denominator;
-                maxVal = avg;
-            }else if(i>=this._duration){
-                float oldval = values[i-this._duration];
-                durationVolume-=oldval;
-                avg =durationVolume/denominator;
-                if(avg>maxVal)maxVal = avg;
+
+        if (timeStep == 1) {
+            for (int i = 0; i < values.length; i++) {
+                durationVolume += values[i];
+                if (i == (this._duration - 1)) {
+                    avg = durationVolume / denominator;
+                    maxVal = avg;
+                } else if (i >= this._duration) {
+                    float oldval = values[i - this._duration];
+                    durationVolume -= oldval;
+                    avg = durationVolume / denominator;
+                    if (avg > maxVal) maxVal = avg;
+                }
+            }
+        } else {
+            for (int i = 0; i < values.length; i++) {
+                durationVolume += values[i];
+                if (i == (denominator - 1)) {
+                    avg = durationVolume / denominator;
+                    maxVal = avg;
+                } else if (i >= denominator) {
+                    float oldval = values[i - denominator];
+                    durationVolume -= oldval;
+                    avg = durationVolume / denominator;
+                    if (avg > maxVal) maxVal = avg;
+                }
             }
         }
         return maxVal;
