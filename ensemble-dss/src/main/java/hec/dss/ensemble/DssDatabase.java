@@ -36,9 +36,9 @@ import java.util.TimeZone;
 public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     private String dssFileName;
     private Catalog catalog;
-    static DateTimeFormatter dssDateFormat = DateTimeFormatter.ofPattern("ddMMMyyyy HHmm");
-    static DateTimeFormatter startDateformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
-    static DateTimeFormatter issueDateformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+    private static final DateTimeFormatter dssDateFormat = DateTimeFormatter.ofPattern("ddMMMyyyy HHmm");
+    private static final DateTimeFormatter startDateformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
+    private static final DateTimeFormatter issueDateformatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
     static String metricTimeseriesIdentifier = "MetricTimeseries";
     static String metricPairedDataIdentifier = "MetricPairedData";
     boolean CatalogIsUpToDate = false;
