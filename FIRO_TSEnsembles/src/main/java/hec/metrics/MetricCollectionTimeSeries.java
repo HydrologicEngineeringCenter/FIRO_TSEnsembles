@@ -38,7 +38,7 @@ public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>, 
      * @param startDate startingDate for this MetricCollection.
      * @param parameterNames  the names
      */
-    public void addMetricCollection(ZonedDateTime issueDate, float[][] metrics, ZonedDateTime startDate, Statistics[] parameterNames)
+    public void addMetricCollection(ZonedDateTime issueDate, float[][] metrics, ZonedDateTime startDate, String parameterNames)
     {
         MetricCollection e = new MetricCollection(issueDate,startDate, parameterNames, metrics);
         addMetricCollection(e);

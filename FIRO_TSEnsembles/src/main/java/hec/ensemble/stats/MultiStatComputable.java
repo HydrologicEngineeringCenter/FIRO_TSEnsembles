@@ -1,8 +1,9 @@
 package hec.ensemble.stats;
 
+import java.util.Arrays;
+
 public class MultiStatComputable implements MultiComputable, Computable {
     Statistics[] statSelection;
-
     /**
      * The MultiComputable interface is beneficial for creating multiple time series representations.
      * This method iterates across all traces for each timestep to produce multiple values for each
@@ -71,5 +72,21 @@ public class MultiStatComputable implements MultiComputable, Computable {
     @Override
     public Statistics[] Statistics() {
         return statSelection;
+    }
+
+    @Override
+    public String StatisticsLabel() {
+        String statLablel = "";
+        int count = 0;
+        for(Statistics stat: statSelection){
+            if(count == statSelection.length-1){
+                statLablel += stat;
+            }
+            else{
+                statLablel +=  stat + "|";
+            }
+            count++;
+        }
+        return statLablel;
     }
 }

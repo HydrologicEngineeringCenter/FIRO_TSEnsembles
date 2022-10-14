@@ -28,4 +28,9 @@ public class CumulativeComputable implements MultiComputable {
     public Statistics[] Statistics() {
         return new Statistics[]{Statistics.CUMULATIVE};
     }
+
+    @Override
+    public String StatisticsLabel() {
+        return "CUMULATIVE";
+    }
 }

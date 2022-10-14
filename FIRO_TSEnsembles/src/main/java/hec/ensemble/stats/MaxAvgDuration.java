@@ -77,4 +77,9 @@ public  class MaxAvgDuration implements Computable, Configurable {
     public Statistics[] Statistics() {
         return new Statistics[]{Statistics.MAXAVERAGEDURATION};//but what duration?
     }
+
+    @Override
+    public String StatisticsLabel() {
+        return "MAXAVERAGEDURATION" + "("+ _duration + "Hours)";
+    }
 }

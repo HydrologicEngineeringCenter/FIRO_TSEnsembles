@@ -66,4 +66,9 @@ public  class MaxAccumDuration implements Computable, Configurable {
     public Statistics[] Statistics() {
         return new Statistics[]{Statistics.MAXACCUMDURATION};//but what duration?
     }
+
+    @Override
+    public String StatisticsLabel() {
+        return "MAXACCUMDURATION" + "(" + _duration + "Hour)";
+    }
 }

@@ -15,4 +15,9 @@ public class MeanComputable implements Computable{
     public Statistics[] Statistics() {
         return new Statistics[]{Statistics.AVERAGE};
     }
+
+    @Override
+    public String StatisticsLabel() {
+        return "AVERAGE";
+    }
 }

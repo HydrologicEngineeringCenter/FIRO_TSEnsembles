@@ -89,4 +89,19 @@ public class PercentilesComputable implements Computable, MultiComputable {
         }
         return ret;
     }
+
+    @Override
+    public String StatisticsLabel() {
+        String label = "";
+        for (int i = 0 ; i < _percentiles.length; i ++){
+            if(i == _percentiles.length-1){
+                label += Statistics.PERCENTILE + "(" +_percentiles[i] + ")";
+            }
+            else{
+                label += Statistics.PERCENTILE + "(" +_percentiles[i] + ")|";
+            }
+
+        }
+        return label;
+    }
 }

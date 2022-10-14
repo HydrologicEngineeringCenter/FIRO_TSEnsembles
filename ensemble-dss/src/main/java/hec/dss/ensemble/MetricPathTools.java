@@ -1,6 +1,7 @@
 package hec.dss.ensemble;
 
 import hec.ensemble.stats.Statistics;
+import hec.heclib.dss.DSSPathname;
 
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -40,6 +41,14 @@ class MetricPathTools {
         return null;
     }
 
+    static String getMetricStatLabelFromPath(DSSPathname path) {
+        String[] splitPath = path.cPart().split("-");
+        if(splitPath[1].contains("stat")){
+            //this is a paired data container, and we cant actually get the stats without the pdc.
+        }
+        return splitPath[1];
+    }
+
     static private String getMetricPattern() {
         StringBuilder builder = new StringBuilder();
         Statistics[] stats = Statistics.values();
@@ -56,12 +65,16 @@ class MetricPathTools {
     }
 
     static boolean isMetricTimeSeries(String cPart) {
-        Matcher matcher = MetricPathTools.metricTimeSeriesPattern.matcher(cPart);
-        return matcher.find();
+        if(cPart.startsWith(DssDatabase.metricTimeseriesIdentifier)){
+            return true;
+        }
+        return false;
     }
 
     static boolean isMetricPairedData(String cPart) {
-        Matcher matcher = MetricPathTools.metricPairedDataPattern.matcher(cPart);
-        return matcher.find();
+        if(cPart.startsWith(DssDatabase.metricPairedDataIdentifier)){
+            return true;
+        }
+        return false;
     }
 }

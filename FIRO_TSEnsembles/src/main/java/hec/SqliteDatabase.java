@@ -676,12 +676,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         byte[] byte_value_array = rs.getBytes("byte_value_array");
 
         float[][] values = TableCompression.UnPack(byte_value_array, member_count, member_length, compression);
-        String[] params = metricstats.split(",");
-        Statistics[] stats = new Statistics[params.length];
-        for (int i = 0; i < params.length; i++){
-            stats[i] = Statistics.valueOf(params[i]);
-        }
-        return new MetricCollection(issue_date, start_date, stats, values); //Duration.ofSeconds(interval_seconds),units);
+        return new MetricCollection(issue_date, start_date, metricstats, values);
     }
     @Override
     public List<RecordIdentifier> getMetricTimeSeriesIDs() {

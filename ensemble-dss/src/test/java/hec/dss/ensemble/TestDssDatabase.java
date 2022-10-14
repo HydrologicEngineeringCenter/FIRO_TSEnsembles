@@ -6,6 +6,7 @@ import hec.RecordIdentifier;
 import hec.ensemble.Ensemble;
 
 import hec.ensemble.EnsembleTimeSeries;
+import hec.ensemble.stats.*;
 import hec.heclib.dss.DssDataType;
 import hec.heclib.dss.HecPairedData;
 import hec.heclib.dss.HecTimeSeries;
@@ -13,10 +14,7 @@ import hec.io.PairedDataContainer;
 import hec.io.TimeSeriesContainer;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
-import hec.ensemble.stats.MultiComputable;
-import hec.ensemble.stats.MultiStatComputable;
-import hec.ensemble.stats.Statistics;
-import jdk.nashorn.internal.ir.annotations.Ignore;
+import mil.army.usace.hec.data.timeseries.TimeSeries;
 import org.junit.jupiter.api.Test;
 
 import static hec.ensemble.stats.Statistics.*;
@@ -124,15 +122,15 @@ public class TestDssDatabase {
 
         HecTimeSeries dss = new HecTimeSeries(db.getFileName());
         String[] pathsToFind = new String[] {
-            "//Kanektok.BCAC1/flow-MAX/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-            "//Kanektok.BCAC1/flow-AVERAGE/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-            "//Kanektok.BCAC1/flow-MIN/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-            "//Kanektok.BCAC1/flow-MAX/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-            "//Kanektok.BCAC1/flow-AVERAGE/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-            "//Kanektok.BCAC1/flow-MIN/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-            "//Kanektok.BCAC1/flow-MAX/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
-            "//Kanektok.BCAC1/flow-AVERAGE/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
-            "//Kanektok.BCAC1/flow-MIN/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/"
+            "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-MAX/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-AVERAGE/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-MIN/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-MAX/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-AVERAGE/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-MIN/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-MAX/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-AVERAGE/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-MIN/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/"
         };
 
         for (String path : pathsToFind) {
@@ -148,6 +146,44 @@ public class TestDssDatabase {
     }
 
     @Test
+    public void testMetricCollectionAsTimeSeries_TwoStep() throws Exception{
+
+        DssDatabase db = getNewTestDssDatabase();
+        RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
+        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
+
+        MultiComputable cumulativeComputable = new CumulativeComputable();
+        Computable cumulative = new NDayMultiComputable(cumulativeComputable,2);
+        Computable percentileCompute = new PercentilesComputable(0.95f);
+        SingleComputable twoStep = new TwoStepComputable(cumulative,percentileCompute,false);
+        MetricCollectionTimeSeries output = ets.computeSingleValueSummary(twoStep);
+        db.write(output);
+
+        HecTimeSeries dss = new HecTimeSeries(db.getFileName());
+        String[] pathsToFind = new String[] {
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILE(0.95)/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILE(0.95)/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILE(0.95)/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
+        };
+
+        for (String path : pathsToFind) {
+            TimeSeriesContainer tsc = new TimeSeriesContainer();
+            tsc.fullName = path;
+            int status = dss.read(tsc, true);
+            assertEquals(0, status);
+            assertEquals(1, tsc.values.length);
+            assertEquals(1, tsc.times.length);
+        }
+        //db.catalog.update();
+        List<hec.RecordIdentifier> ids = db.getMetricTimeSeriesIDs();
+        for(hec.RecordIdentifier mid: ids){
+            MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mid);
+            assertEquals(3, mcts.getIssueDates().size());
+        }
+        dss.done();
+    }
+
+    @Test
     public void testStoreMetricTimeSeriesIDs() throws Exception{
         DssDatabase db = getNewTestDssDatabase();
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
@@ -156,7 +192,7 @@ public class TestDssDatabase {
         MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, AVERAGE});
         MetricCollectionTimeSeries output = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(test);
         db.write(output);
-        db.catalog.update();
+        //db.catalog.update();
 
         List<RecordIdentifier> mIds = db.getMetricTimeSeriesIDs();
         assertEquals(3, mIds.size());
@@ -164,11 +200,6 @@ public class TestDssDatabase {
         MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mIds.get(0));
         assertEquals(3, mcts.getIssueDates().size());
 
-
-    }
-
-    @Ignore
-    public void StoringPercentilesInTimeSeries() throws Exception {
 
     }
 
@@ -181,13 +212,13 @@ public class TestDssDatabase {
         MetricCollectionTimeSeries output = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(test);
         for (MetricCollection mc : output)
             db.write(mc);
-        db.catalog.update();
+        //db.catalog.update();
 
         HecPairedData dss = new HecPairedData(db.getFileName());
         String[] pathsToFind = new String[] {
-                "//Kanektok.BCAC1/flow-stats///T:20131103-1200|V:20131103-120000|/",
-                "//Kanektok.BCAC1/flow-stats///T:20131104-1200|V:20131104-120000|/",
-                "//Kanektok.BCAC1/flow-stats///T:20131105-1200|V:20131105-120000|/"
+                "//Kanektok.BCAC1/"+ DssDatabase.metricPairedDataIdentifier+ "-flow-stats///T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/"+ DssDatabase.metricPairedDataIdentifier+ "-flow-stats///T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/"+ DssDatabase.metricPairedDataIdentifier+ "-flow-stats///T:20131105-1200|V:20131105-120000|/"
         };
 
         for (String path : pathsToFind) {
