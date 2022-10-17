@@ -62,7 +62,8 @@ public class MetricCollection {
     //probably need getdataforparametername.
 
     public float[] getDateForStatistic(Statistics stat){
-        int index = Arrays.asList(metric_statisticsLabel).indexOf(stat);
+        String[] splitString = metric_statisticsLabel.split(",");
+        int index = Arrays.asList(splitString).indexOf(stat.toString());
         if (index >= 0) {
             return metrics[index];
         }
