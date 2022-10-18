@@ -42,6 +42,13 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     static String metricTimeseriesIdentifier = "MetricTimeseries";
     static String metricPairedDataIdentifier = "MetricPairedData";
     boolean CatalogIsUpToDate = false;
+    private String overriddenFPart = null;
+
+    public void setOverriddenFPart(String overriddenFPart) {
+        this.overriddenFPart = overriddenFPart;
+    }
+
+
 
     public DssDatabase(String dssFileName){
         this.dssFileName= dssFileName;
@@ -135,8 +142,12 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                 +"|V:"+issueDateformatter.format(v)+"|";
     }
 
+    //This method builds the FPart for metric collections. The ovverride was added to comply with convention in a WAT FRA
+    //compute.
     private String buildFpart(ZonedDateTime t, ZonedDateTime v) {
-
+        if(!(overriddenFPart==null)){
+            return overriddenFPart;
+        }
         return "T:" + startDateformatter.format(t)
                 + "|V:" + issueDateformatter.format(v) + "|";
     }
