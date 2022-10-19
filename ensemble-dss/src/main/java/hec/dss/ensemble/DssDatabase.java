@@ -98,7 +98,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     private String buildTimeSeriesStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval, ZonedDateTime startDateTime, ZonedDateTime issueDate, String stat) {
         DSSPathname path = new DSSPathname();
-        path.setAPart("");
+        path.setAPart(buildTimeAndVersionInfo(startDateTime,issueDate));
         path.setBPart(timeSeriesIdentifier.location);
         path.setCPart(metricTimeseriesIdentifier+ "-" + timeSeriesIdentifier.parameter + "-" + stat);
         path.setDPart("");
@@ -110,7 +110,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     private String buildPairedDataStatPathName(RecordIdentifier timeSeriesIdentifier, ZonedDateTime startDateTime, ZonedDateTime issueDate) {
         DSSPathname path = new DSSPathname();
-        path.setAPart("");
+        path.setAPart(buildTimeAndVersionInfo(startDateTime,issueDate));
         path.setBPart(timeSeriesIdentifier.location);
         path.setCPart(metricPairedDataIdentifier + "-" + timeSeriesIdentifier.parameter + "-stats");
         path.setDPart("");
@@ -148,6 +148,10 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         if(!(overriddenFPart==null)){
             return overriddenFPart;
         }
+        return buildTimeAndVersionInfo(t,v);
+    }
+
+    private static String buildTimeAndVersionInfo(ZonedDateTime t, ZonedDateTime v){
         return "T:" + startDateformatter.format(t)
                 + "|V:" + issueDateformatter.format(v) + "|";
     }

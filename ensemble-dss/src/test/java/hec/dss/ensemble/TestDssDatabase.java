@@ -151,6 +151,7 @@ public class TestDssDatabase {
         DssDatabase db = getNewTestDssDatabase();
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
+        db.setOverriddenFPart("override");
 
         MultiComputable cumulativeComputable = new CumulativeComputable();
         Computable cumulative = new NDayMultiComputable(cumulativeComputable,2);
@@ -161,9 +162,9 @@ public class TestDssDatabase {
 
         HecTimeSeries dss = new HecTimeSeries(db.getFileName());
         String[] pathsToFind = new String[] {
-                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILE(0.95)/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILE(0.95)/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILE(0.95)/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
+                "/T:20131103-1200|V:20131103-120000|/Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILE(0.95)/01Nov2013/1Hour/override/",
+                "/T:20131104-1200|V:20131104-120000|/Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILE(0.95)/01Nov2013/1Hour/override/",
+                "/T:20131105-1200|V:20131105-120000|/Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILE(0.95)/01Nov2013/1Hour/override/",
         };
 
         for (String path : pathsToFind) {
