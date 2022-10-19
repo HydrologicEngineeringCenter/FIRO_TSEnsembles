@@ -151,13 +151,20 @@ public class Catalog {
     }
 
     private ZonedDateTime getStartDateTime(DSSPathname path) {
+        boolean foundThePattern = false;
         Matcher matcher = startTimePattern.matcher(path.fPart());
-
-        if (matcher.find()){
+        foundThePattern = matcher.find();
+        //if you don't find the pattern in F, check for it in A. Because metrics store that data in A
+        if(!foundThePattern){
+            matcher = startTimePattern.matcher(path.aPart());
+            foundThePattern = matcher.find();
+        }
+        if (foundThePattern){
             String s = matcher.group(1);
             LocalDateTime localDateTime = LocalDateTime.parse(s, startTimeFormat);
             return localDateTime.atZone(TimeZone.getTimeZone("GMT").toZoneId());
         }
+
 
         return null;
     }
