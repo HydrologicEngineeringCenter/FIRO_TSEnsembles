@@ -61,12 +61,11 @@ public class MetricCollection {
     }
     //probably need getdataforparametername.
 
-    public float[] getDateForStatistic(Statistics stat){
-        String[] splitString = metric_statisticsLabel.split("[|,]");
-        int index = Arrays.asList(splitString).indexOf(stat.toString());
-        if (index >= 0) {
-            return metrics[index];
+    public float[] getComputedValuesForStatistic(Statistics stat){
+        if (metric_statisticsLabel.contains(stat.toString())) {
+            return metrics[0];
+        } else {
+            throw new IllegalArgumentException(stat + " does not match " + metric_statisticsLabel);
         }
-        return null;
     }
 }
