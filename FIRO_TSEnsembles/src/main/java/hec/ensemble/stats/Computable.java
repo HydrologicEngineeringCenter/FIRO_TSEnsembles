@@ -1,5 +1,7 @@
 package hec.ensemble.stats;
 
-public interface Computable extends StatisticsReportable {
+import java.io.Serializable;
+
+public interface Computable extends StatisticsReportable, Serializable {
     float compute(float[] values);
 }

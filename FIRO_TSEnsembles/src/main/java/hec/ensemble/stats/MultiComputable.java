@@ -1,5 +1,7 @@
 package hec.ensemble.stats;
 
-public interface MultiComputable extends StatisticsReportable {
+import java.io.Serializable;
+
+public interface MultiComputable extends StatisticsReportable, Serializable {
     public float[] multiCompute(float[] values);
 }
