@@ -42,10 +42,10 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     static String metricTimeseriesIdentifier = "MetricTimeseries";
     static String metricPairedDataIdentifier = "MetricPairedData";
     boolean CatalogIsUpToDate = false;
-    private String overriddenFPart = null;
+    private String appendedFPart = "";
 
-    public void setOverriddenFPart(String overriddenFPart) {
-        this.overriddenFPart = overriddenFPart;
+    public void setAppendedFPart(String appendedFPart) {
+        this.appendedFPart = appendedFPart;
     }
 
 
@@ -98,12 +98,12 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     private String buildTimeSeriesStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval, ZonedDateTime startDateTime, ZonedDateTime issueDate, String stat) {
         DSSPathname path = new DSSPathname();
-        path.setAPart(buildTimeAndVersionInfo(startDateTime,issueDate));
+        path.setAPart("");
         path.setBPart(timeSeriesIdentifier.location);
         path.setCPart(metricTimeseriesIdentifier+ "-" + timeSeriesIdentifier.parameter + "-" + stat);
         path.setDPart("");
         path.setEPart(getEPart((int)interval.toMinutes()));
-        path.setFPart(buildFpart(startDateTime, issueDate));
+        path.setFPart(buildTimeAndVersionInfo(startDateTime,issueDate));
         return path.toString();
     }
 
@@ -145,10 +145,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     //This method builds the FPart for metric collections. The ovverride was added to comply with convention in a WAT FRA
     //compute.
     private String buildFpart(ZonedDateTime t, ZonedDateTime v) {
-        if(!(overriddenFPart==null)){
-            return overriddenFPart;
-        }
-        return buildTimeAndVersionInfo(t,v);
+        return buildTimeAndVersionInfo(t,v) + appendedFPart;
     }
 
     private static String buildTimeAndVersionInfo(ZonedDateTime t, ZonedDateTime v){

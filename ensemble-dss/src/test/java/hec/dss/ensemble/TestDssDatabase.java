@@ -14,7 +14,6 @@ import hec.io.PairedDataContainer;
 import hec.io.TimeSeriesContainer;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
-import mil.army.usace.hec.data.timeseries.TimeSeries;
 import org.junit.jupiter.api.Test;
 
 import static hec.ensemble.stats.Statistics.*;
@@ -151,7 +150,7 @@ public class TestDssDatabase {
         DssDatabase db = getNewTestDssDatabase();
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
-        db.setOverriddenFPart("override");
+        db.setAppendedFPart("override");
 
         MultiComputable cumulativeComputable = new CumulativeComputable();
         Computable cumulative = new NDayMultiComputable(cumulativeComputable,2);
@@ -207,7 +206,7 @@ public class TestDssDatabase {
     @Test
     public void testStoringMetricsInPairedData() throws Exception {
         DssDatabase db = getNewTestDssDatabase();
-        db.setOverriddenFPart("override");
+        db.setAppendedFPart("override");
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
         MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, AVERAGE});
