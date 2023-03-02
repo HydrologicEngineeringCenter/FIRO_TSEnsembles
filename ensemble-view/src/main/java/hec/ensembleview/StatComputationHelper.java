@@ -106,10 +106,10 @@ public class StatComputationHelper {
     static private float[] computeStatFromMultiStatComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
         if(chartType == ChartType.TimePlot) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(new MultiStatComputable(new Statistics[]{stat}));
-            return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+            return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
         } else if (chartType == ChartType.ScatterPlot) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(new MultiStatComputable(new Statistics[] {stat}));
-            return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+            return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
         }
         return null;
     }
@@ -117,10 +117,10 @@ public class StatComputationHelper {
     static private float[] computeStatFromPercentilesComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] percentiles, ChartType chartType) {
         if(chartType == ChartType.TimePlot) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(new PercentilesComputable(percentiles));
-            return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+            return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
         } else if (chartType == ChartType.ScatterPlot) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(new PercentilesComputable(percentiles));
-            return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+            return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
         }
         return null;
     }
@@ -129,21 +129,21 @@ public class StatComputationHelper {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new MaxAvgDuration(value));
 
-        return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+        return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
     }
 
     static private float[] computeStatFromMaxAccumDurationComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, int value) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new MaxAccumDuration(value));
 
-        return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+        return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
     }
 
     static private float[] computeStatFromTotalComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new Total());
 
-        return mct.getMetricCollection(selectedZdt).getDateForStatistic(stat);
+        return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
     }
 
     static private float[][] computeStatFromCumulativeComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt) {
