@@ -15,7 +15,9 @@ public enum Statistics {
     CUMULATIVE,
     MAXAVERAGEDURATION,
     MAXACCUMDURATION,
-    COMPUTABLE;
+    PLOTTINGPOSITION,
+    COMPUTABLE,
+    UNDEFINED;
 
     public static String pack(EnumSet<Statistics> set){ //returns a list of the statistics in a string format
         String ret = "";
