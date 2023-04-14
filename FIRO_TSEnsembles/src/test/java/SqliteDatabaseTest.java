@@ -3,15 +3,20 @@ import hec.SqliteDatabase;
 import hec.VersionableDatabase;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.*;
+import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.common.record.Record;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SqliteDatabaseTest {
     private File get_test_file(String test_database_resource ) throws Exception{
@@ -49,9 +54,39 @@ public class SqliteDatabaseTest {
 
         List<RecordIdentifier> ids = db.getMetricTimeSeriesIDs();
         for(hec.RecordIdentifier mid: ids){
-            MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mid);
+            List<String> stats = db.getMetricStatistics(mid);
+            MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mid, stats.get(0));
             assertEquals(3, mcts.getIssueDates().size());
         }
+    }
+
+    @Test
+    public static void testMetricStatistics() throws Exception {
+        // open ensemble.db, read metric statistics, confirm that there is the correct number of them.
+        String sourceData = "src/test/resources/database/synthetic_ensembles.db";
+
+        File sourcefile = new File(sourceData);
+        File copiedFile = File.createTempFile("syntemp",".db");
+        copyFileUsingStream(sourcefile,copiedFile);
+        SqliteDatabase db = new SqliteDatabase(copiedFile.getAbsolutePath(), SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
+
+        RecordIdentifier recID = new RecordIdentifier("ADOC", "FLOW");
+        List<String> stats = db.getMetricStatistics(recID);
+        assertEquals(24, stats.size());
+
+        // check sizes of results
+        Map<RecordIdentifier, List<String>> statsMap = db.getMetricStatistics();
+        assertEquals(1, statsMap.keySet().size());
+        assertEquals(24, statsMap.get(recID).size());
+
+        // check that we can read with a statistic
+        MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(recID, "CUMULATIVE(2DAY),PERCENTILE(0.05)");
+        assertNotNull(mcts);
+        assertEquals(65, mcts.getIssueDates().size());
+
+        // get the whole list without naming a stat
+        List<MetricCollectionTimeSeries> mctsList = db.getMetricCollectionTimeSeries(recID);
+        assertEquals(24, mctsList.size());
     }
 
     private static void copyFileUsingStream(File source, File dest) throws IOException {

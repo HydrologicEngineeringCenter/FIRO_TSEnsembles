@@ -10,10 +10,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.sql.*;
 import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import hec.ensemble.*;
@@ -557,6 +554,39 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         ps_insertMetricCollection.setBytes(10, byte_value_array);
         ps_insertMetricCollection.execute();
     }
+
+    public List<String> getMetricStatistics(RecordIdentifier timeseriesID){
+        String sql = "select distinct statistics from view_metriccollection WHERE location = ? AND parameter_name = ?";
+        return readMetricStatistics(timeseriesID, sql);
+    }
+
+    public Map<RecordIdentifier,List<String>> getMetricStatistics(){
+        String sql = "select distinct statistics from view_metriccollection WHERE location = ? AND parameter_name = ?";
+        HashMap<RecordIdentifier, List<String>> rval = new HashMap();
+        for(RecordIdentifier tsid : getMetricTimeSeriesIDs()){
+            rval.put(tsid, readMetricStatistics(tsid, sql));
+        }
+        return rval;
+    }
+
+    private List<String> readMetricStatistics(RecordIdentifier timeseriesID, String sql){
+        LinkedList<String> statisticsForTSID = new LinkedList<String>();
+        try {
+            PreparedStatement statement = _connection.prepareStatement(sql);
+            statement.setString(1, timeseriesID.location);
+            statement.setString(2, timeseriesID.parameter);
+
+            ResultSet rs = statement.executeQuery();
+            // loop through the result set
+            while (rs.next()) {
+                statisticsForTSID.add(rs.getString("statistics"));
+            }
+        } catch (Exception e) {
+            Logger.logError(e.getMessage());
+        }
+        return statisticsForTSID;
+    }
+
     /**
      * Gets EnsembleTimeSeries, loading ensembles into memory
      *
@@ -564,28 +594,48 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
      * @return returns @EnsembleTimeSeries
      */
     @Override
-    public MetricCollectionTimeSeries getMetricCollectionTimeSeries(RecordIdentifier timeseriesID) {
+    public List<MetricCollectionTimeSeries> getMetricCollectionTimeSeries(RecordIdentifier timeseriesID) {
         String sql = "select * from view_metriccollection WHERE location = ? "
                 + " AND parameter_name = ? ";
-        return readMetricCollectionTimeSeriesFromDB(timeseriesID, sql);
+        List<MetricCollectionTimeSeries> rval = new LinkedList();
+        for(String stat : getMetricStatistics(timeseriesID)){
+            rval.add(readMetricCollectionTimeSeriesFromDB(timeseriesID, stat, sql));
+        }
+        return rval;
     }
 
-    public MetricCollectionTimeSeries getMetricCollectionTimeSeries(RecordIdentifier timeseriesID,
+    /**
+     * Gets EnsembleTimeSeries, loading ensembles into memory
+     *
+     * @param timeseriesID TimeSeriesIdentifier
+     * @param statistics String
+     * @return returns @EnsembleTimeSeries
+     */
+    @Override
+    public MetricCollectionTimeSeries getMetricCollectionTimeSeries(RecordIdentifier timeseriesID, String statistics) {
+        String sql = "select * from view_metriccollection WHERE location = ? "
+                + " AND parameter_name = ? and statistics = ?";
+        return readMetricCollectionTimeSeriesFromDB(timeseriesID, statistics, sql);
+    }
+
+    public MetricCollectionTimeSeries getMetricCollectionTimeSeries(RecordIdentifier timeseriesID, String statistics,
                                                                     ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
 
         String sql = "select * from  view_metriccollection " + " WHERE issue_datetime  >= '"
                 + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
-                + DateUtility.formatDate(issueDateEnd) + "' " + " AND location = ? " + " AND parameter_name = ? ";
+                + DateUtility.formatDate(issueDateEnd) + "' " + " AND location = ? " + " AND parameter_name = ?"
+                + " AND statistics = ?";
         sql += " order by issue_datetime";
 
-        return readMetricCollectionTimeSeriesFromDB(timeseriesID, sql);
+        return readMetricCollectionTimeSeriesFromDB(timeseriesID, statistics, sql);
     }
-    private MetricCollectionTimeSeries readMetricCollectionTimeSeriesFromDB(RecordIdentifier timeseriesID, String sql) {
+    private MetricCollectionTimeSeries readMetricCollectionTimeSeriesFromDB(RecordIdentifier timeseriesID, String statistics, String sql) {
         MetricCollectionTimeSeries rval =null;
         try {
             PreparedStatement statement = _connection.prepareStatement(sql);
             statement.setString(1, timeseriesID.location);
             statement.setString(2, timeseriesID.parameter);
+            statement.setString(3, statistics);
 
             ResultSet rs = statement.executeQuery();
             boolean firstRow = true;
@@ -605,6 +655,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         }
         return rval;
     }
+
     private MetricCollectionTimeSeries createMetricCollectionTimeSeries(ResultSet rs) throws SQLException {
 
         String location = rs.getString("location");
