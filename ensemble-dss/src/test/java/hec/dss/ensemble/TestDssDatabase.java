@@ -175,9 +175,10 @@ public class TestDssDatabase {
             assertEquals(1, tsc.times.length);
         }
         //db.catalog.update();
-        List<hec.RecordIdentifier> ids = db.getMetricTimeSeriesIDs();
+        List<RecordIdentifier> ids = db.getMetricTimeSeriesIDs();
         for(hec.RecordIdentifier mid: ids){
-            MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mid);
+            List<String> stats = db.getMetricStatistics(mid);
+            MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mid, stats.get(0));
             assertEquals(3, mcts.getIssueDates().size());
         }
         dss.done();
@@ -197,7 +198,8 @@ public class TestDssDatabase {
         List<RecordIdentifier> mIds = db.getMetricTimeSeriesIDs();
         assertEquals(3, mIds.size());
 
-        MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mIds.get(0));
+        List<String> stats = db.getMetricStatistics(mIds.get(0));
+        MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mIds.get(0), stats.get(0));
         assertEquals(3, mcts.getIssueDates().size());
 
 
@@ -210,7 +212,7 @@ public class TestDssDatabase {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
         MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, AVERAGE});
         MetricCollectionTimeSeries output = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(test);
-        for (MetricCollection mc : output)
+        for(MetricCollection mc : output)
             db.write(mc);
         //db.catalog.update();
 

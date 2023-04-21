@@ -16,12 +16,15 @@ import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.metrics.MetricTypes;
 import hec.ensemble.stats.Statistics;
+import org.apache.commons.lang.NotImplementedException;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -327,6 +330,9 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         return mc;
     }
 
+    /*
+    Commented this out for now to NotImplement new version
+
     @Override
     public hec.metrics.MetricCollectionTimeSeries getMetricCollectionTimeSeries(hec.RecordIdentifier timeseriesID) {
         MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(timeseriesID, "", MetricTypes.TIMESERIES_OF_ARRAY);
@@ -338,6 +344,26 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
             mcts.addMetricCollection(mc);
         }
         return mcts;
+    }*/
+
+    @Override
+    public List<hec.metrics.MetricCollectionTimeSeries> getMetricCollectionTimeSeries(hec.RecordIdentifier timeseriesID) throws NotImplementedException{
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public hec.metrics.MetricCollectionTimeSeries getMetricCollectionTimeSeries(hec.RecordIdentifier timeseriesID, String statistic) throws NotImplementedException {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public Map<RecordIdentifier, List<String>> getMetricStatistics() throws NotImplementedException {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public List<String> getMetricStatistics(hec.RecordIdentifier timeseriesID) throws NotImplementedException {
+        throw new NotImplementedException();
     }
 
     private float[][] getMetricValues(List<DSSPathname> paths) {
