@@ -1,4 +1,4 @@
-package hec.stats;
+package hec.ensemble.stats;
 
 import hec.ensemble.stats.*;
 import org.jdom.Element;

@@ -1,4 +1,4 @@
-package hec.stats;
+package hec.ensemble.stats;
 
 import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleConfiguration;
