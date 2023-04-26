@@ -3,6 +3,7 @@ package hec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.zip.GZIPInputStream;
@@ -104,7 +105,9 @@ import java.util.zip.GZIPOutputStream;
     {
         ByteBuffer byteBuffer = ByteBuffer.allocate(data.length).order(ByteOrder.LITTLE_ENDIAN);
         byteBuffer.put(data);
-        byteBuffer.rewind();
+        ((Buffer) byteBuffer).rewind();
+        //byteBuffer.position(0);
+
         float[][] rval = new float[rowCount][columnCount];
 
         for (int i = 0; i <rowCount ; i++) {
