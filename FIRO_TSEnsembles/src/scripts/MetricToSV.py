@@ -1,4 +1,6 @@
 from hec.script import Constants
+from hec.model import RunTimeStep
+from hec.heclib.util import HecTime
 from hec import SqliteDatabase
 import os
 
@@ -47,16 +49,16 @@ def rtsOf(issueDate, rtw):
     # Convert issue date into an RTS
     ht = HecTime()
     minutesPastMidnight = issueDate.getMinute() + issueDate.getHour()*60
-    ht.setYearMonthDay(issueDate.getYear(), issueDate.getMonth(), issueDate.getDayOfMonth(), minutesPastMidnight)
+    ht.setYearMonthDay(issueDate.getYear(), issueDate.getMonthValue(), issueDate.getDayOfMonth(), minutesPastMidnight)
     idRTS = rtw.getStepAtTime(ht)
 
-def nextIssueDates(rts, issueDateList):
+def nextIssueDate(rts, issueDateList):
     # return the last valid issue date for the current RTS
     # TODO: validate this method does what is intended
-    i = issueDates[0] # start with first value
-    while rts >= rtsOf(i, rts.getRunTimeWindow()):
+    i = issueDateList[0] # start with first value
+    while rts >= rtsOf(i, rts.getRunTimeWindow()) and len(issueDateList) > 0:
         # pop if passed
-        i = issueDates.pop()
+        i = issueDateList.pop()
     return i
 
 def populateSV(sv, ensembleDB, recID, stat):
@@ -66,6 +68,7 @@ def populateSV(sv, ensembleDB, recID, stat):
     # any method to match timestamps.
     mcts = ensembleDB.getMetricCollectionTimeSeries(recID, stat)
     issueDates = mcts.getIssueDates()
+    sv.getSystem().printMessage(issueDates.toString())
     rtw = sv.getSystem().getRssRun().getRunTimeWindow()
     nModelSteps = rtw.getNumSteps()
     curIssueDate = None
@@ -74,7 +77,7 @@ def populateSV(sv, ensembleDB, recID, stat):
     for intStep in range(nModelSteps):
         rts.setStep(intStep)
         # do something to align issueDates and rts, assumes more RTSes than issue dates, and first RTS after first issuedate
-        curIssueDate = nextIssueDate(issueDates)
+        curIssueDate = nextIssueDate(rts, issueDates)
         mcVal = getMetricValue(mcts, curIssueDate)
         sv.setValue(rts, mcVal)
 
