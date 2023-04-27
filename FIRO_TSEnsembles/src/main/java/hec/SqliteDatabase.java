@@ -301,7 +301,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
 
         String sql = "select * from  view_ensemble " + " WHERE issue_datetime  >= '"
                 + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
-                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location = ? " + " AND parameter_name = ? ";
+                + DateUtility.formatDate(issueDateEnd) + "' " + " AND location = ? " + " AND parameter_name = ? ";
         sql += " order by issue_datetime";
 
         return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
@@ -369,7 +369,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
 
         String sql = "select * from  view_ensemble " + " WHERE issue_datetime  >= '"
                 + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
-                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location = ? " + " AND parameter_name = ? ";
+                + DateUtility.formatDate(issueDateEnd) + "' " + " AND location = ? " + " AND parameter_name = ? ";
         sql += " order by issue_datetime";
 
         Ensemble rval = null;
@@ -575,7 +575,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
 
         String sql = "select * from  view_metriccollection " + " WHERE issue_datetime  >= '"
                 + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
-                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location = ? " + " AND parameter_name = ? ";
+                + DateUtility.formatDate(issueDateEnd) + "' " + " AND location = ? " + " AND parameter_name = ? ";
         sql += " order by issue_datetime";
 
         return readMetricCollectionTimeSeriesFromDB(timeseriesID, sql);
@@ -642,7 +642,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
 
         String sql = "select * from  view_metriccollection " + " WHERE issue_datetime  >= '"
                 + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
-                + DateUtility.formatDate(issueDateEnd) + " '" + " AND location = ? " + " AND parameter_name = ? ";
+                + DateUtility.formatDate(issueDateEnd) + "' " + " AND location = ? " + " AND parameter_name = ? ";
         sql += " order by issue_datetime";
 
         MetricCollection rval = null;
