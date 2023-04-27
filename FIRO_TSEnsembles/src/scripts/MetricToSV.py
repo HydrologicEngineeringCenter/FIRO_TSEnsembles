@@ -50,16 +50,23 @@ def rtsOf(issueDate, rtw):
     ht = HecTime()
     minutesPastMidnight = issueDate.getMinute() + issueDate.getHour()*60
     ht.setYearMonthDay(issueDate.getYear(), issueDate.getMonthValue(), issueDate.getDayOfMonth(), minutesPastMidnight)
-    idRTS = rtw.getStepAtTime(ht)
+    idRTS = RunTimeStep(rtw)
+    idRTS.setStep(rtw.getStepAtTime(ht))
+    return idRTS
 
-def nextIssueDate(rts, issueDateList):
+def getLastIssueDate(rts, issueDateList):
     # return the last valid issue date for the current RTS
     # TODO: validate this method does what is intended
-    i = issueDateList[0] # start with first value
-    while rts >= rtsOf(i, rts.getRunTimeWindow()) and len(issueDateList) > 0:
-        # pop if passed
-        i = issueDateList.pop()
-    return i
+    rtw = rts.getRunTimeWindow()
+    prev_idate = issueDateList[0]
+    for idate in issueDateList:
+        rts_i = rtsOf(idate, rtw)
+        # loop until we find the next idate
+        if rts.getStep() < rts_i.getStep():
+            # then return the previous idate
+            return prev_idate
+        prev_idate = idate
+    return idate
 
 def populateSV(sv, ensembleDB, recID, stat):
     # for each timestep in compute, retrive value from ensemble TS and apply to SV
@@ -68,7 +75,7 @@ def populateSV(sv, ensembleDB, recID, stat):
     # any method to match timestamps.
     mcts = ensembleDB.getMetricCollectionTimeSeries(recID, stat)
     issueDates = mcts.getIssueDates()
-    sv.getSystem().printMessage(issueDates.toString())
+    if not SILENT: sv.getSystem().printMessage(issueDates.toString())
     rtw = sv.getSystem().getRssRun().getRunTimeWindow()
     nModelSteps = rtw.getNumSteps()
     curIssueDate = None
@@ -77,29 +84,33 @@ def populateSV(sv, ensembleDB, recID, stat):
     for intStep in range(nModelSteps):
         rts.setStep(intStep)
         # do something to align issueDates and rts, assumes more RTSes than issue dates, and first RTS after first issuedate
-        curIssueDate = nextIssueDate(rts, issueDates)
+        curIssueDate = getLastIssueDate(rts, issueDates)
+        if not SILENT: sv.getSystem().printMessage("%s: %s" % (curIssueDate.toString(), rts.dateTimeString()))
         mcVal = getMetricValue(mcts, curIssueDate)
         sv.setValue(rts, mcVal)
 
 def initStateVariable(currentVariable, network):
     rssAltFilename = network.getRssRun().getAltPath()
     eventFolder = rssAltFilename.split("rss")[0]
-    network.printErrorMessage("looking for ensembles.db file in %s" % eventFolder)
+    if not SILENT: network.printErrorMessage("looking for ensembles.db file in %s" % eventFolder)
     ensembleDB = SqliteDatabase(os.path.join(eventFolder,"ensembles.db"), SqliteDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE)
     statistics = ensembleDB.getMetricStatistics()
     # for each location and statistic, check if an SV exists
     for recID in statistics.keySet():
-        network.printMessage(recID.toString())
+        if not SILENT: network.printMessage(recID.toString())
         for stat in statistics[recID]:
-            network.printMessage(stat)
+            if not SILENT: network.printMessage(stat)
             svName = svNameFormatter(recID, stat)
             # if an SV matching the formatted name exists, echo
             if hasSV(network, svName):
-                if not SILENT: network.printMessage("found SV: %s" % svName)
+                network.printMessage("found SV: %s" % svName)
                 sv = network.getStateVariable(svName)
                 populateSV(sv, ensembleDB, recID, stat)
             else:
-                if not SILENT: network.printWarningMessage("failed to find SV: %s" % svName)
+                network.printWarningMessage("failed to find SV: %s" % svName)
+
+    ensembleDB.close() # important!
+
 
     # return Constants.TRUE if the initialization is successful and Constants.FALSE if it failed.
     # Returning Constants.FALSE will halt the compute.
