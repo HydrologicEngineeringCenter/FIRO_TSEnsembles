@@ -18,7 +18,7 @@ import os
 # raise StopComputeException("the reason to stop the compute")
 #
 
-SILENT = False
+SILENT = True
 BAD_CHARS = "\/()., !@#$%^&*" # this list is incomplete but should suffice
 def svNameFormatter(recID, statistic):
     # this function creates the name to save each SV to.
@@ -92,7 +92,7 @@ def populateSV(sv, ensembleDB, recID, stat):
 def initStateVariable(currentVariable, network):
     rssAltFilename = network.getRssRun().getAltPath()
     eventFolder = rssAltFilename.split("rss")[0]
-    if not SILENT: network.printErrorMessage("looking for ensembles.db file in %s" % eventFolder)
+    if not SILENT: network.printMessage("looking for ensembles.db file in %s" % eventFolder)
     ensembleDB = SqliteDatabase(os.path.join(eventFolder,"ensembles.db"), SqliteDatabase.CREATION_MODE.OPEN_EXISTING_UPDATE)
     statistics = ensembleDB.getMetricStatistics()
     # for each location and statistic, check if an SV exists
@@ -110,7 +110,6 @@ def initStateVariable(currentVariable, network):
                 network.printWarningMessage("failed to find SV: %s" % svName)
 
     ensembleDB.close() # important!
-
 
     # return Constants.TRUE if the initialization is successful and Constants.FALSE if it failed.
     # Returning Constants.FALSE will halt the compute.
