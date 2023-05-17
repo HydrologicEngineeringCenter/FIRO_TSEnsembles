@@ -2,8 +2,11 @@ package hec.ensemble.stats;
 
 import java.util.Arrays;
 
-public class PercentilesComputable implements Computable, MultiComputable {
-    private float[] _percentiles;
+public class PercentilesComputable implements Computable, MultiComputable, Configurable {
+    private static final String DEFAULT_INPUT_UNITS = "cfs";
+    private float[] selectedPercentiles;
+    private String outputUnits;
+    private Configuration config;
 
     /**
      * Instantiates a percentile computable object
@@ -11,30 +14,44 @@ public class PercentilesComputable implements Computable, MultiComputable {
      */
 
     public PercentilesComputable(float percentile) {
-        this._percentiles = new float[] {percentile};
+        this.selectedPercentiles = new float[] {percentile};
     }
     //empty constructor added to satisfy <init>() function deserializing from XML with reflection
     public PercentilesComputable(){}
 
     public PercentilesComputable(float[] percentiles) {
-        this._percentiles = percentiles;
+        this.selectedPercentiles = percentiles;
     }
 
     @Override
     public float compute(float[] values) {
         Arrays.sort(values);
-        return computePercentile(values, _percentiles[0]);
+        return computePercentile(values, selectedPercentiles[0]);
+    }
+
+    private void getInputUnits() {
+        if(config == null || config.getUnits().isEmpty()) {
+            outputUnits = DEFAULT_INPUT_UNITS;
+        } else {
+            outputUnits = config.getUnits();
+        }
+    }
+
+    @Override
+    public String getOutputUnits() {
+        getInputUnits();
+        return outputUnits;
     }
 
     @Override
     public float[] multiCompute(float[] values) {
-        int size = this._percentiles.length;
+        int size = this.selectedPercentiles.length;
         float[] result = new float[size];
         int i = 0;
         Arrays.sort(values);
 
-        for (float p: this._percentiles) {
-            result[i] = Float.valueOf(computePercentile(values, p));
+        for (float p: this.selectedPercentiles) {
+            result[i] = computePercentile(values, p);
             i++;
         }
         return result;
@@ -52,8 +69,6 @@ public class PercentilesComputable implements Computable, MultiComputable {
         if (p < 0) {
             throw new ArithmeticException("Percentile must be greater than or equal to 0");
         }
-        //sorts array
-        //Arrays.sort(values);
 
         if (p == 0) {
             return values[0];
@@ -68,8 +83,7 @@ public class PercentilesComputable implements Computable, MultiComputable {
                 float x2 = (float) (endIndex) / (values.length -1);
                 float y1 = values[startIndex];
                 float y2 = values[endIndex];
-                float val = linInterp(x1, x2, y1, y2, p);
-                return val;
+                return linInterp(x1, x2, y1, y2, p);
             }
         }
     }
@@ -83,8 +97,8 @@ public class PercentilesComputable implements Computable, MultiComputable {
 
     @Override
     public Statistics[] Statistics() {
-        Statistics[] ret = new Statistics[_percentiles.length];
-        for (int i = 0 ; i < _percentiles.length; i ++){
+        Statistics[] ret = new Statistics[selectedPercentiles.length];
+        for (int i = 0; i < selectedPercentiles.length; i ++){
             ret[i] = Statistics.PERCENTILE;
         }
         return ret;
@@ -92,16 +106,20 @@ public class PercentilesComputable implements Computable, MultiComputable {
 
     @Override
     public String StatisticsLabel() {
-        String label = "";
-        for (int i = 0 ; i < _percentiles.length; i ++){
-            if(i == _percentiles.length-1){
-                label += Statistics.PERCENTILE + "(" +_percentiles[i] + ")";
+        StringBuilder label = new StringBuilder();
+        for (int i = 0; i < selectedPercentiles.length; i ++){
+            if(i == selectedPercentiles.length-1){
+                label.append(Statistics.PERCENTILE + "(").append(selectedPercentiles[i]).append(")");
             }
             else{
-                label += Statistics.PERCENTILE + "(" +_percentiles[i] + ")|";
+                label.append(Statistics.PERCENTILE + "(").append(selectedPercentiles[i]).append(")|");
             }
-
         }
-        return label;
+        return label.toString();
+    }
+
+    @Override
+    public void configure(Configuration c) {
+        config = c;
     }
 }

@@ -125,7 +125,7 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float[] farray = e.iterateForTimeAcrossTraces(compute);
-        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),e.getUnits());
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(), compute.getOutputUnits());
         MetricCollection mc = new MetricCollection(ec, compute.StatisticsLabel(), new float[][] {farray} );
         mcts.addMetricCollection(mc);
       }
@@ -136,7 +136,7 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float[] farray = e.iterateForTracesAcrossTime(compute);
-        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),e.getUnits());
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(), compute.getOutputUnits());
         MetricCollection mc = new MetricCollection(ec, compute.StatisticsLabel(), new float[][] {farray} );
         mcts.addMetricCollection(mc);
       }
@@ -147,7 +147,7 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float[][] farray = e.multiComputeForTimeAcrossTraces(compute);
-        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),e.getUnits());
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),compute.getOutputUnits());
         MetricCollection mc = new MetricCollection(ec, compute.StatisticsLabel(), farray );
         mcts.addMetricCollection(mc);
       }
@@ -158,7 +158,7 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float[][] farray = e.multiComputeForTracesAcrossTime(compute);
-        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),e.getUnits());
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),compute.getOutputUnits());
         MetricCollection mc = new MetricCollection(ec, compute.StatisticsLabel(), farray );
         mcts.addMetricCollection(mc);
       }
@@ -169,7 +169,7 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float[][] farray = e.multiComputeForEachTraces(compute);
-        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),e.getUnits());
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(), compute.getOutputUnits());
         MetricCollection mc = new MetricCollection(ec, compute.StatisticsLabel(), farray );
         mcts.addMetricCollection(mc);
       }

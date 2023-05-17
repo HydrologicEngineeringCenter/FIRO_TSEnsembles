@@ -5,7 +5,6 @@ import hec.ensemble.stats.Statistics;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 
 
 public class MetricCollection {

@@ -1,9 +1,10 @@
 package hec.ensemble.stats;
 
-import java.util.Arrays;
-
-public class MultiStatComputable implements MultiComputable, Computable {
+public class MultiStatComputable implements MultiComputable, Computable, Configurable {
+    private static final String DEFAULT_INPUT_UNITS = "cfs";
     Statistics[] statSelection;
+    private Configuration config;
+    private String outputUnit;
     /**
      * The MultiComputable interface is beneficial for creating multiple time series representations.
      * This method iterates across all traces for each timestep to produce multiple values for each
@@ -22,7 +23,6 @@ public class MultiStatComputable implements MultiComputable, Computable {
 
     @Override
     public float compute(float[] values) {
-        float results = 0;
         InlineStats is = new InlineStats();
 
         for(float f : values){
@@ -45,8 +45,23 @@ public class MultiStatComputable implements MultiComputable, Computable {
         }
         return results;
     }
+
+    private void getInputUnits() {
+        if(config == null || config.getUnits().isEmpty()) {
+            outputUnit = DEFAULT_INPUT_UNITS;
+        } else {
+            outputUnit = config.getUnits();
+        }
+    }
+
+    @Override
+    public String getOutputUnits() {
+        getInputUnits();
+        return outputUnit;
+    }
+
     private float selectedStatCompute(int selectedStat, InlineStats is) {
-        float results = 0;
+        float results;
         switch (statSelection[selectedStat]) {
             case MIN:
                 results = is.getMin();
@@ -76,17 +91,22 @@ public class MultiStatComputable implements MultiComputable, Computable {
 
     @Override
     public String StatisticsLabel() {
-        String statLablel = "";
+        StringBuilder statLablel = new StringBuilder();
         int count = 0;
         for(Statistics stat: statSelection){
             if(count == statSelection.length-1){
-                statLablel += stat;
+                statLablel.append(stat);
             }
             else{
-                statLablel +=  stat + "|";
+                statLablel.append(stat).append("|");
             }
             count++;
         }
-        return statLablel;
+        return statLablel.toString();
+    }
+
+    @Override
+    public void configure(Configuration c) {
+        config = c;
     }
 }

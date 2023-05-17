@@ -6,8 +6,6 @@ import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
 
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.Map;
 
 public class StatComputationHelper {
     private StatComputationHelper() {
@@ -38,19 +36,11 @@ public class StatComputationHelper {
         return new float[0];
     }
 
-    public static float[][] computeTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
+    public static float[][] computeTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt) {
         if (stat == Statistics.CUMULATIVE) {
             return computeStatFromCumulativeComputable(ets, selectedZdt);
         }
         return new float[0][0];
-    }
-
-    public static Map computeProbability(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
-        float[] metric = computeStat(ets, stat, selectedZdt, chartType);
-        if (stat == Statistics.PLOTTINGPOSITION) {
-            return computeStatFromProbabilityComputable(metric);
-        }
-        return Collections.emptyMap();
     }
 
     public static float[] computeStat(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] values, ChartType chartType) {
@@ -151,14 +141,6 @@ public class StatComputationHelper {
                 new Total());
 
         return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
-    }
-
-    private static Map<Float, Float> computeStatFromProbabilityComputable(float[] metric) {
-        PlottingPositionComputable plottingPositionComputable = new PlottingPositionComputable(PlottingType.WEIBULL);
-        float[] prob = plottingPositionComputable.multiCompute(metric);
-        float[] values = plottingPositionComputable.orderValues(metric);
-
-        return plottingPositionComputable.assignProbability(values, prob);
     }
 
     private static float[][] computeStatFromCumulativeComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt) {
