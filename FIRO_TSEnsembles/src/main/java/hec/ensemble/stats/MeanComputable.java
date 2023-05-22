@@ -2,7 +2,6 @@ package hec.ensemble.stats;
 
 public class MeanComputable implements Computable, Configurable {
     private static final String DEFAULT_INPUT_UNITS = "cfs";
-    private String outputUnit;
     private Configuration config;
     @Override
     public float compute(float[] values){
@@ -14,18 +13,17 @@ public class MeanComputable implements Computable, Configurable {
         return sum / values.length;
     }
 
-    private void getInputUnits() {
+    private String getInputUnits() {
         if(config == null || config.getUnits().isEmpty()) {
-            outputUnit = DEFAULT_INPUT_UNITS;
+            return DEFAULT_INPUT_UNITS;
         } else {
-            outputUnit = config.getUnits();
+            return config.getUnits();
         }
     }
 
     @Override
     public String getOutputUnits() {
-        getInputUnits();
-        return outputUnit;
+        return getInputUnits();
     }
 
     @Override

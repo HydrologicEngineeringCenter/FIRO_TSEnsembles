@@ -1,11 +1,10 @@
 package hec.ensemble.stats;
 
 public  class MaxAvgDuration implements Computable, Configurable {
-    private static final String DEFAULT_UNITS = "cfs";
+    private static final String DEFAULT_INPUT_UNITS = "cfs";
 
     Integer computeDuration; //duration in hours
     Configuration config;
-    private String outputUnit;
 
     /**
      * Instantiates a max average computable object
@@ -66,18 +65,17 @@ public  class MaxAvgDuration implements Computable, Configurable {
         return maxVal;
     }
 
-    private void checkUnits() {
+    private String getInputUnits() {
         if(config == null || config.getUnits().isEmpty()) {
-            outputUnit = DEFAULT_UNITS;
+            return DEFAULT_INPUT_UNITS;
         } else {
-            outputUnit = config.getUnits();
+            return config.getUnits();
         }
     }
 
     @Override
     public String getOutputUnits() {
-        checkUnits();
-        return outputUnit;
+        return getInputUnits();
     }
 
     @Override

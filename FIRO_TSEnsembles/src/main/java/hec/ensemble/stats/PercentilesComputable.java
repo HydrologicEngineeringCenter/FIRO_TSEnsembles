@@ -5,7 +5,6 @@ import java.util.Arrays;
 public class PercentilesComputable implements Computable, MultiComputable, Configurable {
     private static final String DEFAULT_INPUT_UNITS = "cfs";
     private float[] selectedPercentiles;
-    private String outputUnits;
     private Configuration config;
 
     /**
@@ -29,18 +28,17 @@ public class PercentilesComputable implements Computable, MultiComputable, Confi
         return computePercentile(values, selectedPercentiles[0]);
     }
 
-    private void getInputUnits() {
+    private String getInputUnits() {
         if(config == null || config.getUnits().isEmpty()) {
-            outputUnits = DEFAULT_INPUT_UNITS;
+            return DEFAULT_INPUT_UNITS;
         } else {
-            outputUnits = config.getUnits();
+            return config.getUnits();
         }
     }
 
     @Override
     public String getOutputUnits() {
-        getInputUnits();
-        return outputUnits;
+        return getInputUnits();
     }
 
     @Override

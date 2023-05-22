@@ -2,7 +2,6 @@ package hec.ensemble.stats;
 
 public class MaxComputable implements Computable, Configurable {
     private static final String DEFAULT_INPUTS_UNITS = "cfs";
-    private String outputUnit;
     private Configuration config;
 
     @Override
@@ -13,18 +12,17 @@ public class MaxComputable implements Computable, Configurable {
         return values[size-1];
     }
 
-    private void getInputUnits() {
+    private String getInputUnits() {
         if(config == null || config.getUnits().isEmpty()) {
-            outputUnit = DEFAULT_INPUTS_UNITS;
+            return DEFAULT_INPUTS_UNITS;
         } else {
-            outputUnit = config.getUnits();
+            return config.getUnits();
         }
     }
 
     @Override
     public String getOutputUnits() {
-        getInputUnits();
-        return outputUnit;
+        return getInputUnits();
     }
 
     @Override

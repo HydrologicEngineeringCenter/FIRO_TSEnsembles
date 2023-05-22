@@ -9,8 +9,6 @@ public class CumulativeComputable implements MultiComputable, Configurable {
     private Configuration config;
     private String outputUnit;
 
-    public CumulativeComputable() {
-    }
 
     @Override
     public float[] multiCompute(float[] values) {
@@ -41,7 +39,7 @@ public class CumulativeComputable implements MultiComputable, Configurable {
         if(config == null || config.getUnits().isEmpty()) {
             return DEFAULT_INPUT_UNITS;
         } else {
-            return  config.getUnits();
+            return config.getUnits();
         }
     }
 
