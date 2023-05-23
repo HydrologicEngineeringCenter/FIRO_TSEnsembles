@@ -5,9 +5,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ publish-ensemble-viewer-UI ]
+    branches: [ master ]
   pull_request:
-    branches: [ publish-ensemble-viewer-UI ]
+    branches: [ master ]
 
 jobs:
   build:
