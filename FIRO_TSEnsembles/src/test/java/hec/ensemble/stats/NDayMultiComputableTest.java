@@ -17,23 +17,26 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class NDayMultiComputableTest {
     @Test
-    public void testNDayMultiComputableAcrossTimeSimpleArray() {
-        Computable test = new NDayMultiComputable(new CumulativeComputable(), 1);
-        Configurable c = (Configurable) test;
-        c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),""));
+    void testNDayMultiComputableAcrossTimeSimpleArray() {
+        CumulativeComputable cumulativeComputable = new CumulativeComputable();
+        ((Configurable) cumulativeComputable).configure(new EnsembleConfiguration(null, null, Duration.ofHours(1), "cfs"));
+
+        Computable test = new NDayMultiComputable(cumulativeComputable, 1);
+        Configurable c2 = (Configurable) test;
+        c2.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1), ""));
         float[] num1 = {11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8};
         float results = test.compute(num1);
-        assertEquals(158, results);
+        assertEquals(13.057, results, .001);
     }
 
 
     @Test
-    public void testNDayMultiComputableAcrossTimeEnsemble() {
+    void testNDayMultiComputableAcrossTimeEnsemble() {
         try {
             Ensemble e = TestData.getSampleEnsemble();
             Computable test = new NDayMultiComputable(new CumulativeComputable(), 14);
             float[] output = e.iterateForTracesAcrossTime(test);
-            assertEquals(-3398.096923828125, output[3]);
+            assertEquals(-280.8352, output[3], 0.001);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
@@ -41,12 +44,12 @@ class NDayMultiComputableTest {
     }
 
     @Test
-    public void testNDayMultiComputableAcrossTimeEnsemble2() {
+    void testNDayMultiComputableAcrossTimeEnsemble2() {
         try {
             Ensemble e = TestData.getSampleEnsemble();
             Computable test = new NDayMultiComputable(new CumulativeComputable(), 13);
             float[] output = e.iterateForTracesAcrossTime(test);
-            assertEquals(-8451.3525390625, output[8]);
+            assertEquals(-698.4583, output[8], 0.001);
         } catch (Exception e) {
             Logger.logError(e);
             fail();

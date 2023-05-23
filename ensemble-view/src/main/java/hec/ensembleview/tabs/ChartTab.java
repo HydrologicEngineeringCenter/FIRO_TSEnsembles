@@ -95,7 +95,7 @@ public class ChartTab extends JPanel implements EnsembleTab {
             boolean randomColor = selectedStats.length <= 1;
             if (isTimeSeriesViewSelected(selectedStats)){  // if the Radio button is selected to Cumulative or Moving Average, compute metric for time series view
                 float[][] cumulativeVals = StatComputationHelper.computeTimeSeriesView(db.getEnsembleTimeSeries(rid),
-                        getSelectedTimeSeriesView(selectedStats), zdt, ChartType.TimePlot);
+                        getSelectedTimeSeriesView(selectedStats), zdt);
                 EnsembleTimeSeries ets = new EnsembleTimeSeries(rid, "units", "data_type", "version");
                 ets.addEnsemble(new Ensemble(ensemble.getIssueDate(), cumulativeVals, ensemble.getStartDateTime(), ensemble.getInterval(), ensemble.getUnits()));
                 addStatisticsToTimePlot(chart, selectedStats, ets, dates);

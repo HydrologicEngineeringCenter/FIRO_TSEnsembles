@@ -7,9 +7,13 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class PlottingPositionComputable implements MultiComputable, PlottingMethod {
+public class PlottingPositionComputable implements MultiComputable, PlottingMethod, Configurable {
+    private static final String DEFAULT_INPUT_UNITS = "cfs";
     PlottingType method;
     Float[] reverseValues;
+    private Configuration config;
+    private String outputUnit;
+
     public PlottingPositionComputable(PlottingType method) {
         this.method = method;
     }
@@ -22,6 +26,20 @@ public class PlottingPositionComputable implements MultiComputable, PlottingMeth
     @Override
     public float[] multiCompute(float[] values) {
         return computeProbability(values);
+    }
+
+    private void getInputUnits() {
+        if(config == null || config.getUnits().isEmpty()) {
+            outputUnit = DEFAULT_INPUT_UNITS;
+        } else {
+            outputUnit = config.getUnits();
+        }
+    }
+
+    @Override
+    public String getOutputUnits() {
+        getInputUnits();
+        return outputUnit;
     }
 
     public float[] computeProbability(float[] values) {
@@ -56,4 +74,8 @@ public class PlottingPositionComputable implements MultiComputable, PlottingMeth
         return "PLOTTING POSITION";
     }
 
+    @Override
+    public void configure(Configuration c) {
+        config = c;
+    }
 }
