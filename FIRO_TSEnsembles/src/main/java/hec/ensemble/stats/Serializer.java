@@ -12,6 +12,7 @@ import java.util.List;
 public final class Serializer {
     private static final String DOUBLE =  "java.lang.Double";
     private static final String INTEGER =  "int";
+    private static final String STRING = "java.lang.String";
     private static final String FLOAT =  "java.lang.float";
     private static final String FLOATARRAY =  "float[]";
     private static final String STATISTICSARRAY =  "hec.ensemble.stats.Statistics[]";
@@ -48,6 +49,9 @@ public final class Serializer {
                 }
                 //Check what type the field holds,and serialize it appropriately.
                 switch (stringType) {
+                    case STRING:
+                        attribute = (String)objectFieldValue;
+                        break;
                     case DOUBLE:
                         double doubleVal = (double) objectFieldValue;
                         attribute = Double.toString(doubleVal);
@@ -124,6 +128,10 @@ public final class Serializer {
                 String attributeValue = ele.getAttributeValue(fieldName);
 
                 switch (stringType) {
+                    case STRING:
+                        if(attributeValue == null){ continue;}
+                        field.set(computable, attributeValue);
+                        break;
                     case DOUBLE:
                         if(attributeValue == null){ continue;}
                         field.set(computable, Double.parseDouble(attributeValue));
