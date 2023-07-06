@@ -74,6 +74,40 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot 
 
     @Override
     public ChartPanel generateChart() {
+        XYPlot plot = createXyPlot();
+        ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot)) {
+            @Override
+            public void mousePressed(MouseEvent e)
+            {
+                int mods = e.getModifiers();
+                int panMask = InputEvent.BUTTON1_MASK;
+                if (mods == InputEvent.BUTTON1_MASK+ InputEvent.SHIFT_MASK) {
+                    panMask = 255; //The pan test will match nothing and the zoom rectangle will be activated.
+                }try {
+                    Field mask = ChartPanel.class.getDeclaredField("panMask");
+                    mask.setAccessible(true);
+                    mask.set(this, panMask);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                super.mousePressed(e);
+            }
+        };
+        addChartFeatures(chart);
+
+        return chart;
+    }
+
+    private void addChartFeatures(ChartPanel chart) {
+        chart.setMouseZoomable(false);
+        chart.setMouseWheelEnabled(true);
+        chart.setDomainZoomable(true);
+        chart.setRangeZoomable(true);
+
+        setChartToolTip(chart);
+    }
+
+    private XYPlot createXyPlot() {
         XYPlot plot = new XYPlot();
         plot.setDomainPannable(true);
         plot.setRangePannable(true);
