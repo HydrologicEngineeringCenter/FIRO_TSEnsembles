@@ -6,6 +6,8 @@ import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
 
 import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.Map;
 
 public class StatComputationHelper {
     private StatComputationHelper() {
@@ -36,11 +38,44 @@ public class StatComputationHelper {
         return new float[0];
     }
 
-    public static float[][] computeTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt) {
+    public static float[][] computeTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
         if (stat == Statistics.CUMULATIVE) {
             return computeStatFromCumulativeComputable(ets, selectedZdt);
         }
         return new float[0][0];
+    }
+
+    public static Map<Float, Float> computeProbability(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
+        switch(stat) {
+            case MIN:
+            case MAX:
+            case MEDIAN:
+            case AVERAGE:
+            case TOTAL:
+                float[] metric = computeStat(ets, stat, selectedZdt, chartType);
+                return computeStatFromProbabilityComputable(metric);
+            case UNDEFINED:
+                break;
+            default:
+                return Collections.emptyMap();
+        }
+        return Collections.emptyMap();
+    }
+
+    public static Map<Float, Float> computeProbability(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] values, ChartType chartType) {
+        switch(stat) {
+            case PERCENTILE:
+            case NDAYCUMULATIVE:
+            case MAXAVERAGEDURATION:
+            case MAXACCUMDURATION:
+                float[] metric = computeStat(ets, stat, selectedZdt, values, chartType);
+                return computeStatFromProbabilityComputable(metric);
+            case UNDEFINED:
+                break;
+            default:
+                return Collections.emptyMap();
+        }
+        return Collections.emptyMap();
     }
 
     public static float[] computeStat(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] values, ChartType chartType) {
@@ -142,7 +177,22 @@ public class StatComputationHelper {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new Total());
 
-        return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
+        return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic();
+    }
+
+    private static float[] computeStatFromNDayComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] value) {
+        MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
+                new NDayMultiComputable(new CumulativeComputable(), value));
+
+        return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic();
+    }
+
+    private static Map<Float, Float> computeStatFromProbabilityComputable(float[] metric) {
+        PlottingPositionComputable plottingPositionComputable = new PlottingPositionComputable(PlottingType.WEIBULL);
+        float[] prob = plottingPositionComputable.multiCompute(metric);
+        float[] values = plottingPositionComputable.orderValues(metric);
+
+        return plottingPositionComputable.assignProbability(values, prob);
     }
 
     private static float[][] computeStatFromCumulativeComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt) {

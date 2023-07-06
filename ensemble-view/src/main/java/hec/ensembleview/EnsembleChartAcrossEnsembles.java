@@ -55,8 +55,22 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot 
         XYSeriesCollectionMap.get(point.rangeAxis).addSeries(newMember);
         pointSpecMap.get(point.rangeAxis).add(point);
 
-    }
+    public void addProbPoint(PointSpec point) {  // first attempt to add probability values to chart
+        XYSeries newMember = new XYSeries(point.pointName);
+        Map<Float, Float> probValues = point.prob;
 
+        for (Map.Entry<Float, Float> entry : probValues.entrySet()) {
+            newMember.add(entry.getValue(), entry.getKey());
+        }
+
+        if (!xYSeriesCollectionMap.containsKey(point.rangeAxis)) {
+            xYSeriesCollectionMap.put(point.rangeAxis, new XYSeriesCollection());
+            pointSpecMap.put(point.rangeAxis, new ArrayList<>());
+        }
+
+        xYSeriesCollectionMap.get(point.rangeAxis).addSeries(newMember);
+        pointSpecMap.get(point.rangeAxis).add(point);
+    }
 
     @Override
     public ChartPanel generateChart() {

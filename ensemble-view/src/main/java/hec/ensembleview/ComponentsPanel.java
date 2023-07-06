@@ -42,6 +42,11 @@ public class ComponentsPanel {
                 case CUMULATIVE:
                     timeSeriesViewPanel.add((RadioButtonStat)stat);
                     buttonGroup.add(((RadioButtonStat)stat).getRadioButton());
+                case PLOTTINGPOSITION:
+                    timeSeriesViewPanel.add((RadioButtonStat)stat);
+                    buttonGroup.add(((RadioButtonStat)stat).getRadioButton());
+                    break;
+                default:
                     break;
             }
         }

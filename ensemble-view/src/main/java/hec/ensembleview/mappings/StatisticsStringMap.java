@@ -15,9 +15,9 @@ public class StatisticsStringMap {
         map.put(Statistics.MEDIAN, "Median");
         map.put(Statistics.STANDARDDEVIATION, "Standard Deviation");
         map.put(Statistics.VARIANCE, "Variance");
-        map.put(Statistics.PERCENTILE, "Percentile");
-        map.put(Statistics.TOTAL, "Total Flow");
-        map.put(Statistics.CUMULATIVE, "Cumulative");
+        map.put(Statistics.PERCENTILE, "Percentile (%)");
+        map.put(Statistics.TOTAL, "Total Volume (acre-ft");
+        map.put(Statistics.CUMULATIVE, "Cumulative Volume");
         map.put(Statistics.NONE, "Original");
         map.put(Statistics.MAXAVERAGEDURATION, "Max Average Duration (cfs)");
         map.put(Statistics.MAXACCUMDURATION, "Max Cumulative Volume (acre-ft)");
