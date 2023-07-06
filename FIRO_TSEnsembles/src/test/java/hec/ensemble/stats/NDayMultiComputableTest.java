@@ -32,8 +32,8 @@ class NDayMultiComputableTest {
         c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),""));
         float[] num1 = {11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8};
         float[] results = test.multiCompute(num1);
-        assertEquals(158, results[0]);
-        assertEquals(305, results[1]);
+        assertEquals(13.05785, results[0], 0.001);
+        assertEquals(25.20661, results[1], 0.001);
     }
 
 
