@@ -64,6 +64,7 @@ public class ComponentsPanel {
                     break;
                 //case MEDIAN:
                 case PERCENTILE:
+                case NDAYCUMULATIVE:
                 case MAXAVERAGEDURATION:
                 case MAXACCUMDURATION:
                     statPanel.add((TextBoxStat)stat);

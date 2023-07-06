@@ -1,8 +1,10 @@
 package hec.ensemble.stats;
 
-public class NDayMultiComputable implements Computable, StatisticsReportable, Configurable {
-    private MultiComputable stepOneCompute;
+public class NDayMultiComputable implements Computable, MultiComputable, StatisticsReportable, Configurable {
+
+    private  MultiComputable stepOneCompute;
     private int accumulatingDays;
+    private  float[] _days;
     Configuration config;
 
     /**
@@ -15,13 +17,33 @@ public class NDayMultiComputable implements Computable, StatisticsReportable, Co
         accumulatingDays = numberDays;
     }
 
+    public NDayMultiComputable(MultiComputable stepOne, float[] numberDays) {
+        stepOneCompute = stepOne;
+        _days = numberDays;
+    }
+
     @Override
     public float compute(float[] values) {
         values = stepOneCompute.multiCompute(values);
-
         int timestep = (int) config.getDuration().toHours();
         int timestepDay = 24 / timestep;
         return values[timestepDay * accumulatingDays];
+    }
+
+    @Override
+    public float[] multiCompute(float[] values) {
+        int size = _days.length;
+        float[] results = new float[size];
+        int i = 0;
+        values = stepOneCompute.multiCompute(values);
+
+        for(float day : _days) {
+            int timestep = (int) config.getDuration().toHours();
+            int timestepDay = 24 / timestep;
+            results[i] = values[timestepDay * (int) day];
+            i++;
+        }
+        return results;
     }
 
     @Override

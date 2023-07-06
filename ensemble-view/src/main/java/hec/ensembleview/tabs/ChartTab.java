@@ -16,17 +16,13 @@ import hec.ensembleview.PointSpec;
 import hec.ensembleview.StatisticUIType;
 import hec.ensembleview.TextBoxStat;
 import hec.ensembleview.mappings.ChartTypeStatisticsMap;
-import hec.ensembleview.mappings.StatisticsStringMap;
-import hec.ensemble.stats.Statistics;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class ChartTab extends JPanel implements EnsembleTab {
     public JPanel chartPanel;
@@ -50,7 +46,7 @@ public class ChartTab extends JPanel implements EnsembleTab {
     }
 
     private void addActionListeners() {
-        for (Statistics stat : ChartTypeStatisticsMap.map.get(chartType)) {
+        for (Statistics stat : ChartTypeStatisticsMap.getMap().get(chartType)) {
             EnsembleViewStat evs = componentsPanel.getStat(stat);
             evs.addActionListener(e -> tryShowingChart());
         }

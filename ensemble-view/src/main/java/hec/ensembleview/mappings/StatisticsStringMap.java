@@ -19,7 +19,9 @@ public class StatisticsStringMap {
         map.put(Statistics.TOTAL, "Total Flow");
         map.put(Statistics.CUMULATIVE, "Cumulative");
         map.put(Statistics.NONE, "Original");
-        map.put(Statistics.MAXAVERAGEDURATION, "Max Average Duration");
-        map.put(Statistics.MAXACCUMDURATION, "Max Accum Duration");
+        map.put(Statistics.MAXAVERAGEDURATION, "Max Average Duration (cfs)");
+        map.put(Statistics.MAXACCUMDURATION, "Max Cumulative Volume (acre-ft)");
+        map.put(Statistics.PLOTTINGPOSITION, "Probability Plot");
+        map.put(Statistics.NDAYCUMULATIVE, "Cumulative Volume (acre-ft)");
     }
 }

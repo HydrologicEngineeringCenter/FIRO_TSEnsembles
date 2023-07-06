@@ -4,10 +4,6 @@ import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleConfiguration;
 import hec.ensemble.Logger;
 import hec.ensemble.TestData;
-import hec.ensemble.stats.Computable;
-import hec.ensemble.stats.Configurable;
-import hec.ensemble.stats.CumulativeComputable;
-import hec.ensemble.stats.NDayMultiComputable;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -27,6 +23,17 @@ class NDayMultiComputableTest {
         float[] num1 = {11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8};
         float results = test.compute(num1);
         assertEquals(13.057, results, .001);
+    }
+
+    @Test
+    public void testNDayMultiComputableAcrossTimeTwoValues() {
+        MultiComputable test = new NDayMultiComputable(new CumulativeComputable(), new float[] {1,2});
+        Configurable c = (Configurable) test;
+        c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),""));
+        float[] num1 = {11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8};
+        float[] results = test.multiCompute(num1);
+        assertEquals(158, results[0]);
+        assertEquals(305, results[1]);
     }
 
 

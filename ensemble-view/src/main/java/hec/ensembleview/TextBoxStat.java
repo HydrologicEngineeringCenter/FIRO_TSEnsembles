@@ -15,7 +15,6 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
 
 
     public TextBoxStat(Statistics stat) {
-//        label = new JLabel(StatisticsStringMap.map.get(stat));
         checkBox = new JCheckBox(StatisticsStringMap.map.get(stat));
         textField = new JTextField();
         textField.setFont(DefaultSettings.setSegoeFontText());
@@ -30,7 +29,8 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
         validate();
     }
 
-        if(stat == Statistics.CUMULATIVE) {
+    private void setToolTipMessages() {
+        if(stat == Statistics.CUMULATIVE || stat == Statistics.NDAYCUMULATIVE) {
             textField.setToolTipText("Enter value in days");
         } else if (stat == Statistics.PERCENTILE) {
             textField.setToolTipText("Enter percentile as decimal.  Multiple percentiles can be entered by adding commas");

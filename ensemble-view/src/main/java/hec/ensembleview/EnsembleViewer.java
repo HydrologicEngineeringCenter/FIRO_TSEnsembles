@@ -152,22 +152,19 @@ public class EnsembleViewer {
         frame.add(tabPane, BorderLayout.CENTER);
         frame.setSize(1000,1000);
 
-
-      //  frame.pack();
-
         addActionListeners();
     }
 
 
-    private void createTabs() {
+    private void createTabs() { // create three types of charts in viewer
         /*
         Create tab spec.
          */
-        tabs.add(new TabSpec("Time Series Plot", new JPanel(), TabType.Chart));
-        tabs.get(0).panel = new ChartTab(new EnsembleChartAcrossTime().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.map.get(ChartType.TimePlot)), ChartType.TimePlot);
+        tabs.add(new TabSpec("Time Series Plot", new JPanel(), TabType.Chart));  // tab is a TabbedPane.  There are three tabs in the viewer. adding the name to the tab
+        tabs.get(0).panel = new ChartTab(new EnsembleChartAcrossTime().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.getMap().get(ChartType.TIMEPLOT)), ChartType.TIMEPLOT);  //adding the chart to the pane.  Each pane needs to have its own chart.  There is a panel within the tab
 
         tabs.add(new TabSpec("Scatter Plot", new JPanel(), TabType.Chart));
-        tabs.get(1).panel = new ChartTab(new EnsembleChartAcrossEnsembles().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.map.get(ChartType.ScatterPlot)), ChartType.ScatterPlot);
+        tabs.get(1).panel = new ChartTab(new EnsembleChartAcrossEnsembles().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.getMap().get(ChartType.SCATTERPLOT)), ChartType.SCATTERPLOT);
 
         tabs.add(new TabSpec("Single Value Summary", new JPanel(), TabType.SingleValueSummary));
         tabs.get(2).panel = new SingleValueSummaryTab();

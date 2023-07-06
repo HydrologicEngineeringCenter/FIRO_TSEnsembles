@@ -47,6 +47,8 @@ public class StatComputationHelper {
         switch(stat){
             case PERCENTILE:
                 return computeStatFromPercentilesComputable(ets, stat, selectedZdt, values, chartType);
+            case NDAYCUMULATIVE:
+                return computeStatFromNDayComputable(ets, stat, selectedZdt, values);
             case MAXAVERAGEDURATION:
                 return computeStatFromMaxAvgDurationComputable(ets, stat, selectedZdt, (int) values[0]);
             case MAXACCUMDURATION:
