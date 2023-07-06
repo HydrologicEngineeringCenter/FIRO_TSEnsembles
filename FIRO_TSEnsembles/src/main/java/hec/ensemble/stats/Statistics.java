@@ -1,6 +1,6 @@
 package hec.ensemble.stats;
 
-import java.util.EnumSet;
+import java.util.Set;
 
 public enum Statistics {
     NONE,

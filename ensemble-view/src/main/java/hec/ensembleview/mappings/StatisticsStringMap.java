@@ -9,11 +9,11 @@ public class StatisticsStringMap {
     public final static Map<Statistics, String> map = new HashMap<>();
 
     static {
-        map.put(Statistics.MAX, "Max");
-        map.put(Statistics.MIN, "Min");
-        map.put(Statistics.AVERAGE, "Average");
-        map.put(Statistics.MEDIAN, "Median");
-        map.put(Statistics.STANDARDDEVIATION, "Standard Deviation");
+        map.put(Statistics.MAX, "Max (cfs)");
+        map.put(Statistics.MIN, "Min (cfs)");
+        map.put(Statistics.AVERAGE, "Average (cfs)");
+        map.put(Statistics.MEDIAN, "Median (cfs)");
+        map.put(Statistics.STANDARDDEVIATION, "Standard Deviation (cfs)");
         map.put(Statistics.VARIANCE, "Variance");
         map.put(Statistics.PERCENTILE, "Percentile (%)");
         map.put(Statistics.TOTAL, "Total Volume (acre-ft");

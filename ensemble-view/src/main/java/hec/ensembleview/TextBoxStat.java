@@ -2,7 +2,6 @@ package hec.ensembleview;
 
 import hec.ensemble.stats.Statistics;
 import hec.ensembleview.mappings.StatisticsStringMap;
-import hec.ensemble.stats.Statistics;
 
 import javax.swing.*;
 import java.awt.*;
@@ -55,17 +54,15 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
         setLayout(gl);
         add(checkBox);
         add(textField);
-        this.stat = stat;
+
         textField.setEditable(false);
         checkBox.addActionListener(e -> {
-            if(checkBox.isSelected()) {
+            if (checkBox.isSelected()) {
                 textField.setEditable(true);
-            } else if(!checkBox.isSelected()) {
+            } else {
                 textField.setEditable(false);
             }
         });
-        setPreferredSize(getPreferredSize());
-        validate();
     }
 
     public float[] getTextFieldValue() {

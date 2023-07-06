@@ -38,7 +38,7 @@ public class StatComputationHelper {
         return new float[0];
     }
 
-    public static float[][] computeTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
+    public static float[][] computeTimeSeriesView(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt) {
         if (stat == Statistics.CUMULATIVE) {
             return computeStatFromCumulativeComputable(ets, selectedZdt);
         }
@@ -138,23 +138,23 @@ public class StatComputationHelper {
     }
 
     private static float[] computeStatFromMultiStatComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, ChartType chartType) {
-        if(chartType == ChartType.TimePlot) {
+        if(chartType == ChartType.TIMEPLOT) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(new MultiStatComputable(new Statistics[]{stat}));
-            return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
-        } else if (chartType == ChartType.ScatterPlot) {
+            return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic();
+        } else if (chartType == ChartType.SCATTERPLOT) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(new MultiStatComputable(new Statistics[] {stat}));
-            return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
+            return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic();
         }
         return new float[0];
     }
 
     private static float[] computeStatFromPercentilesComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] percentiles, ChartType chartType) {
-        if(chartType == ChartType.TimePlot) {
+        if(chartType == ChartType.TIMEPLOT) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(new PercentilesComputable(percentiles));
-            return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
-        } else if (chartType == ChartType.ScatterPlot) {
+            return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic();
+        } else if (chartType == ChartType.SCATTERPLOT) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(new PercentilesComputable(percentiles));
-            return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
+            return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic();
         }
         return new float[0];
     }
@@ -163,14 +163,14 @@ public class StatComputationHelper {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new MaxAvgDuration(value));
 
-        return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
+        return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic();
     }
 
     private static float[] computeStatFromMaxAccumDurationComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, int value) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new MaxAccumDuration(value));
 
-        return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic(stat);
+        return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic();
     }
 
     private static float[] computeStatFromTotalComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt) {
