@@ -4,17 +4,8 @@ import hec.EnsembleDatabase;
 import hec.RecordIdentifier;
 import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
-import hec.ensembleview.ChartType;
-import hec.ensembleview.ComponentsPanel;
-import hec.ensembleview.StatComputationHelper;
-import hec.ensembleview.EnsembleChart;
-import hec.ensembleview.EnsembleChartAcrossEnsembles;
-import hec.ensembleview.EnsembleChartAcrossTime;
-import hec.ensembleview.EnsembleViewStat;
-import hec.ensembleview.LineSpec;
-import hec.ensembleview.PointSpec;
-import hec.ensembleview.StatisticUIType;
-import hec.ensembleview.TextBoxStat;
+import hec.ensemble.stats.Statistics;
+import hec.ensembleview.*;
 import hec.ensembleview.mappings.ChartTypeStatisticsMap;
 
 import javax.swing.*;
@@ -79,150 +70,58 @@ public class ChartTab extends JPanel implements EnsembleTab {
         float[][] vals = ensemble.getValues();
         EnsembleViewStat[] selectedStats = getSelectedStatistics();
         ZonedDateTime[] dates = ensemble.startDateTime();
+        PlotStatisticsForChartType plotStatisticsForChartType = new PlotStatisticsForChartType(db, zdt, rid);
 
-        /*
-        depending on which tab pane is selected, show time series plot or show scatter plot
-         */
-
-        if(chartType == ChartType.TimePlot) {
-            EnsembleChartAcrossTime chart = new EnsembleChartAcrossTime();
-            chart.setXLabel("Date/Time");
-            chart.setYLabel(String.join(" ", rid.parameter, ensemble.getUnits()));
-            boolean randomColor = selectedStats.length <= 1;
-            if (isTimeSeriesViewSelected(selectedStats)){  // if the Radio button is selected to Cumulative or Moving Average, compute metric for time series view
-                float[][] cumulativeVals = StatComputationHelper.computeTimeSeriesView(db.getEnsembleTimeSeries(rid),
-                        getSelectedTimeSeriesView(selectedStats), zdt);
-                EnsembleTimeSeries ets = new EnsembleTimeSeries(rid, "units", "data_type", "version");
-                ets.addEnsemble(new Ensemble(ensemble.getIssueDate(), cumulativeVals, ensemble.getStartDateTime(), ensemble.getInterval(), ensemble.getUnits()));
-                addStatisticsToTimePlot(chart, selectedStats, ets, dates);
-                addLineMembersToChart(chart, cumulativeVals, dates, randomColor);
-            }
-            else
-            {
-                addStatisticsToTimePlot(chart, selectedStats, db.getEnsembleTimeSeries(rid), dates);
-                addLineMembersToChart(chart, vals, dates, randomColor);
-            }
-            return chart;
-
+        if (chartType == ChartType.TIMEPLOT) {
+            return createTimePlotChart(ensemble, selectedStats, dates, plotStatisticsForChartType, vals);
         } else {
-            EnsembleChartAcrossEnsembles chart = new EnsembleChartAcrossEnsembles();
-            chart.setXLabel("Ensembles");
+            return createScatterPlotChart(ensemble, selectedStats, plotStatisticsForChartType);
+        }
+    }
+
+    private EnsembleChart createTimePlotChart(Ensemble ensemble, EnsembleViewStat[] selectedStats, ZonedDateTime[] dates,
+                                              PlotStatisticsForChartType plotStatisticsForChartType, float[][] vals) throws Exception {
+        EnsembleChartAcrossTime chart = new EnsembleChartAcrossTime();
+        chart.setXLabel("Date/Time");
+        boolean randomColor = selectedStats.length <= 1;
+
+        if (isTimeSeriesViewSelected(selectedStats)) {
+            EnsembleTimeSeries cumulativeEnsembles = plotStatisticsForChartType.getCumulativeEnsembles(ensemble);
+            plotStatisticsForChartType.addStatisticsToTimePlot(chart, selectedStats, cumulativeEnsembles, dates);
+
+            addLineMembersToChart(chart, cumulativeEnsembles.getEnsemble(zdt).getValues(), dates, randomColor);
+            chart.setYLabel(String.join(" ", rid.parameter, cumulativeEnsembles.getUnits()));
+        } else {
+            plotStatisticsForChartType.addStatisticsToTimePlot(chart, selectedStats, db.getEnsembleTimeSeries(rid), dates);
+
+            addLineMembersToChart(chart, vals, dates, randomColor);
             chart.setYLabel(String.join(" ", rid.parameter, ensemble.getUnits()));
-            addStatisticsToScatterPlot(chart, selectedStats, db.getEnsembleTimeSeries(rid));
-            return chart;
         }
+
+        return chart;
     }
 
-    private void addStatisticsToTimePlot(EnsembleChartAcrossTime chart, EnsembleViewStat[] stats, EnsembleTimeSeries ets, ZonedDateTime[] dates) throws ParseException {
-        for (EnsembleViewStat selectedStat : stats) {
-            switch (selectedStat.getStatType()) {
-                case MIN:
-                case MAX:
-                    chart.addLine(
-                            new LineSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
-                                    new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                                            1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case AVERAGE:
-                    chart.addLine(
-                            new LineSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
-                                    new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case MEDIAN:
-                    chart.addLine(
-                            new LineSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
-                                    new BasicStroke(3.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case STANDARDDEVIATION:
-                    chart.addLine(
-                            new LineSpec(1, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
-                                    new BasicStroke(3.0f), Color.GREEN, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case VARIANCE:
-                    chart.addLine(
-                            new LineSpec(1, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.TimePlot), dates,
-                                    new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-
-                case PERCENTILE:
-                    float[] percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();
-                    DecimalFormat df = new DecimalFormat("0.0");
-
-                    for(int i = 0; i < percentiles.length; i++) {
-                        chart.addLine(
-                                new LineSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, new float[] {(percentiles[i])}, ChartType.TimePlot), dates,
-                                        new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                                                1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
-                    }
-                    break;
-            }
+    private EnsembleChart createScatterPlotChart(Ensemble ensemble, EnsembleViewStat[] selectedStats,
+                                                 PlotStatisticsForChartType plotStatisticsForChartType) throws Exception {
+        EnsembleChartAcrossEnsembles chart = new EnsembleChartAcrossEnsembles();
+        if (isTimeSeriesViewSelected(selectedStats)) {
+            chart.setXLabel("Probability");
+        } else {
+            chart.setXLabel("Ensembles");
         }
+        chart.setYLabel(String.join(" ", rid.parameter, ensemble.getUnits()));
+
+        if (isTimeSeriesViewSelected(selectedStats)) {
+            plotStatisticsForChartType.addStatisticsToProbabilityPlot(chart, selectedStats, db.getEnsembleTimeSeries(rid));
+        } else {
+            plotStatisticsForChartType.addStatisticsToScatterPlot(chart, selectedStats, db.getEnsembleTimeSeries(rid));
+        }
+
+        return chart;
     }
 
-    private void addStatisticsToScatterPlot(EnsembleChartAcrossEnsembles chart, EnsembleViewStat[] stats, EnsembleTimeSeries ets) throws ParseException {
-        for (EnsembleViewStat selectedStat : stats) {
-            switch (selectedStat.getStatType()) {
-                case MIN:
-                    chart.addPoint(
-                            new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
-                                    new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                                            1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.RED, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case MAX:
-                    chart.addPoint(
-                            new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
-                                    new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                                            1.0f, new float[]{6.0f, 6.0f}, 0.0f), Color.BLUE, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case AVERAGE:
-                    chart.addPoint(
-                            new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
-                                    new BasicStroke(3.0f), Color.BLACK, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case MEDIAN:
-                    chart.addPoint(
-                            new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
-                                    new BasicStroke(3.0f), Color.ORANGE, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case STANDARDDEVIATION:
-                    chart.addPoint(
-                            new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
-                                    new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case VARIANCE:
-                    chart.addPoint(
-                            new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
-                                    new BasicStroke(3.0f), Color.MAGENTA, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case TOTAL:
-                    chart.addPoint(
-                            new PointSpec(1, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, ChartType.ScatterPlot),
-                                    new BasicStroke(3.0f), Color.GRAY, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case PERCENTILE:
-                    float[] percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();
-                    DecimalFormat df = new DecimalFormat("0.0");
 
-                    for(int i = 0; i < percentiles.length; i++) {
 
-                        chart.addPoint(
-                                new PointSpec(0, StatComputationHelper.computeStat(ets, selectedStat.getStatType(), zdt, new float[] {(percentiles[i])}, ChartType.ScatterPlot),
-                                        new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                                                1.0f, new float[]{6.0f, 6.0f}, 0.0f), randomColor(i+1), StatisticsStringMap.map.get(selectedStat.getStatType()) + " " + df.format(percentiles[i]*100) + "%"));
-                    }
-                    break;
-                case MAXAVERAGEDURATION:
-                    chart.addPoint(
-                            new PointSpec(0, StatComputationHelper.computeStat(db.getEnsembleTimeSeries(rid), selectedStat.getStatType(), zdt, ((TextBoxStat) selectedStat).getTextFieldValue(), ChartType.ScatterPlot),
-                                    new BasicStroke(3.0f), Color.PINK, StatisticsStringMap.map.get(selectedStat.getStatType())));
-                    break;
-                case MAXACCUMDURATION:
-                    chart.addPoint(
-                            new PointSpec(0, StatComputationHelper.computeStat(db.getEnsembleTimeSeries(rid), selectedStat.getStatType(), zdt, ((TextBoxStat) selectedStat).getTextFieldValue(), ChartType.ScatterPlot),
-                                    new BasicStroke(3.0f), Color.GREEN, StatisticsStringMap.map.get(selectedStat.getStatType())));
-            }
-        }
-    }
 
     private void addLineMembersToChart(EnsembleChart chart, float[][] vals, ZonedDateTime[] dates, boolean randomColor) throws ParseException {
         Color c = null;
@@ -247,33 +146,15 @@ public class ChartTab extends JPanel implements EnsembleTab {
         return false;
     }
 
-    private Statistics getSelectedTimeSeriesView(EnsembleViewStat[] selectedStats) {
-        for (EnsembleViewStat stat : selectedStats) {
-            if (stat.getStatUIType() == StatisticUIType.RADIOBUTTON && stat.hasInput())
-                return stat.getStatType();
-        }
-        return null;
-    }
-
     private EnsembleViewStat[] getSelectedStatistics() {
         List<EnsembleViewStat> selectedStats = new ArrayList<>();
-        for (Statistics stat : ChartTypeStatisticsMap.map.get(chartType)) {
+        for (Statistics stat : ChartTypeStatisticsMap.getMap().get(chartType)) {
             EnsembleViewStat selectedStat = componentsPanel.getStat(stat);
             if (selectedStat.hasInput()) {
                 selectedStats.add(selectedStat);
             }
         }
         return selectedStats.toArray(new EnsembleViewStat[]{});
-    }
-
-    private Color randomColor(int i) {
-        Random rand = new Random(i);
-        float r = rand.nextFloat();
-        float g = rand.nextFloat();
-        float b = rand.nextFloat();
-
-        Color color = new Color(r, g, b);
-        return color;
     }
 
     @Override
