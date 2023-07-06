@@ -91,21 +91,25 @@ public class EnsembleViewer {
         optionsPanel = new JPanel();
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
         optionsPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Options", TitledBorder.LEFT, TitledBorder.TOP));
-        ((TitledBorder)optionsPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
-        GridLayout experimentLayout = new GridLayout(0,2);
+        ((TitledBorder)optionsPanel.getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
+        GridLayout experimentLayout = new GridLayout(3,2);
         optionsPanel.setLayout(experimentLayout);
 
         /*
         Create file select area.
          */
-        optionsPanel.add(new JLabel("File"));
+        JLabel text = new JLabel("File");
+        text.setFont(DefaultSettings.setSegoeFontText());
+        optionsPanel.add(text);
         filePathPanel = new JPanel();
-        filePathPanel.setLayout(new GridLayout(0,2));
+        filePathPanel.setLayout(new GridLayout(1,2));
         filePath = new JTextField();
+        filePath.setFont(DefaultSettings.setSegoeFontText());
         filePath.setEditable(false);
         filePathPanel.add(filePath);
         fileSearchButton = new JButton();
         fileSearchButton.setText("Choose File...");
+        fileSearchButton.setBackground(new Color(244, 242, 245));
         filePathPanel.add(fileSearchButton);
         optionsPanel.add(filePathPanel);
 
@@ -114,6 +118,7 @@ public class EnsembleViewer {
          */
         optionsPanel.add(new JLabel("Location"));
         locations = new JComboBox<>();
+        locations.setBackground(new Color(244,242,245));
         optionsPanel.add(locations);
 
         /*
@@ -174,6 +179,7 @@ public class EnsembleViewer {
         for(TabSpec tab: tabs) {
             tabPane.addTab(tab.tabName, tab.panel);
         }
+        tabPane.setFont(DefaultSettings.setSegoeFontText());
 
     }
 

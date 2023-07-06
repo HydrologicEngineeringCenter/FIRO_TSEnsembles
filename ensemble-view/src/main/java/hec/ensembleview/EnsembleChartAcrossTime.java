@@ -77,8 +77,15 @@ public class EnsembleChartAcrossTime implements EnsembleChart, LinePlot {
             XYLineAndShapeRenderer renderer = rendererMap.get(k);
             plot.setDataset(k, timeSeriesCollectionMap.get(k));
             plot.setRenderer(k, renderer);
-            plot.setDomainAxis(new DateAxis(xLabel));
-            plot.setRangeAxis(k, new NumberAxis(yLabel));
+
+            DateAxis domainAxis = new DateAxis(xLabel);
+            domainAxis.setTickLabelFont(DefaultSettings.setSegoeFontText());
+            plot.setDomainAxis(domainAxis);
+
+            NumberAxis rangeAxis = new NumberAxis(yLabel);
+            rangeAxis.setTickLabelFont(DefaultSettings.setSegoeFontText());
+            plot.setRangeAxis(k, rangeAxis);
+
             plot.mapDatasetToDomainAxis(k, 0);
             plot.mapDatasetToRangeAxis(k, k);
 

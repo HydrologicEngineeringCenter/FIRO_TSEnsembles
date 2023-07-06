@@ -69,8 +69,15 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot 
             XYLineAndShapeRenderer renderer = rendererMap.get(k);
             plot.setDataset(k, XYSeriesCollectionMap.get(k));
             plot.setRenderer(k, renderer);
-            plot.setDomainAxis(new NumberAxis(xLabel));
-            plot.setRangeAxis(k, new NumberAxis(yLabel));
+
+            NumberAxis domainAxis = new NumberAxis(xLabel);
+            domainAxis.setTickLabelFont(DefaultSettings.setSegoeFontText());
+            plot.setDomainAxis(domainAxis);
+
+            NumberAxis rangeAxis = new NumberAxis(yLabel);
+            rangeAxis.setTickLabelFont(DefaultSettings.setSegoeFontText());
+            plot.setRangeAxis(k, rangeAxis);
+
             plot.mapDatasetToDomainAxis(k, 0);
             plot.mapDatasetToRangeAxis(k, k);
 

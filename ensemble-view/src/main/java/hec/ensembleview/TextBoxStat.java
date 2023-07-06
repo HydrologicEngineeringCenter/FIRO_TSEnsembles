@@ -1,5 +1,6 @@
 package hec.ensembleview;
 
+import hec.ensemble.stats.Statistics;
 import hec.ensembleview.mappings.StatisticsStringMap;
 import hec.ensemble.stats.Statistics;
 
@@ -8,7 +9,6 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 
 public class TextBoxStat extends JPanel implements EnsembleViewStat {
-//    private JLabel label;
     private JTextField textField;
     private JCheckBox checkBox;
     private final Statistics stat;
@@ -18,8 +18,17 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
 //        label = new JLabel(StatisticsStringMap.map.get(stat));
         checkBox = new JCheckBox(StatisticsStringMap.map.get(stat));
         textField = new JTextField();
+        textField.setFont(DefaultSettings.setSegoeFontText());
+        checkBox.setFont(DefaultSettings.setSegoeFontText());
+        this.stat = stat;
+
+        setToolTipFont();
+        setToolTipMessages();
 
         ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+        setPreferredSize(getPreferredSize());
+        validate();
+    }
 
         if(stat == Statistics.CUMULATIVE) {
             textField.setToolTipText("Enter value in days");
@@ -28,8 +37,22 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
         } else {
             textField.setToolTipText("Enter value in hours");
         }
+    }
 
-        setLayout(new GridLayout(1, 2));
+    private void setToolTipFont() {
+        // Set the tooltip font
+        Font tooltipFont = DefaultSettings.setSegoeFontText(); // Replace with your desired font
+        ToolTipManager.sharedInstance().setInitialDelay(0);
+        ToolTipManager.sharedInstance().setReshowDelay(0);
+        ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+        ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
+        UIManager.put("ToolTip.font", tooltipFont);
+
+        // Set the tooltip text
+        textField.setToolTipText("<html><font face='" + tooltipFont.getName() + "' size='" + tooltipFont.getSize() + "'>Enter value in days</font></html>");
+
+        GridLayout gl = new GridLayout(1, 2);
+        setLayout(gl);
         add(checkBox);
         add(textField);
         this.stat = stat;
