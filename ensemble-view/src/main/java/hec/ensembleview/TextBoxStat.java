@@ -57,11 +57,7 @@ public class TextBoxStat extends JPanel implements EnsembleViewStat {
 
         textField.setEditable(false);
         checkBox.addActionListener(e -> {
-            if (checkBox.isSelected()) {
-                textField.setEditable(true);
-            } else {
-                textField.setEditable(false);
-            }
+            textField.setEditable(checkBox.isSelected());
         });
     }
 
