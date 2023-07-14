@@ -29,7 +29,7 @@ public class StatComputationHelper {
             case AVERAGE:
                 return computeStatFromMultiStatComputable(ets, stat, selectedZdt, chartType);
             case TOTAL:
-                return computeStatFromTotalComputable(ets, stat, selectedZdt);
+                return computeStatFromTotalComputable(ets, selectedZdt);
             case UNDEFINED:
                 break;
             default:
@@ -81,13 +81,13 @@ public class StatComputationHelper {
     public static float[] computeStat(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] values, ChartType chartType) {
         switch(stat){
             case PERCENTILE:
-                return computeStatFromPercentilesComputable(ets, stat, selectedZdt, values, chartType);
+                return computeStatFromPercentilesComputable(ets, selectedZdt, values, chartType);
             case NDAYCUMULATIVE:
-                return computeStatFromNDayComputable(ets, stat, selectedZdt, values);
+                return computeStatFromNDayComputable(ets, selectedZdt, values);
             case MAXAVERAGEDURATION:
-                return computeStatFromMaxAvgDurationComputable(ets, stat, selectedZdt, (int) values[0]);
+                return computeStatFromMaxAvgDurationComputable(ets, selectedZdt, (int) values[0]);
             case MAXACCUMDURATION:
-                return computeStatFromMaxAccumDurationComputable(ets, stat, selectedZdt, (int) values[0]);
+                return computeStatFromMaxAccumDurationComputable(ets, selectedZdt, (int) values[0]);
             case UNDEFINED:
                 break;
             default:
@@ -148,7 +148,7 @@ public class StatComputationHelper {
         return new float[0];
     }
 
-    private static float[] computeStatFromPercentilesComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] percentiles, ChartType chartType) {
+    private static float[] computeStatFromPercentilesComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, float[] percentiles, ChartType chartType) {
         if(chartType == ChartType.TIMEPLOT) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(new PercentilesComputable(percentiles));
             return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic();
@@ -159,28 +159,28 @@ public class StatComputationHelper {
         return new float[0];
     }
 
-    private static float[] computeStatFromMaxAvgDurationComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, int value) {
+    private static float[] computeStatFromMaxAvgDurationComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, int value) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new MaxAvgDuration(value));
 
         return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic();
     }
 
-    private static float[] computeStatFromMaxAccumDurationComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, int value) {
+    private static float[] computeStatFromMaxAccumDurationComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, int value) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new MaxAccumDuration(value));
 
         return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic();
     }
 
-    private static float[] computeStatFromTotalComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt) {
+    private static float[] computeStatFromTotalComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new Total());
 
         return mct.getMetricCollection(selectedZdt).getComputedValuesForStatistic();
     }
 
-    private static float[] computeStatFromNDayComputable(EnsembleTimeSeries ets, Statistics stat, ZonedDateTime selectedZdt, float[] value) {
+    private static float[] computeStatFromNDayComputable(EnsembleTimeSeries ets, ZonedDateTime selectedZdt, float[] value) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(
                 new NDayMultiComputable(new CumulativeComputable(), value));
 
