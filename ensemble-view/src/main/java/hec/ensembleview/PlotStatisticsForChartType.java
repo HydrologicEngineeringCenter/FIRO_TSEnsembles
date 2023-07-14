@@ -68,7 +68,6 @@ public class PlotStatisticsForChartType {
         for (EnsembleViewStat selectedStat : stats) {
 
             Statistics statType = selectedStat.getStatType();
-            float[] percentiles = null; // Initialize percentiles if needed
 
             switch (statType) {
                 case MIN:
@@ -85,6 +84,7 @@ public class PlotStatisticsForChartType {
                     break;
 
                 case PERCENTILE:
+                    float[] percentiles = null; // Initialize percentiles if needed
                     percentiles = ((TextBoxStat) selectedStat).getTextFieldValue();
                     DecimalFormat df = new DecimalFormat("0.0");
 
