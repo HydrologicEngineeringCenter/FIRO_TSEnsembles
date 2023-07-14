@@ -40,8 +40,6 @@ public class ComponentsPanel {
                 case NONE:
                     ((RadioButtonStat)stat).getRadioButton().setSelected(true);
                 case CUMULATIVE:
-                    timeSeriesViewPanel.add((RadioButtonStat)stat);
-                    buttonGroup.add(((RadioButtonStat)stat).getRadioButton());
                 case PLOTTINGPOSITION:
                     timeSeriesViewPanel.add((RadioButtonStat)stat);
                     buttonGroup.add(((RadioButtonStat)stat).getRadioButton());
