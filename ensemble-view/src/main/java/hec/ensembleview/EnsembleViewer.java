@@ -91,21 +91,25 @@ public class EnsembleViewer {
         optionsPanel = new JPanel();
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
         optionsPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Options", TitledBorder.LEFT, TitledBorder.TOP));
-        ((TitledBorder)optionsPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
-        GridLayout experimentLayout = new GridLayout(0,2);
+        ((TitledBorder)optionsPanel.getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
+        GridLayout experimentLayout = new GridLayout(3,2);
         optionsPanel.setLayout(experimentLayout);
 
         /*
         Create file select area.
          */
-        optionsPanel.add(new JLabel("File"));
+        JLabel text = new JLabel("File");
+        text.setFont(DefaultSettings.setSegoeFontText());
+        optionsPanel.add(text);
         filePathPanel = new JPanel();
-        filePathPanel.setLayout(new GridLayout(0,2));
+        filePathPanel.setLayout(new GridLayout(1,2));
         filePath = new JTextField();
+        filePath.setFont(DefaultSettings.setSegoeFontText());
         filePath.setEditable(false);
         filePathPanel.add(filePath);
         fileSearchButton = new JButton();
         fileSearchButton.setText("Choose File...");
+        fileSearchButton.setBackground(new Color(244, 242, 245));
         filePathPanel.add(fileSearchButton);
         optionsPanel.add(filePathPanel);
 
@@ -114,6 +118,7 @@ public class EnsembleViewer {
          */
         optionsPanel.add(new JLabel("Location"));
         locations = new JComboBox<>();
+        locations.setBackground(new Color(244,242,245));
         optionsPanel.add(locations);
 
         /*
@@ -147,22 +152,19 @@ public class EnsembleViewer {
         frame.add(tabPane, BorderLayout.CENTER);
         frame.setSize(1000,1000);
 
-
-      //  frame.pack();
-
         addActionListeners();
     }
 
 
-    private void createTabs() {
+    private void createTabs() { // create three types of charts in viewer
         /*
         Create tab spec.
          */
-        tabs.add(new TabSpec("Time Series Plot", new JPanel(), TabType.Chart));
-        tabs.get(0).panel = new ChartTab(new EnsembleChartAcrossTime().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.map.get(ChartType.TimePlot)), ChartType.TimePlot);
+        tabs.add(new TabSpec("Time Series Plot", new JPanel(), TabType.Chart));  // tab is a TabbedPane.  There are three tabs in the viewer. adding the name to the tab
+        tabs.get(0).panel = new ChartTab(new EnsembleChartAcrossTime().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.getMap().get(ChartType.TIMEPLOT)), ChartType.TIMEPLOT);  //adding the chart to the pane.  Each pane needs to have its own chart.  There is a panel within the tab
 
         tabs.add(new TabSpec("Scatter Plot", new JPanel(), TabType.Chart));
-        tabs.get(1).panel = new ChartTab(new EnsembleChartAcrossEnsembles().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.map.get(ChartType.ScatterPlot)), ChartType.ScatterPlot);
+        tabs.get(1).panel = new ChartTab(new EnsembleChartAcrossEnsembles().generateChart(), new ComponentsPanel(ChartTypeStatisticsMap.getMap().get(ChartType.SCATTERPLOT)), ChartType.SCATTERPLOT);
 
         tabs.add(new TabSpec("Single Value Summary", new JPanel(), TabType.SingleValueSummary));
         tabs.get(2).panel = new SingleValueSummaryTab();
@@ -174,6 +176,7 @@ public class EnsembleViewer {
         for(TabSpec tab: tabs) {
             tabPane.addTab(tab.tabName, tab.panel);
         }
+        tabPane.setFont(DefaultSettings.setSegoeFontText());
 
     }
 

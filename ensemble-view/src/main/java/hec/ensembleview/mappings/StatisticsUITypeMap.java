@@ -17,10 +17,12 @@ public class StatisticsUITypeMap {
         map.put(Statistics.STANDARDDEVIATION, StatisticUIType.CHECKBOX);
         map.put(Statistics.VARIANCE, StatisticUIType.CHECKBOX);
         map.put(Statistics.CUMULATIVE, StatisticUIType.RADIOBUTTON);
+        map.put(Statistics.PLOTTINGPOSITION, StatisticUIType.RADIOBUTTON);
         map.put(Statistics.NONE, StatisticUIType.RADIOBUTTON);
         map.put(Statistics.PERCENTILE, StatisticUIType.TEXTBOX);
         map.put(Statistics.MAXAVERAGEDURATION, StatisticUIType.TEXTBOX);
         map.put(Statistics.MAXACCUMDURATION, StatisticUIType.TEXTBOX);
+        map.put(Statistics.NDAYCUMULATIVE, StatisticUIType.TEXTBOX);
     }
 }
 

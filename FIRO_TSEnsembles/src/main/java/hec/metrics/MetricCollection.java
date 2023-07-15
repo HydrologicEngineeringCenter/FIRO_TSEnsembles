@@ -60,11 +60,7 @@ public class MetricCollection {
     }
     //probably need getdataforparametername.
 
-    public float[] getComputedValuesForStatistic(Statistics stat){
-        if (metric_statisticsLabel.contains(stat.toString())) {
-            return metrics[0];
-        } else {
-            throw new IllegalArgumentException(stat + " does not match " + metric_statisticsLabel);
-        }
+    public float[] getComputedValuesForStatistic(){
+        return metrics[0];
     }
 }

@@ -14,6 +14,7 @@ public class RadioButtonStat extends JPanel implements EnsembleViewStat {
     public RadioButtonStat(Statistics stat) {
         setLayout(new BorderLayout());
         radioButton = new JRadioButton(StatisticsStringMap.map.get(stat));
+        radioButton.setFont(DefaultSettings.setSegoeFontText());
         add(radioButton);
         this.stat = stat;
     }

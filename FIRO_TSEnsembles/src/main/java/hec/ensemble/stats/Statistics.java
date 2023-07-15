@@ -1,6 +1,6 @@
 package hec.ensemble.stats;
 
-import java.util.EnumSet;
+import java.util.Set;
 
 public enum Statistics {
     NONE,
@@ -13,21 +13,22 @@ public enum Statistics {
     TOTAL,
     PERCENTILE,
     CUMULATIVE,
+    NDAYCUMULATIVE,
     MAXAVERAGEDURATION,
     MAXACCUMDURATION,
     PLOTTINGPOSITION,
     COMPUTABLE,
     UNDEFINED;
 
-    public static String pack(EnumSet<Statistics> set){ //returns a list of the statistics in a string format
-        String ret = "";
+    public static String pack(Set<Statistics> set){ //returns a list of the statistics in a string format
+        StringBuilder ret = new StringBuilder();
         for (Statistics s : Statistics.values()){
             if (set.contains(s)){
-                ret += s.name() + ",";
+                ret.append(s.name()).append(",");
             }
         }
-        ret = ret.substring(0,ret.length()-1); // removes the last comma
-        return ret;
+        ret = new StringBuilder(ret.substring(0, ret.length() - 1)); // removes the last comma
+        return ret.toString();
     }
 
 }

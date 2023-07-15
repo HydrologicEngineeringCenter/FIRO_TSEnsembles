@@ -11,6 +11,9 @@ import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -68,6 +71,41 @@ public class EnsembleChartAcrossTime implements EnsembleChart, LinePlot {
 
     @Override
     public ChartPanel generateChart() {
+        XYPlot plot = createTimeSeriesPlot();
+
+        ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot)){
+            @Override
+            public void mousePressed(MouseEvent e)
+            {
+                int mods = e.getModifiers();
+                int panMask = InputEvent.BUTTON1_MASK;
+                if (mods == InputEvent.BUTTON1_MASK+ InputEvent.SHIFT_MASK) {
+                    panMask = 255; //The pan test will match nothing and the zoom rectangle will be activated.
+                }try {
+                Field mask = ChartPanel.class.getDeclaredField("panMask");
+                mask.setAccessible(true);
+                mask.set(this, panMask);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+                super.mousePressed(e);
+            }
+        };
+        addChartFeatures(chart);
+
+        return chart;
+    }
+
+    private void addChartFeatures(ChartPanel chart) {
+        chart.setMouseZoomable(false);
+        chart.setMouseWheelEnabled(true);
+        chart.setDomainZoomable(true);
+        chart.setRangeZoomable(true);
+
+        setChartToolTip(chart);
+    }
+
+    private XYPlot createTimeSeriesPlot() {
         XYPlot plot = new XYPlot();
         plot.setDomainPannable(true);
         plot.setRangePannable(true);
@@ -77,8 +115,15 @@ public class EnsembleChartAcrossTime implements EnsembleChart, LinePlot {
             XYLineAndShapeRenderer renderer = rendererMap.get(k);
             plot.setDataset(k, timeSeriesCollectionMap.get(k));
             plot.setRenderer(k, renderer);
-            plot.setDomainAxis(new DateAxis(xLabel));
-            plot.setRangeAxis(k, new NumberAxis(yLabel));
+
+            DateAxis domainAxis = new DateAxis(xLabel);
+            domainAxis.setTickLabelFont(DefaultSettings.setSegoeFontText());
+            plot.setDomainAxis(domainAxis);
+
+            NumberAxis rangeAxis = new NumberAxis(yLabel);
+            rangeAxis.setTickLabelFont(DefaultSettings.setSegoeFontText());
+            plot.setRangeAxis(k, rangeAxis);
+
             plot.mapDatasetToDomainAxis(k, 0);
             plot.mapDatasetToRangeAxis(k, k);
 
@@ -90,12 +135,7 @@ public class EnsembleChartAcrossTime implements EnsembleChart, LinePlot {
             }
         });
 
-        ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot));
-        chart.setMouseWheelEnabled(true);
-        setChartToolTip(chart);
-
-
-        return chart;
+        return plot;
     }
 
     private void setChartToolTip(ChartPanel chart) {

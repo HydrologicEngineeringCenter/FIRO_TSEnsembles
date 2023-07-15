@@ -40,13 +40,16 @@ public class ComponentsPanel {
                 case NONE:
                     ((RadioButtonStat)stat).getRadioButton().setSelected(true);
                 case CUMULATIVE:
+                case PLOTTINGPOSITION:
                     timeSeriesViewPanel.add((RadioButtonStat)stat);
                     buttonGroup.add(((RadioButtonStat)stat).getRadioButton());
+                    break;
+                default:
                     break;
             }
         }
 
-        timeSeriesViewPanel.setLayout(new GridLayout(0,1));
+        timeSeriesViewPanel.setLayout(new FlowLayout());
     }
 
     private void addComponentsToStatsPanel() {
@@ -64,6 +67,7 @@ public class ComponentsPanel {
                     break;
                 //case MEDIAN:
                 case PERCENTILE:
+                case NDAYCUMULATIVE:
                 case MAXAVERAGEDURATION:
                 case MAXACCUMDURATION:
                     statPanel.add((TextBoxStat)stat);
@@ -72,15 +76,15 @@ public class ComponentsPanel {
             }
         }
 
-        statPanel.setLayout(new GridLayout(0,1));
+        statPanel.setLayout(new GridLayout(3,1));
     }
 
     private void setupTimeSeriesViewPanel() {
         timeSeriesViewPanel = new JPanel();
 
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        timeSeriesViewPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Time Series View", TitledBorder.LEFT, TitledBorder.TOP));
-        ((TitledBorder) timeSeriesViewPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
+        timeSeriesViewPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Data View", TitledBorder.LEFT, TitledBorder.TOP));
+        ((TitledBorder) timeSeriesViewPanel.getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
     }
 
     private void setupStatsPanel() {
@@ -88,15 +92,15 @@ public class ComponentsPanel {
 
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
         statPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Statistics", TitledBorder.LEFT, TitledBorder.TOP));
-        ((TitledBorder) statPanel.getBorder()).setTitleFont(new Font(Font.DIALOG, Font.BOLD, 14));
+        ((TitledBorder) statPanel.getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
     }
 
     private void setupParentPanel() {
         parentPanel = new JPanel();
 
-        parentPanel.setLayout(new GridLayout(1, 2));
-        parentPanel.add(statPanel, BorderLayout.WEST);
-        parentPanel.add(timeSeriesViewPanel, BorderLayout.EAST);
+        parentPanel.setLayout(new BorderLayout());
+        parentPanel.add(statPanel, BorderLayout.NORTH);
+        parentPanel.add(timeSeriesViewPanel, BorderLayout.SOUTH);
     }
 
     private void createComponents(List<Statistics> statistics) {

@@ -14,6 +14,7 @@ public class CheckBoxStat extends JPanel implements EnsembleViewStat {
     public CheckBoxStat(Statistics stat) {
         setLayout(new BorderLayout());
         checkBox = new JCheckBox(StatisticsStringMap.map.get(stat));
+        checkBox.setFont(DefaultSettings.setSegoeFontText());
         add(checkBox);
         this.stat = stat;
     }
