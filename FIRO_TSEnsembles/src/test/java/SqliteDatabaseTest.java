@@ -1,6 +1,8 @@
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
+import hec.VersionIdentifier;
 import hec.VersionableDatabase;
+import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.*;
 import hec.metrics.MetricCollection;
@@ -12,6 +14,8 @@ import org.junit.jupiter.params.shadow.com.univocity.parsers.common.record.Recor
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +62,24 @@ public class SqliteDatabaseTest {
             MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mid, stats.get(0));
             assertEquals(3, mcts.getIssueDates().size());
         }
+    }
+
+    @Test
+    public void testVersionRead() throws Exception{
+        String sourceData = "src/test/resources/database/versionTest.db";
+        SqliteDatabase db = new SqliteDatabase(sourceData, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
+        VersionIdentifier id  = new hec.VersionIdentifier("american.FOLSOM","flow", "test2");
+        EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
+        ZonedDateTime date = ZonedDateTime.of(1986,2,13,12,0,0,0, ZoneId.of("GMT"));
+        Ensemble e = ets.getEnsemble(date);
+        Float firstVal = e.getValues()[0][0];
+        assertEquals(0.123f, firstVal );
+
+        VersionIdentifier id2  = new hec.VersionIdentifier("american.FOLSOM","flow", "test");
+        EnsembleTimeSeries ets2 = db.getEnsembleTimeSeries(id2);
+        Ensemble e2 = ets2.getEnsemble(date);
+        Float firstVal2 = e2.getValues()[0][0];
+        assertEquals(123.0f, firstVal2 );
     }
 
     @Test
