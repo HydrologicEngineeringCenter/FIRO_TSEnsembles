@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS ensemble_timeseries
        version NVARCHAR(100),
        catalog_id int references catalog(id)
 				 );
-CREATE UNIQUE INDEX if not EXISTS idx_u_ensemble_timeseries ON ensemble_timeseries(location,parameter_name, version);
+CREATE UNIQUE INDEX if not EXISTS idx_u_ensemble_timeseries ON ensemble_timeseries(location,parameter_name);
 
 				 
 CREATE TABLE IF NOT EXISTS ensemble

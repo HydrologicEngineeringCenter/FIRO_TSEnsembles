@@ -162,6 +162,10 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                     System.out.println("updated to version: 20210922");
                     this.version = next_version;
                 }
+                else if (next_version.equals("20230718")) {
+                    System.out.println("updated to version: 20230718");
+                    this.version = next_version;
+                }
             }
             try {
                 _connection.commit();
@@ -283,7 +287,19 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
     public EnsembleTimeSeries getEnsembleTimeSeries(RecordIdentifier timeseriesID) {
         String sql = "select * from view_ensemble WHERE location = ? "
                 + " AND parameter_name = ? ";
-        return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
+
+        PreparedStatement statement = null;
+
+        try{
+            statement = _connection.prepareStatement(sql);
+            statement.setString(1, timeseriesID.location);
+            statement.setString(2, timeseriesID.parameter);
+
+        } catch ( Exception e){
+            Logger.logError(e.getMessage());
+        }
+        return readEnsembleTimeSeriesFromDB(statement);
+
     }
 
     /**
@@ -295,7 +311,17 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
     public EnsembleTimeSeries getEnsembleTimeSeries(VersionIdentifier versionID) {
         String sql = "select * from view_ensemble WHERE location = ? "
                 + " AND parameter_name = ? " + "AND version = ?";
-        return readEnsembleTimeSeriesFromDB(versionID, sql);
+        PreparedStatement statement = null;
+        try{
+            statement = _connection.prepareStatement(sql);
+            statement.setString(1, versionID.location);
+            statement.setString(2, versionID.parameter);
+            statement.setString(3, versionID.version);
+
+        } catch ( Exception e){
+            Logger.logError(e.getMessage());
+        }
+        return readEnsembleTimeSeriesFromDB(statement);
     }
 
     /**
@@ -314,40 +340,22 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                 + DateUtility.formatDate(issueDateEnd) + "' " + " AND location = ? " + " AND parameter_name = ? ";
         sql += " order by issue_datetime";
 
-        return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
-    }
-    private EnsembleTimeSeries readEnsembleTimeSeriesFromDB(RecordIdentifier timeseriesID, String sql) {
-        EnsembleTimeSeries rval =null;
-        try {
-            PreparedStatement statement = _connection.prepareStatement(sql);
+        PreparedStatement statement = null;
+        try{
+            statement = _connection.prepareStatement(sql);
             statement.setString(1, timeseriesID.location);
             statement.setString(2, timeseriesID.parameter);
 
-            ResultSet rs = statement.executeQuery();
-            boolean firstRow = true;
-            // loop through the result set
-            while (rs.next()) {
-                int ensemble_timeseries_id = rs.getInt("ensemble_timeseries_id");
-                // first pass get the location,parameter_name, units, and data_type
-                if (firstRow) {
-                    rval = createEnsembleTimeSeries(rs);
-                    firstRow = false;
-                }
-                Ensemble e = getEnsemble(rs);
-                rval.addEnsemble(e);
-            }
-        } catch (Exception e) {
+        } catch ( Exception e){
             Logger.logError(e.getMessage());
         }
-        return rval;
+
+        return readEnsembleTimeSeriesFromDB(statement);
     }
-    private EnsembleTimeSeries readEnsembleTimeSeriesFromDB(VersionIdentifier versionID, String sql) {
+
+    private EnsembleTimeSeries readEnsembleTimeSeriesFromDB(PreparedStatement statement) {
         EnsembleTimeSeries rval =null;
         try {
-            PreparedStatement statement = _connection.prepareStatement(sql);
-            statement.setString(1, versionID.location);
-            statement.setString(2, versionID.parameter);
-            statement.setString(3, versionID.version);
 
             ResultSet rs = statement.executeQuery();
             boolean firstRow = true;
