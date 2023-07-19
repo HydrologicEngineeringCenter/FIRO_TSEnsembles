@@ -162,6 +162,10 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                     System.out.println("updated to version: 20210922");
                     this.version = next_version;
                 }
+                else if (next_version.equals("20230718")) {
+                    System.out.println("updated to version: 20230718");
+                    this.version = next_version;
+                }
             }
             try {
                 _connection.commit();
@@ -283,8 +287,43 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
     public EnsembleTimeSeries getEnsembleTimeSeries(RecordIdentifier timeseriesID) {
         String sql = "select * from view_ensemble WHERE location = ? "
                 + " AND parameter_name = ? ";
-        return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
+
+        PreparedStatement statement = null;
+
+        try{
+            statement = _connection.prepareStatement(sql);
+            statement.setString(1, timeseriesID.location);
+            statement.setString(2, timeseriesID.parameter);
+
+        } catch ( Exception e){
+            Logger.logError(e.getMessage());
+        }
+        return readEnsembleTimeSeriesFromDB(statement);
+
     }
+
+    /**
+     * Gets EnsembleTimeSeries of specific version, loading ensembles into memory
+     *
+     * @param versionID VersionIdentifier
+     * @return returns @EnsembleTimeSeries
+     */
+    public EnsembleTimeSeries getEnsembleTimeSeries(VersionIdentifier versionID) {
+        String sql = "select * from view_ensemble WHERE location = ? "
+                + " AND parameter_name = ? " + "AND version = ?";
+        PreparedStatement statement = null;
+        try{
+            statement = _connection.prepareStatement(sql);
+            statement.setString(1, versionID.location);
+            statement.setString(2, versionID.parameter);
+            statement.setString(3, versionID.version);
+
+        } catch ( Exception e){
+            Logger.logError(e.getMessage());
+        }
+        return readEnsembleTimeSeriesFromDB(statement);
+    }
+
     /**
      * Gets EnsembleTimeSeries, loading ensembles into memory.
      *
@@ -301,14 +340,22 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                 + DateUtility.formatDate(issueDateEnd) + "' " + " AND location = ? " + " AND parameter_name = ? ";
         sql += " order by issue_datetime";
 
-        return readEnsembleTimeSeriesFromDB(timeseriesID, sql);
-    }
-    private EnsembleTimeSeries readEnsembleTimeSeriesFromDB(RecordIdentifier timeseriesID, String sql) {
-        EnsembleTimeSeries rval =null;
-        try {
-            PreparedStatement statement = _connection.prepareStatement(sql);
+        PreparedStatement statement = null;
+        try{
+            statement = _connection.prepareStatement(sql);
             statement.setString(1, timeseriesID.location);
             statement.setString(2, timeseriesID.parameter);
+
+        } catch ( Exception e){
+            Logger.logError(e.getMessage());
+        }
+
+        return readEnsembleTimeSeriesFromDB(statement);
+    }
+
+    private EnsembleTimeSeries readEnsembleTimeSeriesFromDB(PreparedStatement statement) {
+        EnsembleTimeSeries rval =null;
+        try {
 
             ResultSet rs = statement.executeQuery();
             boolean firstRow = true;
@@ -328,6 +375,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         }
         return rval;
     }
+
     private EnsembleTimeSeries createEnsembleTimeSeries(ResultSet rs) throws SQLException {
 
         String location = rs.getString("location");
@@ -883,7 +931,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
     @Override
     public List<String> getVersions(){
     ArrayList<String> list = new ArrayList<String>();
-        InputStream version_file = this.getClass().getResourceAsStream("/versions.txt");        
+        InputStream version_file = this.getClass().getResourceAsStream("/versions.txt");
         try( BufferedReader br = new BufferedReader( new InputStreamReader(version_file))){
             String line = null;
             while( (line = br.readLine()) != null ){
@@ -892,13 +940,13 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
             return list;
         } catch( IOException err ){
             throw new RuntimeException("Error extracting defined resource information",err);
-        }        
+        }
     }
 
     @Override
     public String getUpdateScript(String from, String to){
         return "/update_" + from + "_to_"+to+".sql";
-	}    
+	}
 
     private void updateFor20200101_to_20200224() {
         // need to loop through and move the ensembles into the catalog
@@ -913,8 +961,8 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                            .prepareStatement("update ensemble_timeseries set catalog_id=? where id=?");
                         PreparedStatement select_ensembles = _connection.prepareStatement(
                                   "select id,location,parameter_name,units from ensemble_timeseries");) {
-                        
-                        
+
+
                         rs = select_ensembles.executeQuery();
                         while (rs.next()) {
                             int ensemble_id = rs.getInt("id");
@@ -948,14 +996,14 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                             } catch (SQLException e) {
                                 throw new RuntimeException("A ResultSet could not be closed after finishing database update", e);
                             }
-                        } 
+                        }
                         if (rs_inner != null) {
                             try {
                                 rs_inner.close();
                             } catch (SQLException e) {
                                 throw new RuntimeException("A ResultSet could not be closed after finishing database update", e);
                             }
-                        } 
+                        }
                     }
     }
     private void updateFor20200224_to_20200227() {
