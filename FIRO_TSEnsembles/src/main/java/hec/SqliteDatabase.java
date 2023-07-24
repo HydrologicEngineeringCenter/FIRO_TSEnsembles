@@ -44,6 +44,9 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
     private PreparedStatement ps_insertEnsemble;
     private PreparedStatement ps_insertMetricCollection;
     private PreparedStatement ps_insertMetricCollectionTimeSeries;
+    private PreparedStatement ps_drop_ensemble;
+    private PreparedStatement ps_drop_ensemble_timeseries;
+
     /**
      * constructor for SqliteDatabase
      *
@@ -121,11 +124,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
     private String getCurrentVersionFromDB(){
         try(Statement version_query = _connection.createStatement()){
             ResultSet rs = version_query.executeQuery("select version from version");
-            String version = rs.getString(1);            
+            String version = rs.getString(1);
             return version;
         } catch( SQLException err ){
             return "20200101";
-        }        
+        }
     }
 
     /**
@@ -566,6 +569,42 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         }
         _connection.commit();
     }
+
+    private Boolean doesTableExist(String tableName) {
+
+        PreparedStatement p = null;
+        try{
+            String sql = "SELECT name FROM sqlite_master WHERE type='table' AND name= ?";
+            p = _connection.prepareStatement(sql);
+            p.setString(1, tableName);
+            ResultSet rs = p.executeQuery();
+            rs.next();
+            return rs.getString("name").equals(tableName);
+        } catch (Exception e) {
+            Logger.logError(e);
+        }
+        return false;
+    }
+
+    public void deleteAllEnsemblesFromDB() throws Exception{
+
+        if (doesTableExist("ensemble")) {
+            if (ps_drop_ensemble == null) {
+                String sql1 = "DELETE from ensemble";
+                ps_drop_ensemble = _connection.prepareStatement(sql1);
+                String sql2 = "DELETE from ensemble_timeseries";
+                ps_drop_ensemble_timeseries = _connection.prepareStatement(sql2);
+            }
+            if (ps_drop_ensemble_timeseries == null) {
+                String sql2 = "DELETE from ensemble_timeseries";
+                ps_drop_ensemble_timeseries = _connection.prepareStatement(sql2);
+            }
+            ps_drop_ensemble.execute();
+            ps_drop_ensemble_timeseries.execute();
+        }
+    }
+
+
     private void InsertMetricCollectionTimeSeries(int id, RecordIdentifier record_id, String units, MetricTypes metric_type) throws Exception {
         if (ps_insertMetricCollectionTimeSeries == null) {
             String sql = "INSERT INTO " + metricCollectionTimeSeriesTableName + " ([id], [location], [parameter_name], "
