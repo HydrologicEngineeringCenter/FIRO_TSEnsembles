@@ -75,7 +75,7 @@ public class SqliteDatabaseTest {
         SqliteDatabase db = new SqliteDatabase(copiedData, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
         db.deleteAllEnsemblesFromDB();
         Integer testVal = db.getEnsembleTimeSeriesIDs().size();
-        assertEquals(testVal, 0);
+        assertEquals(0, testVal);
     }
 
     @Test

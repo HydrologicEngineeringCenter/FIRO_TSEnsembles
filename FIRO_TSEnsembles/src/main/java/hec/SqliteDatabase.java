@@ -585,7 +585,9 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         }
         return false;
     }
-
+    /**
+     * Delete all ensemble and ensemble timeseries from db
+     * **/
     public void deleteAllEnsemblesFromDB() throws Exception{
 
         if (doesTableExist("ensemble")) {
@@ -602,6 +604,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
             ps_drop_ensemble.execute();
             ps_drop_ensemble_timeseries.execute();
         }
+        _connection.commit();
     }
 
 
