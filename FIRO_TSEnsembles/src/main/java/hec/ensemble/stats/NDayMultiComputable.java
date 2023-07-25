@@ -64,19 +64,6 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
     }
 
     @Override
-    public Statistics[] Statistics()
-    {
-        Statistics[] statsarray = new Statistics[stepOneCompute.Statistics().length+1];
-        statsarray[0] = Statistics.CUMULATIVE;
-        int count = 1;
-        for(Statistics s: stepOneCompute.Statistics()){
-            statsarray[count] = s;
-            count++;
-        }
-        return new Statistics[0];
-    }
-
-    @Override
     public String StatisticsLabel() {
         return stepOneCompute.StatisticsLabel()+"("+ accumulatingDays +"DAY)";
     }

@@ -62,11 +62,6 @@ public class CumulativeComputable implements MultiComputable, Configurable {
     }
 
     @Override
-    public Statistics[] Statistics() {
-        return new Statistics[]{Statistics.CUMULATIVE};
-    }
-
-    @Override
     public String StatisticsLabel() {
         return "CUMULATIVE";
     }

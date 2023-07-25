@@ -1,12 +1,12 @@
 package hec.ensemble;
 
-import java.time.Duration;
-import java.time.ZonedDateTime;
-
 import hec.ensemble.stats.Computable;
 import hec.ensemble.stats.Configurable;
 import hec.ensemble.stats.MultiComputable;
 import hec.ensemble.stats.SingleComputable;
+
+import java.time.Duration;
+import java.time.ZonedDateTime;
 
 /**
  * an Ensemble is an array of time-series data
@@ -124,7 +124,7 @@ public class Ensemble
         ((Configurable)cmd).configure(_configuration);
       }
       int size= values.length;
-      int size2 = cmd.Statistics().length;
+      int size2 = cmd.StatisticsLabel().split("\\|").length;
       float[] rval;
       float[][] val = new float[size2][size];
       for (int i = 0; i <size ; i++) {
@@ -146,7 +146,7 @@ public class Ensemble
         ((Configurable)cmd).configure(_configuration);
       }
       int size= values[0].length;//number of timesteps
-      int size2 = cmd.Statistics().length;
+      int size2 = cmd.StatisticsLabel().split("\\|").length;
       float[][] val = new float[size2][size];
       int traces = values.length;//number of traces
       float[] rval;

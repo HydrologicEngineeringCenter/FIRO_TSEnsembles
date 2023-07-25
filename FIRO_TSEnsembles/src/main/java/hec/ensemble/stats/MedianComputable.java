@@ -30,11 +30,6 @@ public class MedianComputable implements Computable, Configurable {
     }
 
     @Override
-    public Statistics[] Statistics() {
-        return new Statistics[]{Statistics.MEDIAN};
-    }
-
-    @Override
     public String StatisticsLabel() {
         return "MEDIAN";
     }

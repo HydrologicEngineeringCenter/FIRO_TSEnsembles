@@ -65,11 +65,6 @@ public class PlottingPositionComputable implements MultiComputable, PlottingMeth
     }
 
     @Override
-    public Statistics[] Statistics() {
-        return new Statistics[]{Statistics.PLOTTINGPOSITION};
-    }
-
-    @Override
     public String StatisticsLabel() {
         return "PLOTTING POSITION";
     }
