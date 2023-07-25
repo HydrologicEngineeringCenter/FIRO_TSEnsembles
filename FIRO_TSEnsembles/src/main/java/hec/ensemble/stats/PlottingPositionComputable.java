@@ -53,13 +53,13 @@ public class PlottingPositionComputable implements MultiComputable, PlottingMeth
         return ArrayUtils.toPrimitive(reverseValues);
     }
 
-    public Map<Float, Float> assignProbability(float[] value, float[] probability) {
+    public Map<Float, Float> assignProbability(float[] probability, float[] value) {
         Float[] prob = ArrayUtils.toObject(probability);
         Float[] val = ArrayUtils.toObject(value);
         Map<Float, Float> probVal = new TreeMap<>();
 
         for(int i = 0; i < value.length; i++) {
-            probVal.put(val[i], prob[i]);
+            probVal.put(prob[i], val[i]);
         }
         return probVal;
     }
