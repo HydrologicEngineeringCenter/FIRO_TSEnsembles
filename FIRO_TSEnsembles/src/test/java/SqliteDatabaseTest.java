@@ -46,7 +46,7 @@ public class SqliteDatabaseTest {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
 
         MultiComputable cumulativeComputable = new CumulativeComputable();
-        Computable cumulative = new NDayMultiComputable(cumulativeComputable,2);
+        Computable cumulative = new NDayMultiComputable(cumulativeComputable, new float[]{2});
         Computable percentileCompute = new PercentilesComputable(0.95f);
         SingleComputable twoStep = new TwoStepComputable(cumulative,percentileCompute,false);
         MetricCollectionTimeSeries output = ets.computeSingleValueSummary(twoStep);

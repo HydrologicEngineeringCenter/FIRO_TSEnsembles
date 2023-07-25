@@ -2,7 +2,6 @@ package hec.ensemble.stats;
 
 public class NDayMultiComputable implements Computable, MultiComputable, StatisticsReportable, Configurable {
     private MultiComputable stepOneCompute;
-    private int accumulatingDays;
     private float[] days;
     Configuration config;
 
@@ -11,10 +10,7 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
      * Intended to be used for iterating for traces across time and does not account for daylight savings
      */
     public NDayMultiComputable(){ } // necessary for reflection deserializing serializing
-    public NDayMultiComputable(MultiComputable stepOne, int numberDays) {
-        stepOneCompute = stepOne;
-        accumulatingDays = numberDays;
-    }
+
     public NDayMultiComputable(MultiComputable stepOne, float[] numberDays) {
         stepOneCompute = stepOne;
         days = numberDays;
@@ -26,7 +22,7 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
 
         int timeStep = (int) config.getDuration().toHours();
         int timeStepDay = 24 / timeStep;
-        return values[timeStepDay * accumulatingDays];
+        return values[timeStepDay * (int) days[0]];
     }
 
     @Override
@@ -67,10 +63,10 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
         StringBuilder label = new StringBuilder();
         for (int i = 0; i < days.length; i ++){
             if(i == days.length-1){
-                label.append(stepOneCompute.StatisticsLabel() + "(").append(days[i]).append(")");
+                label.append(stepOneCompute.StatisticsLabel() + "(").append((int) days[i]).append("DAY)");
             }
             else{
-                label.append(stepOneCompute.StatisticsLabel() + "(").append(days[i]).append(")|");
+                label.append(stepOneCompute.StatisticsLabel() + "(").append((int) days[i]).append("DAY)|");
             }
         }
         return label.toString();

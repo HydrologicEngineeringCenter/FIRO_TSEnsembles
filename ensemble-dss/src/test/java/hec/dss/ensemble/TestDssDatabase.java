@@ -1,10 +1,7 @@
 package hec.dss.ensemble;
-import java.time.ZonedDateTime;
-import java.util.List;
 
 import hec.RecordIdentifier;
 import hec.ensemble.Ensemble;
-
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.*;
 import hec.heclib.dss.DssDataType;
@@ -14,12 +11,13 @@ import hec.io.PairedDataContainer;
 import hec.io.TimeSeriesContainer;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
-import mil.army.usace.hec.data.timeseries.TimeSeries;
 import org.junit.jupiter.api.Test;
+
+import java.time.ZonedDateTime;
+import java.util.List;
 
 import static hec.ensemble.stats.Statistics.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestDssDatabase {
 
@@ -153,7 +151,7 @@ public class TestDssDatabase {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
 
         MultiComputable cumulativeComputable = new CumulativeComputable();
-        Computable cumulative = new NDayMultiComputable(cumulativeComputable,2);
+        Computable cumulative = new NDayMultiComputable(cumulativeComputable, new float[]{2.0f});
         Computable percentileCompute = new PercentilesComputable(0.95f);
         SingleComputable twoStep = new TwoStepComputable(cumulative,percentileCompute,false);
         MetricCollectionTimeSeries output = ets.computeSingleValueSummary(twoStep);
@@ -161,9 +159,9 @@ public class TestDssDatabase {
 
         HecTimeSeries dss = new HecTimeSeries(db.getFileName());
         String[] pathsToFind = new String[] {
-                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILE(0.95)/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILE(0.95)/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILE(0.95)/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILES(0.95)/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILES(0.95)/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILES(0.95)/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
         };
 
         for (String path : pathsToFind) {

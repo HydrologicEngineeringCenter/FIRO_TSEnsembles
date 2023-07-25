@@ -58,7 +58,7 @@ public class StatComputationHelper {
     public float computeTwoStepComputable(Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
         SingleComputable compute;
         if(stepOne == Statistics.CUMULATIVE) {
-            compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), (int) stepOneValues[0]), getComputable(stepTwo, stepTwoValues), false);
+            compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), new float[]{stepOneValues[0]}), getComputable(stepTwo, stepTwoValues), false);
         } else {
             compute = new TwoStepComputable(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), computeAcrossEnsembles);
         }
