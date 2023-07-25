@@ -98,10 +98,10 @@ public class PercentilesComputable implements Computable, MultiComputable, Confi
         StringBuilder label = new StringBuilder();
         for (int i = 0; i < selectedPercentiles.length; i ++){
             if(i == selectedPercentiles.length-1){
-                label.append(Statistics.PERCENTILE + "(").append(selectedPercentiles[i]).append(")");
+                label.append(Statistics.PERCENTILES + "(").append(selectedPercentiles[i]).append(")");
             }
             else{
-                label.append(Statistics.PERCENTILE + "(").append(selectedPercentiles[i]).append(")|");
+                label.append(Statistics.PERCENTILES + "(").append(selectedPercentiles[i]).append(")|");
             }
         }
         return label.toString();
