@@ -11,6 +11,6 @@ public class DefaultSettings {
     }
 
     public static Font setSegoeFontTitle()  {
-        return new Font("Segoe UI", Font.BOLD, 14);
+        return new Font("Segoe UI", Font.BOLD, 12);
     }
 }
