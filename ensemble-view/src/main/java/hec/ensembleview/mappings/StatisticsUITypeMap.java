@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StatisticsUITypeMap {
-    protected static final Map<Statistics, StatisticUIType> map = new HashMap<>();
+    public static final Map<Statistics, StatisticUIType> map = new HashMap<>();
 
     static {
         map.put(Statistics.MAX, StatisticUIType.CHECKBOX);

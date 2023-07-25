@@ -1,22 +1,17 @@
 package hec.ensembleview.tabs;
 
-import hec.EnsembleDatabase;
-import hec.RecordIdentifier;
-import hec.ensemble.EnsembleTimeSeries;
-import hec.ensembleview.StatComputationHelper;
-import hec.ensembleview.SingleValueSummaryType;
-import hec.ensembleview.StatisticUIType;
-import hec.ensembleview.mappings.SingleValueComboBoxMap;
-import hec.ensembleview.mappings.StatisticsUITypeMap;
 import hec.ensemble.stats.Statistics;
-//import javafx.scene.chart.Chart;
+import hec.ensembleview.StatComputationHelper;
+import hec.ensembleview.mappings.StatisticUIType;
+import hec.ensembleview.mappings.SingleValueComboBoxMap;
+import hec.ensembleview.mappings.SingleValueSummaryType;
+import hec.ensembleview.mappings.StatisticsUITypeMap;
 
 import javax.swing.*;
 import java.awt.*;
-import java.time.ZonedDateTime;
 import java.util.Objects;
 
-public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
+public class SingleValueSummaryTab extends JPanel {
     JPanel leftPanel;
     JPanel rightPanel;
 
@@ -31,16 +26,14 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
     JButton cleanButton;
 
     JTextArea outputArea;
-
-    EnsembleDatabase db;
-    RecordIdentifier rid;
-    ZonedDateTime zdt;
+    final StatComputationHelper statComputationHelper = new StatComputationHelper();
 
     public SingleValueSummaryTab() {
         initializeUI();
         organizeUI();
         setSummaryTypeComboBox();
         setActionListeners();
+
 
     }
 
@@ -54,7 +47,7 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         Statistics stat = getFirstStat();
         float[] vals = getFirstTextFieldValue();
         if (StatisticsUITypeMap.map.get(stat) == StatisticUIType.TEXTBOX) {
-            if (stat == Statistics.PERCENTILE) {
+            if (stat == Statistics.PERCENTILES) {
                 r = String.format("%.2f%% %s", vals[0] * 100, stat);
             } else if (stat == Statistics.MAXAVERAGEDURATION || stat == Statistics.MAXACCUMDURATION) {
                 r = String.format("%d hour %s", (int)vals[0], stat);
@@ -77,7 +70,7 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         Statistics stat = getSecondStat();
         float[] vals = getSecondTextFieldValue();
         if (StatisticsUITypeMap.map.get(stat) == StatisticUIType.TEXTBOX) {
-            if (stat == Statistics.PERCENTILE) {
+            if (stat == Statistics.PERCENTILES) {
                 r = String.format("%.2f%% %s", vals[0] * 100, stat);
             } else if (stat == Statistics.MAXAVERAGEDURATION || stat == Statistics.MAXACCUMDURATION) {
                 r = String.format("%d hour %s", (int)vals[0], stat);
@@ -164,14 +157,12 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         statComboBox2.addActionListener(e ->
                 textField2.setEditable(StatisticsUITypeMap.map.get((Statistics) (statComboBox2.getSelectedItem())) != StatisticUIType.CHECKBOX));
 
-        cleanButton.addActionListener(e -> {
-            outputArea.setText("");
-        });
+        cleanButton.addActionListener(e -> outputArea.setText(""));
 
         statComboBox1.addActionListener(e -> {
             if(statComboBox1.getSelectedItem() == Statistics.MAXACCUMDURATION || statComboBox1.getSelectedItem() == Statistics.MAXAVERAGEDURATION) {
                 textField1.setToolTipText("Enter value in Hours");
-            } else if (statComboBox1.getSelectedItem() == Statistics.PERCENTILE) {
+            } else if (statComboBox1.getSelectedItem() == Statistics.PERCENTILES) {
                 textField1.setToolTipText("Enter percentile as Decimal");
             } else if (statComboBox1.getSelectedItem() == Statistics.CUMULATIVE) {
                 textField1.setToolTipText("Enter value in Days");
@@ -181,7 +172,7 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         });
 
         statComboBox2.addActionListener(e -> {
-            if (statComboBox2.getSelectedItem() == Statistics.PERCENTILE) {
+            if (statComboBox2.getSelectedItem() == Statistics.PERCENTILES) {
                 textField2.setToolTipText("Enter percentile as Decimal");
             } else {
                 textField2.setToolTipText(null);
@@ -189,18 +180,17 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         });
 
         computeButton.addActionListener(e -> {
-            EnsembleTimeSeries ets = db.getEnsembleTimeSeries(rid);
-            float value = StatComputationHelper.computeTwoStepComputable(ets, zdt, getFirstStat(), getFirstTextFieldValue(),
+            float value = statComputationHelper.computeTwoStepComputable(getFirstStat(), getFirstTextFieldValue(),
                     getSecondStat(), getSecondTextFieldValue(),
-                    getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles ||
-                            getSummaryType() == SingleValueSummaryType.ComputeCumulative);
+                    getSummaryType() == SingleValueSummaryType.COMPUTEACROSSENSEMBLES ||
+                            getSummaryType() == SingleValueSummaryType.COMPUTECUMULATIVE);
 
             tryShowingOutput(value);
         });
     }
 
     private void organizeUI() {
-        setLayout(new GridLayout(1,2));
+        setLayout(new GridLayout(2,1));
 
         add(leftPanel);
         add(rightPanel);
@@ -290,34 +280,19 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
     }
 
     public void tryShowingOutput(float result) {
-        if (getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles) {
+        if (getSummaryType() == SingleValueSummaryType.COMPUTEACROSSENSEMBLES) {
             writeLn(String.join(" ", "Computing",
                     getFirstStatString(), "across all ensemble members for each time-step,",
                     "then computing", getSecondStatString(), "across all time-steps",
                     "=", Float.toString(result)));
-        } else if (getSummaryType() == SingleValueSummaryType.ComputeAcrossTime) {
+        } else if (getSummaryType() == SingleValueSummaryType.COMPUTEACROSSTIME) {
             writeLn(String.join(" ", "Computing",
                     getFirstStatString(), "for each ensemble across all time-steps,",
                     "then computing", getSecondStatString(), "across all ensemble members",
                     "=", Float.toString(result)));
-        } else if (getSummaryType() == SingleValueSummaryType.ComputeCumulative) {
+        } else if (getSummaryType() == SingleValueSummaryType.COMPUTECUMULATIVE) {
             writeLn(String.join(" ", "Computing", getFirstStatString() + ",",
                     "then computing", getSecondStatString(), "across all ensemble members =", Float.toString(result)));
         }
-    }
-
-    @Override
-    public void setDatabase(EnsembleDatabase db) {
-        this.db = db;
-    }
-
-    @Override
-    public void setRecordIdentifier(RecordIdentifier rid) {
-        this.rid = rid;
-    }
-
-    @Override
-    public void setZonedDateTime(ZonedDateTime zdt) {
-        this.zdt = zdt;
     }
 }
