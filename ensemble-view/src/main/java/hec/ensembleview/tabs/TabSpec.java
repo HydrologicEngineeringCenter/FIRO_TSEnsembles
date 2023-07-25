@@ -1,4 +1,4 @@
-package hec.ensembleview;
+package hec.ensembleview.tabs;
 
 import javax.swing.*;
 

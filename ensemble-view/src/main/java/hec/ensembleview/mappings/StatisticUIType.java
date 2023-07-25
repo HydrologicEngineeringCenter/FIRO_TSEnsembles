@@ -1,4 +1,4 @@
-package hec.ensembleview;
+package hec.ensembleview.mappings;
 
 public enum StatisticUIType {
     CHECKBOX,

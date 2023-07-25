@@ -1,4 +1,4 @@
-package hec.ensembleview;
+package hec.ensembleview.charts;
 
 import java.text.ParseException;
 

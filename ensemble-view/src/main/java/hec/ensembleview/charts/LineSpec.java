@@ -1,4 +1,4 @@
-package hec.ensembleview;
+package hec.ensembleview.charts;
 
 import java.awt.*;
 import java.time.ZonedDateTime;

@@ -1,9 +1,5 @@
-package hec.ensembleview;
-
+package hec.ensembleview.charts;
 import org.jfree.chart.ChartPanel;
-
-import java.text.ParseException;
-import java.time.ZonedDateTime;
 
 /**
  * Interface for basic ensemble charting functions.
