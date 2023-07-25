@@ -65,6 +65,20 @@ public class SqliteDatabaseTest {
     }
 
     @Test
+    public void testDeleteAllEnsembles() throws Exception {
+        String sourceData = "src/test/resources/database/ResSimTest_20200101.db";
+        String copiedData = "C:\\Temp\\testdb_delete.db";
+        File sourcefile = new File(sourceData);
+        File copiedFile = new File(copiedData);
+        copyFileUsingStream(sourcefile,copiedFile);
+
+        SqliteDatabase db = new SqliteDatabase(copiedData, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
+        db.deleteAllEnsemblesFromDB();
+        Integer testVal = db.getEnsembleTimeSeriesIDs().size();
+        assertEquals(0, testVal);
+    }
+
+    @Test
     public void testVersionRead() throws Exception{
         String sourceData = "src/test/resources/database/versionTest.db";
         SqliteDatabase db = new SqliteDatabase(sourceData, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
