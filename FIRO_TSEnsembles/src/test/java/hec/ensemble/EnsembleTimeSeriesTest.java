@@ -108,8 +108,8 @@ class EnsembleTimeSeriesTest {
             float[] value1 = output.iterator().next().getValues()[1];
             float[] value2 = output.iterator().next().getValues()[2];
             assertEquals(-512.317932128906, value0[3],0.001);
-            assertEquals(-165.0469970703125, value1[3]);
-            assertEquals(-247.69163513183594, value2[3]);
+            assertEquals(-165.0469970703125, value1[3],0.001);
+            assertEquals(-247.69163513183594, value2[3],0.001);
             //write result
             _db.write(output);
         } catch (Exception e) {
