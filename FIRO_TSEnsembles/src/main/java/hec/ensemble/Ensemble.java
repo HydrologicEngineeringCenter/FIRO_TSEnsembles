@@ -184,9 +184,7 @@ public class Ensemble
       float[][] val = new float[traces][time];
       for (int i = 0; i <traces ; i++) {
         rval = cmd.multiCompute(values[i]);
-        for (int j = 0; j<time;j++){
-          val[i][j] = rval[j];
-        }
+        System.arraycopy(rval, 0, val[i], 0, time);
 
       }
       return val;
