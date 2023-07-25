@@ -5,11 +5,11 @@ import java.time.ZonedDateTime;
 
 public class LineSpec {
     int rangeAxis;
-    public float[] values;
-    public ZonedDateTime[] dateTimes;
-    public Stroke lineStroke;
-    public Color lineColor;
-    public String lineName;
+    float[] values;
+    ZonedDateTime[] dateTimes;
+    Stroke lineStroke;
+    Color lineColor;
+    String lineName;
 
     public LineSpec(int rangeAxis, float[] values, ZonedDateTime[] dateTimes, Stroke lineStroke,
                     Color lineColor, String lineName) {

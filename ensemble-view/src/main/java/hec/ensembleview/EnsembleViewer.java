@@ -28,21 +28,21 @@ public class EnsembleViewer {
         Create tab spec.
          */
 
-        tabs.add(new TabSpec("Time Series Plot", new JPanel(), TabType.Chart));  // tab is a TabbedPane.  There are three tabs in the viewer. adding the name to the tab
-        tabs.get(0).panel = new TimeSeriesTab();
+        tabs.add(new TabSpec("Time Series Plot", new JPanel(), TabType.CHART));  // tab is a TabbedPane.  There are three tabs in the viewer. adding the name to the tab
+        tabs.get(0).setPanel(new TimeSeriesTab());
 
-        tabs.add(new TabSpec("Scatter Plot", new JPanel(), TabType.Chart));
-        tabs.get(1).panel = new EnsembleArrayTab();
+        tabs.add(new TabSpec("Scatter Plot", new JPanel(), TabType.CHART));
+        tabs.get(1).setPanel(new EnsembleArrayTab());
 
-        tabs.add(new TabSpec("Single Value Summary", new JPanel(), TabType.SingleValueSummary));
-        tabs.get(2).panel = new SingleValueSummaryTab();
+        tabs.add(new TabSpec("Single Value Summary", new JPanel(), TabType.SINGLEVALUESUMMARY));
+        tabs.get(2).setPanel(new SingleValueSummaryTab());
 
         /*
         Create tabs in tab pane.
          */
         tabPane = new JTabbedPane();
         for(TabSpec tab: tabs) {
-            tabPane.addTab(tab.tabName, tab.panel);
+            tabPane.addTab(tab.getTabName(), tab.getPanel());
         }
         tabPane.setFont(DefaultSettings.setSegoeFontText());
     }

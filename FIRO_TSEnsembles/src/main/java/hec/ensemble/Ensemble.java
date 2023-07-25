@@ -18,7 +18,7 @@ public class Ensemble
   {
     private final EnsembleConfiguration _configuration;
     protected EnsembleTimeSeries parent = null;
-    private float[][] values;
+    private final float[][] values;
 
 
     public Ensemble(ZonedDateTime issueDate, float[][] values, ZonedDateTime startDate, Duration interval, String units)

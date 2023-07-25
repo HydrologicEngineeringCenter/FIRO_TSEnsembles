@@ -4,10 +4,11 @@ import java.awt.*;
 
 public class PointSpec {
     int rangeAxis;
-    public float[] yValue;
-    public Stroke lineStroke;
-    public Color pointColor;
-    public String pointName;
+    float[] yValue;
+    Map<Float, Float> prob;
+    Stroke lineStroke;
+    Color pointColor;
+    String pointName;
 
     public PointSpec(int rangeAxis, float[] y,Stroke lineStroke,
                      Color pointColor, String pointName) {
