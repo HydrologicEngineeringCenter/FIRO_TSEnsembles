@@ -1,7 +1,6 @@
 package hec.metrics;
 
 import hec.RecordIdentifier;
-import hec.ensemble.stats.Statistics;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -61,6 +60,10 @@ public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>, 
         List<ZonedDateTime> rval = new ArrayList<>(items.size());
         rval.addAll(items.keySet());
         return rval;
+    }
+
+    public MetricTypes getMetricType() {
+        return metricType;
     }
 
     /**
