@@ -3,33 +3,34 @@ package hec.ensemble.stats;
 import hec.ensemble.Ensemble;
 import hec.ensemble.Logger;
 import hec.ensemble.TestData;
-import hec.ensemble.stats.*;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
+
 class PlottingPositionTest {
     private Map<Float, Float> weibullMap() {
         Map<Float, Float> map = new TreeMap<>();
-        map.put(50.0f, 0.16666f);
-        map.put(40.0f, 0.33333f);
-        map.put(30.0f, 0.5f);
-        map.put(20.0f, 0.66666f);
-        map.put(10.0f, 0.83333f);
+        map.put(0.16666f, 50.0f);
+        map.put(0.33333f, 40.0f);
+        map.put(0.5f, 30.0f);
+        map.put(0.66666f, 20.0f);
+        map.put(0.83333f, 10.0f);
 
         return map;
     }
 
     private Map<Float, Float> medianMap() {
         Map<Float, Float> map = new TreeMap<>();
-        map.put(50.0f, 0.12963f);
-        map.put(40.0f, 0.314815f);
-        map.put(30.0f, 0.5f);
-        map.put(20.0f, 0.685185f);
-        map.put(10.0f, 0.87037f);
+        map.put(0.12963f, 50.0f);
+        map.put(0.314815f, 40.0f);
+        map.put(0.5f, 30.0f);
+        map.put(0.685185f, 20.0f);
+        map.put(0.87037f, 10.0f);
 
         return map;
     }
@@ -57,19 +58,36 @@ class PlottingPositionTest {
         float[] medianResults = median.multiCompute(num);  //computing probability position
         float[] medianReverseValues = median.orderValues(num);
 
-        Map<Float, Float> compareWeibull = weibull.assignProbability(weibullReverseValues, weibullResults);
-        Map<Float, Float> truthWeibull = weibullMap();
+        Map<Float, Float> compareWeibull = weibull.assignProbability(weibullResults, weibullReverseValues);
+        List<Float> weibullList = new ArrayList<>();
+        for(Map.Entry<Float, Float> entry : compareWeibull.entrySet()) {
+            weibullList.add(entry.getKey());
+        }
 
-        Map<Float, Float> compareMedian = median.assignProbability(medianReverseValues, medianResults);
+        Map<Float, Float> truthWeibull = weibullMap();  // prob, value
+        List<Float> weibullListTrue = new ArrayList<>();
+        for(Map.Entry<Float, Float> entry : weibullMap().entrySet()) {
+            weibullListTrue.add(entry.getKey());
+        }
+
+        Map<Float, Float> compareMedian = median.assignProbability(medianResults, medianReverseValues);
+        List<Float> medianList = new ArrayList<>();
+        for(Map.Entry<Float, Float> entry : compareMedian.entrySet()) {
+            medianList.add(entry.getKey());
+        }
+
         Map<Float, Float> truthMedian = medianMap();
+        List<Float> medianListTrue = new ArrayList<>();
+        for(Map.Entry<Float, Float> entry : truthMedian.entrySet()) {
+            medianListTrue.add(entry.getKey());
+        }
 
-        assertEquals(truthWeibull.get(40f), compareWeibull.get(40f), 4);
-        assertEquals(truthWeibull.get(10f), compareWeibull.get(10f), 4);
-        assertEquals(truthWeibull.containsValue(0.5f), compareWeibull.containsValue(0.5f));
 
-        assertEquals(truthMedian.get(40f), compareMedian.get(40f), 4);
-        assertEquals(truthMedian.get(10f), compareMedian.get(10f), 4);
-        assertEquals(truthMedian.containsValue(0.5f), compareMedian.containsValue(0.5f));
+        assertEquals(weibullListTrue.get(2), weibullList.get(2), 4);
+        assertEquals(truthWeibull.containsKey(0.5f), compareWeibull.containsKey(0.5f));
+
+        assertEquals(medianListTrue.get(0), medianList.get(0), 4);
+        assertEquals(truthMedian.containsKey(0.5f), compareMedian.containsKey(0.5f));
     }
 
     @Test
