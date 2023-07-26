@@ -59,7 +59,7 @@ class RfcCsvFileTest {
             EnsembleTimeSeries ets =  db.getEnsembleTimeSeries(tsid);
             List<ZonedDateTime> issueDates = ets.getIssueDates();
             Ensemble e = db.getEnsemble(tsid, issueDates.get(0));
-            assertEquals("kcfs",e.getUnits());
+            assertEquals("cfs",e.getUnits());
             float[][] data2 = e.getValues();
             AssertSCRN2(data2);
 

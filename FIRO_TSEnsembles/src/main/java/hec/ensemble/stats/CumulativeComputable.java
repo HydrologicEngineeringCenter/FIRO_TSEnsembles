@@ -1,5 +1,7 @@
 package hec.ensemble.stats;
 
+import org.apache.commons.lang.NotImplementedException;
+
 import static hec.ensemble.stats.ConvertUnits.convertCfsAcreFeet;
 
 public class CumulativeComputable implements MultiComputable, Configurable {
@@ -30,8 +32,7 @@ public class CumulativeComputable implements MultiComputable, Configurable {
             outputUnit = "acre-ft";
             return convertCfsAcreFeet((int) getDuration());
         } else {
-            //if no conversion then do not convert and factor is equal to 1
-            return 1;
+            throw new NotImplementedException("Converting '"+getInputUnits()+"' to a volume is not supported");
         }
     }
 

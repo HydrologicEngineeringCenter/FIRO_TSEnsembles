@@ -101,7 +101,7 @@ public class CsvEnsembleReader {
                     else {
                         RecordIdentifier tsid= new RecordIdentifier(watershedName+"."+locName,"flow");
                         // TODO  confirm units.
-                        ets = new EnsembleTimeSeries(tsid, "kcfs","PER-AVER",csv.FileName);
+                        ets = new EnsembleTimeSeries(tsid, "cfs","PER-AVER",csv.FileName);
                         locationMap.put(locName, ets);
                     }
 
