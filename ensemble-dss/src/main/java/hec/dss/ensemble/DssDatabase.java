@@ -5,6 +5,7 @@ import hec.MetricDatabase;
 import hec.RecordIdentifier;
 import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
+import hec.ensemble.stats.Statistics;
 import hec.heclib.dss.DSSPathname;
 import hec.heclib.dss.HecPairedData;
 import hec.heclib.dss.HecTimeSeries;
@@ -14,11 +15,8 @@ import hec.io.TimeSeriesCollectionContainer;
 import hec.io.TimeSeriesContainer;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
-import hec.metrics.MetricTypes;
-import hec.ensemble.stats.Statistics;
 import org.apache.commons.lang.NotImplementedException;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -173,7 +171,17 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     private ZonedDateTime getStartDate(TimeSeriesCollectionContainer tscc) {
         HecTime time = tscc.get(0).getStartTime();
         System.out.println(time.toString());
-        return ZonedDateTime.of(time.year(), time.month(), time.day(), time.hour(),
+
+        int hour = time.hour();
+        int day = time.day();
+
+        // Handling 2400 hours
+        if (hour == 24) {
+            day = day + 1;
+            hour = 0;
+        }
+
+        return ZonedDateTime.of(time.year(), time.month(), day, hour,
                 time.minute(), time.second(), 0,
                 TimeZone.getTimeZone(tscc.locationTimezone).toZoneId());
     }
