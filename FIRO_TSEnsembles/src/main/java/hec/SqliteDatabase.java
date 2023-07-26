@@ -104,7 +104,6 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         // prop.setProperty("Journal Mode","Off");
 
         _connection = DriverManager.getConnection("jdbc:sqlite:" + FileName, prop);
-        _connection.setAutoCommit(false);
         if (create) {
             version = createTables();
             this.version = getCurrentVersionFromDB();
