@@ -1,33 +1,29 @@
 package hec.ensembleview.viewpanels;
 
+import hec.ensembleview.DataTransformView;
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.DefaultSettings;
+import hec.ensembleview.ProbabilityDataViewListener;
 import hec.ensembleview.charts.ChartType;
-import hec.ensembleview.controllers.ComputePanelController;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
-public class EnsembleDataTransformView extends JPanel implements ActionListener, PropertyChangeListener {
+public class EnsembleDataTransformView extends DataTransformView {
     private JRadioButton original;
     private JRadioButton probability;
-    private final transient ComputePanelController computePanelController;
-    public EnsembleDataTransformView(ComputePanelController computePanelController) {
-        this.computePanelController = computePanelController;
-        DatabaseHandlerService.getInstance().addDatabaseChangeListener(this);
-
-        setupDataViewPanel();
-        initiateRadioButton();
-        createButtonGroup();
+    private transient ProbabilityDataViewListener probabilityListener;
+    public EnsembleDataTransformView() {
+        super();
     }
 
-    private void initiateButtonSelection() {
+    public void setProbabilityListener(ProbabilityDataViewListener listener) {
+        this.probabilityListener = listener;
+    }
+
+    @Override
+    protected void initiateButtonSelection() {
         if(original.isSelected()) {
             actionPerformed(new ActionEvent(original, ActionEvent.ACTION_PERFORMED, "selected"));
         } else if (probability.isSelected()) {
@@ -35,7 +31,8 @@ public class EnsembleDataTransformView extends JPanel implements ActionListener,
         }
     }
 
-    private void initiateRadioButton() {
+    @Override
+    protected void initiateRadioButton() {
         this.original = new JRadioButton();
         this.original.setName("Original");
         this.original.setText("Original");
@@ -53,29 +50,21 @@ public class EnsembleDataTransformView extends JPanel implements ActionListener,
         this.probability.addActionListener(this);
     }
 
-    private void createButtonGroup() {
+    @Override
+    protected void createButtonGroup() {
         ButtonGroup buttonGroup = new ButtonGroup();
         buttonGroup.add(original);
         buttonGroup.add(probability);
     }
 
-    private void setupDataViewPanel() {
-        GridBagLayout layout = new GridBagLayout();
-        setLayout(layout);
-
-        Border grayLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        setBorder((BorderFactory.createTitledBorder(grayLine, "Data View", TitledBorder.LEFT, TitledBorder.TOP)));
-        ((TitledBorder) getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == this.original) {
-            computePanelController.setIsDataViewProbability(false);
-            computePanelController.initiateEnsembleCompute(ChartType.SCATTERPLOT);
+            probabilityListener.setIsDataViewProbability(false);
+            probabilityListener.initiateEnsembleCompute(ChartType.SCATTERPLOT);
         } else if(e.getSource() == this.probability) {
-            computePanelController.setIsDataViewProbability(true);
-            computePanelController.initiateEnsembleCompute(ChartType.SCATTERPLOT);
+            probabilityListener.setIsDataViewProbability(true);
+            probabilityListener.initiateEnsembleCompute(ChartType.SCATTERPLOT);
         }
     }
 
