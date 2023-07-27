@@ -1,5 +1,6 @@
 package hec.ensembleview;
 
+import hec.ensembleview.controllers.DatabaseController;
 import hec.ensembleview.tabs.*;
 import hec.ensembleview.viewpanels.EnsembleParentPanel;
 import hec.ensembleview.viewpanels.OptionsPanel;
@@ -18,6 +19,7 @@ public class EnsembleViewer {
 
     public EnsembleViewer() {
         OptionsPanel optionsPanel = new OptionsPanel();
+        new DatabaseController(optionsPanel);
         createTabs();
 
         new EnsembleParentPanel(optionsPanel, tabPane);
