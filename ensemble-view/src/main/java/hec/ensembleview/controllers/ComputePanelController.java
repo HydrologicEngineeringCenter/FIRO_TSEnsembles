@@ -5,10 +5,7 @@ import hec.ensemble.stats.Statistics;
 import hec.ensembleview.*;
 import hec.ensembleview.charts.ChartType;
 import hec.ensembleview.mappings.StatisticsMap;
-import hec.ensembleview.viewpanels.EnsembleDataTransformView;
-import hec.ensembleview.viewpanels.StatEnsembleComputePanelView;
-import hec.ensembleview.viewpanels.StatTimeSeriesComputePanelView;
-import hec.ensembleview.viewpanels.TimeSeriesDataTransformView;
+import hec.ensembleview.viewpanels.*;
 
 import javax.swing.*;
 import java.beans.PropertyChangeEvent;

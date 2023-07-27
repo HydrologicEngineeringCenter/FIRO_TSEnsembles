@@ -1,4 +1,4 @@
-package hec.ensembleview;
+package hec.ensembleview.controllers;
 
 import hec.ensembleview.charts.ChartType;
 

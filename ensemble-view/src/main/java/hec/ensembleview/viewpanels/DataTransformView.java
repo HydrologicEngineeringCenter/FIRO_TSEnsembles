@@ -1,4 +1,7 @@
-package hec.ensembleview;
+package hec.ensembleview.viewpanels;
+
+import hec.ensembleview.DatabaseHandlerService;
+import hec.ensembleview.DefaultSettings;
 
 import javax.swing.*;
 import javax.swing.border.Border;

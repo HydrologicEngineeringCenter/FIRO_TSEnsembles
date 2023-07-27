@@ -1,7 +1,6 @@
 package hec.ensembleview.viewpanels;
 
-import hec.ensembleview.CumulativeDataViewListener;
-import hec.ensembleview.DataTransformView;
+import hec.ensembleview.controllers.CumulativeDataViewListener;
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.DefaultSettings;
 import hec.ensembleview.charts.ChartType;

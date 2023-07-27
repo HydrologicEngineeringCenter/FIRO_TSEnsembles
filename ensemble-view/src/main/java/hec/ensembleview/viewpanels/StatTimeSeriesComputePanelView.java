@@ -1,8 +1,7 @@
 package hec.ensembleview.viewpanels;
 
-import hec.ensembleview.ComputePanelView;
 import hec.ensembleview.DatabaseHandlerService;
-import hec.ensembleview.TimeSeriesComputePanelListener;
+import hec.ensembleview.controllers.TimeSeriesComputePanelListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

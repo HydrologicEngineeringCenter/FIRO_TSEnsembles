@@ -1,9 +1,8 @@
 package hec.ensembleview.viewpanels;
 
-import hec.ensembleview.DataTransformView;
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.DefaultSettings;
-import hec.ensembleview.ProbabilityDataViewListener;
+import hec.ensembleview.controllers.ProbabilityDataViewListener;
 import hec.ensembleview.charts.ChartType;
 
 import javax.swing.*;

@@ -1,7 +1,7 @@
 package hec.ensembleview.tabs;
 
-import hec.ensembleview.ComputePanelView;
-import hec.ensembleview.DataTransformView;
+import hec.ensembleview.viewpanels.ComputePanelView;
+import hec.ensembleview.viewpanels.DataTransformView;
 import hec.ensembleview.controllers.ComputePanelController;
 import hec.ensembleview.viewpanels.TimeSeriesDataTransformView;
 import hec.ensembleview.viewpanels.StatTimeSeriesComputePanelView;
