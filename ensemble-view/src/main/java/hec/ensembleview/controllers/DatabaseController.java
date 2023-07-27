@@ -4,6 +4,7 @@ import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.dss.ensemble.DssDatabase;
 import hec.ensembleview.DatabaseHandlerService;
+import hec.ensembleview.viewpanels.OptionsPanel;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -14,7 +15,6 @@ import java.util.logging.Logger;
 
 public class DatabaseController {
     Logger logger = Logger.getLogger(DatabaseController.class.getName());
-    private static final DatabaseController instance = new DatabaseController();
     private JPanel filePathPanel;
     private JComboBox<ZonedDateTime> dateTimes;
     private JComboBox<RecordIdentifier> locations;
@@ -22,24 +22,55 @@ public class DatabaseController {
     private DatabaseHandlerService databaseHandlerService;
     boolean isNewLoad;  //checks if new database is added. If database is new, set to true
 
-    private DatabaseController() {
+    public DatabaseController(OptionsPanel optionsPanel) {
+        initiateDatabaseListener(optionsPanel);
     }
 
-    public void initialize(JPanel filePathPanel, JComboBox<ZonedDateTime> dateTimes, JComboBox<RecordIdentifier> locations,
-                           JTextField filePath) {
-        setFilePathPanel(filePathPanel);
-        setDateTimes(dateTimes);
-        setLocations(locations);
-        setFilePath(filePath);
-        setFilePathAndInitialRidZdt();
-    }
+    private void initiateDatabaseListener(OptionsPanel optionsPanel) {
+        optionsPanel.setDatabaseListener(new DatabaseListener() {
+            @Override
+            public void initialize(JPanel filePathPanel, JComboBox<ZonedDateTime> dateTimes, JComboBox<RecordIdentifier> locations, JTextField filePath) {
+                setFilePathPanel(filePathPanel);
+                setDateTimes(dateTimes);
+                setLocations(locations);
+                setFilePath(filePath);
+                setFilePathAndInitialRidZdt();
+            }
 
-    public static DatabaseController getInstance() {
-        return instance;
-    }
+            @Override
+            public void setIsNewLoad(boolean newLoad) {
+                isNewLoad = newLoad;
+            }
 
-    public void setFilePathPanel(JPanel filePathPanel) {
-        this.filePathPanel = filePathPanel;
+            @Override
+            public void setFilePathPanel(JPanel filePath) {
+                filePathPanel = filePath;
+            }
+
+            @Override
+            public void setSelectedRid() {
+                RecordIdentifier selectedRid = (RecordIdentifier)locations.getSelectedItem();
+                if(selectedRid == null) {
+                    return;
+                }
+                databaseHandlerService.setDbHandlerRecordIdentifier(selectedRid);
+                resetZdt(selectedRid);
+            }
+
+            @Override
+            public void setZdt() {
+                ZonedDateTime selectedZdt = (ZonedDateTime) dateTimes.getSelectedItem();
+                if(selectedZdt == null) {
+                    return;
+                }
+                databaseHandlerService.setDbHandlerZonedDateTime(selectedZdt);
+            }
+
+            @Override
+            public boolean getIsNewLoad() {
+                return isNewLoad;
+            }
+        });
     }
 
     public void setDateTimes(JComboBox<ZonedDateTime> dateTimes) {
@@ -102,33 +133,7 @@ public class DatabaseController {
             dateTimes.addItem(date);
     }
 
-    public void setZdt() {
-        ZonedDateTime selectedZdt = (ZonedDateTime) dateTimes.getSelectedItem();
-        if(selectedZdt == null) {
-            return;
-        }
-        databaseHandlerService.setDbHandlerZonedDateTime(selectedZdt);
-    }
-
-    public void setSelectedRid() {
-        RecordIdentifier selectedRid = (RecordIdentifier)locations.getSelectedItem();
-        if(selectedRid == null) {
-            return;
-        }
-        databaseHandlerService.setDbHandlerRecordIdentifier(selectedRid);
-        resetZdt(selectedRid);
-    }
-
-    public void setIsNewLoad(boolean isNewLoad) {
-        this.isNewLoad = isNewLoad;
-    }
-
-    public boolean getIsNewLoad() {
-        return this.isNewLoad;
-    }
-
     private void resetZdt(RecordIdentifier selectedRid) {
-//        databaseHandlerService.setDbHandlerZonedDateTime(null);  //reset zdt to empty
         setZdtList(selectedRid);  //update zdt to new list
         databaseHandlerService.setDbHandlerZonedDateTime((ZonedDateTime) dateTimes.getSelectedItem());
     }
