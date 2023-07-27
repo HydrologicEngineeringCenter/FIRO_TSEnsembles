@@ -1,10 +1,12 @@
 package hec.ensembleview.tabs;
 
+import hec.ensembleview.ComputePanelView;
+import hec.ensembleview.DataTransformView;
+import hec.ensembleview.charts.EnsembleChartAcrossTime;
 import hec.ensembleview.controllers.ComputePanelController;
+import hec.ensembleview.controllers.EnsembleArrayChartManager;
 import hec.ensembleview.viewpanels.EnsembleDataTransformView;
 import hec.ensembleview.viewpanels.StatEnsembleComputePanelView;
-import hec.ensembleview.controllers.EnsembleArrayChartManager;
-import hec.ensembleview.charts.EnsembleChartAcrossTime;
 import org.jfree.chart.ChartPanel;
 
 import javax.swing.*;
@@ -13,16 +15,15 @@ import java.awt.*;
 public class EnsembleArrayTab extends JPanel {
     private final ChartPanel chartPanel;
     private final JPanel statAndDataViewPanel = new JPanel();
-    private transient ComputePanelController computePanelController;
 
     public EnsembleArrayTab() {
         this.chartPanel = createChart();
-        initiateEnsembleChart();
+        ComputePanelView statEnsembleComputePanelView = new StatEnsembleComputePanelView();
+        DataTransformView ensembleDataTransformView = new EnsembleDataTransformView();
 
-        StatEnsembleComputePanelView statEnsembleComputePanelView = new StatEnsembleComputePanelView(computePanelController);
-        EnsembleDataTransformView ensembleDataTransformView = new EnsembleDataTransformView(computePanelController);
-
+        initiateEnsembleChart(ensembleDataTransformView, statEnsembleComputePanelView);
         setupStatisticsAndDataViewPanel(statEnsembleComputePanelView, ensembleDataTransformView);
+
         setLayout(new BorderLayout());
         add(statAndDataViewPanel, BorderLayout.NORTH);
         add(chartPanel, BorderLayout.CENTER);
@@ -38,8 +39,8 @@ public class EnsembleArrayTab extends JPanel {
         return new EnsembleChartAcrossTime().generateChart();
     }
 
-    void initiateEnsembleChart() {
-        computePanelController = new ComputePanelController();
+    void initiateEnsembleChart(DataTransformView dataTransformView, ComputePanelView computePanelView) {
+        ComputePanelController computePanelController = new ComputePanelController(dataTransformView, computePanelView);
         new EnsembleArrayChartManager(computePanelController.getStatisticsMap(), chartPanel);
     }
 }

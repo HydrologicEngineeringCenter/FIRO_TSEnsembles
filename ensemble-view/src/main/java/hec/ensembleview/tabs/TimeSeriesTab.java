@@ -1,5 +1,7 @@
 package hec.ensembleview.tabs;
 
+import hec.ensembleview.ComputePanelView;
+import hec.ensembleview.DataTransformView;
 import hec.ensembleview.controllers.ComputePanelController;
 import hec.ensembleview.viewpanels.TimeSeriesDataTransformView;
 import hec.ensembleview.viewpanels.StatTimeSeriesComputePanelView;
@@ -13,16 +15,16 @@ import java.awt.*;
 public class TimeSeriesTab extends JPanel {
     private final ChartPanel ensembleChart;
     private final JPanel statAndDataViewPanel = new JPanel();
-    private transient ComputePanelController computePanelController;
 
     public TimeSeriesTab() {
         this.ensembleChart = createEnsembleChart();
-        initiateChartManager();
 
-        StatTimeSeriesComputePanelView statTimeSeriesComputePanelView = new StatTimeSeriesComputePanelView(computePanelController);
-        TimeSeriesDataTransformView timeSeriesDataTransformView = new TimeSeriesDataTransformView(computePanelController);
+        ComputePanelView statTimeSeriesComputePanelView = new StatTimeSeriesComputePanelView();
+        DataTransformView timeSeriesDataTransformView = new TimeSeriesDataTransformView();
 
+        initiateChartManager(timeSeriesDataTransformView, statTimeSeriesComputePanelView);
         setupStatisticsAndDataViewPanel(statTimeSeriesComputePanelView, timeSeriesDataTransformView);
+
         setLayout(new BorderLayout());
         add(ensembleChart, BorderLayout.CENTER);
         add(statAndDataViewPanel, BorderLayout.NORTH);
@@ -38,8 +40,8 @@ public class TimeSeriesTab extends JPanel {
         return new EnsembleChartAcrossTime().generateChart();
     }
 
-    void initiateChartManager() { //The Chart Manager is a controller for the chart.
-        computePanelController = new ComputePanelController();
+    void initiateChartManager(DataTransformView dataTransformView, ComputePanelView computePanelView) { //The Chart Manager is a controller for the chart.
+        ComputePanelController computePanelController = new ComputePanelController(dataTransformView, computePanelView);
         new EnsembleTimeSeriesChartManager(computePanelController.getStatisticsMap(), ensembleChart);
     }
 }
