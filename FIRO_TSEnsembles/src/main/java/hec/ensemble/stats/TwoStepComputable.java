@@ -58,12 +58,6 @@ public class TwoStepComputable implements SingleComputable, Configurable {
         _c = c;
     }
 
-
-    @Override
-    public Statistics[] Statistics() {
-        return new Statistics[]{Statistics.COMPUTABLE};
-    }
-
     @Override
     public String StatisticsLabel() {
         return  _stepOne.StatisticsLabel() +"," + _stepTwo.StatisticsLabel();

@@ -25,10 +25,6 @@ public class MaxComputable implements Computable, Configurable {
         return getInputUnits();
     }
 
-    @Override
-    public Statistics[] Statistics() {
-        return new Statistics[]{Statistics.MAX};
-    }
 
     @Override
     public String StatisticsLabel() {

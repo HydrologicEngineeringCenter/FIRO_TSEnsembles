@@ -85,11 +85,6 @@ public class MultiStatComputable implements MultiComputable, Computable, Configu
     }
 
     @Override
-    public Statistics[] Statistics() {
-        return statSelection;
-    }
-
-    @Override
     public String StatisticsLabel() {
         StringBuilder statLablel = new StringBuilder();
         int count = 0;

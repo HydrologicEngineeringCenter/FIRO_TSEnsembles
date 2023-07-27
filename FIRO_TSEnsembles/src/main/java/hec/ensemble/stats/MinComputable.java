@@ -23,11 +23,6 @@ public class MinComputable implements Computable, Configurable {
     }
 
     @Override
-    public Statistics[] Statistics() {
-        return new Statistics[]{Statistics.MIN};
-    }
-
-    @Override
     public String StatisticsLabel() {
         return "MIN";
     }

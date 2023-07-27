@@ -27,11 +27,6 @@ public class MeanComputable implements Computable, Configurable {
     }
 
     @Override
-    public Statistics[] Statistics() {
-        return new Statistics[]{Statistics.AVERAGE};
-    }
-
-    @Override
     public String StatisticsLabel() {
         return "AVERAGE";
     }

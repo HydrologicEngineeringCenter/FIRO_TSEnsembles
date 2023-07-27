@@ -51,11 +51,6 @@ public class Total implements Computable, Configurable {
     }
 
     @Override
-    public Statistics[] Statistics() {
-        return new Statistics[]{Statistics.TOTAL};
-    }
-
-    @Override
     public String StatisticsLabel() {
         return "TOTAL";
     }
