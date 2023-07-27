@@ -2,10 +2,13 @@ package hec.ensembleview.controllers;
 
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.Statistics;
-import hec.ensembleview.DatabaseHandlerService;
-import hec.ensembleview.StatComputationHelper;
-import hec.ensembleview.mappings.StatisticsMap;
+import hec.ensembleview.*;
 import hec.ensembleview.charts.ChartType;
+import hec.ensembleview.mappings.StatisticsMap;
+import hec.ensembleview.viewpanels.EnsembleDataTransformView;
+import hec.ensembleview.viewpanels.StatEnsembleComputePanelView;
+import hec.ensembleview.viewpanels.StatTimeSeriesComputePanelView;
+import hec.ensembleview.viewpanels.TimeSeriesDataTransformView;
 
 import javax.swing.*;
 import java.beans.PropertyChangeEvent;
@@ -26,42 +29,177 @@ public class ComputePanelController implements PropertyChangeListener {
     private EnsembleTimeSeries ets;
     private final StatisticsMap statisticsMap = new StatisticsMap();
     private final StatComputationHelper statComputationHelper = new StatComputationHelper();
-    public ComputePanelController() {
+
+    public ComputePanelController(DataTransformView dataTransformView, ComputePanelView computePanelView) {
         this.databaseHandlerService = DatabaseHandlerService.getInstance();
         databaseHandlerService.addDatabaseChangeListener(this);
-    }
 
-    public void initiateTimeSeriesCompute(ChartType chartType) {
-        for (String stat : statisticsMap.getTimeSeriesMapList().keySet()) {
-            if (isCumulative) {
-                this.ets = databaseHandlerService.getCumulativeEnsembleTimeSeries();
-            } else {
-                this.ets = databaseHandlerService.getEnsembleTimeSeries();
-            }
-            if (Boolean.TRUE.equals(statisticsMap.getTimeSeriesMapList().get(stat))) {
-                computeTimeSeriesStat(this.ets, stat, chartType);
-            }
+        if(computePanelView instanceof StatTimeSeriesComputePanelView) {
+            initiateTimeSeriesComputePanelListener(computePanelView);
+        } else if(computePanelView instanceof StatEnsembleComputePanelView) {
+            initiateEnsembleArrayComputePanelListener(computePanelView);
         }
-        statisticsMap.setTimeStatisticsMap();
+
+        if(dataTransformView instanceof TimeSeriesDataTransformView) {
+            initiateTimeSeriesDataView(dataTransformView);
+        } else if (dataTransformView instanceof EnsembleDataTransformView) {
+            initiateEnsembleDataView(dataTransformView);
+        }
     }
 
-    public void initiateEnsembleCompute(ChartType chartType) {
-        this.ets = databaseHandlerService.getEnsembleTimeSeries();
+    private void initiateTimeSeriesDataView(DataTransformView dataTransformView) {
+        ((TimeSeriesDataTransformView)dataTransformView).setCumulativeListener(new CumulativeDataViewListener() {
+            @Override
+            public void setIsDataViewCumulative(boolean cumulative) {
+                isCumulative = cumulative;
+                timeSeriesType(isCumulative);
+                statisticsMap.setDataView(isCumulative, ChartType.TIMEPLOT);
+            }
 
-        for (String stat : statisticsMap.getEnsembleSeriesMapList().keySet()) {
-            if (isProbability) {
-                if (Boolean.TRUE.equals(statisticsMap.getEnsembleSeriesMapList().get(stat))) {
-                    computeTimeSeriesStat(this.ets, stat, chartType);
-                    statComputationHelper.computeStatFromProbabilityComputable();
+            @Override
+            public void initiateTimeSeriesCompute(ChartType chartType) {
+                for (String stat : statisticsMap.getTimeSeriesMapList().keySet()) {
+                    if (isCumulative) {
+                        ets = databaseHandlerService.getCumulativeEnsembleTimeSeries();
+                    } else {
+                        ets = databaseHandlerService.getEnsembleTimeSeries();
+                    }
+                    if (Boolean.TRUE.equals(statisticsMap.getTimeSeriesMapList().get(stat))) {
+                        computeMetric(ets, stat, chartType);
+                    }
                 }
-            } else if (Boolean.TRUE.equals(statisticsMap.getEnsembleSeriesMapList().get(stat))) {
-                computeTimeSeriesStat(this.ets, stat, chartType);
+                statisticsMap.setTimeStatisticsMap();
             }
-        }
-        statisticsMap.setEnsembleStatisticsMap();
+        });
     }
 
-    private void computeTimeSeriesStat(EnsembleTimeSeries ets, String statName, ChartType chartType) {
+    private void initiateEnsembleDataView(DataTransformView dataTransformView) {
+        ((EnsembleDataTransformView)dataTransformView).setProbabilityListener(new ProbabilityDataViewListener() {
+            @Override
+            public void setIsDataViewProbability(Boolean prob) {
+                isProbability = prob;
+                timeSeriesType(isProbability);
+                statisticsMap.setDataView(isProbability, ChartType.SCATTERPLOT);
+            }
+
+            @Override
+            public void initiateEnsembleCompute(ChartType chartType) {
+                ets = databaseHandlerService.getEnsembleTimeSeries();
+                for (String stat : statisticsMap.getEnsembleSeriesMapList().keySet()) {
+                    if (isProbability) {
+                        if (Boolean.TRUE.equals(statisticsMap.getEnsembleSeriesMapList().get(stat))) {
+                            computeMetric(ets, stat, chartType);
+                            statComputationHelper.computeStatFromProbabilityComputable();
+                        }
+                    } else if (Boolean.TRUE.equals(statisticsMap.getEnsembleSeriesMapList().get(stat))) {
+                        computeMetric(ets, stat, chartType);
+                    }
+                }
+                statisticsMap.setEnsembleStatisticsMap();
+            }
+        });
+    }
+
+    private void initiateTimeSeriesComputePanelListener(ComputePanelView computePanelView) {
+        ((StatTimeSeriesComputePanelView)computePanelView).setTimeListener(new TimeSeriesComputePanelListener() {
+            @Override
+            public void initiateTimeSeriesCompute() {
+                for (String stat : statisticsMap.getTimeSeriesMapList().keySet()) {
+                    if (isCumulative) {
+                        ets = databaseHandlerService.getCumulativeEnsembleTimeSeries();
+                    } else {
+                        ets = databaseHandlerService.getEnsembleTimeSeries();
+                    }
+                    if (Boolean.TRUE.equals(statisticsMap.getTimeSeriesMapList().get(stat))) {
+                        computeMetric(ets, stat, ChartType.TIMEPLOT);
+                    }
+                }
+                statisticsMap.setTimeStatisticsMap();
+            }
+
+            @Override
+            public void setCheckedStatistics(String name) {
+                Map<String, Boolean> map = new HashMap<>();
+                map.put(name, true);
+                statisticsMap.storeTimeStatisticList(map);
+
+            }
+
+            @Override
+            public void setRemovedStatistics(String name) {
+                Map<String, Boolean> map = new HashMap<>();
+                map.put(name, false);
+                statisticsMap.storeTimeStatisticList(map);
+            }
+
+            @Override
+            public void getTextFieldValues(JTextField textField) {
+                String textValues = textField.getText();
+                String[] textValuesParse = textValues.trim().split("[,:;]");
+                floatPercentileValuesParse = new float[textValuesParse.length];
+                for (int i = 0; i < textValuesParse.length; i++) {
+                    floatPercentileValuesParse[i] = Float.parseFloat(textValuesParse[i]);
+                }
+            }
+        });
+    }
+
+    private void initiateEnsembleArrayComputePanelListener(ComputePanelView computePanelView) {
+        ((StatEnsembleComputePanelView) computePanelView).setEnsembleListener(new EnsembleArrayComputePanelListener() {
+            @Override
+            public void initiateEnsembleCompute() {
+                ets = databaseHandlerService.getEnsembleTimeSeries();
+                for (String stat : statisticsMap.getEnsembleSeriesMapList().keySet()) {
+                    boolean isStatSelected = Boolean.TRUE.equals(statisticsMap.getEnsembleSeriesMapList().get(stat));
+                    if (isProbability && isStatSelected) {
+                        computeProbability(ets, stat);
+                    } else if (!isProbability && isStatSelected) {
+                        computeMetric(ets, stat, ChartType.SCATTERPLOT);
+                    }
+                }
+                statisticsMap.setEnsembleStatisticsMap();
+            }
+
+            @Override
+            public void setCheckedStatistics(String name) {
+                Map<String, Boolean> map = new HashMap<>();
+                map.put(name, true);
+                statisticsMap.storeEnsembleStatisticList(map);
+            }
+
+            @Override
+            public void setRemovedStatistics(String name) {
+                Map<String, Boolean> map = new HashMap<>();
+                map.put(name, false);
+                statisticsMap.storeEnsembleStatisticList(map);
+            }
+
+            @Override
+            public void getTextFieldValues(JTextField textField) {
+                String textValues = textField.getText();
+                String[] textValuesParse = textValues.trim().split("[,:;]");
+
+                if(textField.getName().equalsIgnoreCase("percentiles")) {
+                    floatPercentileValuesParse = new float[textValuesParse.length];
+                    for(int i = 0; i < textValuesParse.length; i++) {
+                        floatPercentileValuesParse[i] = Float.parseFloat(textValuesParse[i]);
+                    }
+                }else if(textField.getName().equalsIgnoreCase("Cumulative Volume")) {
+                    floatCumulativeValuesParse = new float[textValuesParse.length];
+                    for(int i = 0; i < textValuesParse.length; i++) {
+                        floatCumulativeValuesParse[i] = Float.parseFloat(textValuesParse[i]);
+                    }
+                }
+            }
+        });
+    }
+
+    private void computeProbability(EnsembleTimeSeries ets, String stat) {
+        computeMetric(ets, stat, ChartType.SCATTERPLOT);
+        statComputationHelper.computeStatFromProbabilityComputable();
+    }
+
+    private void computeMetric(EnsembleTimeSeries ets, String statName, ChartType chartType) {
         if (getStatistic(statName) == Statistics.PERCENTILES) {
             statComputationHelper.computeStat(ets, Statistics.PERCENTILES,
                     floatPercentileValuesParse, chartType);
@@ -82,54 +220,6 @@ public class ComputePanelController implements PropertyChangeListener {
 
     private Statistics getStatistic(String statName) {
         return Statistics.getStatName(statName);
-    }
-
-    public void setIsDataViewCumulative(boolean isCumulative) {  // is set by DataView Panel
-        this.isCumulative = isCumulative;
-        timeSeriesType(isCumulative);
-        statisticsMap.setDataView(this.isCumulative, ChartType.TIMEPLOT);
-    }
-
-    public void setIsDataViewProbability(boolean isProbability) {  // is set by DataView Panel
-        this.isProbability = isProbability;
-        statisticsMap.setDataView(this.isProbability, ChartType.SCATTERPLOT);
-    }
-
-    public void setCheckedStatistics(String name, ChartType chartType) {  // sets selected stat and adds to list
-        Map<String, Boolean> map = new HashMap<>();
-        map.put(name, true);
-        if(chartType == ChartType.TIMEPLOT) {
-            statisticsMap.storeTimeStatisticList(map);
-        } else if (chartType == ChartType.SCATTERPLOT) {
-            statisticsMap.storeEnsembleStatisticList(map);
-        }
-    }
-
-    public void setRemovedStatistics(String name, ChartType chartType) {  // remove stat from stat and adds to list
-        Map<String, Boolean> map = new HashMap<>();
-        map.put(name, false);
-        if(chartType == ChartType.TIMEPLOT) {
-            statisticsMap.storeTimeStatisticList(map);
-        } else if (chartType == ChartType.SCATTERPLOT) {
-            statisticsMap.storeEnsembleStatisticList(map);
-        }
-    }
-
-    public void getTextFieldValues(JTextField textField) {
-        String textValues = textField.getText();
-        String[] textValuesParse = textValues.trim().split("[,:;]");
-
-        if(textField.getName().equalsIgnoreCase("percentiles")) {
-            floatPercentileValuesParse = new float[textValuesParse.length];
-            for(int i = 0; i < textValuesParse.length; i++) {
-                floatPercentileValuesParse[i] = Float.parseFloat(textValuesParse[i]);
-            }
-        }else if(textField.getName().equalsIgnoreCase("Cumulative Volume")) {
-            floatCumulativeValuesParse = new float[textValuesParse.length];
-            for(int i = 0; i < textValuesParse.length; i++) {
-                floatCumulativeValuesParse[i] = Float.parseFloat(textValuesParse[i]);
-            }
-        }
     }
 
     public StatisticsMap getStatisticsMap() {
