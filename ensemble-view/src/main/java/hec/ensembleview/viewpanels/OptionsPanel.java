@@ -1,8 +1,8 @@
 package hec.ensembleview.viewpanels;
 
 import hec.RecordIdentifier;
+import hec.ensembleview.controllers.DatabaseListener;
 import hec.ensembleview.DefaultSettings;
-import hec.ensembleview.controllers.DatabaseController;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -12,7 +12,6 @@ import java.awt.event.ActionListener;
 import java.time.ZonedDateTime;
 
 public class OptionsPanel extends JPanel {
-    private transient DatabaseController databaseController;
     private JPanel parentPanel;
     private JPanel filePathPanel;
     private JTextField filePath;
@@ -21,6 +20,7 @@ public class OptionsPanel extends JPanel {
     private transient ActionListener filePathListener;
     private transient ActionListener locationsListener;
     private transient ActionListener dateTimesListener;
+    private transient DatabaseListener databaseListener;
 
     public OptionsPanel() {
         setLayout(new GridLayout(1, 1));
@@ -32,30 +32,34 @@ public class OptionsPanel extends JPanel {
         parentPanel = createParentPanel();
     }
 
+    public void setDatabaseListener(DatabaseListener listener) {
+        this.databaseListener = listener;
+    }
+
     private void addFilePathListener() {
 
         filePathListener = e -> {
         /*
     Add listeners to file path button, locations combo box, date/time combo box, and statistics combo boxes.
      */
-            databaseController = DatabaseController.getInstance();
-            databaseController.setIsNewLoad(false);
-            databaseController.initialize(filePathPanel, dateTimes, locations, filePath);
+
+            databaseListener.setIsNewLoad(false);
+            databaseListener.initialize(filePathPanel, dateTimes, locations, filePath);
         };
     }
 
     private void addLocationsListener() {
         locationsListener = e -> {
-            if(databaseController.getIsNewLoad()) {
-                databaseController.setSelectedRid();
+            if(databaseListener.getIsNewLoad()) {
+                databaseListener.setSelectedRid();
             }
         };
     }
 
     private void addDateTimeListener() {
         dateTimesListener = e -> {
-            if(databaseController.getIsNewLoad()) {
-                databaseController.setZdt();
+            if(databaseListener.getIsNewLoad()) {
+                databaseListener.setZdt();
             }
         };
     }
