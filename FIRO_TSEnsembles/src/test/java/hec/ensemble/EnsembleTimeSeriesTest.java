@@ -18,10 +18,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class EnsembleTimeSeriesTest {
     private static String _fn = TestingPaths.instance.getTempDir()+"/importCsvToDatabaseMutable.db";
     private static SqliteDatabase _db = null;
+    private static File f;
     @BeforeAll
     static void prepareNewDatabase() throws Exception {
         //ensure no previous test db exists.
-        File f = new File(_fn);
+        f = new File(_fn);
         if (f.exists()){
             if (!f.delete()){
                 Logger.logError("database failed to delete, some resource must be using " + _fn);
@@ -181,8 +182,8 @@ class EnsembleTimeSeriesTest {
         }
     }
     @AfterAll
-    static void cleanUp(){
-        File f = new File(_fn);
+    static void cleanUp() throws Exception {
         f.delete();
+        _db.close();
     }
 }
