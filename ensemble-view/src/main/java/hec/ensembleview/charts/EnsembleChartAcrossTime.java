@@ -11,9 +11,6 @@ import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 
-import java.awt.event.InputEvent;
-import java.awt.event.MouseEvent;
-import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -73,28 +70,7 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
     @Override
     public ChartPanel generateChart() {
         plot = createTimeSeriesPlot();
-
-        ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot)){
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                int mods = e.getModifiersEx();
-                int panMask = InputEvent.BUTTON1_DOWN_MASK;
-                if (mods == InputEvent.BUTTON1_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK) {
-                    panMask = 255; //The pan test will match nothing and the zoom rectangle will be activated.
-                }
-                try {
-                    Field mask = ChartPanel.class.getDeclaredField("panMask");
-                    mask.setAccessible(true);
-                    mask.set(this, panMask);
-
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                super.mousePressed(e);
-            }
-        };
-
+        ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot));
         addChartFeatures(chart);
 
         return chart;

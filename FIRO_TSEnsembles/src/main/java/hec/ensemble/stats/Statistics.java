@@ -13,7 +13,7 @@ public enum Statistics {
     TOTAL("Total"),
     PERCENTILES("Percentiles"),
     NDAYCOMPUTABLE("Cumulative Volume"),
-    CUMULATIVE("Cumulative"),
+    CUMULATIVE("Cumulative Mass Curve"),
     MAXAVERAGEDURATION("Max Average Duration"),
     MAXACCUMDURATION("Max Accumulated Duration"),
     PLOTTINGPOSITION("Plotting Position"),

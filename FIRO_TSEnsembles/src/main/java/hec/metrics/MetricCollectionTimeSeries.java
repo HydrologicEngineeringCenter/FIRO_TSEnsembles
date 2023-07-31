@@ -51,6 +51,10 @@ public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>, 
         items.put(metricCollection.getIssueDate(),metricCollection);
     }
 
+    public void setUnits(String units) {
+        this.units = units;
+    }
+
     /**
      * getIssueDates computes a list of ZonedDateTimes in this collection
      * @return returns an array of ZonedDateTime

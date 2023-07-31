@@ -9,21 +9,23 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import java.awt.event.InputEvent;
-import java.awt.event.MouseEvent;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class EnsembleChartAcrossEnsembles extends EnsembleChart {
+    private String y2Label = "";
     private final Map<Integer, List<PointSpec>> pointSpecMap = new HashMap<>();
     private final Map<Integer, XYSeriesCollection> XYSeriesCollectionMap = new HashMap<>();
 
     /**
      * Ensembles Charts Across Ensembles class sets up and displays the metrics for the scatter plot chart
      */
+
+    public void setY2Label(String label) {
+        y2Label = label;
+    }
 
 
     public void addPoint(PointSpec point) {
@@ -61,25 +63,7 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
     @Override
     public ChartPanel generateChart() {
         plot = createXyPlot();
-        ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot)) {
-            @Override
-            public void mousePressed(MouseEvent e)
-            {
-                int mods = e.getModifiersEx();
-                int panMask = InputEvent.BUTTON1_DOWN_MASK;
-                if (mods == InputEvent.BUTTON1_DOWN_MASK+ InputEvent.SHIFT_DOWN_MASK) {
-                    panMask = 255; //The pan test will match nothing and the zoom rectangle will be activated.
-                }try {
-                    Field mask = ChartPanel.class.getDeclaredField("panMask");
-                    mask.setAccessible(true);
-                    mask.set(this, panMask);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                super.mousePressed(e);
-            }
-
-        };
+        ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot));
         addChartFeatures(chart);
 
         return chart;
@@ -101,6 +85,11 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
             plot.setDomainAxis(domainAxis);
 
             NumberAxis rangeAxis = new NumberAxis(yLabel);
+
+            if(k == 1) {
+                rangeAxis.setLabel(y2Label);
+            }
+
             rangeAxis.setTickLabelFont(DefaultSettings.setSegoeFontText());
             plot.setRangeAxis(k, rangeAxis);
 

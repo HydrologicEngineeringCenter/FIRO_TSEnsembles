@@ -21,6 +21,8 @@ import java.util.logging.Logger;
 public class EnsembleArrayChartManager extends ChartManager {
     private static final Logger logger = Logger.getLogger(EnsembleArrayChartManager.class.getName());
     private boolean isProbability = false;
+    private MetricCollectionTimeSeries residentMetricCollectionTimeSeries;
+    private String secondaryUnits;
 
     public EnsembleArrayChartManager(StatisticsMap statisticsMap, JPanel chartPanel) {
         super(statisticsMap, chartPanel);
@@ -47,12 +49,10 @@ public class EnsembleArrayChartManager extends ChartManager {
         //get map of MetricCollectionTImeSeries data and create a list of stats in map
         Map<Statistics, MetricCollectionTimeSeries> metricCollectionTimeSeriesMap = databaseHandlerService.getMetricCollectionTimeSeriesMap();
         List<Statistics> list = new ArrayList<>(metricCollectionTimeSeriesMap.keySet());
-        MetricCollectionTimeSeries residentMetricCollectionTimeSeries;
 
         for (Statistics stat : list) {
             residentMetricCollectionTimeSeries = metricCollectionTimeSeriesMap.get(stat);
-            super.units = residentMetricCollectionTimeSeries.getUnits();
-            setChartLabels();
+            chartLabelsForStatistic(stat);
             databaseHandlerService.setResidentMetricCollectionTimeSeries(residentMetricCollectionTimeSeries);
             if (isMetricArrayOfArray(residentMetricCollectionTimeSeries)) {
                 String stats = databaseHandlerService.getResidentMetricStatisticsList();
@@ -64,6 +64,21 @@ public class EnsembleArrayChartManager extends ChartManager {
             }
         }
         return metricValues;
+    }
+
+    private void chartLabelsForStatistic(Statistics stat) {
+        if(PlotStatisticsForChartType.getRangeAxis(stat) == 0) {
+            units = residentMetricCollectionTimeSeries.getUnits();
+        } else if(PlotStatisticsForChartType.getRangeAxis(stat) == 1) {
+            secondaryUnits = residentMetricCollectionTimeSeries.getUnits();
+        }
+        setChartLabels();
+    }
+
+    private void setChartLabels() {
+        chart.setXLabel("Ensembles");
+        chart.setYLabel(String.join("-", databaseHandlerService.getDbHandlerRid().parameter, units));
+        ((EnsembleChartAcrossEnsembles) chart).setY2Label(String.join("-", databaseHandlerService.getDbHandlerRid().parameter, secondaryUnits));
     }
 
     private boolean isMetricArrayOfArray(MetricCollectionTimeSeries metricCollections) {
@@ -86,8 +101,12 @@ public class EnsembleArrayChartManager extends ChartManager {
     }
 
     private void plotProbabilityChart(EnsembleChart chart) {
+        Map<Statistics, MetricCollectionTimeSeries> metricCollectionTimeSeriesMap = databaseHandlerService.getMetricCollectionTimeSeriesMap();
+
         Map<String, Map<Float, Float>> probList = databaseHandlerService.getEnsembleProbabilityList();
         for(Map.Entry<String, Map<Float, Float>> entry : probList.entrySet()) {
+            residentMetricCollectionTimeSeries = metricCollectionTimeSeriesMap.get(Statistics.getStatName(entry.getKey()));
+            chartLabelsForStatistic(Statistics.getStatName(entry.getKey()));
             PlotStatisticsForChartType.addStatisticsToEnsemblePlot((EnsembleChartAcrossEnsembles) chart, entry.getKey(), entry.getValue());
         }
         chartPanel.revalidate();

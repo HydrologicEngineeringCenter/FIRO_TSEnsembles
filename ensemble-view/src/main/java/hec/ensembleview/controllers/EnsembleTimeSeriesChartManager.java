@@ -36,8 +36,8 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
 
         chart = new EnsembleChartAcrossTime();
         isEnsembleDataViewTypeCumulative(isCumulative);
-        super.units = ensemble.getUnits();
-        super.setChartLabels();
+        units = ensemble.getUnits();
+        setChartLabels();
         PlotStatisticsForChartType.addLineMembersToChart(chart, ensemble.getValues(), ensemble.startDateTime());
 
         return chart;
@@ -65,6 +65,11 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
             }
         }
         return metricValues;
+    }
+
+    void setChartLabels() {
+        chart.setXLabel("Date/Time");
+        chart.setYLabel(String.join("-", databaseHandlerService.getDbHandlerRid().parameter, units));
     }
 
     private boolean isMetricTimeSeries(MetricCollectionTimeSeries metricCollections) {

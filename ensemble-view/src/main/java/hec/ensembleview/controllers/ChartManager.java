@@ -51,11 +51,6 @@ public abstract class ChartManager implements PropertyChangeListener {
 
     abstract EnsembleChart createEnsembleChart() throws ParseException;
 
-    void setChartLabels() {
-        chart.setXLabel("Date/Time");
-        chart.setYLabel(String.join("-", databaseHandlerService.getDbHandlerRid().parameter, units));
-    }
-
     abstract Map<String, float[]> getMetricValuesFromResidentMetricDatabase();
 
 }

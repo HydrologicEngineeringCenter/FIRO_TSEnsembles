@@ -27,7 +27,6 @@ public class PlotStatisticsForChartType {
     public static void addMetricStatisticsToTimePlot(EnsembleChartAcrossTime chart, String stat, float[] val, ZonedDateTime[] dates) throws ParseException {
         Color lineColor;
         BasicStroke stroke;
-
         Statistics statType = Statistics.getStatName(stat);
         switch (statType) {
             case MIN:
@@ -45,6 +44,24 @@ public class PlotStatisticsForChartType {
                 logger.log(Level.INFO, "Statistic does not exist for Time plot metric compute");
                 break;
         }
+    }
+
+    public static int getRangeAxis(Statistics statistic) {
+        switch (statistic) {
+            case MIN:
+            case MAX:
+            case AVERAGE:
+            case MEDIAN:
+            case STANDARDDEVIATION:
+            case PERCENTILES:
+                return 0;
+            case NDAYCOMPUTABLE:
+            case TOTAL:
+                return 1;
+            default:
+                logger.log(Level.INFO, "Statistic does not exist for Ensemble plot metric compute");
+        }
+        return 0;
     }
 
     public static void addLineMembersToChart(EnsembleChart chart, float[][] vals, ZonedDateTime[] dates) throws ParseException {
@@ -66,7 +83,7 @@ public class PlotStatisticsForChartType {
                 chart.addPoint(
                         new PointSpec(0, val, getStrokeForStatType(statType), getColorForStatType(statType), stat));
                 break;
-            case CUMULATIVE:
+            case NDAYCOMPUTABLE:
             case TOTAL:
                 chart.addPoint(
                         new PointSpec(1, val, getStrokeForStatType(statType), getColorForStatType(statType), stat));
@@ -89,7 +106,7 @@ public class PlotStatisticsForChartType {
                 chart.addProbPoint(
                         new PointSpec(0, probValues, getStrokeForStatType(statType), getColorForStatType(statType), stat));
                 break;
-            case CUMULATIVE:
+            case NDAYCOMPUTABLE:
             case TOTAL:
                 chart.addProbPoint(
                         new PointSpec(1, probValues, getStrokeForStatType(statType), getColorForStatType(statType), stat));
