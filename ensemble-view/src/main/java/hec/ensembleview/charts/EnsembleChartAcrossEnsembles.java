@@ -4,7 +4,6 @@ import hec.ensembleview.DefaultSettings;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
@@ -18,33 +17,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EnsembleChartAcrossEnsembles implements EnsembleChart {
-
-    private String chartTitle = "";
-    private String yLabel = "";
-    private String xLabel = "";
+public class EnsembleChartAcrossEnsembles extends EnsembleChart {
     private final Map<Integer, List<PointSpec>> pointSpecMap = new HashMap<>();
     private final Map<Integer, XYSeriesCollection> XYSeriesCollectionMap = new HashMap<>();
-    private final Map<Integer, XYLineAndShapeRenderer> rendererMap = new HashMap<>();
-    private XYPlot plot;
 
     /**
      * Ensembles Charts Across Ensembles class sets up and displays the metrics for the scatter plot chart
      */
 
 
-    @Override
-    public void setYLabel(String label) {yLabel = label;
-    }
-
-    @Override
-    public void setXLabel(String label) {xLabel = label;
-    }
-
     public void addPoint(PointSpec point) {
         XYSeries newMember = new XYSeries(point.pointName);
         for (int i = 0; i < point.yValue.length; i++) {
-            newMember.add(i + 1, point.yValue[i]);
+            newMember.add(i + 1d, point.yValue[i]);
         }
 
         if (!XYSeriesCollectionMap.containsKey(point.rangeAxis)) {
@@ -100,16 +85,8 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart {
         return chart;
     }
 
-    private void addChartFeatures(ChartPanel chart) {
-        chart.setMouseZoomable(false);
-        chart.setMouseWheelEnabled(true);
-        chart.setDomainZoomable(true);
-        chart.setRangeZoomable(true);
-        setChartToolTip(chart);
-    }
-
     private XYPlot createXyPlot() {
-        XYPlot plot = new XYPlot();
+        plot = new XYPlot();
         plot.setDomainPannable(true);
         plot.setRangePannable(true);
 
@@ -142,27 +119,6 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart {
     }
 
 
-    private void setChartToolTip(ChartPanel chart) {
-        XYToolTipGenerator xyToolTipGenerator = (dataset, series, item) -> {
-            Number x1 = dataset.getX(series, item);
-            Number y1 = dataset.getY(series, item);
-            return String.format("<html><p style='color:#0000ff;'>%s</p>", dataset.getSeriesKey(series)) +
-                    String.format("Ensemble:'%s'<br/>", x1) +
-                    String.format("Y:'%s'", y1.toString()) +
-                    "</html>";
-        };
-
-        rendererMap.forEach((k, v) -> {
-            XYLineAndShapeRenderer renderer = ((XYLineAndShapeRenderer)chart.getChart().getXYPlot().getRenderer(k));
-            renderer.setDefaultToolTipGenerator(xyToolTipGenerator);
-            renderer.setDefaultItemLabelFont(DefaultSettings.setSegoeFontText());
-            renderer.setDefaultItemLabelFont(DefaultSettings.setSegoeFontText());
-        });
-
-        chart.setDismissDelay(Integer.MAX_VALUE);
-    }
-
-
     // --Commented out by Inspection START (7/23/23, 2:45 PM) - for viewing statistics:
 //    public void hidePoint(String stat, int rangeAxis) {
 //        List<PointSpec> pointsForRange = pointSpecMap.get(rangeAxis);
@@ -192,7 +148,5 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart {
 //        }
 //    }
 // --Commented out by Inspection STOP (7/23/23, 2:46 PM)
-
-
 }
 
