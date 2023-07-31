@@ -23,8 +23,8 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
 
-public class EnsembleChartAcrossTime implements EnsembleChart, LinePlot {
-    private String chartTitle = "";
+public class EnsembleChartAcrossTime implements EnsembleChart {
+    private final String chartTitle = "";
     private String yLabel = "";
     private String xLabel = "";
     private final Map<Integer, List<LineSpec>> lineSpecMap = new HashMap<>();
@@ -51,7 +51,6 @@ public class EnsembleChartAcrossTime implements EnsembleChart, LinePlot {
         xLabel = label;
     }
 
-    @Override
     public void addLine(LineSpec line) throws ParseException {
         if(ignoreLine(line.lineName) == 0) {
             return;

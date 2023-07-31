@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot {
+public class EnsembleChartAcrossEnsembles implements EnsembleChart {
 
     private String chartTitle = "";
     private String yLabel = "";
@@ -41,7 +41,6 @@ public class EnsembleChartAcrossEnsembles implements EnsembleChart, ScatterPlot 
     public void setXLabel(String label) {xLabel = label;
     }
 
-    @Override
     public void addPoint(PointSpec point) {
         XYSeries newMember = new XYSeries(point.pointName);
         for (int i = 0; i < point.yValue.length; i++) {
