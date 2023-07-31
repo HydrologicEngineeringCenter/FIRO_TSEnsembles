@@ -20,7 +20,7 @@ public abstract class DataTransformView extends JPanel implements ActionListener
         createButtonGroup();
     }
 
-    protected void setupDataViewPanel() {
+    private void setupDataViewPanel() {
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
 

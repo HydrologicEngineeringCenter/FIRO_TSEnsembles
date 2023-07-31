@@ -70,7 +70,7 @@ public class EnsembleArrayChartManager extends ChartManager {
         return metricCollections.getMetricType() == MetricTypes.ARRAY_OF_ARRAY;
     }
 
-    void plotResidentMetricChart(EnsembleChart chart) {
+    private void plotResidentMetricChart(EnsembleChart chart) {
         for (Map.Entry<String, float[]> entry : getMetricValuesFromResidentMetricDatabase().entrySet()) {
             String stat = entry.getKey();
             float[] vals = entry.getValue();

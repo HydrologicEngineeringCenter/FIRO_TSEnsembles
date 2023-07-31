@@ -35,11 +35,11 @@ public class EnsembleArrayTab extends JPanel {
         statAndDataViewPanel.add(dataViewPanel, BorderLayout.SOUTH);
     }
 
-    public ChartPanel createChart() {
+    private ChartPanel createChart() {
         return new EnsembleChartAcrossTime().generateChart();
     }
 
-    void initiateEnsembleChart(DataTransformView dataTransformView, ComputePanelView computePanelView) {
+    private void initiateEnsembleChart(DataTransformView dataTransformView, ComputePanelView computePanelView) {
         ComputePanelController computePanelController = new ComputePanelController(dataTransformView, computePanelView);
         new EnsembleArrayChartManager(computePanelController.getStatisticsMap(), chartPanel);
     }

@@ -14,13 +14,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DatabaseController {
-    Logger logger = Logger.getLogger(DatabaseController.class.getName());
+    private final Logger logger = Logger.getLogger(DatabaseController.class.getName());
     private JPanel filePathPanel;
     private JComboBox<ZonedDateTime> dateTimes;
     private JComboBox<RecordIdentifier> locations;
     private JTextField filePath;
     private DatabaseHandlerService databaseHandlerService;
-    boolean isNewLoad;  //checks if new database is added. If database is new, set to true
+    private boolean isNewLoad;  //checks if new database is added. If database is new, set to true
 
     public DatabaseController(OptionsPanel optionsPanel) {
         initiateDatabaseListener(optionsPanel);
@@ -73,15 +73,15 @@ public class DatabaseController {
         });
     }
 
-    public void setDateTimes(JComboBox<ZonedDateTime> dateTimes) {
+    private void setDateTimes(JComboBox<ZonedDateTime> dateTimes) {
         this.dateTimes = dateTimes;
     }
 
-    public void setLocations(JComboBox<RecordIdentifier> locations) {
+    private void setLocations(JComboBox<RecordIdentifier> locations) {
         this.locations = locations;
     }
 
-    public void setFilePath(JTextField filePath) {
+    private void setFilePath(JTextField filePath) {
         this.filePath = filePath;
     }
 

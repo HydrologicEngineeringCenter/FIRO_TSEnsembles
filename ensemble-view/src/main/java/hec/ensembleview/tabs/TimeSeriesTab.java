@@ -36,11 +36,11 @@ public class TimeSeriesTab extends JPanel {
         statAndDataViewPanel.add(dataViewPanel, BorderLayout.SOUTH);
     }
 
-    public ChartPanel createEnsembleChart() {
+    private ChartPanel createEnsembleChart() {
         return new EnsembleChartAcrossTime().generateChart();
     }
 
-    void initiateChartManager(DataTransformView dataTransformView, ComputePanelView computePanelView) { //The Chart Manager is a controller for the chart.
+    private void initiateChartManager(DataTransformView dataTransformView, ComputePanelView computePanelView) { //The Chart Manager is a controller for the chart.
         ComputePanelController computePanelController = new ComputePanelController(dataTransformView, computePanelView);
         new EnsembleTimeSeriesChartManager(computePanelController.getStatisticsMap(), ensembleChart);
     }

@@ -2,14 +2,11 @@ package hec.ensembleview.mappings;
 
 import hec.ensemble.stats.Statistics;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SingleValueComboBoxMap {
-    public final static Map<SingleValueSummaryType, String> summaryComboBoxMap = new HashMap<>();
-    public final static Map<SingleValueSummaryType, List<List<Statistics>>> summaryStatisticsMap = new HashMap<>();
+    private static final Map<SingleValueSummaryType, String> summaryComboBoxMap = new EnumMap<>(SingleValueSummaryType.class);
+    private static final Map<SingleValueSummaryType, List<List<Statistics>>> summaryStatisticsMap = new EnumMap<>(SingleValueSummaryType.class);
 
     static {
         summaryComboBoxMap.put(SingleValueSummaryType.COMPUTEACROSSENSEMBLES, "Compute Across Ensembles for Each Time Step");
@@ -34,5 +31,13 @@ public class SingleValueComboBoxMap {
                         Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.STANDARDDEVIATION, Statistics.VARIANCE, Statistics.PERCENTILES, Statistics.TOTAL)
                 )
         );
+    }
+
+    public static Map<SingleValueSummaryType, String> getSummaryComboBoxMap() {
+        return summaryComboBoxMap;
+    }
+
+    public static Map<SingleValueSummaryType, List<List<Statistics>>> getSummaryStatisticsMap() {
+        return summaryStatisticsMap;
     }
 }

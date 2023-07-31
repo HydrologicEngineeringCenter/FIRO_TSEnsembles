@@ -12,37 +12,35 @@ import java.awt.*;
 import java.util.Objects;
 
 public class SingleValueSummaryTab extends JPanel {
-    JPanel leftPanel;
-    JPanel rightPanel;
+    private JPanel leftPanel;
+    private JPanel rightPanel;
 
-    JComboBox<String> summaryTypeComboBox;
-    JComboBox<Statistics> statComboBox1;
-    JComboBox<Statistics> statComboBox2;
-    JTextField textField1;
-    JTextField textField2;
+    private JComboBox<String> summaryTypeComboBox;
+    private JComboBox<Statistics> statComboBox1;
+    private JComboBox<Statistics> statComboBox2;
+    private JTextField textField1;
+    private JTextField textField2;
 
-    JPanel buttonPanel;
-    public JButton computeButton;
-    JButton cleanButton;
+    private JPanel buttonPanel;
+    private JButton computeButton;
+    private JButton cleanButton;
 
-    JTextArea outputArea;
-    final StatComputationHelper statComputationHelper = new StatComputationHelper();
+    private JTextArea outputArea;
+    private final transient StatComputationHelper statComputationHelper = new StatComputationHelper();
 
     public SingleValueSummaryTab() {
         initializeUI();
         organizeUI();
         setSummaryTypeComboBox();
         setActionListeners();
-
-
     }
 
-    public Statistics getFirstStat()
+    private Statistics getFirstStat()
     {
         return (Statistics)statComboBox1.getSelectedItem();
     }
 
-    public String getFirstStatString() {
+    private String getFirstStatString() {
         String r;
         Statistics stat = getFirstStat();
         float[] vals = getFirstTextFieldValue();
@@ -65,7 +63,7 @@ public class SingleValueSummaryTab extends JPanel {
         return r;
     }
 
-    public String getSecondStatString() {
+    private String getSecondStatString() {
         String r;
         Statistics stat = getSecondStat();
         float[] vals = getSecondTextFieldValue();
@@ -85,21 +83,21 @@ public class SingleValueSummaryTab extends JPanel {
         return r;
     }
 
-    public Statistics getSecondStat()
+    private Statistics getSecondStat()
     {
         return (Statistics)statComboBox2.getSelectedItem();
     }
 
-    public SingleValueSummaryType getSummaryType() {
-        for (SingleValueSummaryType type : SingleValueComboBoxMap.summaryComboBoxMap.keySet()) {
-            if (SingleValueComboBoxMap.summaryComboBoxMap.get(type) == summaryTypeComboBox.getSelectedItem())
+    private SingleValueSummaryType getSummaryType() {
+        for (SingleValueSummaryType type : SingleValueComboBoxMap.getSummaryComboBoxMap().keySet()) {
+            if (SingleValueComboBoxMap.getSummaryComboBoxMap().get(type) == summaryTypeComboBox.getSelectedItem())
                 return type;
         }
         return null;
     }
 
-    public float[] getFirstTextFieldValue() {
-        if (StatisticsUITypeMap.map.get((Statistics)statComboBox1.getSelectedItem()) == StatisticUIType.CHECKBOX)
+    private float[] getFirstTextFieldValue() {
+        if (StatisticsUITypeMap.map.get(statComboBox1.getSelectedItem()) == StatisticUIType.CHECKBOX)
             return null;
 
         String textValues = textField1.getText();
@@ -115,7 +113,7 @@ public class SingleValueSummaryTab extends JPanel {
         return floatValuesParse;
     }
 
-    public float[] getSecondTextFieldValue() {
+    private float[] getSecondTextFieldValue() {
         if (StatisticsUITypeMap.map.get((Statistics)statComboBox2.getSelectedItem()) != StatisticUIType.TEXTBOX)
             return null;
 
@@ -132,7 +130,7 @@ public class SingleValueSummaryTab extends JPanel {
         return floatValuesParse;
     }
 
-    public void writeLn(String output) {
+    private void writeLn(String output) {
         outputArea.append("\n" + output);
     }
 
@@ -279,7 +277,7 @@ public class SingleValueSummaryTab extends JPanel {
 
     }
 
-    public void tryShowingOutput(float result) {
+    private void tryShowingOutput(float result) {
         if (getSummaryType() == SingleValueSummaryType.COMPUTEACROSSENSEMBLES) {
             writeLn(String.join(" ", "Computing",
                     getFirstStatString(), "across all ensemble members for each time-step,",
