@@ -52,10 +52,6 @@ public class EnsembleChartAcrossTime implements EnsembleChart {
     }
 
     public void addLine(LineSpec line) throws ParseException {
-        if(ignoreLine(line.lineName) == 0) {
-            return;
-        }
-
         TimeSeries newMember = new TimeSeries(line.lineName);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
         for (int i = 0; i < line.values.length; i++)
@@ -73,21 +69,7 @@ public class EnsembleChartAcrossTime implements EnsembleChart {
         lineSpecMap.get(line.rangeAxis).add(line);
     }
 
-    //TODO may not need ignoreLine anymore since we are not recreating lines
-    private int ignoreLine(String stat) {
-        for (int i = 0; i < timeSeriesCollectionMap.size(); i++) {
-            TimeSeriesCollection collection = timeSeriesCollectionMap.get(i);
-            for (int j = 0; j < collection.getSeriesCount(); j++) {
-                TimeSeries series = collection.getSeries(j);
-                if (series.getKey().toString().equalsIgnoreCase(stat)) {
-                    return 0;  //if 0 ignore line
-                }
-            }
-        }
-        return 1;  //if 1 add line
-    }
-
-    //TODO move this to ChartManager
+    //Refreshes time series ensembles to one color if metric is selected
     public void updateEnsembleLineSpec(boolean isChecked) {
         List<LineSpec> linesForRange = lineSpecMap.get(0);
         if(isChecked) {
@@ -128,16 +110,17 @@ public class EnsembleChartAcrossTime implements EnsembleChart {
             public void mousePressed(MouseEvent e) {
                 int mods = e.getModifiersEx();
                 int panMask = InputEvent.BUTTON1_DOWN_MASK;
-                if (mods == InputEvent.BUTTON1_DOWN_MASK+ InputEvent.SHIFT_DOWN_MASK) {
+                if (mods == InputEvent.BUTTON1_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK) {
                     panMask = 255; //The pan test will match nothing and the zoom rectangle will be activated.
-                }try {
-                Field mask = ChartPanel.class.getDeclaredField("panMask");
-                mask.setAccessible(true);
-                mask.set(this, panMask);
+                }
+                try {
+                    Field mask = ChartPanel.class.getDeclaredField("panMask");
+                    mask.setAccessible(true);
+                    mask.set(this, panMask);
 
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
                 super.mousePressed(e);
             }
         };

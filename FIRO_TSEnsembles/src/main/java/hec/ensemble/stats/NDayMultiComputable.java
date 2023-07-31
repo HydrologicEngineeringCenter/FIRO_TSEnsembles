@@ -63,10 +63,10 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
         StringBuilder label = new StringBuilder();
         for (int i = 0; i < days.length; i ++){
             if(i == days.length-1){
-                label.append(stepOneCompute.StatisticsLabel() + "(").append((int) days[i]).append("DAY)");
+                label.append(stepOneCompute.StatisticsLabel()).append("(").append((int) days[i]).append("DAY)");
             }
             else{
-                label.append(stepOneCompute.StatisticsLabel() + "(").append((int) days[i]).append("DAY)|");
+                label.append(stepOneCompute.StatisticsLabel()).append("(").append((int) days[i]).append("DAY)|");
             }
         }
         return label.toString();
