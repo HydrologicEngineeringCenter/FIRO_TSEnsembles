@@ -20,8 +20,6 @@ public class SingleValueSummaryTab extends JPanel {
     private JComboBox<Statistics> statComboBox2;
     private JTextField textField1;
     private JTextField textField2;
-
-    private JPanel buttonPanel;
     private JButton computeButton;
     private JButton cleanButton;
 
@@ -139,8 +137,8 @@ public class SingleValueSummaryTab extends JPanel {
         summaryTypeComboBox.addActionListener(e -> {
             String s = (String)summaryTypeComboBox.getSelectedItem();
             SingleValueSummaryType type = null;
-            for (SingleValueSummaryType t : SingleValueComboBoxMap.summaryComboBoxMap.keySet()) {
-                if (Objects.equals(SingleValueComboBoxMap.summaryComboBoxMap.get(t), s)) {
+            for (SingleValueSummaryType t : SingleValueComboBoxMap.getSummaryComboBoxMap().keySet()) {
+                if (Objects.equals(SingleValueComboBoxMap.getSummaryComboBoxMap().get(t), s)) {
                     type = t;
                     break;
                 }
@@ -232,7 +230,7 @@ public class SingleValueSummaryTab extends JPanel {
     }
 
     private void setSummaryTypeComboBox() {
-        for (String option : SingleValueComboBoxMap.summaryComboBoxMap.values())
+        for (String option : SingleValueComboBoxMap.getSummaryComboBoxMap().values())
             summaryTypeComboBox.addItem(option);
 
         summaryTypeComboBox.setSelectedItem(null);
@@ -245,14 +243,14 @@ public class SingleValueSummaryTab extends JPanel {
 
     private void setupStatComboBox1(SingleValueSummaryType option) {
         statComboBox1.removeAllItems();
-        for (Statistics stat : SingleValueComboBoxMap.summaryStatisticsMap.get(option).get(0)) {
+        for (Statistics stat : SingleValueComboBoxMap.getSummaryStatisticsMap().get(option).get(0)) {
             statComboBox1.addItem(stat);
         }
     }
 
     private void setupStatComboBox2(SingleValueSummaryType option) {
         statComboBox2.removeAllItems();
-        for (Statistics stat : SingleValueComboBoxMap.summaryStatisticsMap.get(option).get(1)) {
+        for (Statistics stat : SingleValueComboBoxMap.getSummaryStatisticsMap().get(option).get(1)) {
             statComboBox2.addItem(stat);
         }
     }
@@ -268,7 +266,7 @@ public class SingleValueSummaryTab extends JPanel {
         textField1 = new JTextField();
         textField2 = new JTextField();
 
-        buttonPanel = new JPanel();
+        JPanel buttonPanel = new JPanel();
         computeButton = new JButton("Compute");
         cleanButton = new JButton("Clean");
 
