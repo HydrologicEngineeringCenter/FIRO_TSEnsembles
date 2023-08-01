@@ -140,7 +140,7 @@ public class StatComputationHelper {
                 for(int i = 0; i < vals.length; i++) {
                     float[] prob = plottingPositionComputable.multiCompute(vals[i]);
                     float[] values = plottingPositionComputable.orderValues(vals[i]);
-                    databaseHandlerService.setEnsembleProbabilityMap(savedStats[i], plottingPositionComputable.assignProbability(values, prob));
+                    databaseHandlerService.setEnsembleProbabilityMap(savedStats[i], plottingPositionComputable.assignProbability(prob, values));
                 }
             }
         }
