@@ -119,5 +119,10 @@ public abstract class EnsembleChart {
         }
     }
 
-    public abstract ChartPanel generateChart();
+    public ChartPanel generateChart() {
+        ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot));
+        addChartFeatures(chart);
+
+        return chart;
+    }
 }

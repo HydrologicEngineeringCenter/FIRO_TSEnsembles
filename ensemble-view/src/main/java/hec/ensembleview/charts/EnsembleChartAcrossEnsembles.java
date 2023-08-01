@@ -2,7 +2,6 @@ package hec.ensembleview.charts;
 
 import hec.ensembleview.DefaultSettings;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -63,10 +62,8 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
     @Override
     public ChartPanel generateChart() {
         plot = createXyPlot();
-        ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot));
-        addChartFeatures(chart);
 
-        return chart;
+        return super.generateChart();
     }
 
     private XYPlot createXyPlot() {
