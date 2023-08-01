@@ -66,6 +66,10 @@ public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>, 
         return rval;
     }
 
+    public MetricTypes getMetricType() {
+        return metricType;
+    }
+
     /**
      * Returns an specified metric collection from this im-memory collection
      * @param issueDate date used to lookup metricColelction to return.

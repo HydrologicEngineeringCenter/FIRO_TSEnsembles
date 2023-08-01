@@ -1,39 +1,43 @@
 package hec.ensembleview.mappings;
 
-import hec.ensembleview.SingleValueSummaryType;
 import hec.ensemble.stats.Statistics;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SingleValueComboBoxMap {
-    public final static Map<SingleValueSummaryType, String> summaryComboBoxMap = new HashMap<>();
-    public final static Map<SingleValueSummaryType, List<List<Statistics>>> summaryStatisticsMap = new HashMap<>();
+    private static final Map<SingleValueSummaryType, String> summaryComboBoxMap = new EnumMap<>(SingleValueSummaryType.class);
+    private static final Map<SingleValueSummaryType, List<List<Statistics>>> summaryStatisticsMap = new EnumMap<>(SingleValueSummaryType.class);
 
     static {
-        summaryComboBoxMap.put(SingleValueSummaryType.ComputeAcrossEnsembles, "Compute Across Ensembles for Each Time Step");
-        summaryComboBoxMap.put(SingleValueSummaryType.ComputeAcrossTime, "Compute Across Time Steps for Each Ensemble");
-        summaryComboBoxMap.put(SingleValueSummaryType.ComputeCumulative, "Computing Cumulative");
+        summaryComboBoxMap.put(SingleValueSummaryType.COMPUTEACROSSENSEMBLES, "Compute Across Ensembles for Each Time Step");
+        summaryComboBoxMap.put(SingleValueSummaryType.COMPUTEACROSSTIME, "Compute Across Time Steps for Each Ensemble");
+        summaryComboBoxMap.put(SingleValueSummaryType.COMPUTECUMULATIVE, "Computing Cumulative");
 
-        summaryStatisticsMap.put(SingleValueSummaryType.ComputeAcrossEnsembles,
+        summaryStatisticsMap.put(SingleValueSummaryType.COMPUTEACROSSENSEMBLES,
                 Arrays.asList(
-                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.PERCENTILE),
+                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.PERCENTILES),
                         Arrays.asList(Statistics.MIN, Statistics.MAX)
                 )
         );
-        summaryStatisticsMap.put(SingleValueSummaryType.ComputeAcrossTime,
+        summaryStatisticsMap.put(SingleValueSummaryType.COMPUTEACROSSTIME,
                 Arrays.asList(
                         Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.TOTAL, Statistics.MAXACCUMDURATION, Statistics.MAXAVERAGEDURATION),
-                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.STANDARDDEVIATION, Statistics.VARIANCE, Statistics.PERCENTILE)
+                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.STANDARDDEVIATION, Statistics.VARIANCE, Statistics.PERCENTILES)
                 )
         );
-        summaryStatisticsMap.put(SingleValueSummaryType.ComputeCumulative,
+        summaryStatisticsMap.put(SingleValueSummaryType.COMPUTECUMULATIVE,
                 Arrays.asList(
-                        Arrays.asList(Statistics.CUMULATIVE),
-                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.STANDARDDEVIATION, Statistics.VARIANCE, Statistics.PERCENTILE, Statistics.TOTAL)
+                        Collections.singletonList(Statistics.CUMULATIVE),
+                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.STANDARDDEVIATION, Statistics.VARIANCE, Statistics.PERCENTILES, Statistics.TOTAL)
                 )
         );
+    }
+
+    public static Map<SingleValueSummaryType, String> getSummaryComboBoxMap() {
+        return summaryComboBoxMap;
+    }
+
+    public static Map<SingleValueSummaryType, List<List<Statistics>>> getSummaryStatisticsMap() {
+        return summaryStatisticsMap;
     }
 }

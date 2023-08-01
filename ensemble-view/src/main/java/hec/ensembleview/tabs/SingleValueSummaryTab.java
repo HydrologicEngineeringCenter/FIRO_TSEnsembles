@@ -1,60 +1,49 @@
 package hec.ensembleview.tabs;
 
-import hec.EnsembleDatabase;
-import hec.RecordIdentifier;
-import hec.ensemble.EnsembleTimeSeries;
-import hec.ensembleview.StatComputationHelper;
-import hec.ensembleview.SingleValueSummaryType;
-import hec.ensembleview.StatisticUIType;
-import hec.ensembleview.mappings.SingleValueComboBoxMap;
-import hec.ensembleview.mappings.StatisticsUITypeMap;
 import hec.ensemble.stats.Statistics;
-//import javafx.scene.chart.Chart;
+import hec.ensembleview.StatComputationHelper;
+import hec.ensembleview.mappings.StatisticUIType;
+import hec.ensembleview.mappings.SingleValueComboBoxMap;
+import hec.ensembleview.mappings.SingleValueSummaryType;
+import hec.ensembleview.mappings.StatisticsUITypeMap;
 
 import javax.swing.*;
 import java.awt.*;
-import java.time.ZonedDateTime;
 import java.util.Objects;
 
-public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
-    JPanel leftPanel;
-    JPanel rightPanel;
+public class SingleValueSummaryTab extends JPanel {
+    private JPanel leftPanel;
+    private JPanel rightPanel;
 
-    JComboBox<String> summaryTypeComboBox;
-    JComboBox<Statistics> statComboBox1;
-    JComboBox<Statistics> statComboBox2;
-    JTextField textField1;
-    JTextField textField2;
+    private JComboBox<String> summaryTypeComboBox;
+    private JComboBox<Statistics> statComboBox1;
+    private JComboBox<Statistics> statComboBox2;
+    private JTextField textField1;
+    private JTextField textField2;
+    private JButton computeButton;
+    private JButton cleanButton;
 
-    JPanel buttonPanel;
-    public JButton computeButton;
-    JButton cleanButton;
-
-    JTextArea outputArea;
-
-    EnsembleDatabase db;
-    RecordIdentifier rid;
-    ZonedDateTime zdt;
+    private JTextArea outputArea;
+    private final transient StatComputationHelper statComputationHelper = new StatComputationHelper();
 
     public SingleValueSummaryTab() {
         initializeUI();
         organizeUI();
         setSummaryTypeComboBox();
         setActionListeners();
-
     }
 
-    public Statistics getFirstStat()
+    private Statistics getFirstStat()
     {
         return (Statistics)statComboBox1.getSelectedItem();
     }
 
-    public String getFirstStatString() {
+    private String getFirstStatString() {
         String r;
         Statistics stat = getFirstStat();
         float[] vals = getFirstTextFieldValue();
         if (StatisticsUITypeMap.map.get(stat) == StatisticUIType.TEXTBOX) {
-            if (stat == Statistics.PERCENTILE) {
+            if (stat == Statistics.PERCENTILES) {
                 r = String.format("%.2f%% %s", vals[0] * 100, stat);
             } else if (stat == Statistics.MAXAVERAGEDURATION || stat == Statistics.MAXACCUMDURATION) {
                 r = String.format("%d hour %s", (int)vals[0], stat);
@@ -72,12 +61,12 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         return r;
     }
 
-    public String getSecondStatString() {
+    private String getSecondStatString() {
         String r;
         Statistics stat = getSecondStat();
         float[] vals = getSecondTextFieldValue();
         if (StatisticsUITypeMap.map.get(stat) == StatisticUIType.TEXTBOX) {
-            if (stat == Statistics.PERCENTILE) {
+            if (stat == Statistics.PERCENTILES) {
                 r = String.format("%.2f%% %s", vals[0] * 100, stat);
             } else if (stat == Statistics.MAXAVERAGEDURATION || stat == Statistics.MAXACCUMDURATION) {
                 r = String.format("%d hour %s", (int)vals[0], stat);
@@ -92,21 +81,21 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         return r;
     }
 
-    public Statistics getSecondStat()
+    private Statistics getSecondStat()
     {
         return (Statistics)statComboBox2.getSelectedItem();
     }
 
-    public SingleValueSummaryType getSummaryType() {
-        for (SingleValueSummaryType type : SingleValueComboBoxMap.summaryComboBoxMap.keySet()) {
-            if (SingleValueComboBoxMap.summaryComboBoxMap.get(type) == summaryTypeComboBox.getSelectedItem())
+    private SingleValueSummaryType getSummaryType() {
+        for (SingleValueSummaryType type : SingleValueComboBoxMap.getSummaryComboBoxMap().keySet()) {
+            if (SingleValueComboBoxMap.getSummaryComboBoxMap().get(type) == summaryTypeComboBox.getSelectedItem())
                 return type;
         }
         return null;
     }
 
-    public float[] getFirstTextFieldValue() {
-        if (StatisticsUITypeMap.map.get((Statistics)statComboBox1.getSelectedItem()) == StatisticUIType.CHECKBOX)
+    private float[] getFirstTextFieldValue() {
+        if (StatisticsUITypeMap.map.get(statComboBox1.getSelectedItem()) == StatisticUIType.CHECKBOX)
             return null;
 
         String textValues = textField1.getText();
@@ -122,7 +111,7 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         return floatValuesParse;
     }
 
-    public float[] getSecondTextFieldValue() {
+    private float[] getSecondTextFieldValue() {
         if (StatisticsUITypeMap.map.get((Statistics)statComboBox2.getSelectedItem()) != StatisticUIType.TEXTBOX)
             return null;
 
@@ -139,7 +128,7 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         return floatValuesParse;
     }
 
-    public void writeLn(String output) {
+    private void writeLn(String output) {
         outputArea.append("\n" + output);
     }
 
@@ -148,8 +137,8 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         summaryTypeComboBox.addActionListener(e -> {
             String s = (String)summaryTypeComboBox.getSelectedItem();
             SingleValueSummaryType type = null;
-            for (SingleValueSummaryType t : SingleValueComboBoxMap.summaryComboBoxMap.keySet()) {
-                if (Objects.equals(SingleValueComboBoxMap.summaryComboBoxMap.get(t), s)) {
+            for (SingleValueSummaryType t : SingleValueComboBoxMap.getSummaryComboBoxMap().keySet()) {
+                if (Objects.equals(SingleValueComboBoxMap.getSummaryComboBoxMap().get(t), s)) {
                     type = t;
                     break;
                 }
@@ -164,14 +153,12 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         statComboBox2.addActionListener(e ->
                 textField2.setEditable(StatisticsUITypeMap.map.get((Statistics) (statComboBox2.getSelectedItem())) != StatisticUIType.CHECKBOX));
 
-        cleanButton.addActionListener(e -> {
-            outputArea.setText("");
-        });
+        cleanButton.addActionListener(e -> outputArea.setText(""));
 
         statComboBox1.addActionListener(e -> {
             if(statComboBox1.getSelectedItem() == Statistics.MAXACCUMDURATION || statComboBox1.getSelectedItem() == Statistics.MAXAVERAGEDURATION) {
                 textField1.setToolTipText("Enter value in Hours");
-            } else if (statComboBox1.getSelectedItem() == Statistics.PERCENTILE) {
+            } else if (statComboBox1.getSelectedItem() == Statistics.PERCENTILES) {
                 textField1.setToolTipText("Enter percentile as Decimal");
             } else if (statComboBox1.getSelectedItem() == Statistics.CUMULATIVE) {
                 textField1.setToolTipText("Enter value in Days");
@@ -181,7 +168,7 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         });
 
         statComboBox2.addActionListener(e -> {
-            if (statComboBox2.getSelectedItem() == Statistics.PERCENTILE) {
+            if (statComboBox2.getSelectedItem() == Statistics.PERCENTILES) {
                 textField2.setToolTipText("Enter percentile as Decimal");
             } else {
                 textField2.setToolTipText(null);
@@ -189,18 +176,17 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         });
 
         computeButton.addActionListener(e -> {
-            EnsembleTimeSeries ets = db.getEnsembleTimeSeries(rid);
-            float value = StatComputationHelper.computeTwoStepComputable(ets, zdt, getFirstStat(), getFirstTextFieldValue(),
+            float value = statComputationHelper.computeTwoStepComputable(getFirstStat(), getFirstTextFieldValue(),
                     getSecondStat(), getSecondTextFieldValue(),
-                    getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles ||
-                            getSummaryType() == SingleValueSummaryType.ComputeCumulative);
+                    getSummaryType() == SingleValueSummaryType.COMPUTEACROSSENSEMBLES ||
+                            getSummaryType() == SingleValueSummaryType.COMPUTECUMULATIVE);
 
             tryShowingOutput(value);
         });
     }
 
     private void organizeUI() {
-        setLayout(new GridLayout(1,2));
+        setLayout(new GridLayout(2,1));
 
         add(leftPanel);
         add(rightPanel);
@@ -244,7 +230,7 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
     }
 
     private void setSummaryTypeComboBox() {
-        for (String option : SingleValueComboBoxMap.summaryComboBoxMap.values())
+        for (String option : SingleValueComboBoxMap.getSummaryComboBoxMap().values())
             summaryTypeComboBox.addItem(option);
 
         summaryTypeComboBox.setSelectedItem(null);
@@ -257,14 +243,14 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
 
     private void setupStatComboBox1(SingleValueSummaryType option) {
         statComboBox1.removeAllItems();
-        for (Statistics stat : SingleValueComboBoxMap.summaryStatisticsMap.get(option).get(0)) {
+        for (Statistics stat : SingleValueComboBoxMap.getSummaryStatisticsMap().get(option).get(0)) {
             statComboBox1.addItem(stat);
         }
     }
 
     private void setupStatComboBox2(SingleValueSummaryType option) {
         statComboBox2.removeAllItems();
-        for (Statistics stat : SingleValueComboBoxMap.summaryStatisticsMap.get(option).get(1)) {
+        for (Statistics stat : SingleValueComboBoxMap.getSummaryStatisticsMap().get(option).get(1)) {
             statComboBox2.addItem(stat);
         }
     }
@@ -280,7 +266,7 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
         textField1 = new JTextField();
         textField2 = new JTextField();
 
-        buttonPanel = new JPanel();
+        JPanel buttonPanel = new JPanel();
         computeButton = new JButton("Compute");
         cleanButton = new JButton("Clean");
 
@@ -289,35 +275,20 @@ public class SingleValueSummaryTab extends JPanel implements EnsembleTab {
 
     }
 
-    public void tryShowingOutput(float result) {
-        if (getSummaryType() == SingleValueSummaryType.ComputeAcrossEnsembles) {
+    private void tryShowingOutput(float result) {
+        if (getSummaryType() == SingleValueSummaryType.COMPUTEACROSSENSEMBLES) {
             writeLn(String.join(" ", "Computing",
                     getFirstStatString(), "across all ensemble members for each time-step,",
                     "then computing", getSecondStatString(), "across all time-steps",
                     "=", Float.toString(result)));
-        } else if (getSummaryType() == SingleValueSummaryType.ComputeAcrossTime) {
+        } else if (getSummaryType() == SingleValueSummaryType.COMPUTEACROSSTIME) {
             writeLn(String.join(" ", "Computing",
                     getFirstStatString(), "for each ensemble across all time-steps,",
                     "then computing", getSecondStatString(), "across all ensemble members",
                     "=", Float.toString(result)));
-        } else if (getSummaryType() == SingleValueSummaryType.ComputeCumulative) {
+        } else if (getSummaryType() == SingleValueSummaryType.COMPUTECUMULATIVE) {
             writeLn(String.join(" ", "Computing", getFirstStatString() + ",",
                     "then computing", getSecondStatString(), "across all ensemble members =", Float.toString(result)));
         }
-    }
-
-    @Override
-    public void setDatabase(EnsembleDatabase db) {
-        this.db = db;
-    }
-
-    @Override
-    public void setRecordIdentifier(RecordIdentifier rid) {
-        this.rid = rid;
-    }
-
-    @Override
-    public void setZonedDateTime(ZonedDateTime zdt) {
-        this.zdt = zdt;
     }
 }

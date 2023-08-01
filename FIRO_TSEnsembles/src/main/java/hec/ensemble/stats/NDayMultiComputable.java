@@ -1,10 +1,8 @@
 package hec.ensemble.stats;
 
 public class NDayMultiComputable implements Computable, MultiComputable, StatisticsReportable, Configurable {
-
-    private  MultiComputable stepOneCompute;
-    private int accumulatingDays;
-    private  float[] _days;
+    private MultiComputable stepOneCompute;
+    private float[] days;
     Configuration config;
 
     /**
@@ -12,35 +10,32 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
      * Intended to be used for iterating for traces across time and does not account for daylight savings
      */
     public NDayMultiComputable(){ } // necessary for reflection deserializing serializing
-    public NDayMultiComputable(MultiComputable stepOne, int numberDays) {
-        stepOneCompute = stepOne;
-        accumulatingDays = numberDays;
-    }
 
     public NDayMultiComputable(MultiComputable stepOne, float[] numberDays) {
         stepOneCompute = stepOne;
-        _days = numberDays;
+        days = numberDays;
     }
 
     @Override
     public float compute(float[] values) {
         values = stepOneCompute.multiCompute(values);
-        int timestep = (int) config.getDuration().toHours();
-        int timestepDay = 24 / timestep;
-        return values[timestepDay * accumulatingDays];
+
+        int timeStep = (int) config.getDuration().toHours();
+        int timeStepDay = 24 / timeStep;
+        return values[timeStepDay * (int) days[0]];
     }
 
     @Override
     public float[] multiCompute(float[] values) {
-        int size = _days.length;
+        int size = days.length;
         float[] results = new float[size];
         int i = 0;
         values = stepOneCompute.multiCompute(values);
 
-        for(float day : _days) {
-            int timestep = (int) config.getDuration().toHours();
-            int timestepDay = 24 / timestep;
-            results[i] = values[timestepDay * (int) day];
+        for(float day : days) {
+            int timeStep = (int) config.getDuration().toHours();
+            int timeStepDay = 24 / timeStep;
+            results[i] = values[timeStepDay * (int) day];
             i++;
         }
         return results;
@@ -54,7 +49,7 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
 
     @Override
     public void configure(Configuration c) {
-        config = c; //figure out how many values make up a day and multiple by number of days
+        config = c; //figure out how many values make up a day and multiply by number of days
         try {
             Configurable configurable = (Configurable) stepOneCompute;
             configurable.configure(this.config);
@@ -65,7 +60,16 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
 
     @Override
     public String StatisticsLabel() {
-        return stepOneCompute.StatisticsLabel()+"("+ accumulatingDays +"DAY)";
+        StringBuilder label = new StringBuilder();
+        for (int i = 0; i < days.length; i ++){
+            if(i == days.length-1){
+                label.append(stepOneCompute.StatisticsLabel()).append("(").append((int) days[i]).append("DAY)");
+            }
+            else{
+                label.append(stepOneCompute.StatisticsLabel()).append("(").append((int) days[i]).append("DAY)|");
+            }
+        }
+        return label.toString();
     }
 
 

@@ -1,16 +1,15 @@
 package hec.ensemble.stats;
 
-import hec.ensemble.stats.*;
 import org.jdom.Element;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class SingleComputableTest {
     SingleComputable maxOfMax = new MaxOfMaximumsComputable();
     Statistics[] stats = new Statistics[]{Statistics.MAX};
     MultiComputable mc = new MultiStatComputable(stats);
-    NDayMultiComputable nday = new NDayMultiComputable(mc,2);
+    NDayMultiComputable nday = new NDayMultiComputable(mc,new float[] {2});
     SingleComputable twostep = new TwoStepComputable(nday,new MeanComputable(), true);
 
     @Test
