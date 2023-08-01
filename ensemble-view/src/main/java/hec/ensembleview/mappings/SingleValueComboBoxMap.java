@@ -27,7 +27,7 @@ public class SingleValueComboBoxMap {
         );
         summaryStatisticsMap.put(SingleValueSummaryType.COMPUTECUMULATIVE,
                 Arrays.asList(
-                        Arrays.asList(Statistics.CUMULATIVE),
+                        Collections.singletonList(Statistics.CUMULATIVE),
                         Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.STANDARDDEVIATION, Statistics.VARIANCE, Statistics.PERCENTILES, Statistics.TOTAL)
                 )
         );
