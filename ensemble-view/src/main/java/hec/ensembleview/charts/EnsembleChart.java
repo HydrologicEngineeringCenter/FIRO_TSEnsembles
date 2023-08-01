@@ -2,6 +2,7 @@ package hec.ensembleview.charts;
 
 import hec.ensemble.stats.Statistics;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -14,13 +15,13 @@ import java.util.Map;
 import java.util.Random;
 
 public abstract class EnsembleChart {
-    protected final String chartTitle = "";
+    private final String chartTitle = "";
     protected String yLabel = "";
     protected String xLabel = "";
     protected final Map<Integer, XYLineAndShapeRenderer> rendererMap = new HashMap<>();
     protected XYPlot plot;
 
-    public EnsembleChart() {
+    protected EnsembleChart() {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
     }
@@ -43,7 +44,7 @@ public abstract class EnsembleChart {
         return c;
     }
 
-    protected void addChartFeatures(ChartPanel chart) {
+    private void addChartFeatures(ChartPanel chart) {
         chart.setMouseZoomable(false);
         chart.setMouseWheelEnabled(true);
         chart.setDomainZoomable(true);
