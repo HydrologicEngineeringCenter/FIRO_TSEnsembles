@@ -75,7 +75,6 @@ public class ComputePanelController implements PropertyChangeListener {
             @Override
             public void setIsDataViewProbability(Boolean prob) {
                 isProbability = prob;
-                timeSeriesType(isProbability);
                 statisticsMap.setDataView(isProbability, ChartType.SCATTERPLOT);
             }
 
