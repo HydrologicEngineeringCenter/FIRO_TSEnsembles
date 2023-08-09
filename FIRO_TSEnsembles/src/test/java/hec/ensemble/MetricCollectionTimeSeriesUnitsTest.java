@@ -54,7 +54,7 @@ class MetricCollectionTimeSeriesUnitsTest {
         c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),"cfs"));
         float[] num1 = {11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8};
         float[] results = test.multiCompute(num1);
-        assertEquals("acre-ft", test.getOutputUnits());
+        assertEquals("ACRE-FT", test.getOutputUnits());
     }
 
     @Test
@@ -69,7 +69,7 @@ class MetricCollectionTimeSeriesUnitsTest {
             //compute the statistics for the entire ensemble time series
             MetricCollectionTimeSeries output = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(test);
 
-            assertEquals("acre-ft", output.getUnits());
+            assertEquals("ACRE-FT", output.getUnits());
 
             //write result
             _db.write(output);
@@ -91,7 +91,7 @@ class MetricCollectionTimeSeriesUnitsTest {
             //compute the statistics for the entire ensemble time series
             MetricCollectionTimeSeries output = ets.iterateTracesOfEnsemblesWithMultiComputable(test);
 
-            assertEquals("acre-ft", output.getUnits());
+            assertEquals("ACRE-FT", output.getUnits());
 
             //write result
             _db.write(output);
