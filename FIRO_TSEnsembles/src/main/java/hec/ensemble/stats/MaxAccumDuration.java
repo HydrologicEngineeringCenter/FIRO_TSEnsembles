@@ -1,14 +1,16 @@
 package hec.ensemble.stats;
 
-import static hec.ensemble.stats.ConvertUnits.convertCfsAcreFeet;
+import javax.measure.IncommensurableException;
+import javax.measure.Unit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public  class MaxAccumDuration implements Computable, Configurable {
+    private static final Logger logger = Logger.getLogger(MaxAccumDuration.class.getName());
     private static final String DEFAULT_INPUT_UNITS = "cfs";
-    private static final long DEFAULT_INPUT_DURATION = 3600;  //seconds
-
     Integer accumulatingDuration; //duration in hours
     Configuration config;
-    private String outputUnit;
+    private Unit<?> unit = null;
 
     /**
      * The max accumulated volume computes the max volume for a given duration (i.e. max 2-day volume).
@@ -40,18 +42,20 @@ public  class MaxAccumDuration implements Computable, Configurable {
 
     @Override
     public float compute(float[] values) {
-        float factor = getConversionFactor();
+        double factor = getConversionFactor();
+        long duration = getDuration();
+
         int timeSPD = timeStepsPerDuration();
         float maxVal = Float.MIN_VALUE;
         float vol;
         float durationVolume = 0;
         for(int i = 0; i<values.length;i++){
-            durationVolume += factor * values[i];
+            durationVolume += factor * values[i] * duration;
             if(i==(timeSPD -1)){
                 vol =durationVolume;
                 maxVal = vol;
             }else if(i>=timeSPD){
-                float oldval = factor * values[i-timeSPD];
+                float oldval = (float) (factor * values[i-timeSPD] * duration);
                 durationVolume-=oldval;
                 vol =durationVolume;
                 if(vol>maxVal)maxVal = vol;
@@ -60,12 +64,13 @@ public  class MaxAccumDuration implements Computable, Configurable {
         return maxVal;
     }
 
-    private float getConversionFactor() {
-        if(getInputUnits().equalsIgnoreCase("cfs")) {
-            outputUnit = "acre-ft";
-            return convertCfsAcreFeet((int) getDuration());
-        } else {
-            return 1;
+    private double getConversionFactor() {
+        unit = ConvertUnits.convertStringUnits(getInputUnits());
+        try {
+            return ConvertUnits.getAccumulationConversionFactor(unit);
+        } catch (IncommensurableException e) {
+            logger.log(Level.SEVERE, "Error in max accumulated duration compute");
+            throw new RuntimeException(e);
         }
     }
 
@@ -78,16 +83,12 @@ public  class MaxAccumDuration implements Computable, Configurable {
     }
 
     private long getDuration() {
-        if(config == null) {
-            return DEFAULT_INPUT_DURATION;
-        } else {
-            return config.getDuration().getSeconds();
-        }
+        return config.getDuration().getSeconds();
     }
 
     @Override
     public String getOutputUnits() {
-        return outputUnit;
+        return UnitsUtil.getOutputUnitString(unit);
     }
 
     @Override

@@ -10,6 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EnsembleViewer {
+    static {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                 UnsupportedLookAndFeelException e) {
+            throw new RuntimeException(e);
+        }
+    }
     private JTabbedPane tabPane;
     private final List<TabSpec> tabs = new ArrayList<>();
 

@@ -1,11 +1,12 @@
 package hec.ensemble.stats;
 
-import static hec.ensemble.stats.ConvertUnits.convertCfsAcreFeet;
+import javax.measure.IncommensurableException;
+import javax.measure.Unit;
 
 public class Total implements Computable, Configurable {
     private static final String DEFAULT_INPUT_UNITS = "cfs";
     Configuration config;
-    private String outputUnit;
+    private Unit<?> unit = null;
 
     /**
      * Instantiates a total flow computable object
@@ -16,19 +17,19 @@ public class Total implements Computable, Configurable {
 
     @Override
     public float compute(float[] values) {
-        float factor = getConversionFactor();
+        double factor = getConversionFactor();
 
         float flowVol = 0;
-        for (float Q : values) flowVol += factor * Q;
+        for (float Q : values) flowVol += factor * Q * config.getDuration().getSeconds();
         return flowVol;
     }
 
-    private float getConversionFactor() {
-        if(getInputUnits().equalsIgnoreCase("cfs")) {
-            outputUnit = "acre-ft";
-            return convertCfsAcreFeet((int) config.getDuration().getSeconds());
-        } else {
-            return 1;
+    private double getConversionFactor() {
+        unit = ConvertUnits.convertStringUnits(getInputUnits());
+        try {
+            return ConvertUnits.getAccumulationConversionFactor(unit);
+        } catch (IncommensurableException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -42,7 +43,7 @@ public class Total implements Computable, Configurable {
 
     @Override
     public String getOutputUnits() {
-        return outputUnit;
+        return UnitsUtil.getOutputUnitString(unit);
     }
 
     @Override
