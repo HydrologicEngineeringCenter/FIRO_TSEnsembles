@@ -97,12 +97,13 @@ public class StatTimeSeriesComputePanelView extends ComputePanelView {
             if(percentileValues.getText().isEmpty()) {
                 return;
             }
-            timeListener.getTextFieldValues(percentileValues);
             try {
+                timeListener.getTextFieldValues(percentileValues);
                 timeListener.setCheckedStatistics(percentiles.getName());
                 timeListener.initiateTimeSeriesCompute();
             } catch (Exception ex) {
                 logger.log(Level.SEVERE, "Error in Text Field. Text input cannot be understood or parsed");
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
