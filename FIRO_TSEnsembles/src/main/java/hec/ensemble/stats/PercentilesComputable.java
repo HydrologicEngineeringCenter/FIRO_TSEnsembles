@@ -57,40 +57,34 @@ public class PercentilesComputable implements Computable, MultiComputable, Confi
     /**
      * computePercentile must be sorted.
      * @param values must be sorted
-     * @param p is the percentile value
+     * @param interpVal is the percentile value
      */
 
-    private float computePercentile(float[] values, float p) {
-        if (p > 1.0) {
+    private float computePercentile(float[] values, float interpVal) {
+        if (interpVal > 1.0) {
             throw new ArithmeticException("Percentile must be less than equal to 1");
         }
-        if (p < 0) {
+        if (interpVal < 0) {
             throw new ArithmeticException("Percentile must be greater than or equal to 0");
         }
 
-        if (p == 0) {
+        if (interpVal == 0) {
             return values[0];
         } else {
-            if (p == 1.0) {
+            if (interpVal == 1.0) {
                 return values[values.length - 1];
             } else {
-                int startIndex = (int) (p * (values.length-1));
+                int startIndex = (int) (interpVal * (values.length-1));
                 int endIndex = startIndex + 1;
 
-                float x1 = (float) (startIndex) / (values.length - 1);
-                float x2 = (float) (endIndex) / (values.length -1);
+                float x1 = (float) startIndex / (values.length - 1);
+                float x2 = (float) endIndex / (values.length - 1);
                 float y1 = values[startIndex];
                 float y2 = values[endIndex];
-                return linInterp(x1, x2, y1, y2, p);
+
+                return LinearInterp.linInterp(x1, x2, y1, y2, interpVal);
             }
         }
-    }
-    private float linInterp(float x1, float x2, float y1, float y2, float p) {
-        //linear interpolation to estimate the value given the exceedance
-
-        double slp = (y2 - y1) / (x2 - x1);
-        double interpValue = slp * (p -x1) + y1;
-        return (float) interpValue;
     }
 
     @Override

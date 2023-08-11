@@ -20,9 +20,10 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
     public float compute(float[] values) {
         values = stepOneCompute.multiCompute(values);
 
-        int timeStep = (int) config.getDuration().toHours();
-        int timeStepDay = 24 / timeStep;
-        return values[timeStepDay * (int) days[0]];
+        int timeStep = (int) config.getDuration().getSeconds();
+        int timeStepDay = 86400 / timeStep;
+        float interpVal = timeStepDay * days[0];
+        return interpolateNDay(values, interpVal);
     }
 
     @Override
@@ -33,12 +34,34 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
         values = stepOneCompute.multiCompute(values);
 
         for(float day : days) {
-            int timeStep = (int) config.getDuration().toHours();
-            int timeStepDay = 24 / timeStep;
-            results[i] = values[timeStepDay * (int) day];
+            int timeStep = (int) config.getDuration().getSeconds();
+            int timeStepDay = 86400 / timeStep;
+            float interpVal = timeStepDay * day;
+            results[i] = interpolateNDay(values, interpVal);
             i++;
         }
         return results;
+    }
+
+    private float interpolateNDay(float[] values, float interpVal) {
+        if (interpVal > values.length) {
+            throw new ArithmeticException("Accumulating days higher than given time series length.  Use a lower value");
+        }
+
+        if (interpVal < 0) {
+            throw new ArithmeticException("Accumulating days must be greater than 0");
+        }
+
+        if (interpVal == values.length-1) {
+            return values[(int) interpVal];
+        }
+
+        int startIndex = (int) interpVal;
+        int endIndex = startIndex + 1;
+
+        float y1 = values[startIndex];
+        float y2 = values[endIndex];
+        return LinearInterp.linInterp(startIndex, endIndex, y1, y2, interpVal);
     }
 
     @Override
@@ -63,10 +86,10 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
         StringBuilder label = new StringBuilder();
         for (int i = 0; i < days.length; i ++){
             if(i == days.length-1){
-                label.append(stepOneCompute.StatisticsLabel()).append("(").append((int) days[i]).append("DAY)");
+                label.append(stepOneCompute.StatisticsLabel()).append("(").append(days[i]).append("DAY)");
             }
             else{
-                label.append(stepOneCompute.StatisticsLabel()).append("(").append((int) days[i]).append("DAY)|");
+                label.append(stepOneCompute.StatisticsLabel()).append("(").append(days[i]).append("DAY)|");
             }
         }
         return label.toString();

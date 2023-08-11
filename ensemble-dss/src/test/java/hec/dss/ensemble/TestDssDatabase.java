@@ -159,9 +159,9 @@ public class TestDssDatabase {
 
         HecTimeSeries dss = new HecTimeSeries(db.getFileName());
         String[] pathsToFind = new String[] {
-                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILES(0.95)/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
-                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILES(0.95)/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
-                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2DAY),PERCENTILES(0.95)/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2.0DAY),PERCENTILES(0.95)/01Nov2013/1Hour/T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2.0DAY),PERCENTILES(0.95)/01Nov2013/1Hour/T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/" +DssDatabase.metricTimeseriesIdentifier+ "-flow-CUMULATIVE(2.0DAY),PERCENTILES(0.95)/01Nov2013/1Hour/T:20131105-1200|V:20131105-120000|/",
         };
 
         for (String path : pathsToFind) {

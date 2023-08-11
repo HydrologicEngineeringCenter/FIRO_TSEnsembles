@@ -149,11 +149,12 @@ public class StatEnsembleComputePanelView extends ComputePanelView {
     public void actionPerformed(ActionEvent e) {
         JTextField textField = (JTextField) e.getSource();
         if(isTextBoxAvailable(textField)) {
-            this.ensembleListener.getTextFieldValues(textField);
             try {
+                this.ensembleListener.getTextFieldValues(textField);
                 this.ensembleListener.setCheckedStatistics(textField.getName());
                 this.ensembleListener.initiateEnsembleCompute();
             } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
                 logger.log(Level.SEVERE, "Error in Text Field. Text input cannot be understood or parsed");
             }
         }
