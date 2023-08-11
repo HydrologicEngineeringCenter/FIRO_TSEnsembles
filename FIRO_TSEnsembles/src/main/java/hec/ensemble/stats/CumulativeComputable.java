@@ -6,7 +6,7 @@ import javax.measure.Unit;
 public class CumulativeComputable implements MultiComputable, Configurable {
     private static final String DEFAULT_INPUT_UNITS = "cfs";
     private Configuration config;
-    private Unit<?> unit = null;
+    private Unit<?> unit;
 
     @Override
     public float[] multiCompute(float[] values) {

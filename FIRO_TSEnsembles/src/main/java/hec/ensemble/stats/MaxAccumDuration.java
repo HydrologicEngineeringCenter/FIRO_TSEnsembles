@@ -10,7 +10,7 @@ public  class MaxAccumDuration implements Computable, Configurable {
     private static final String DEFAULT_INPUT_UNITS = "cfs";
     Integer accumulatingDuration; //duration in hours
     Configuration config;
-    private Unit<?> unit = null;
+    private Unit<?> unit;
 
     /**
      * The max accumulated volume computes the max volume for a given duration (i.e. max 2-day volume).

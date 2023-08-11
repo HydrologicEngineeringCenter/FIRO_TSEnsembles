@@ -6,7 +6,7 @@ import javax.measure.Unit;
 public class Total implements Computable, Configurable {
     private static final String DEFAULT_INPUT_UNITS = "cfs";
     Configuration config;
-    private Unit<?> unit = null;
+    private Unit<?> unit;
 
     /**
      * Instantiates a total flow computable object
