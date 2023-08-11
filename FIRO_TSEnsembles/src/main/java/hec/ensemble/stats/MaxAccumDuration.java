@@ -42,7 +42,7 @@ public  class MaxAccumDuration implements Computable, Configurable {
 
     @Override
     public float compute(float[] values) {
-        double factor = getConversionFactor();
+        double factor = getAccumulationConversionFactor();
         long duration = getDuration();
 
         int timeSPD = timeStepsPerDuration();
@@ -64,7 +64,7 @@ public  class MaxAccumDuration implements Computable, Configurable {
         return maxVal;
     }
 
-    private double getConversionFactor() {
+    private double getAccumulationConversionFactor() {
         unit = ConvertUnits.convertStringUnits(getInputUnits());
         try {
             return ConvertUnits.getAccumulationConversionFactor(unit);
