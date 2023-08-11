@@ -12,11 +12,11 @@ public final class ConvertUnits {
     private ConvertUnits() {
     }
 
-    public static Unit<?> convertStringUnits(String units) {
+    static Unit<?> convertStringUnits(String units) {
         return UnitsUtil.convert(units);
     }
 
-    public static double getAccumulationConversionFactor(Unit<?> unit) throws IncommensurableException {
+    static double getAccumulationConversionFactor(Unit<?> unit) throws IncommensurableException {
         if (unit.equals(CUBIC_FOOT.divide(SECOND)) || unit.equals(KILO(CUBIC_FOOT.divide(SECOND)))) {
             RationalConverter rationalConverter = (RationalConverter) unit.getConverterToAny(ACRE_FOOT.divide(SECOND));
 
