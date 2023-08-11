@@ -69,7 +69,9 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
 
     void setChartLabels() {
         chart.setXLabel("Date/Time");
-        chart.setYLabel(String.join("-", databaseHandlerService.getDbHandlerRid().parameter, units));
+
+        String yLabelText = databaseHandlerService.getDbHandlerRid().parameter + " (" + units + ")";
+        chart.setYLabel(yLabelText);
     }
 
     private boolean isMetricTimeSeries(MetricCollectionTimeSeries metricCollections) {

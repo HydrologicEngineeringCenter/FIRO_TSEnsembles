@@ -76,10 +76,19 @@ public class EnsembleArrayChartManager extends ChartManager {
     }
 
     private void setChartLabels() {
+        String parameter = databaseHandlerService.getDbHandlerRid().parameter;
+
+        String yLabelText = parameter + " (" + units + ")";
+        chart.setYLabel(yLabelText);
+
+        if (chart instanceof EnsembleChartAcrossEnsembles) {
+            String y2LabelText = parameter + " (" + secondaryUnits + ")";
+            ((EnsembleChartAcrossEnsembles) chart).setY2Label(y2LabelText);
+        }
+
         chart.setXLabel("Ensembles");
-        chart.setYLabel(String.join("-", databaseHandlerService.getDbHandlerRid().parameter, units));
-        ((EnsembleChartAcrossEnsembles) chart).setY2Label(String.join("-", databaseHandlerService.getDbHandlerRid().parameter, secondaryUnits));
     }
+
 
     private boolean isMetricArrayOfArray(MetricCollectionTimeSeries metricCollections) {
         return metricCollections.getMetricType() == MetricTypes.ARRAY_OF_ARRAY;
