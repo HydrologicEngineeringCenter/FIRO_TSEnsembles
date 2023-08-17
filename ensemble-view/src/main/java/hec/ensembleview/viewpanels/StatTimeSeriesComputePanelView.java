@@ -111,7 +111,9 @@ public class StatTimeSeriesComputePanelView extends ComputePanelView {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if(evt.getSource() instanceof DatabaseHandlerService) {
+            removeCheckBoxListener(statisticsList);
             resetCheckboxes();
+            addCheckboxListeners(statisticsList);
         }
     }
 }
