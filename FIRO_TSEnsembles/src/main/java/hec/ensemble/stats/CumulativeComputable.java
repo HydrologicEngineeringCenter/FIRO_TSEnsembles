@@ -11,14 +11,13 @@ public class CumulativeComputable implements MultiComputable, Configurable {
     @Override
     public float[] multiCompute(float[] values) {
         double factor = getConversionFactor();
-        long duration = getDuration();
 
         float[] flowVol = new float[values.length];
         for (int i = 0; i < flowVol.length; i++) {
             if (i == 0) {
-                flowVol[i] = (float) factor * (values[0]) * duration;
+                flowVol[i] = (float) factor * (values[0]);
             } else {
-                flowVol[i] = (float) (flowVol[i - 1] + factor * (values[i]) * duration);
+                flowVol[i] = (float) (flowVol[i - 1] + factor * (values[i]));
             }
         }
         return flowVol;
@@ -27,7 +26,11 @@ public class CumulativeComputable implements MultiComputable, Configurable {
     private double getConversionFactor() {
         unit = ConvertUnits.convertStringUnits(getInputUnits());
         try {
-            return ConvertUnits.getAccumulationConversionFactor(unit);
+            double factor = ConvertUnits.getAccumulationConversionFactor(unit);
+            if(ConvertUnits.isUnitsRateUnit(unit)) {
+                return factor * getDuration();
+            }
+            return factor;
         } catch (IncommensurableException e) {
             throw new RuntimeException(e);
         }

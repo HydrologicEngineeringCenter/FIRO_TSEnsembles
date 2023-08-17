@@ -20,14 +20,18 @@ public class Total implements Computable, Configurable {
         double factor = getConversionFactor();
 
         float flowVol = 0;
-        for (float Q : values) flowVol += factor * Q * config.getDuration().getSeconds();
+        for (float Q : values) flowVol += factor * Q;
         return flowVol;
     }
 
     private double getConversionFactor() {
         unit = ConvertUnits.convertStringUnits(getInputUnits());
         try {
-            return ConvertUnits.getAccumulationConversionFactor(unit);
+            double factor = ConvertUnits.getAccumulationConversionFactor(unit);
+            if(ConvertUnits.isUnitsRateUnit(unit)) {
+                return factor * config.getDuration().getSeconds();
+            }
+            return factor;
         } catch (IncommensurableException e) {
             throw new RuntimeException(e);
         }
