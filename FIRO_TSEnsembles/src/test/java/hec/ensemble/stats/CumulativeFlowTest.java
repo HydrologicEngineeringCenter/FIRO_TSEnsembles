@@ -5,9 +5,6 @@ import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleConfiguration;
 import hec.ensemble.Logger;
 import hec.ensemble.TestData;
-import hec.ensemble.stats.Configurable;
-import hec.ensemble.stats.CumulativeComputable;
-import hec.ensemble.stats.MultiComputable;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -28,7 +25,8 @@ class CumulativeFlowTest {
         //Results computed in excel
         float[] result1 = {0.0826f,0.2479f,0.4959f,0.8264f,1.2397f,1.7355f,2.3140f,2.9752f,3.7190f,4.5455f,5.4545f};
         float[] result2 = {0.8264f, 3.3058f, 7.0248f, 13.6364f, 17.7686f, 25.2066f, 33.8843f, 39.8347f, 45.4545f};
-        float[][] results = {result1, result2};
+        float[] result3 = {10, 40, 85, 165, 215, 305, 410, 482, 550};
+        float[][] results = {result1, result2, result3};
         return results[i];
     }
 
@@ -46,6 +44,30 @@ class CumulativeFlowTest {
         Configurable c = (Configurable) test;
         c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),"cfs"));
         assertArrayEquals(testResults(1), test.multiCompute(testCases(1)), .001f);
+    }
+
+    @Test
+    public void testCumulativeExactSimpleArrayTensPrecip() {
+        MultiComputable test = new CumulativeComputable();
+        Configurable c = (Configurable) test;
+        c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),"in"));
+        assertArrayEquals(testResults(2), test.multiCompute(testCases(1)), .001f);
+    }
+
+    @Test
+    public void testCumulativeExactSimpleArrayTensTonne() {
+        MultiComputable test = new CumulativeComputable();
+        Configurable c = (Configurable) test;
+        c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),"tonne"));
+        assertArrayEquals(testResults(2), test.multiCompute(testCases(1)), .001f);
+    }
+
+    @Test
+    public void testCumulativeExactSimpleArrayTensMeters() {
+        MultiComputable test = new CumulativeComputable();
+        Configurable c = (Configurable) test;
+        c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),"m"));
+        assertArrayEquals(testResults(2), test.multiCompute(testCases(1)), .001f);
     }
 
     @Test
