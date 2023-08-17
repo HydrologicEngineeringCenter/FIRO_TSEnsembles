@@ -1,5 +1,7 @@
 package hec.ensemble.stats;
 
 public interface SingleComputable extends StatisticsReportable{
-    public float compute(float[][] values);
+    float compute(float[][] values);
+    String getOutputUnits();
+
 }

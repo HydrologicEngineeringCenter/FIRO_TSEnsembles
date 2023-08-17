@@ -54,6 +54,11 @@ public class TwoStepComputable implements SingleComputable, Configurable {
     }
 
     @Override
+    public String getOutputUnits() {
+        return _stepOne.getOutputUnits();
+    }
+
+    @Override
     public void configure(Configuration c) {
         _c = c;
     }

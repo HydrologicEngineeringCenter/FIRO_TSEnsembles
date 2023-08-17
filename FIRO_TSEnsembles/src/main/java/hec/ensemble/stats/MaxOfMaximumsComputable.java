@@ -15,6 +15,11 @@ public class MaxOfMaximumsComputable implements SingleComputable {
     }
 
     @Override
+    public String getOutputUnits() {
+        return null;
+    }
+
+    @Override
     public String StatisticsLabel() {
         return null;
     }

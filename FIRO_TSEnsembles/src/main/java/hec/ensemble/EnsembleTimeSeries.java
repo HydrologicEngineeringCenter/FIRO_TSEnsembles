@@ -24,6 +24,7 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
 
     private RecordIdentifier timeseriesID;
     private String units;
+    private String computedUnits;
     private String dataType;
     private String version;
     //https://docs.oracle.com/javase/7/docs/api/java/util/TreeMap.html
@@ -114,7 +115,8 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float result = e.singleComputeForEnsemble(compute);
-        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),e.getUnits());
+        computedUnits = compute.getOutputUnits();
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),computedUnits);
         MetricCollection mc = new MetricCollection(ec, compute.StatisticsLabel(), new float[][] {{result}});
         mcts.addMetricCollection(mc);
       }
@@ -132,7 +134,6 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       return mcts;
     }
     public MetricCollectionTimeSeries iterateAcrossEnsembleTracesWithSingleComputable(Computable compute){
-      String computedUnits = null;
       MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.ARRAY_OF_ARRAY);
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
@@ -157,7 +158,6 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       return mcts;
     }
     public MetricCollectionTimeSeries iterateAcrossTracesOfEnsemblesWithMultiComputable(MultiComputable compute){
-      String computedUnits = null;
       MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.ARRAY_OF_ARRAY);
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
@@ -171,7 +171,6 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
       return mcts;
     }
     public MetricCollectionTimeSeries iterateTracesOfEnsemblesWithMultiComputable(MultiComputable compute){
-      String computedUnits = null;
       MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.TIMESERIES_OF_ARRAY);
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
