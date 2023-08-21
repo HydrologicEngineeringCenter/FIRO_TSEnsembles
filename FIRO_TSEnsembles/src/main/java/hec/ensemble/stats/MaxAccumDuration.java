@@ -43,19 +43,18 @@ public  class MaxAccumDuration implements Computable, Configurable {
     @Override
     public float compute(float[] values) {
         double factor = getAccumulationConversionFactor();
-        long duration = getDuration();
 
         int timeSPD = timeStepsPerDuration();
         float maxVal = Float.MIN_VALUE;
         float vol;
         float durationVolume = 0;
         for(int i = 0; i<values.length;i++){
-            durationVolume += factor * values[i] * duration;
+            durationVolume += factor * values[i];
             if(i==(timeSPD -1)){
                 vol =durationVolume;
                 maxVal = vol;
             }else if(i>=timeSPD){
-                float oldval = (float) (factor * values[i-timeSPD] * duration);
+                float oldval = (float) (factor * values[i-timeSPD]);
                 durationVolume-=oldval;
                 vol =durationVolume;
                 if(vol>maxVal)maxVal = vol;
@@ -67,7 +66,11 @@ public  class MaxAccumDuration implements Computable, Configurable {
     private double getAccumulationConversionFactor() {
         unit = ConvertUnits.convertStringUnits(getInputUnits());
         try {
-            return ConvertUnits.getAccumulationConversionFactor(unit);
+            double factor = ConvertUnits.getAccumulationConversionFactor(unit);
+            if(ConvertUnits.isUnitsRateUnit(unit)) {
+                return factor * getDuration();
+            }
+            return factor;
         } catch (IncommensurableException e) {
             logger.log(Level.SEVERE, "Error in max accumulated duration compute");
             throw new RuntimeException(e);

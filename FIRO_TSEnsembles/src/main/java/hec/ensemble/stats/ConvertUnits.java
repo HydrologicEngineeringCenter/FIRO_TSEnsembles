@@ -1,5 +1,8 @@
 package hec.ensemble.stats;
+
 import tech.units.indriya.function.RationalConverter;
+
+import javax.measure.Dimension;
 import javax.measure.IncommensurableException;
 import javax.measure.Unit;
 
@@ -26,5 +29,10 @@ public final class ConvertUnits {
             return dividend/divisor;
         }
         return 1;
+    }
+
+    static boolean isUnitsRateUnit(Unit<?> unit) {
+        Dimension test = unit.getDimension();
+        return test.toString().contains("/[T]");
     }
 }

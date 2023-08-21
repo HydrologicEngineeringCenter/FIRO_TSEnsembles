@@ -5,14 +5,12 @@ import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleConfiguration;
 import hec.ensemble.Logger;
 import hec.ensemble.TestData;
-import hec.ensemble.stats.Computable;
-import hec.ensemble.stats.Configurable;
-import hec.ensemble.stats.MaxAccumDuration;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 class MaxAccumDurationTest {
@@ -21,7 +19,7 @@ class MaxAccumDurationTest {
         //result computed in excel
         MaxAccumDuration test = new MaxAccumDuration(3);
         float[] num = {1,2,3,4,5,6,7,8};
-        test.configure(new EnsembleConfiguration(null, null, Duration.ofHours(3),""));
+        test.configure(new EnsembleConfiguration(null, null, Duration.ofHours(3),"cfs"));
 
         float results = test.compute(num);
         assertEquals(1.9834, results, 0.001);
@@ -32,7 +30,7 @@ class MaxAccumDurationTest {
         //result computed in excel
         MaxAccumDuration test = new MaxAccumDuration(4);
         float[] num = {4,8,2,5,4,9,1,2,5,9};
-        test.configure(new EnsembleConfiguration(null, null, Duration.ofHours(2),""));
+        test.configure(new EnsembleConfiguration(null, null, Duration.ofHours(2),"cfs"));
 
         float results = test.compute(num);
         assertEquals(2.3140, results, 0.001);
@@ -42,10 +40,20 @@ class MaxAccumDurationTest {
     public void testMaxAccumDurationSimpleArrayTens() {
         Computable test = new MaxAccumDuration(4);
         Configurable c = (Configurable) test;
-        c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),""));
+        c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),"cfs"));
         float[] num = {10,30,45,80,50};
         float results = test.compute(num);
         assertEquals(16.9420, results, 0.001);
+    }
+
+    @Test
+    public void testMaxAccumDurationSimpleArrayTensPrecip() {
+        Computable test = new MaxAccumDuration(3);
+        Configurable c = (Configurable) test;
+        c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),"in"));
+        float[] num = {10,30,45,80,50};
+        float results = test.compute(num);
+        assertEquals(175, results, 0.001);
     }
     @Test
     public void testMaxAccumDurationWithEnsembleTimeAcrossTraces() {
