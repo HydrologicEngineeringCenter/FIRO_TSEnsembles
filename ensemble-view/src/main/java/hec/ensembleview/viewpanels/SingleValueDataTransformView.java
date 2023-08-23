@@ -16,6 +16,9 @@ public class SingleValueDataTransformView extends DataTransformView {
     private JRadioButton acrossTime;
     private JRadioButton acrossEnsembles;
     private transient SingleValueDataViewListener singleValueDataViewListener;
+    private static final String ACROSSENSEMBLESTRING = "Across Ensembles";
+    private static final String ACROSSTIMESTRING = "Across Time";
+
     public SingleValueDataTransformView() {
         super();
         Border grayLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
@@ -39,8 +42,8 @@ public class SingleValueDataTransformView extends DataTransformView {
     @Override
     protected void initiateRadioButton() {
         this.acrossEnsembles = new JRadioButton();
-        this.acrossEnsembles.setName("Across Ensembles");
-        this.acrossEnsembles.setText("Across Ensembles");
+        this.acrossEnsembles.setName(ACROSSENSEMBLESTRING);
+        this.acrossEnsembles.setText(ACROSSENSEMBLESTRING);
         this.acrossEnsembles.setFont(DefaultSettings.setSegoeFontText());
         add(this.acrossEnsembles);
         this.acrossEnsembles.setEnabled(true);
@@ -48,8 +51,8 @@ public class SingleValueDataTransformView extends DataTransformView {
         this.acrossEnsembles.addActionListener(this);
 
         this.acrossTime = new JRadioButton();
-        this.acrossTime.setName("Across Time");
-        this.acrossTime.setText("Across Time");
+        this.acrossTime.setName(ACROSSTIMESTRING);
+        this.acrossTime.setText(ACROSSTIMESTRING);
         this.acrossTime.setFont(DefaultSettings.setSegoeFontText());
         add(this.acrossTime);
         this.acrossTime.addActionListener(this);
@@ -66,10 +69,10 @@ public class SingleValueDataTransformView extends DataTransformView {
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == this.acrossTime) {
             singleValueDataViewListener.initiateComboBoxSelection(SingleValueSummaryType.COMPUTEACROSSTIME);
-            singleValueDataViewListener.setComputeOrderLabel("Across Time");
+            singleValueDataViewListener.setComputeOrderLabel(ACROSSTIMESTRING);
         } else if(e.getSource() == this.acrossEnsembles) {
             singleValueDataViewListener.initiateComboBoxSelection(SingleValueSummaryType.COMPUTEACROSSENSEMBLES);
-            singleValueDataViewListener.setComputeOrderLabel("Across Ensembles");
+            singleValueDataViewListener.setComputeOrderLabel(ACROSSENSEMBLESTRING);
         }
     }
 
