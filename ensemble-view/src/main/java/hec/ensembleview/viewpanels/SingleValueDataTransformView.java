@@ -6,6 +6,9 @@ import hec.ensembleview.controllers.SingleValueDataViewListener;
 import hec.ensembleview.mappings.SingleValueSummaryType;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 
@@ -15,6 +18,9 @@ public class SingleValueDataTransformView extends DataTransformView {
     private transient SingleValueDataViewListener singleValueDataViewListener;
     public SingleValueDataTransformView() {
         super();
+        Border grayLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
+        setBorder((BorderFactory.createTitledBorder(grayLine, "Compute Order", TitledBorder.LEFT, TitledBorder.TOP)));
+        ((TitledBorder) getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
     }
 
     public void setSingleValueDataViewListener(SingleValueDataViewListener listener) {
@@ -60,8 +66,10 @@ public class SingleValueDataTransformView extends DataTransformView {
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == this.acrossTime) {
             singleValueDataViewListener.initiateComboBoxSelection(SingleValueSummaryType.COMPUTEACROSSTIME);
+            singleValueDataViewListener.setComputeOrderLabel("Across Time");
         } else if(e.getSource() == this.acrossEnsembles) {
             singleValueDataViewListener.initiateComboBoxSelection(SingleValueSummaryType.COMPUTEACROSSENSEMBLES);
+            singleValueDataViewListener.setComputeOrderLabel("Across Ensembles");
         }
     }
 

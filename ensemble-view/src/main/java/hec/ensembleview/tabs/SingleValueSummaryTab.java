@@ -4,6 +4,7 @@ import hec.ensemble.stats.Statistics;
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.DefaultSettings;
 import hec.ensembleview.StatComputationHelper;
+import hec.ensembleview.controllers.SingleValueDataViewListener;
 import hec.ensembleview.mappings.SingleValueComboBoxMap;
 import hec.ensembleview.mappings.SingleValueSummaryType;
 import hec.ensembleview.mappings.StatisticUIType;
@@ -26,6 +27,8 @@ public class SingleValueSummaryTab extends JPanel {
     private SingleValueSummaryType selectedSummaryType = SingleValueSummaryType.COMPUTEACROSSENSEMBLES;
     private JComboBox<Statistics> statComboBox1;
     private JComboBox<Statistics> statComboBox2;
+    private String computeOrder1;
+    private String computeOrder2;
     private JLabel label1;
     private JLabel label2;
     private JTextField textField1;
@@ -39,19 +42,35 @@ public class SingleValueSummaryTab extends JPanel {
     public SingleValueSummaryTab() {
         initializeUI();
         organizeUI();
-
         initiateSingleValueComboBoxListener();
     }
 
     private void initiateSingleValueComboBoxListener() {
-        singleValueDataTransformView.setSingleValueDataViewListener(summaryType -> {
-            if(computeButton.getActionListeners() != null) {
+        singleValueDataTransformView.setSingleValueDataViewListener(new SingleValueDataViewListener() {
+            @Override
+            public void initiateComboBoxSelection(SingleValueSummaryType summaryType) {
                 removeActionListener();
+                selectedSummaryType = summaryType;
+                setActionListeners();
             }
-            removeActionListener();
-            selectedSummaryType = summaryType;
-            setActionListeners();
+
+            @Override
+            public void setComputeOrderLabel(String computeOrder) {
+                if(computeOrder.equalsIgnoreCase("Across Time")) {
+                    computeOrder1 = computeOrder;
+                    computeOrder2 = "Across Ensembles";
+                } else {
+                    computeOrder1 = computeOrder;
+                    computeOrder2 = "Across Time";
+                }
+                setLabel();
+            }
         });
+    }
+
+    private void setLabel() {
+        label1.setText("1. " + computeOrder1);
+        label2.setText("2. " + computeOrder2);
     }
 
     private void removeActionListener() {
@@ -70,10 +89,8 @@ public class SingleValueSummaryTab extends JPanel {
         float[] vals = getFirstTextFieldValue();
         if (StatisticsUITypeMap.map.get(stat) == StatisticUIType.TEXTBOX) {
             if (stat == Statistics.PERCENTILES) {
-                assert vals != null;
                 r = String.format("%.2f%% %s", vals[0] * 100, stat);
             } else if (stat == Statistics.MAXAVERAGEDURATION || stat == Statistics.MAXACCUMDURATION) {
-                assert vals != null;
                 r = String.format("%d hour %s", (int)vals[0], stat);
             }
             else {
@@ -81,12 +98,10 @@ public class SingleValueSummaryTab extends JPanel {
             }
         } else {
             if (stat == Statistics.CUMULATIVE) {
-                assert vals != null;
                 r = String.format("%s value on day %d", stat, (int)vals[0]);
             } else
                 r = stat.toString();
         }
-
         return r;
     }
 
@@ -96,10 +111,8 @@ public class SingleValueSummaryTab extends JPanel {
         float[] vals = getSecondTextFieldValue();
         if (StatisticsUITypeMap.map.get(stat) == StatisticUIType.TEXTBOX) {
             if (stat == Statistics.PERCENTILES) {
-                assert vals != null;
                 r = String.format("%.2f%% %s", vals[0] * 100, stat);
             } else if (stat == Statistics.MAXAVERAGEDURATION || stat == Statistics.MAXACCUMDURATION) {
-                assert vals != null;
                 r = String.format("%d hour %s", (int)vals[0], stat);
             }
             else {
@@ -108,7 +121,6 @@ public class SingleValueSummaryTab extends JPanel {
         } else {
             r = stat.toString();
         }
-
         return r;
     }
 
@@ -123,12 +135,10 @@ public class SingleValueSummaryTab extends JPanel {
 
     private float[] getFirstTextFieldValue() {
         if (StatisticsUITypeMap.map.get(statComboBox1.getSelectedItem()) == StatisticUIType.CHECKBOX)
-            return null;
-
+            return new float[0];
         String textValues = textField1.getText();
-
         if (Objects.equals(textValues, ""))
-            return null;
+            return new float[0];
 
         String[] textValuesParse = textValues.trim().split("[,:;]");
         float[] floatValuesParse = new float[textValuesParse.length];
@@ -139,14 +149,12 @@ public class SingleValueSummaryTab extends JPanel {
     }
 
     private float[] getSecondTextFieldValue() {
-        if (StatisticsUITypeMap.map.get((Statistics)statComboBox2.getSelectedItem()) != StatisticUIType.TEXTBOX)
-            return null;
-
+        if (StatisticsUITypeMap.map.get(statComboBox2.getSelectedItem()) != StatisticUIType.TEXTBOX)
+            return new float[0];
         String textValues = textField2.getText();
 
         if (Objects.equals(textValues, ""))
-            return null;
-
+            return new float[0];
         String[] textValuesParse = textValues.trim().split("[,:;]");
         float[] floatValuesParse = new float[textValuesParse.length];
         for(int i = 0; i < textValuesParse.length; i++) {
@@ -163,33 +171,17 @@ public class SingleValueSummaryTab extends JPanel {
     private void setActionListeners() {
         setupStatComboBoxes(selectedSummaryType);
 
-        statComboBox1.addActionListener(e ->
-                textField1.setEditable(StatisticsUITypeMap.map.get((Statistics) (statComboBox1.getSelectedItem())) != StatisticUIType.CHECKBOX));
-
-        statComboBox2.addActionListener(e ->
-                textField2.setEditable(StatisticsUITypeMap.map.get((Statistics) (statComboBox2.getSelectedItem())) != StatisticUIType.CHECKBOX));
+        statComboBox1.addActionListener(e -> {
+            setTextboxEditable(textField1, statComboBox1);
+            setTextFieldToolTip(textField1, statComboBox1);
+        });
+        
+        statComboBox2.addActionListener(e -> {
+            setTextboxEditable(textField2, statComboBox2);
+            setTextFieldToolTip(textField2, statComboBox2);
+        });
 
         clearButton.addActionListener(e -> outputArea.setText(""));
-
-        statComboBox1.addActionListener(e -> {
-            if(statComboBox1.getSelectedItem() == Statistics.MAXACCUMDURATION || statComboBox1.getSelectedItem() == Statistics.MAXAVERAGEDURATION) {
-                textField1.setToolTipText("Enter value in Hours");
-            } else if (statComboBox1.getSelectedItem() == Statistics.PERCENTILES) {
-                textField1.setToolTipText("Enter percentile as Decimal");
-            } else if (statComboBox1.getSelectedItem() == Statistics.CUMULATIVE) {
-                textField1.setToolTipText("Enter value in Days");
-            } else {
-                textField1.setToolTipText(null);
-            }
-        });
-
-        statComboBox2.addActionListener(e -> {
-            if (statComboBox2.getSelectedItem() == Statistics.PERCENTILES) {
-                textField2.setToolTipText("Enter percentile as Decimal");
-            } else {
-                textField2.setToolTipText(null);
-            }
-        });
 
         computeButton.addActionListener(e -> {
             MetricCollectionTimeSeries value = statComputationHelper.computeTwoStepComputable(getFirstStat(), getFirstTextFieldValue(),
@@ -200,6 +192,23 @@ public class SingleValueSummaryTab extends JPanel {
 
             tryShowingOutput(getValuesFromMetricCollectionTimeSeries(value));
         });
+    }
+
+    private void setTextFieldToolTip(JTextField textField, JComboBox<Statistics> comboBox) {
+        if(comboBox.getSelectedItem() == Statistics.MAXACCUMDURATION || comboBox.getSelectedItem() == Statistics.MAXAVERAGEDURATION) {
+            textField.setToolTipText("Enter value in Hours");
+        } else if (comboBox.getSelectedItem() == Statistics.PERCENTILES) {
+            textField.setToolTipText("Enter percentile as Decimal");
+        } else if (comboBox.getSelectedItem() == Statistics.CUMULATIVE) {
+            textField.setToolTipText("Enter value in Days");
+        } else {
+            textField.setToolTipText(null);
+        }
+    }
+
+    private void setTextboxEditable(JTextField textField, JComboBox<Statistics> statComboBox) {
+        textField.setEditable(StatisticsUITypeMap.map.get((statComboBox.getSelectedItem())) != StatisticUIType.CHECKBOX);
+        textField.setText("");
     }
 
     private float getValuesFromMetricCollectionTimeSeries(MetricCollectionTimeSeries mcts) {
@@ -217,12 +226,6 @@ public class SingleValueSummaryTab extends JPanel {
 
     private void organizeUI() {
         setLayout(new BorderLayout());
-
-        // setting borders for top and bottom panels
-        Border grayLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        topPanel.setBorder((BorderFactory.createTitledBorder(grayLine, "Compute Selection", TitledBorder.LEFT, TitledBorder.TOP)));
-        ((TitledBorder )topPanel.getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
-
         bottomPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 
         // topPanel contains the comboBoxes, textfields, and buttons.
@@ -232,7 +235,9 @@ public class SingleValueSummaryTab extends JPanel {
 
         // creating panel to hold comboBoxes, textfields, and buttons and assigning to topPanel
         JPanel selectionPanel = new JPanel();
-        selectionPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        Border grayLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
+        selectionPanel.setBorder((BorderFactory.createTitledBorder(grayLine, "Compute Selection", TitledBorder.LEFT, TitledBorder.TOP)));
+        ((TitledBorder )selectionPanel.getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
 
         topPanel.setLayout(new BorderLayout());
         topPanel.add(selectionPanel, BorderLayout.PAGE_START);
@@ -246,33 +251,37 @@ public class SingleValueSummaryTab extends JPanel {
 
         Dimension comboDim = new Dimension();
         comboDim.width = 200;
-        comboDim.height = 30;
+        comboDim.height = 25;
         statComboBox1.setPreferredSize(comboDim);
         statComboBox2.setPreferredSize(comboDim);
 
         gc.gridx = 0;
         gc.gridy = 0;
+
         gc.weightx = .1;
 
-        gc.anchor = GridBagConstraints.LINE_END;
+        gc.anchor = GridBagConstraints.LINE_START;
         selectionPanel.add(label1, gc);
 
         gc.gridx = 1;
         gc.gridy = 0;
+        gc.insets = new Insets(5, 0, 5, 0);
 
         gc.anchor = GridBagConstraints.LINE_START;
         selectionPanel.add(statComboBox1, gc);
 
         gc.gridx = 2;
         gc.gridy = 0;
+        gc.weightx = 1;
 
         gc.anchor = GridBagConstraints.LINE_START;
         selectionPanel.add(textField1, gc);
 
         gc.gridx = 0;
         gc.gridy = 1;
+        gc.weightx = .1;
 
-        gc.anchor = GridBagConstraints.LINE_END;
+        gc.anchor = GridBagConstraints.LINE_START;
         selectionPanel.add(label2, gc);
 
         gc.gridx = 1;
@@ -283,6 +292,7 @@ public class SingleValueSummaryTab extends JPanel {
 
         gc.gridx = 2;
         gc.gridy = 1;
+        gc.weightx = 1;
 
         gc.anchor = GridBagConstraints.LINE_START;
         selectionPanel.add(textField2, gc);
@@ -299,10 +309,10 @@ public class SingleValueSummaryTab extends JPanel {
 
         selectionPanel.add(buttonGroup, gc);
 
-        BorderLayout rightArea = new BorderLayout(10,10);
+        BorderLayout rightArea = new BorderLayout();
         bottomPanel.setLayout(rightArea);
 
-        JScrollPane scrollPane = new JScrollPane(outputArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        JScrollPane scrollPane = new JScrollPane(outputArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         bottomPanel.add(scrollPane, BorderLayout.CENTER);
     }
 
@@ -336,7 +346,9 @@ public class SingleValueSummaryTab extends JPanel {
         statComboBox2 = new JComboBox<>();
 
         textField1 = new JTextField(10);
+        textField1.setEditable(false);
         textField2 = new JTextField(10);
+        textField2.setEditable(false);
 
         computeButton = new JButton("Compute");
         clearButton = new JButton("Clear");

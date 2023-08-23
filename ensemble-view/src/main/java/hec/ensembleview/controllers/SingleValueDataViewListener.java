@@ -4,4 +4,5 @@ import hec.ensembleview.mappings.SingleValueSummaryType;
 
 public interface SingleValueDataViewListener {
     void initiateComboBoxSelection(SingleValueSummaryType summaryType);
+    void setComputeOrderLabel(String computeOrder);
 }
