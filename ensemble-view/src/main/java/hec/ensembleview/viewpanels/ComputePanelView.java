@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ComputePanelView extends JPanel implements ItemListener, ActionListener, PropertyChangeListener {
-    private final List<JCheckBox> statisticsList = new ArrayList<>();
+    final List<JCheckBox> statisticsList = new ArrayList<>();
     private final List<JTextField> textFieldList = new ArrayList<>();
 
     protected ComputePanelView() {
@@ -63,6 +63,12 @@ public abstract class ComputePanelView extends JPanel implements ItemListener, A
     void addTextBoxListeners(List<JTextField> list) {
         for(JTextField textField : list) {
             textField.addActionListener(this);
+        }
+    }
+
+    void removeCheckBoxListener(List<JCheckBox> list) {
+        for(JCheckBox checkBox : list) {
+            checkBox.removeItemListener(this);
         }
     }
 

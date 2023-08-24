@@ -9,9 +9,9 @@ import java.time.ZonedDateTime;
 
 public class MetricCollection {
     public MetricCollectionTimeSeries parent;
-    private Configuration _configuration;
-    private float[][] metrics;
-    private String metric_statisticsLabel;
+    private final Configuration _configuration;
+    private final float[][] metrics;
+    private final String metric_statisticsLabel;
 
     public MetricCollection(Configuration c, String statisticsLabel, float[][] values)
     {
@@ -60,7 +60,7 @@ public class MetricCollection {
     }
     //probably need getdataforparametername.
 
-    public float[] getComputedValuesForStatistic(){
-        return metrics[0];
+    public String getUnits() {
+        return _configuration.getUnits();
     }
 }

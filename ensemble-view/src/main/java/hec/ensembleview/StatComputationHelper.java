@@ -55,15 +55,14 @@ public class StatComputationHelper {
         }
     }
 
-    public float computeTwoStepComputable(Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
+    public MetricCollectionTimeSeries computeTwoStepComputable(Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
         SingleComputable compute;
         if(stepOne == Statistics.CUMULATIVE) {
             compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), new float[]{stepOneValues[0]}), getComputable(stepTwo, stepTwoValues), false);
         } else {
             compute = new TwoStepComputable(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), computeAcrossEnsembles);
         }
-        Ensemble e = databaseHandlerService.getEnsemble();
-        return e.singleComputeForEnsemble(compute);
+        return databaseHandlerService.getEnsembleTimeSeries().computeSingleValueSummary(compute);
     }
 
     public static Computable getComputable(Statistics stat, float[] values) {
