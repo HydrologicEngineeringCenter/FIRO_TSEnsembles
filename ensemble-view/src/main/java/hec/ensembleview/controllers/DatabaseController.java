@@ -4,6 +4,7 @@ import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.dss.ensemble.DssDatabase;
 import hec.ensembleview.DatabaseHandlerService;
+import hec.ensembleview.ParameterFilter;
 import hec.ensembleview.viewpanels.OptionsPanel;
 
 import javax.swing.*;
@@ -114,9 +115,12 @@ public class DatabaseController {
 
                 locations.removeAllItems();
                 List<RecordIdentifier> rids = databaseHandlerService.getEnsembleDatabase().getEnsembleTimeSeriesIDs();
-                for (RecordIdentifier rid : rids)
-                    locations.addItem(rid);  // add the location to the combo box
-
+                for (RecordIdentifier rid : rids) {
+                    RecordIdentifier filteredRid = ParameterFilter.checkParameter(rid);
+                    if (filteredRid != null) {
+                        locations.addItem(filteredRid);  // add the location to the combo box
+                    }
+                }
                 RecordIdentifier selectedRid = (RecordIdentifier)locations.getSelectedItem();
                 databaseHandlerService.setDbHandlerRecordIdentifier(selectedRid);
 
