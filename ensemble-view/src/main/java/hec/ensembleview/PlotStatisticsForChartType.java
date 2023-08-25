@@ -2,16 +2,18 @@ package hec.ensembleview;
 
 import hec.ensemble.stats.Statistics;
 import hec.ensembleview.charts.*;
+import hec.gfx2d.ViewportLayout;
 
 import java.awt.*;
-import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static hec.ensembleview.charts.EnsembleChart.getLinePatternForStatType;
 import static hec.ensembleview.charts.EnsembleChartAcrossTime.getColorForStatType;
-import static hec.ensembleview.charts.EnsembleChartAcrossTime.getStrokeForStatType;
+import static hec.ensembleview.charts.EnsembleChartAcrossTime.getLineWidthForStatType;
 
 /**
  * This class checks which statistics type exists in the database and adds the line or
@@ -24,9 +26,10 @@ public class PlotStatisticsForChartType {
     private PlotStatisticsForChartType() {
     }
 
-    public static void addMetricStatisticsToTimePlot(EnsembleChartAcrossTime chart, String stat, float[] val, ZonedDateTime[] dates) throws ParseException {
+    public static void addMetricStatisticsToTimePlot(EnsembleChartAcrossTime chart, String stat, float[] val, ZonedDateTime[] dates) {
         Color lineColor;
-        BasicStroke stroke;
+        int lineWidth;
+        float[] linePattern;
         Statistics statType = Statistics.getStatName(stat);
         switch (statType) {
             case MIN:
@@ -36,9 +39,10 @@ public class PlotStatisticsForChartType {
             case STANDARDDEVIATION:
             case PERCENTILES:
                 lineColor = getColorForStatType(statType);
-                stroke = getStrokeForStatType(statType);
+                lineWidth = getLineWidthForStatType(statType);
+                linePattern = getLinePatternForStatType(statType);
                 chart.addLine(
-                        new LineSpec(0, val, dates, stroke, lineColor, stat));
+                        new LineSpec(0, val, dates, lineWidth, lineColor, linePattern, stat));
                 break;
             default:
                 logger.log(Level.INFO, "Statistic does not exist for Time plot metric compute");
@@ -64,11 +68,21 @@ public class PlotStatisticsForChartType {
         return 0;
     }
 
-    public static void addLineMembersToChart(EnsembleChart chart, float[][] vals, ZonedDateTime[] dates) throws ParseException {
-        Color c = null;  //This is for the Raw ensemble data itself
+    public static void addLineMembersToChart(EnsembleChart chart, float[][] vals, ZonedDateTime[] dates) {//This is for the Raw ensemble data itself
         for (int i = 0; i < vals.length; i++) {
-            ((EnsembleChartAcrossTime) (chart)).addLine(new LineSpec(0, vals[i], dates, new BasicStroke(1.0f), c, "Member " + (i + 1)));
+            ((EnsembleChartAcrossTime) (chart)).addLine(new LineSpec(0, vals[i], dates,
+                    getLineWidthForStatType(Statistics.NONE), randomColor(i),
+                    getLinePatternForStatType(Statistics.NONE), "Member " + (i + 1)));
         }
+    }
+
+    static Color randomColor(int i) {
+        Random rand = new Random(i);
+        float r = rand.nextFloat();
+        float g = rand.nextFloat();
+        float b = rand.nextFloat();
+
+        return new Color(r, g, b);
     }
 
     public static void addStatisticsToEnsemblePlot(EnsembleChartAcrossEnsembles chart, String stat, float[] val) {
@@ -81,12 +95,12 @@ public class PlotStatisticsForChartType {
             case STANDARDDEVIATION:
             case PERCENTILES:
                 chart.addPoint(
-                        new PointSpec(0, val, getStrokeForStatType(statType), getColorForStatType(statType), stat));
+                        new PointSpec(ViewportLayout.Y1, val, getLineWidthForStatType(statType), getColorForStatType(statType), stat));
                 break;
             case NDAYCOMPUTABLE:
             case TOTAL:
                 chart.addPoint(
-                        new PointSpec(1, val, getStrokeForStatType(statType), getColorForStatType(statType), stat));
+                        new PointSpec(ViewportLayout.Y2, val, getLineWidthForStatType(statType), getColorForStatType(statType), stat));
                 break;
             default:
                 logger.log(Level.INFO, "Statistic does not exist for Ensemble plot metric compute");
@@ -104,12 +118,12 @@ public class PlotStatisticsForChartType {
             case STANDARDDEVIATION:
             case PERCENTILES:
                 chart.addProbPoint(
-                        new PointSpec(0, probValues, getStrokeForStatType(statType), getColorForStatType(statType), stat));
+                        new PointSpec(ViewportLayout.Y1, probValues, getLineWidthForStatType(statType), getColorForStatType(statType), stat));
                 break;
             case NDAYCOMPUTABLE:
             case TOTAL:
                 chart.addProbPoint(
-                        new PointSpec(1, probValues, getStrokeForStatType(statType), getColorForStatType(statType), stat));
+                        new PointSpec(ViewportLayout.Y2, probValues, getLineWidthForStatType(statType), getColorForStatType(statType), stat));
                 break;
             default:
                 logger.log(Level.INFO, "Statistic does not exist for Probability plot metric compute");

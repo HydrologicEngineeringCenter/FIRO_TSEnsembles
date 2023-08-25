@@ -4,8 +4,8 @@ import hec.ensemble.Ensemble;
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.charts.EnsembleChart;
 import hec.ensembleview.mappings.StatisticsMap;
+import hec.gfx2d.G2dPanel;
 
-import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
@@ -13,13 +13,13 @@ import java.util.Map;
 
 public abstract class ChartManager implements PropertyChangeListener {
     final StatisticsMap statisticsMap;
-    final JPanel chartPanel;
+    final G2dPanel chartPanel;
     DatabaseHandlerService databaseHandlerService;
     Ensemble ensemble;
     EnsembleChart chart;
     String units;
 
-    protected ChartManager(StatisticsMap map, JPanel chartPanel) {
+    protected ChartManager(StatisticsMap map, G2dPanel chartPanel) {
         databaseHandlerService = DatabaseHandlerService.getInstance();
         databaseHandlerService.addDatabaseChangeListener(this);
 
