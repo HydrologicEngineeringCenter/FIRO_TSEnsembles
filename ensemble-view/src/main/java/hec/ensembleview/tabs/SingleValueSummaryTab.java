@@ -250,7 +250,7 @@ public class SingleValueSummaryTab extends JPanel {
         GridBagConstraints gc = new GridBagConstraints();
 
         Dimension comboDim = new Dimension();
-        comboDim.width = 200;
+        comboDim.width = 150;
         comboDim.height = 25;
         statComboBox1.setPreferredSize(comboDim);
         statComboBox2.setPreferredSize(comboDim);
