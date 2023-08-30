@@ -12,9 +12,13 @@ import java.awt.event.ActionListener;
 import java.time.ZonedDateTime;
 
 public class OptionsPanel extends JPanel {
+    private JLabel fileText;
+    private JLabel locationText;
+    private JLabel dateTimeText;
     private JPanel parentPanel;
     private JPanel filePathPanel;
     private JTextField filePath;
+    private JButton fileSearchButton;
     private JComboBox<RecordIdentifier> locations;
     private JComboBox<ZonedDateTime> dateTimes;
     private transient ActionListener filePathListener;
@@ -23,8 +27,6 @@ public class OptionsPanel extends JPanel {
     private transient DatabaseListener databaseListener;
 
     public OptionsPanel() {
-        setLayout(new GridLayout(1, 1));
-
         addFilePathListener();
         addLocationsListener();
         addDateTimeListener();
@@ -65,77 +67,150 @@ public class OptionsPanel extends JPanel {
     }
 
     private JPanel createParentPanel() {
-                /*
-        Create panel that holds file name, location, and date/time information.
-         */
+        setLayout(new GridLayout());
+
         parentPanel = new JPanel();
+        parentPanel.setLayout(new GridBagLayout());
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
         parentPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Options", TitledBorder.LEFT, TitledBorder.TOP));
         ((TitledBorder) parentPanel.getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
-        GridLayout experimentLayout = new GridLayout(3,2);
-        parentPanel.setLayout(experimentLayout);
 
         add(parentPanel);
         filePathPanel = createFilePathPanel();
         locations = createLocationsComboBox();
         dateTimes = createDateTimeComboBox();
 
+        setUpOptionsPanelLayout();
+
         return parentPanel;
+    }
+
+    private void setUpOptionsPanelLayout() {
+        // Set up text field, text box, and combo box locations
+        GridBagConstraints gc = new GridBagConstraints();
+        Dimension dim = new Dimension();  // dimensions for text field
+        dim.width = 250;
+        dim.height = 25;
+
+        // File Text Field and button selection
+        gc.gridx = 0;
+        gc.gridy = 0;
+        gc.weightx = .1;
+        gc.weighty = .5;
+
+        gc.anchor = GridBagConstraints.LINE_START;
+        parentPanel.add(fileText, gc);
+
+        gc.gridx = 1;
+        gc.gridy = 0;
+        gc.weightx = .9;
+        gc.weighty = .5;
+
+        Dimension buttonDim = new Dimension();
+        buttonDim.width = 25;
+        buttonDim.height = 25;
+        fileSearchButton.setMaximumSize(buttonDim);
+        fileSearchButton.setMinimumSize(buttonDim);
+        fileSearchButton.setPreferredSize(buttonDim);
+
+        filePath.setPreferredSize(dim);
+        gc.anchor = GridBagConstraints.LINE_START;
+        parentPanel.add(filePathPanel, gc);
+
+        // Location Combo Box Selection
+        gc.gridx = 0;
+        gc.gridy = 1;
+        gc.weightx = .1;
+        gc.weighty = .5;
+
+        gc.anchor = GridBagConstraints.LINE_START;
+        parentPanel.add(locationText, gc);
+
+        Dimension comboDim = new Dimension();
+        comboDim.width = 275;
+        comboDim.height = 25;
+
+        gc.gridx = 1;
+        gc.gridy = 1;
+        gc.weightx = .9;
+        gc.weighty = .5;
+        gc.insets = new Insets(5, 0, 5, 0);
+
+        locations.setPreferredSize(comboDim);
+        gc.anchor = GridBagConstraints.LINE_START;
+        parentPanel.add(locations, gc);
+
+        // Date and Time Combo Box Selection
+        gc.gridx = 0;
+        gc.gridy = 2;
+        gc.weightx = .1;
+        gc.weighty = .5;
+
+        gc.anchor = GridBagConstraints.LINE_START;
+        parentPanel.add(dateTimeText, gc);
+
+        gc.gridx = 1;
+        gc.gridy = 2;
+        gc.weightx = .9;
+        gc.weighty = .5;
+        gc.insets = new Insets(0, 0, 5, 0);
+
+        dateTimes.setPreferredSize(comboDim);
+        gc.anchor = GridBagConstraints.LINE_START;
+        parentPanel.add(dateTimes, gc);
     }
 
     private JPanel createFilePathPanel() {
                 /*
         Create file select area.
          */
-        JLabel text = new JLabel("File");
-        text.setFont(DefaultSettings.setSegoeFontText());
-        parentPanel.add(text);
+        fileText = new JLabel("File");
+        fileText.setFont(DefaultSettings.setSegoeFontText());
 
-        filePathPanel = new JPanel();
-        GridLayout layout = new GridLayout(1,2);
-        filePathPanel.setLayout(layout);
+        fileSearchButton = new JButton();
+        fileSearchButton.addActionListener(filePathListener);
+        ImageIcon fileIcon = new ImageIcon("ensemble-view/src/main/resources/Open24_Default.gif");
 
+        fileSearchButton.setIcon(fileIcon);
         filePath = new JTextField();
         filePath.setEditable(false);
-        filePathPanel.add(filePath);
 
-        JButton fileSearchButton = new JButton();
-        fileSearchButton.addActionListener(filePathListener);
-        fileSearchButton.setText("Choose File...");
-        fileSearchButton.setFont(DefaultSettings.setSegoeFontText());
-        filePathPanel.add(fileSearchButton);
-        parentPanel.add(filePathPanel);
+        filePathPanel = new JPanel();
+        GridBagLayout layout = new GridBagLayout();
+        GridBagConstraints gc = new GridBagConstraints();
+        filePathPanel.setLayout(layout);
+
+        gc.gridx = 0;
+        gc.gridy = 0;
+        gc.weightx = .9;
+
+        filePathPanel.add(filePath, gc);
+
+        gc.gridx = 1;
+        gc.gridy = 0;
+        gc.weightx = .1;
+        filePathPanel.add(fileSearchButton, gc);
 
         return filePathPanel;
     }
 
     private JComboBox<RecordIdentifier> createLocationsComboBox() {
-                /*
-        Create location combo box.
-         */
-        JLabel location = new JLabel("Location");
-        location.setFont(DefaultSettings.setSegoeFontText());
+        locationText = new JLabel("Location");
+        locationText.setFont(DefaultSettings.setSegoeFontText());
 
-        parentPanel.add(location);
         locations = new JComboBox<>();
         locations.setFont(DefaultSettings.setSegoeFontText());
 
-        parentPanel.add(locations);
         locations.addActionListener(locationsListener);
 
         return locations;
     }
 
     private JComboBox<ZonedDateTime> createDateTimeComboBox() {
-                /*
-        Create location combo box.
-         */
-        JLabel dateTime = new JLabel("Date/Time");
-        dateTime.setFont(DefaultSettings.setSegoeFontText());
+        dateTimeText = new JLabel("Date/Time");
+        dateTimeText.setFont(DefaultSettings.setSegoeFontText());
 
-        parentPanel.add(dateTime);
         dateTimes = new JComboBox<>();
-        parentPanel.add(dateTimes);
         dateTimes.addActionListener(dateTimesListener);
 
         return dateTimes;

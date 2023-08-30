@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ComputePanelView extends JPanel implements ItemListener, ActionListener, PropertyChangeListener {
-    final List<JCheckBox> statisticsList = new ArrayList<>();
+    final transient List<JCheckBox> statisticsList = new ArrayList<>();
     private final List<JTextField> textFieldList = new ArrayList<>();
 
     protected ComputePanelView() {
@@ -29,7 +29,7 @@ public abstract class ComputePanelView extends JPanel implements ItemListener, A
     }
 
     void setupStatsPanel() {
-        setLayout(new GridLayout(3, 1));
+        setLayout(new GridLayout(2, 1));
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
         setBorder(BorderFactory.createTitledBorder(graylineBorder, "Statistics", TitledBorder.LEFT, TitledBorder.TOP));
         ((TitledBorder) getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
@@ -93,9 +93,27 @@ public abstract class ComputePanelView extends JPanel implements ItemListener, A
 
     protected void groupCheckboxTextfield(JCheckBox checkBox, JTextField textField) {
         JPanel group = new JPanel();
-        group.setLayout(new GridLayout());
-        group.add(checkBox);
-        group.add(textField);
+        group.setLayout(new GridBagLayout());
+
+        Dimension textBoxDim = new Dimension();
+        textBoxDim.width = 100;
+        textBoxDim.height = 20;
+        textField.setPreferredSize(textBoxDim);
+
+        GridBagConstraints gc = new GridBagConstraints();
+        gc.gridx = 0;
+        gc.gridy = 0;
+        gc.weightx = .1;
+
+        gc.anchor = GridBagConstraints.LINE_START;
+        group.add(checkBox, gc);
+
+        gc.gridx = 1;
+        gc.gridy = 0;
+        gc.weightx = .9;
+
+        gc.anchor = GridBagConstraints.LINE_START;
+        group.add(textField, gc);
         add(group);
     }
 

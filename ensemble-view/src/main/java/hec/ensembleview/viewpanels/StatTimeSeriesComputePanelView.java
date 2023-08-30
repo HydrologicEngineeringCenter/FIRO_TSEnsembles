@@ -54,6 +54,7 @@ public class StatTimeSeriesComputePanelView extends ComputePanelView {
     @Override
     protected void initTextBoxStat() {
         this.percentileValues = createTextBox("Percentiles");
+        this.percentileValues.setToolTipText("Enter Percentile as Decimal");
         addTextFieldList(this.percentileValues);
         this.percentileValues.setEnabled(false);
         this.percentileValues.setEditable(false);

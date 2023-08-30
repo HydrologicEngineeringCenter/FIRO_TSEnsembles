@@ -62,6 +62,7 @@ public class StatEnsembleComputePanelView extends ComputePanelView {
         addTextFieldList(this.percentileText);
         this.percentileText.setEnabled(false);
         this.percentileText.setEditable(false);
+        this.percentileText.setToolTipText("Enter Percentile as Decimal");
         groupCheckboxTextfield(percentiles, percentileText);
 
         this.cumVol = createCheckBox("Cumulative Volume");
@@ -73,6 +74,7 @@ public class StatEnsembleComputePanelView extends ComputePanelView {
         addTextFieldList(this.cumVolText);
         this.cumVolText.setEnabled(false);
         this.cumVolText.setEditable(false);
+        this.cumVolText.setToolTipText("Enter Cumulative Volume in Days");
         groupCheckboxTextfield(cumVol, cumVolText);
     }
 
