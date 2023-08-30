@@ -19,11 +19,16 @@ public class StatisticsMap { //maps the statistics to the specific statistics pa
     }
 
     public void setTimeStatisticsMap() {
-        this.timeSeriesMapList = getTimeSeriesMapList();
+        if(this.timeSeriesMapList.size() == 0) {
+            return;
+        }
         support.firePropertyChange("time", false, true);
     }
 
     public void setEnsembleStatisticsMap() {
+        if(this.ensembleSeriesMapList.size() == 0) {
+            return;
+        }
         support.firePropertyChange("ensemble", false, true);
     }
 
