@@ -1,27 +1,23 @@
 package hec.ensembleview.charts;
 
 import hec.ensemble.stats.Statistics;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.labels.XYToolTipGenerator;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import hec.gfx2d.G2dLineProperties;
+import hec.gfx2d.G2dPanel;
+import hec.gfx2d.PlotLayout;
+import hec.gfx2d.ViewportLayout;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 public abstract class EnsembleChart {
-    private final String chartTitle = "";
-    protected String yLabel = "";
-    protected String xLabel = "";
-    protected final Map<Integer, XYLineAndShapeRenderer> rendererMap = new HashMap<>();
-    protected XYPlot plot;
+    ViewportLayout view = null;
+    String yLabel = "";
+    String xLabel = "";
+    G2dPanel plotPanel;
+    PlotLayout layout = new PlotLayout();
 
-    protected EnsembleChart() {
+    EnsembleChart() {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
     }
@@ -30,74 +26,45 @@ public abstract class EnsembleChart {
         yLabel = label;
     }
 
-
     public void setXLabel(String label) {
         xLabel = label;
     }
 
-    protected Color ensembleColor() {
-        Color c;
-        c = Color.blue;
-        int alpha = 8;
-        int cInt = (c.getRGB() & 0xffffff) | (alpha << 24);
-        c = new Color(cInt, true);
-        return c;
+    Color ensembleColor() {
+        return new Color(51,204,255);
     }
 
-    private void addChartFeatures(ChartPanel chart) {
-        chart.setMouseZoomable(false);
-        chart.setMouseWheelEnabled(true);
-        chart.setDomainZoomable(true);
-        chart.setRangeZoomable(true);
-
-        setChartToolTip(chart);
-    }
-
-    private void setChartToolTip(ChartPanel chart) {
-        XYToolTipGenerator xyToolTipGenerator = (dataset, series, item) -> {
-            Number x1 = dataset.getX(series, item);
-            Number y1 = dataset.getY(series, item);
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(String.format("<html><p style='color:#0000ff;'>%s</p>", dataset.getSeriesKey(series)));
-            stringBuilder.append(String.format("X:'%s'<br/>", new Date(x1.longValue())));
-            stringBuilder.append(String.format("Y:'%s'", y1.toString()));
-            stringBuilder.append("</html>");
-            return stringBuilder.toString();
-        };
-
-
-        rendererMap.forEach((k, v) -> {
-            XYLineAndShapeRenderer renderer = ((XYLineAndShapeRenderer)chart.getChart().getXYPlot().getRenderer(k));
-            renderer.setDefaultToolTipGenerator(xyToolTipGenerator);
-        });
-
-        chart.setDismissDelay(Integer.MAX_VALUE);
+    double[] floatToDoubleConversion(float[] floatArray) {
+        double[] doubleArray = new double[floatArray.length];
+        for (int i = 0; i < floatArray.length; i++) {
+            doubleArray[i] = floatArray[i];
+        }
+        return doubleArray;
     }
 
     public static Color getColorForStatType(Statistics statType) {
         switch (statType) {
             case MIN:
-                return randomColor(1);
             case MAX:
-                return randomColor(2);
+                return randomColor(1);
             case AVERAGE:
-                return randomColor(3);
+                return randomColor(25);
             case MEDIAN:
-                return randomColor(4);
+                return randomColor(50);
             case STANDARDDEVIATION:
-                return randomColor(5);
+                return randomColor(75);
             case CUMULATIVE:
-                return randomColor(6);
+                return randomColor(125);
             case TOTAL:
-                return randomColor(10);
+                return randomColor(150);
             case PERCENTILES:
-                return randomColor(11);
+                return randomColor(200);
             default:
                 return randomColor(100);
         }
     }
 
-    private static Color randomColor(int i) {
+    static Color randomColor(int i) {
         Random rand = new Random(i);
         float r = rand.nextFloat();
         float g = rand.nextFloat();
@@ -106,23 +73,34 @@ public abstract class EnsembleChart {
         return new Color(r, g, b);
     }
 
-    public static BasicStroke getStrokeForStatType(Statistics statType) {
+    public static int getLineWidthForStatType(Statistics statType) {
         switch (statType) {
             case MIN:
             case MAX:
             case CUMULATIVE:
             case PERCENTILES:
-                return new BasicStroke(5.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                        1.0f, new float[]{6.0f, 6.0f}, 0.0f);
+                return 3;
             default:
-                return new BasicStroke(3.0f);
+                return 1;
         }
     }
 
-    public ChartPanel generateChart() {
-        ChartPanel chart = new ChartPanel(new JFreeChart(chartTitle, plot));
-        addChartFeatures(chart);
+    public static float[] getLinePatternForStatType(Statistics statType) {
+        switch (statType) {
+            case MIN:
+            case MAX:
+            case CUMULATIVE:
+            case PERCENTILES:
+                return G2dLineProperties.DOT_STYLE_PATTERN;
+            default:
+                return G2dLineProperties.SOLID_STYLE_PATTERN;
+        }
+    }
 
-        return chart;
+    public G2dPanel generateChart() {
+        plotPanel = new G2dPanel();
+        plotPanel.setIgnorePopupPlotEvents(true);
+
+        return plotPanel;
     }
 }

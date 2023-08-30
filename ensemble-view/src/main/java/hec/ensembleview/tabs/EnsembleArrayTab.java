@@ -1,19 +1,19 @@
 package hec.ensembleview.tabs;
 
-import hec.ensembleview.viewpanels.ComputePanelView;
-import hec.ensembleview.viewpanels.DataTransformView;
 import hec.ensembleview.charts.EnsembleChartAcrossTime;
 import hec.ensembleview.controllers.ComputePanelController;
 import hec.ensembleview.controllers.EnsembleArrayChartManager;
+import hec.ensembleview.viewpanels.ComputePanelView;
+import hec.ensembleview.viewpanels.DataTransformView;
 import hec.ensembleview.viewpanels.EnsembleDataTransformView;
 import hec.ensembleview.viewpanels.StatEnsembleComputePanelView;
-import org.jfree.chart.ChartPanel;
+import hec.gfx2d.G2dPanel;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class EnsembleArrayTab extends JPanel {
-    private final ChartPanel chartPanel;
+    private final G2dPanel chartPanel;
     private final JPanel statAndDataViewPanel = new JPanel();
 
     public EnsembleArrayTab() {
@@ -35,7 +35,7 @@ public class EnsembleArrayTab extends JPanel {
         statAndDataViewPanel.add(dataViewPanel, BorderLayout.SOUTH);
     }
 
-    private ChartPanel createChart() {
+    private G2dPanel createChart() {
         return new EnsembleChartAcrossTime().generateChart();
     }
 

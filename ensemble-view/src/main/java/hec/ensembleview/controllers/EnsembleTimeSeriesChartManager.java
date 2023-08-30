@@ -6,10 +6,10 @@ import hec.ensembleview.PlotStatisticsForChartType;
 import hec.ensembleview.charts.EnsembleChart;
 import hec.ensembleview.charts.EnsembleChartAcrossTime;
 import hec.ensembleview.mappings.StatisticsMap;
+import hec.gfx2d.G2dPanel;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.metrics.MetricTypes;
 
-import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
@@ -24,7 +24,7 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
     private static final Logger logger = Logger.getLogger(EnsembleTimeSeriesChartManager.class.getName());
     private boolean isCumulative = false;
 
-    public EnsembleTimeSeriesChartManager(StatisticsMap statisticsMap, JPanel chartPanel) {
+    public EnsembleTimeSeriesChartManager(StatisticsMap statisticsMap, G2dPanel chartPanel) {
         super(statisticsMap, chartPanel);
     }
 

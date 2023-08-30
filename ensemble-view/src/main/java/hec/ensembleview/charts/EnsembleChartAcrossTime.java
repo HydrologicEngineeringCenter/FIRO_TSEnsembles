@@ -1,22 +1,19 @@
 package hec.ensembleview.charts;
 
-import hec.ensembleview.DefaultSettings;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.time.Second;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
+import hec.gfx2d.*;
+import hec.heclib.util.HecTime;
+import hec.heclib.util.HecTimeArray;
+import hec.io.TimeSeriesContainer;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EnsembleChartAcrossTime extends EnsembleChart {
-    private final Map<Integer, List<LineSpec>> lineSpecMap = new HashMap<>();
-    private final Map<Integer, TimeSeriesCollection> timeSeriesCollectionMap = new HashMap<>();
+    private final List<TimeSeriesDataSet> timeSeriesDataSetList = new ArrayList<>();
+    private final List<G2dLineProperties> g2dLinePropertiesList = new ArrayList<>();
+
 
     /**
      * Ensembles Charts Across Time class sets up and displays the metrics for the time series chart.
@@ -24,123 +21,101 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
 
     public EnsembleChartAcrossTime() {
         super();
+        layout.setHasLegend(true);
     }
 
-    public void addLine(LineSpec line) throws ParseException {
-        TimeSeries newMember = new TimeSeries(line.lineName);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-        for (int i = 0; i < line.values.length; i++)
-        {
-            Date dt = dateFormat.parse(line.dateTimes[i].toLocalDateTime().toString());
-            newMember.add(new Second(dt), line.values[i]);
+    public void addLine(LineSpec line) {
+        int length = line.dateTimes.length;
+        Duration duration = Duration.between(line.dateTimes[0], line.dateTimes[1]);
+        HecTime startTime = convertZdtToHecTime(line);
+
+        HecTimeArray timeArray = new HecTimeArray(length);
+        for (int i = 0; i < length; i++) {
+            timeArray.set(i, startTime);
+            startTime.addMinutes((int)duration.toMinutes());
         }
 
-        if (!timeSeriesCollectionMap.containsKey(line.rangeAxis)) {
-            timeSeriesCollectionMap.put(line.rangeAxis, new TimeSeriesCollection());
-            lineSpecMap.put(line.rangeAxis, new ArrayList<>());
-        }
+        // Create TimeSeriesContainer and set Time and Values
+        TimeSeriesContainer timeSeriesContainer = new TimeSeriesContainer();
+        double[] values = floatToDoubleConversion(line.values);
+        timeSeriesContainer.setValues(values);
+        timeSeriesContainer.setTimes(timeArray);
+        timeSeriesContainer.setName(line.lineName);
 
-        timeSeriesCollectionMap.get(line.rangeAxis).addSeries(newMember);
-        lineSpecMap.get(line.rangeAxis).add(line);
+        // Create TimeSeriesDataSet and add to arraylist
+        TimeSeriesDataSet timeSeriesDataSet = new TimeSeriesDataSet(timeSeriesContainer);
+        timeSeriesDataSet.setName(line.lineName);
+        timeSeriesDataSetList.add(timeSeriesDataSet);
+
+        // Create Properties
+        G2dLineProperties props = new G2dLineProperties();
+        setG2dLineProperties(props, line);
+
+        if(view != null) {
+            view.addCurve(ViewportLayout.Y1, timeSeriesDataSet, props);
+            plotPanel.buildComponents(layout);
+        }
+    }
+
+    private HecTime convertZdtToHecTime(LineSpec line) {
+        ZonedDateTime startDate = line.dateTimes[0];
+        int year = startDate.getYear();
+        String month = startDate.getMonth().toString();
+        int day = startDate.getDayOfMonth();
+        String hour = String.valueOf(startDate.getHour());
+        String minutes = String.valueOf(startDate.getMinute());
+
+        return new HecTime(day + month + year, hour + minutes);
+    }
+
+    private void setG2dLineProperties(G2dLineProperties props, LineSpec lineSpec) {
+        props.setLineWidth(lineSpec.lineWidth);
+        props.setLinePattern(lineSpec.linePattern);
+        props.setName(lineSpec.lineName);
+        props.setLabel(lineSpec.lineName);
+        props.setLineColor(lineSpec.lineColor);
+        props.setDrawLine(true);
+        props.setDrawPoints(false);
+        g2dLinePropertiesList.add(props);
     }
 
     //Refreshes time series ensembles to one color if metric is selected
     public void updateEnsembleLineSpec(boolean isChecked) {
-        List<LineSpec> linesForRange = lineSpecMap.get(0);
-        if(isChecked) {
-            for (int j = 0; j < linesForRange.size(); j++) {
-                LineSpec currentLine = linesForRange.get(j);
-                if(currentLine.lineName.contains("Member")) {
-                    currentLine.lineColor = ensembleColor();
-                    plot.getRenderer().setSeriesPaint(j, currentLine.lineColor);
+        List<G2dLineProperties> list = view.getY1DataProperties(ViewportLayout.X1);
+        if (isChecked) {
+            for (G2dLineProperties lineProperties : list) {
+                if (lineProperties.getName().contains("Member")) {
+                    lineProperties._lineColor = ensembleColor();
+                    lineProperties._lineTransparency = 80;
                 }
             }
         } else {
-            for (int j = 0; j < linesForRange.size(); j++) {
-                LineSpec currentLine = linesForRange.get(j);
-                if(currentLine.lineName.contains("Member")) {
-                    currentLine.lineColor = null;
-                    plot.getRenderer().setSeriesPaint(j, currentLine.lineColor);
+            for (G2dLineProperties lineProperties : list) {
+                if (lineProperties.getName().contains("Member")) {
+                    lineProperties._lineColor = randomColor(1);
                 }
             }
         }
     }
 
     @Override
-    public ChartPanel generateChart() {
-        plot = createTimeSeriesPlot();
+    public G2dPanel generateChart() {
+        super.generateChart();
+        if(view == null) {
+            view = layout.addViewport(1.0);
+            view.setAxisLabel(ViewportLayout.Y1, yLabel);
+            view.setAxisLabel(ViewportLayout.X1, xLabel);
+        }
 
-        return super.generateChart();
+        buildViewPortGraph();
+        plotPanel.buildComponents(layout);
+
+        return plotPanel;
     }
 
-    private XYPlot createTimeSeriesPlot() {
-        XYPlot plot = new XYPlot();
-
-        plot.setDomainPannable(true);
-        plot.setRangePannable(true);
-
-        timeSeriesCollectionMap.forEach((k, v) -> {
-            rendererMap.put(k, new XYLineAndShapeRenderer(true, false));
-            XYLineAndShapeRenderer renderer = rendererMap.get(k);
-            plot.setDataset(k, timeSeriesCollectionMap.get(k));
-            plot.setRenderer(k, renderer);
-
-            DateAxis domainAxis = new DateAxis(xLabel);
-            domainAxis.setTickLabelFont(DefaultSettings.setSegoeFontText());
-            plot.setDomainAxis(domainAxis);
-
-            NumberAxis rangeAxis = new NumberAxis(yLabel);
-            rangeAxis.setTickLabelFont(DefaultSettings.setSegoeFontText());
-            plot.setRangeAxis(k, rangeAxis);
-
-            plot.mapDatasetToDomainAxis(k, 0);
-            plot.mapDatasetToRangeAxis(k, k);
-
-            List<LineSpec> linesForRange = lineSpecMap.get(k);
-            for (int j = 0; j < linesForRange.size(); j++) {
-                LineSpec currentLine = linesForRange.get(j);
-                plot.getRenderer(k).setSeriesStroke(j, currentLine.lineStroke);
-                if (currentLine.lineColor != null) plot.getRenderer(k).setSeriesPaint(j, currentLine.lineColor);
-            }
-        });
-
-        return plot;
+    private void buildViewPortGraph() {
+        for (int i = 0; i < timeSeriesDataSetList.size(); i++) {
+            view.addCurve(ViewportLayout.Y1, timeSeriesDataSetList.get(i), g2dLinePropertiesList.get(i));
+        }
     }
-
-    // --Commented out by Inspection START (7/23/23, 2:47 PM) - or viewing statistics:
-//
-//    public void hideLine(String stat) {
-//        List<LineSpec> linesForRange = lineSpecMap.get(0);
-//        for (int j = 0; j < linesForRange.size(); j++) {
-//            LineSpec currentLine = linesForRange.get(j);
-//            if (currentLine.lineName.equalsIgnoreCase(stat.toUpperCase())) {
-//                plot.getRenderer(0).setSeriesVisible(j, false);
-//                break;
-//            } else if (currentLine.lineName.contains(stat.toUpperCase())) {
-//                plot.getRenderer(0).setSeriesVisible(j, false);
-//            }
-//        }
-//    }
-// --Commented out by Inspection STOP (7/23/23, 2:47 PM)
-
-// --Commented out by Inspection START (7/23/23, 2:48 PM):
-//    public void showLine(String stat) {
-//        if (plot == null) {
-//            return;
-//        }
-//
-//        List<LineSpec> linesForRange = lineSpecMap.get(0);
-//        for (int j = 0; j < linesForRange.size(); j++) {
-//            LineSpec currentLine = linesForRange.get(j);
-//            if (currentLine.lineName.equalsIgnoreCase(stat)) {
-//                plot.getRenderer(0).setSeriesVisible(j, true);
-//                break;
-//            } else if (currentLine.lineName.contains(stat.toUpperCase())) {
-//                plot.getRenderer(0).setSeriesVisible(j, true);
-//            }
-//        }
-//    }
-// --Commented out by Inspection STOP (7/23/23, 2:48 PM)
-
-
 }

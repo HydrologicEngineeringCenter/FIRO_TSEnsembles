@@ -6,10 +6,10 @@ import hec.ensembleview.PlotStatisticsForChartType;
 import hec.ensembleview.charts.EnsembleChart;
 import hec.ensembleview.charts.EnsembleChartAcrossEnsembles;
 import hec.ensembleview.mappings.StatisticsMap;
+import hec.gfx2d.G2dPanel;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.metrics.MetricTypes;
 
-import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +24,7 @@ public class EnsembleArrayChartManager extends ChartManager {
     private MetricCollectionTimeSeries residentMetricCollectionTimeSeries;
     private String secondaryUnits;
 
-    public EnsembleArrayChartManager(StatisticsMap statisticsMap, JPanel chartPanel) {
+    public EnsembleArrayChartManager(StatisticsMap statisticsMap, G2dPanel chartPanel) {
         super(statisticsMap, chartPanel);
     }
 

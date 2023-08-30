@@ -1,22 +1,23 @@
 package hec.ensembleview.charts;
 
-import hec.ensembleview.DefaultSettings;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+import hec.gfx2d.G2dLineProperties;
+import hec.gfx2d.G2dPanel;
+import hec.gfx2d.PairedDataSet;
+import hec.gfx2d.ViewportLayout;
+import hec.io.PairedDataContainer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class EnsembleChartAcrossEnsembles extends EnsembleChart {
     private String y2Label = "";
-    private final Map<Integer, List<PointSpec>> pointSpecMap = new HashMap<>();
-    private final Map<Integer, XYSeriesCollection> xYSeriesCollectionMap = new HashMap<>();
+    private final List<PairedDataSet> pairedDataSetListY1 = new ArrayList<>();
+    private final List<PairedDataSet> pairedDataSetListY2 = new ArrayList<>();
+    private final List<G2dLineProperties> g2dPointPropertiesListY1 = new ArrayList<>();
+    private final List<G2dLineProperties> g2dPointPropertiesListY2 = new ArrayList<>();
+    private double[] xOrdinates;
+    private double[][] yOrdinates;
 
     /**
      * Ensembles Charts Across Ensembles class sets up and displays the metrics for the scatter plot chart
@@ -26,82 +27,119 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
         y2Label = label;
     }
 
+    private void setXyOrdinates(double[] values, double[] prob) {
+        xOrdinates = new double[values.length];
+        yOrdinates = new double[1][values.length];
+
+        if (prob.length > 0) {
+            xOrdinates = prob;
+            for (int i = 0; i < values.length; i++) {
+                yOrdinates[0][i] = values[i];
+            }
+        } else {
+            for (int i = 0; i < values.length; i++) {
+                xOrdinates[i] = i + 1d;
+                yOrdinates[0][i] = values[i];
+            }
+        }
+    }
 
     public void addPoint(PointSpec point) {
-        XYSeries newMember = new XYSeries(point.pointName);
-        for (int i = 0; i < point.yValue.length; i++) {
-            newMember.add(i + 1d, point.yValue[i]);
+        PairedDataContainer pairedDataContainer = new PairedDataContainer();
+        double[] values = floatToDoubleConversion(point.yValue);
+        setXyOrdinates(values, new double[0]);
+
+        pairedDataContainer.setValues(xOrdinates, yOrdinates);
+        pairedDataContainer.setName(point.pointName);
+
+        PairedDataSet pairedDataSet = new PairedDataSet(pairedDataContainer);
+        pairedDataSet.setName(point.pointName);
+
+        if(point.rangeAxis.equalsIgnoreCase(ViewportLayout.Y1)) {
+            pairedDataSetListY1.add(pairedDataSet);
+        } else {
+            pairedDataSetListY2.add(pairedDataSet);
         }
 
-        if (!xYSeriesCollectionMap.containsKey(point.rangeAxis)) {
-            xYSeriesCollectionMap.put(point.rangeAxis, new XYSeriesCollection());
-            pointSpecMap.put(point.rangeAxis, new ArrayList<>());
-        }
-
-        xYSeriesCollectionMap.get(point.rangeAxis).addSeries(newMember);
-        pointSpecMap.get(point.rangeAxis).add(point);
+        G2dLineProperties props = new G2dLineProperties();
+        setG2dPointProperties(props, point);
     }
 
     public void addProbPoint(PointSpec point) {
-        XYSeries newMember = new XYSeries(point.pointName);
+        //get probability map and set to double array
         Map<Float, Float> probValues = point.prob;
+        List<Float> statValues = new ArrayList<>(probValues.values());
+        List<Float> probability = new ArrayList<>(probValues.keySet());
 
-        for(Map.Entry<Float, Float> entry : probValues.entrySet()) {
-            newMember.add(entry.getKey(), entry.getValue());
+        double[] values = statValues.stream().mapToDouble(Float::doubleValue).toArray();
+        double[] prob = probability.stream().mapToDouble(Float::doubleValue).toArray();
+
+        setXyOrdinates(values, prob);
+
+        // Create new pairedDataContainer and add x and y ordinates
+        PairedDataContainer pairedDataContainer = new PairedDataContainer();
+        pairedDataContainer.setValues(xOrdinates, yOrdinates);
+        pairedDataContainer.setName(point.pointName);
+
+        // Create new PairedDatedSet and add to arraylist based on axis
+        PairedDataSet pairedDataSet = new PairedDataSet(pairedDataContainer);
+        pairedDataSet.setName(point.pointName);
+
+        if(point.rangeAxis.equalsIgnoreCase(ViewportLayout.Y1)) {
+            pairedDataSetListY1.add(pairedDataSet);
+        } else {
+            pairedDataSetListY2.add(pairedDataSet);
         }
 
-        if (!xYSeriesCollectionMap.containsKey(point.rangeAxis)) {
-            xYSeriesCollectionMap.put(point.rangeAxis, new XYSeriesCollection());
-            pointSpecMap.put(point.rangeAxis, new ArrayList<>());
-        }
+        // Create G2dLineProperties
+        G2dLineProperties props = new G2dLineProperties();
+        setG2dPointProperties(props, point);
+    }
 
-        xYSeriesCollectionMap.get(point.rangeAxis).addSeries(newMember);
-        pointSpecMap.get(point.rangeAxis).add(point);
+    private void setG2dPointProperties(G2dLineProperties props, PointSpec pointSpec) {
+        props.setDrawLine(false);
+        props.setDrawPoints(true);
+        props.setName(pointSpec.pointName);
+        props.setLabel(pointSpec.pointName);
+        props.setPointLineColor(pointSpec.pointColor);
+        props.setSymbolFillColor(pointSpec.pointColor);
+
+        if(pointSpec.rangeAxis.equalsIgnoreCase(ViewportLayout.Y1)) {
+            g2dPointPropertiesListY1.add(props);
+        } else {
+            g2dPointPropertiesListY2.add(props);
+        }
     }
 
     @Override
-    public ChartPanel generateChart() {
-        plot = createXyPlot();
+    public G2dPanel generateChart() {
+        super.generateChart();
 
-        return super.generateChart();
+        if(view == null) {
+            view = layout.addViewport(1.0);
+            view.setAxisLabel(ViewportLayout.X1, xLabel);
+        }
+        buildViewPortGraph();
+
+        plotPanel.buildComponents(layout);
+
+        return plotPanel;
     }
 
-    private XYPlot createXyPlot() {
-        plot = new XYPlot();
-        plot.setDomainPannable(true);
-        plot.setRangePannable(true);
-
-        xYSeriesCollectionMap.forEach((k, v) -> {
-            rendererMap.put(k, new XYLineAndShapeRenderer(false, true));
-            XYLineAndShapeRenderer renderer = rendererMap.get(k);
-            plot.setDataset(k, xYSeriesCollectionMap.get(k));
-            plot.setRenderer(k, renderer);
-
-            NumberAxis domainAxis = new NumberAxis(xLabel);
-            domainAxis.setTickLabelFont(DefaultSettings.setSegoeFontText());
-            plot.setDomainAxis(domainAxis);
-
-            NumberAxis rangeAxis = new NumberAxis(yLabel);
-
-            if(k == 1) {
-                rangeAxis.setLabel(y2Label);
+    private void buildViewPortGraph() {
+        if(!pairedDataSetListY1.isEmpty()) {
+            for (int i = 0; i < pairedDataSetListY1.size(); i++) {
+                view.addCurve(ViewportLayout.Y1, pairedDataSetListY1.get(i), g2dPointPropertiesListY1.get(i));
             }
+            view.setAxisLabel(ViewportLayout.Y1, yLabel);
+        }
 
-            rangeAxis.setTickLabelFont(DefaultSettings.setSegoeFontText());
-            plot.setRangeAxis(k, rangeAxis);
-
-            plot.mapDatasetToDomainAxis(k, 0);
-            plot.mapDatasetToRangeAxis(k, k);
-
-            List<PointSpec> pointsForRange = pointSpecMap.get(k);
-            for (int j = 0; j < pointsForRange.size(); j++) {
-                PointSpec currentPoint = pointsForRange.get(j);
-                plot.getRenderer(k).setSeriesStroke(j, currentPoint.lineStroke);
-                if (currentPoint.pointColor != null) plot.getRenderer(k).setSeriesPaint(j, currentPoint.pointColor);
+        if(!pairedDataSetListY2.isEmpty()) {
+            for (int i = 0; i < pairedDataSetListY2.size(); i++) {
+                view.addCurve(ViewportLayout.Y2, pairedDataSetListY2.get(i), g2dPointPropertiesListY2.get(i));
             }
-        });
-
-        return plot;
+            view.setAxisName(ViewportLayout.Y2, y2Label);
+        }
     }
 }
 
