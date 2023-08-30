@@ -34,7 +34,7 @@ public abstract class EnsembleChart {
         return new Color(51,204,255);
     }
 
-    protected double[] floatToDoubleConversion(float[] floatArray) {
+    double[] floatToDoubleConversion(float[] floatArray) {
         double[] doubleArray = new double[floatArray.length];
         for (int i = 0; i < floatArray.length; i++) {
             doubleArray[i] = floatArray[i];

@@ -76,7 +76,7 @@ public class PlotStatisticsForChartType {
         }
     }
 
-    static Color randomColor(int i) {
+    private static Color randomColor(int i) {
         Random rand = new Random(i);
         float r = rand.nextFloat();
         float g = rand.nextFloat();
