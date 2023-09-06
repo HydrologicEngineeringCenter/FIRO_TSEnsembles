@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'maven-publish'
 }
 
 
@@ -18,9 +19,8 @@ dependencies {
     implementation ('mil.army.usace.hec:hec-monolith:3.+') {
         transitive = false
     }
-    implementation 'org.jfree:jfreechart:1.5.3'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 }
 
 test {
@@ -31,3 +31,36 @@ test {
 application {
     mainClassName = 'hec.ensembleview.EnsembleViewer'
 }
+
+jar {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    manifest {
+        attributes 'Main-Class' : 'hec.ensembleview.EnsembleViewer'
+    }
+}
+
+version ="1.0-SNAPSHOT"
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = 'mil.army.usace.hec'
+            artifactId = 'ensemble-view'
+        }
+    }
+    repositories {
+        maven {
+            name = "hecNexus"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+            def releasesRepoUrl = "https://www.hec.usace.army.mil/nexus/repository/maven-releases/"
+            def snapshotsRepoUrl = "https://www.hec.usace.army.mil/nexus/repository/maven-snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+
+publish.dependsOn(build)
