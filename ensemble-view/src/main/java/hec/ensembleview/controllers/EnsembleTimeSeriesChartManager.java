@@ -11,7 +11,6 @@ import hec.metrics.MetricCollectionTimeSeries;
 import hec.metrics.MetricTypes;
 
 import java.beans.PropertyChangeEvent;
-import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +28,7 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
     }
 
     @Override
-    EnsembleChart createEnsembleChart() throws ParseException {
+    EnsembleChart createEnsembleChart() {
         if (databaseHandlerService.getDbHandlerRid() == null || databaseHandlerService.getDbHandlerZdt() == null) {
             return null;
         }
@@ -37,7 +36,7 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
         chart = new EnsembleChartAcrossTime();
         isEnsembleDataViewTypeCumulative(isCumulative);
         units = ensemble.getUnits();
-        setChartLabels();
+        setYAxisChartLabels();
         PlotStatisticsForChartType.addLineMembersToChart(chart, ensemble.getValues(), ensemble.startDateTime());
 
         return chart;
@@ -67,9 +66,7 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
         return metricValues;
     }
 
-    void setChartLabels() {
-        chart.setXLabel("Date/Time");
-
+    void setYAxisChartLabels() {
         String yLabelText = databaseHandlerService.getDbHandlerRid().parameter + " (" + units + ")";
         chart.setYLabel(yLabelText);
     }

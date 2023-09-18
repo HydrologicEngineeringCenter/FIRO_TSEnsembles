@@ -72,10 +72,10 @@ public class EnsembleArrayChartManager extends ChartManager {
         } else if(PlotStatisticsForChartType.getRangeAxis(stat) == 1) {
             secondaryUnits = residentMetricCollectionTimeSeries.getUnits();
         }
-        setChartLabels();
+        setYAxisChartLabels();
     }
 
-    private void setChartLabels() {
+    private void setYAxisChartLabels() {
         String parameter = databaseHandlerService.getDbHandlerRid().parameter;
 
         String yLabelText = parameter + " (" + units + ")";
@@ -85,8 +85,6 @@ public class EnsembleArrayChartManager extends ChartManager {
             String y2LabelText = parameter + " (" + secondaryUnits + ")";
             ((EnsembleChartAcrossEnsembles) chart).setY2Label(y2LabelText);
         }
-
-        chart.setXLabel("Ensembles");
     }
 
 
