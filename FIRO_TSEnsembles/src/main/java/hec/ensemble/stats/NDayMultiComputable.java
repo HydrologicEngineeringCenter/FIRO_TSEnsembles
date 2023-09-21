@@ -22,7 +22,7 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
 
         int timeStepSeconds = (int) config.getDuration().getSeconds();
         int timeStepDay = 86400 / timeStepSeconds;  // How many time steps per day (86400 is how many seconds in a day).
-        float interpVal = timeStepDay * days[0];
+        float interpVal = timeStepDay * days[0]-1;  // This represents the index value
         return interpolateNDay(values, interpVal);
     }
 
@@ -36,7 +36,7 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
         for(float day : days) {
             int timeStepSeconds = (int) config.getDuration().getSeconds();
             int timeStepDay = 86400 / timeStepSeconds;
-            float interpVal = timeStepDay * day;
+            float interpVal = timeStepDay * day-1;
             results[i] = interpolateNDay(values, interpVal);
             i++;
         }
@@ -52,15 +52,15 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
             throw new ArithmeticException("Accumulating days must be greater than 0");
         }
 
-        if (interpVal == values.length-1) {
+        if (Math.round(interpVal) == interpVal) {
             return values[(int) interpVal];
         }
 
         int startIndex = (int) interpVal;
         int endIndex = startIndex + 1;
 
-        float y1 = values[startIndex-1];  // index starts at zero
-        float y2 = values[endIndex-1];  // index starts at zero
+        float y1 = values[startIndex];  // index starts at zero
+        float y2 = values[endIndex];  // index starts at zero
         return LinearInterp.linInterp(startIndex, endIndex, y1, y2, interpVal);
     }
 

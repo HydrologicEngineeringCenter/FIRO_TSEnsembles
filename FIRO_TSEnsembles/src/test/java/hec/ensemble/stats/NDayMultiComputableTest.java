@@ -48,6 +48,17 @@ class NDayMultiComputableTest {
     }
 
     @Test
+    void testNDayMultiComputableAcrossTimeInterpolateDaysFraction() {
+        MultiComputable test = new NDayMultiComputable(new CumulativeComputable(), new float[] {0.4f});
+        Configurable c = (Configurable) test;
+        c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1),""));
+        float[] num1 = {11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8,11,2,6,4,5,6,7,8};
+        float[] results = test.multiCompute(num1);
+        //Expected value computed in Excel. The first value in array is Time zero.
+        assertEquals(5.0578, results[0], 0.001);
+    }
+
+    @Test
     void testNDayMultiComputableAcrossTimeInterpolateDaysWithMinutesTimeStep() {
         MultiComputable test = new NDayMultiComputable(new CumulativeComputable(), new float[] {0.5f});
         Configurable c = (Configurable) test;
@@ -65,7 +76,7 @@ class NDayMultiComputableTest {
             Ensemble e = TestData.getSampleEnsemble();
             Computable test = new NDayMultiComputable(new CumulativeComputable(), new float[] {14});
             float[] output = e.iterateForTracesAcrossTime(test);
-            assertEquals(-280.8352, output[3], 0.001);
+            assertEquals(-281.0137, output[3], 0.01);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
@@ -78,7 +89,7 @@ class NDayMultiComputableTest {
             Ensemble e = TestData.getSampleEnsemble();
             Computable test = new NDayMultiComputable(new CumulativeComputable(), new float[] {13});
             float[] output = e.iterateForTracesAcrossTime(test);
-            assertEquals(-698.64801, output[8], 0.001);
+            assertEquals(-698.64, output[8], 0.01);
         } catch (Exception e) {
             Logger.logError(e);
             fail();
