@@ -1,6 +1,9 @@
 package hec.ensembleview.charts;
 
-import hec.gfx2d.*;
+import hec.gfx2d.G2dLineProperties;
+import hec.gfx2d.G2dPanel;
+import hec.gfx2d.TimeSeriesDataSet;
+import hec.gfx2d.ViewportLayout;
 import hec.heclib.util.HecTime;
 import hec.heclib.util.HecTimeArray;
 import hec.io.TimeSeriesContainer;
@@ -54,6 +57,7 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
         if(view != null) {
             view.addCurve(ViewportLayout.Y1, timeSeriesDataSet, props);
             plotPanel.buildComponents(layout);
+            setPanAdapter();
         }
     }
 
@@ -107,7 +111,9 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
         }
 
         buildViewPortGraph();
+
         plotPanel.buildComponents(layout);
+        setPanAdapter();
 
         return plotPanel;
     }

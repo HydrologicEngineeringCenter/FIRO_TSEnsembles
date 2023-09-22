@@ -1,10 +1,8 @@
 package hec.ensembleview.charts;
 
 import hec.ensemble.stats.Statistics;
-import hec.gfx2d.G2dLineProperties;
-import hec.gfx2d.G2dPanel;
-import hec.gfx2d.PlotLayout;
 import hec.gfx2d.ViewportLayout;
+import hec.gfx2d.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +14,8 @@ public abstract class EnsembleChart {
     String xLabel = "";
     G2dPanel plotPanel;
     PlotLayout layout = new PlotLayout();
+    final ToolbarButtonProp toolbarButtonProp = new ToolbarButtonProp();
+    static final String ICON = "Images/Pan.gif";
 
     EnsembleChart() {
         JPanel panel = new JPanel();
@@ -95,6 +95,17 @@ public abstract class EnsembleChart {
             default:
                 return G2dLineProperties.SOLID_STYLE_PATTERN;
         }
+    }
+
+    void setPanAdapter() {
+        toolbarButtonProp.adapter = PanMouseAdapter.class.getName();
+        toolbarButtonProp.up = ICON;
+        toolbarButtonProp.down = ICON;
+        toolbarButtonProp.over = ICON;
+        toolbarButtonProp.on = ICON;
+
+
+        plotPanel.addTool(toolbarButtonProp);
     }
 
     public G2dPanel generateChart() {

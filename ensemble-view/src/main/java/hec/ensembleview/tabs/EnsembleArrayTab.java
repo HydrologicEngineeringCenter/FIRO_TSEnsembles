@@ -1,6 +1,6 @@
 package hec.ensembleview.tabs;
 
-import hec.ensembleview.charts.EnsembleChartAcrossTime;
+import hec.ensembleview.charts.EnsembleChartAcrossEnsembles;
 import hec.ensembleview.controllers.ComputePanelController;
 import hec.ensembleview.controllers.EnsembleArrayChartManager;
 import hec.ensembleview.viewpanels.ComputePanelView;
@@ -36,7 +36,7 @@ public class EnsembleArrayTab extends JPanel {
     }
 
     private G2dPanel createChart() {
-        return new EnsembleChartAcrossTime().generateChart();
+        return new EnsembleChartAcrossEnsembles().generateChart();
     }
 
     private void initiateEnsembleChart(DataTransformView dataTransformView, ComputePanelView computePanelView) {
