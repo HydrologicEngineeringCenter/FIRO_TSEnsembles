@@ -11,6 +11,12 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
      */
     public NDayMultiComputable(){ } // necessary for reflection deserializing serializing
 
+    /**
+     *
+     * @param stepOne The CumulativeComputable object which returns a float array of a cumulating timeseries trace
+     * @param numberDays Cumulated days. Fractional days are allowed (0.5 days). User can enter multiple days.
+     */
+
     public NDayMultiComputable(MultiComputable stepOne, float[] numberDays) {
         stepOneCompute = stepOne;
         days = numberDays;
@@ -20,9 +26,9 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
     public float compute(float[] values) {
         values = stepOneCompute.multiCompute(values);
 
-        int timeStep = (int) config.getDuration().getSeconds();
-        int timeStepDay = 86400 / timeStep;
-        float interpVal = timeStepDay * days[0];
+        int timeStepSeconds = (int) config.getDuration().getSeconds();
+        int timeStepDay = 86400 / timeStepSeconds;  // How many time steps per day (86400 is how many seconds in a day).
+        float interpVal = timeStepDay * days[0]-1;  // This represents the index value
         return interpolateNDay(values, interpVal);
     }
 
@@ -34,9 +40,9 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
         values = stepOneCompute.multiCompute(values);
 
         for(float day : days) {
-            int timeStep = (int) config.getDuration().getSeconds();
-            int timeStepDay = 86400 / timeStep;
-            float interpVal = timeStepDay * day;
+            int timeStepSeconds = (int) config.getDuration().getSeconds();
+            int timeStepDay = 86400 / timeStepSeconds;
+            float interpVal = timeStepDay * day-1;
             results[i] = interpolateNDay(values, interpVal);
             i++;
         }
@@ -52,15 +58,15 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
             throw new ArithmeticException("Accumulating days must be greater than 0");
         }
 
-        if (interpVal == values.length-1) {
+        if (Math.round(interpVal) == interpVal) {
             return values[(int) interpVal];
         }
 
         int startIndex = (int) interpVal;
         int endIndex = startIndex + 1;
 
-        float y1 = values[startIndex];
-        float y2 = values[endIndex];
+        float y1 = values[startIndex];  // index starts at zero
+        float y2 = values[endIndex];  // index starts at zero
         return LinearInterp.linInterp(startIndex, endIndex, y1, y2, interpVal);
     }
 
