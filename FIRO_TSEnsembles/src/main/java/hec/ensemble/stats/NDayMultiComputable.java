@@ -11,6 +11,12 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
      */
     public NDayMultiComputable(){ } // necessary for reflection deserializing serializing
 
+    /**
+     *
+     * @param stepOne The CumulativeComputable object which returns a float array of a cumulating timeseries trace
+     * @param numberDays Cumulated days. Fractional days are allowed (0.5 days). User can enter multiple days.
+     */
+
     public NDayMultiComputable(MultiComputable stepOne, float[] numberDays) {
         stepOneCompute = stepOne;
         days = numberDays;
