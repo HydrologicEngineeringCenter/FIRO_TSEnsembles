@@ -34,6 +34,10 @@ jobs:
          firoplugin/build/libs
          ensemble-dss/build/libs
          ensemble-view/build/distributions
-         
-         
-    
+    - name: Publish package
+      uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
+      with:
+          arguments: publish
+      env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}

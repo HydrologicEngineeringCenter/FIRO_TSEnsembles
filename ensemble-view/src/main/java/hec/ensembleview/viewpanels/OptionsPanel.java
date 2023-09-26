@@ -1,8 +1,8 @@
 package hec.ensembleview.viewpanels;
 
 import hec.RecordIdentifier;
-import hec.ensembleview.controllers.DatabaseListener;
 import hec.ensembleview.DefaultSettings;
+import hec.ensembleview.controllers.DatabaseListener;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -10,6 +10,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 public class OptionsPanel extends JPanel {
     private JLabel fileText;
@@ -169,7 +170,7 @@ public class OptionsPanel extends JPanel {
 
         fileSearchButton = new JButton();
         fileSearchButton.addActionListener(filePathListener);
-        ImageIcon fileIcon = new ImageIcon("ensemble-view/src/main/resources/Open24_Default.gif");
+        ImageIcon fileIcon = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/Open24_Default.gif")));
 
         fileSearchButton.setIcon(fileIcon);
         filePath = new JTextField();
