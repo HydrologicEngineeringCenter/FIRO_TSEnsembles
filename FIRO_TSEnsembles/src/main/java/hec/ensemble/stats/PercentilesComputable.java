@@ -25,6 +25,9 @@ public class PercentilesComputable implements Computable, MultiComputable, Confi
     @Override
     public float compute(float[] values) {
         Arrays.sort(values);
+        if(selectedPercentiles.length == 0) {
+            throw new ArrayIndexOutOfBoundsException("Percentile(s) less than or equal to 1 must be entered in the text field");
+        }
         return computePercentile(values, selectedPercentiles[0]);
     }
 
@@ -62,7 +65,7 @@ public class PercentilesComputable implements Computable, MultiComputable, Confi
 
     private float computePercentile(float[] values, float interpVal) {
         if (interpVal > 1.0) {
-            throw new ArithmeticException("Percentile must be less than equal to 1");
+            throw new ArithmeticException("Percentile must be less than or equal to 1");
         }
         if (interpVal < 0) {
             throw new ArithmeticException("Percentile must be greater than or equal to 0");

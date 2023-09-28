@@ -24,6 +24,9 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
 
     @Override
     public float compute(float[] values) {
+        if(days.length == 0) {
+            throw new ArrayIndexOutOfBoundsException("Duration in days must be entered in the text field");
+        }
         values = stepOneCompute.multiCompute(values);
 
         int timeStepSeconds = (int) config.getDuration().getSeconds();
@@ -34,6 +37,9 @@ public class NDayMultiComputable implements Computable, MultiComputable, Statist
 
     @Override
     public float[] multiCompute(float[] values) {
+        if(days.length == 0) {
+            throw new ArrayIndexOutOfBoundsException("Duration in days must be entered in the text field");
+        }
         int size = days.length;
         float[] results = new float[size];
         int i = 0;
