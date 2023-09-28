@@ -104,7 +104,6 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
         if(view == null) {
             view = layout.addViewport(1.0);
             view.setAxisLabel(ViewportLayout.Y1, yLabel);
-            view.setAxisLabel(ViewportLayout.X1, xLabel);
         }
 
         buildViewPortGraph();

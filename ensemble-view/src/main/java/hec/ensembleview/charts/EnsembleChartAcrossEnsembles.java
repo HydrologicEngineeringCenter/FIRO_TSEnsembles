@@ -18,6 +18,7 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
     private final List<G2dLineProperties> g2dPointPropertiesListY2 = new ArrayList<>();
     private double[] xOrdinates;
     private double[][] yOrdinates;
+    private boolean isProb = false;
 
     /**
      * Ensembles Charts Across Ensembles class sets up and displays the metrics for the scatter plot chart
@@ -63,6 +64,9 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
 
         G2dLineProperties props = new G2dLineProperties();
         setG2dPointProperties(props, point);
+
+        isProb = false;
+        xLabel = "Ensembles";
     }
 
     public void addProbPoint(PointSpec point) {
@@ -94,6 +98,8 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
         // Create G2dLineProperties
         G2dLineProperties props = new G2dLineProperties();
         setG2dPointProperties(props, point);
+        isProb = true;
+        xLabel = "Probability";
     }
 
     private void setG2dPointProperties(G2dLineProperties props, PointSpec pointSpec) {
@@ -119,6 +125,12 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
             view = layout.addViewport(1.0);
             view.setAxisLabel(ViewportLayout.X1, xLabel);
         }
+
+        if(isProb) {
+            view.setAxisType("X1", "PROBABILITY");
+            view.setAxisLabel(ViewportLayout.X1, xLabel);
+        }
+
         buildViewPortGraph();
 
         plotPanel.buildComponents(layout);
