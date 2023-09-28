@@ -16,8 +16,8 @@ public class SingleValueComboBoxMap {
         );
         summaryStatisticsMap.put(SingleValueSummaryType.COMPUTEACROSSTIME,
                 Arrays.asList(
-                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.TOTAL, Statistics.MAXACCUMDURATION, Statistics.MAXAVERAGEDURATION, Statistics.CUMULATIVE),
-                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.STANDARDDEVIATION, Statistics.VARIANCE, Statistics.PERCENTILES)
+                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.TOTAL, Statistics.CUMULATIVE),
+                        Arrays.asList(Statistics.MIN, Statistics.MAX, Statistics.AVERAGE, Statistics.MEDIAN, Statistics.STANDARDDEVIATION, Statistics.PERCENTILES)
                 )
         );
     }

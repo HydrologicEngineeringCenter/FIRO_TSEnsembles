@@ -184,13 +184,16 @@ public class SingleValueSummaryTab extends JPanel {
         clearButton.addActionListener(e -> outputArea.setText(""));
 
         computeButton.addActionListener(e -> {
-            MetricCollectionTimeSeries value = statComputationHelper.computeTwoStepComputable(getFirstStat(), getFirstTextFieldValue(),
-                    getSecondStat(), getSecondTextFieldValue(),
-                    getSummaryType() == SingleValueSummaryType.COMPUTEACROSSENSEMBLES ||
-                            getSummaryType() == SingleValueSummaryType.COMPUTECUMULATIVE);
-            getValuesFromMetricCollectionTimeSeries(value);
-
-            tryShowingOutput(getValuesFromMetricCollectionTimeSeries(value));
+            try {
+                MetricCollectionTimeSeries value = statComputationHelper.computeTwoStepComputable(getFirstStat(), getFirstTextFieldValue(),
+                        getSecondStat(), getSecondTextFieldValue(),
+                        getSummaryType() == SingleValueSummaryType.COMPUTEACROSSENSEMBLES ||
+                                getSummaryType() == SingleValueSummaryType.COMPUTECUMULATIVE);
+                getValuesFromMetricCollectionTimeSeries(value);
+                tryShowingOutput(getValuesFromMetricCollectionTimeSeries(value));
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
     }
 
