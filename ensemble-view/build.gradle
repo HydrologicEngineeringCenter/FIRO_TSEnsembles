@@ -16,7 +16,7 @@ repositories {
 dependencies {
     implementation project(":FIRO_TSEnsembles")
     implementation project(":ensemble-dss")
-    implementation ('mil.army.usace.hec:hec-monolith:3.+') {
+    implementation ('mil.army.usace.hec:hec-monolith:3.3.23') {
         transitive = false
     }
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'

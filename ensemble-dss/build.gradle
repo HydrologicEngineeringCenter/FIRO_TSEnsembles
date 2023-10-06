@@ -12,7 +12,6 @@ configurations {
 }
 
 group 'hec.dss.ensemble'
-version '0.1'
 
 repositories {
     mavenCentral()
@@ -22,9 +21,9 @@ repositories {
 }
 dependencies {
     implementation project(":FIRO_TSEnsembles")
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-    implementation ('mil.army.usace.hec:hec-monolith:3.0.0-rc5'){
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    implementation ('mil.army.usace.hec:hec-monolith:3.3.23'){
         exclude group: "codebase", module: "*"
         exclude group: "com.sun.media", module: "*"
         exclude group: "javax.media", module: "*"
@@ -58,7 +57,7 @@ jar {
     dependsOn copyNatives
 }
 
-version ="1.0-SNAPSHOT"
+version ="1.0"
 publishing {
     publications {
         mavenJava(MavenPublication) {
