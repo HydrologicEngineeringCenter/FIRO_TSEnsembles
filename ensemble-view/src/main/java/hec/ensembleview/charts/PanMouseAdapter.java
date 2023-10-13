@@ -131,26 +131,9 @@ public class PanMouseAdapter extends G2dPointerAdapter {
     }
 
     @Override
-    public void mouseWheelMoved(java.awt.event.MouseWheelEvent e) {
+    public void mouseWheelMoved(MouseWheelEvent e) {
         if (e.getScrollAmount() != 0) {
-            int direction;
-
-            JScrollBar toScroll;
-            if (e.isShiftDown()) {
-                toScroll = null;   //horizontal Scroll bar;
-            } else if (e.isControlDown()) {
-                toScroll = null;   //vertical Scroll bar;
-            } else {
-                mouseWheelZoom(e);
-                return;
-            }
-
-            direction = e.getWheelRotation() < 0 ? -1 : 1;
-            if (e.getScrollType() == java.awt.event.MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-                scrollByUnits(toScroll, direction, e.getScrollAmount());
-            } else if (e.getScrollType() == java.awt.event.MouseWheelEvent.WHEEL_BLOCK_SCROLL) {
-                scrollByBlock(toScroll, direction);
-            }
+            mouseWheelZoom(e);
         }
     }
 
@@ -208,46 +191,6 @@ public class PanMouseAdapter extends G2dPointerAdapter {
      * Method for scrolling by a block increment.
      * Added for mouse wheel scrolling support
      */
-
-    void scrollByBlock(JScrollBar scrollbar, int direction)
-    {
-        // This method is called from BasicScrollPaneUI to implement wheel
-        // scrolling, and also from scrollByBlock().
-        int oldValue = scrollbar.getValue();
-        int blockIncrement = scrollbar.getBlockIncrement(direction);
-        int delta = blockIncrement * ((direction > 0) ? +1 : -1);
-
-        scrollbar.setValue(oldValue + delta);
-    }
-    /*
-     * Method for scrolling by a unit increment.
-     * Added for mouse wheel scrolling support
-     */
-
-    void scrollByUnits(JScrollBar scrollbar, int direction,
-                       int units)
-    {
-        // This method is called from BasicScrollPaneUI to implement wheel
-        // scrolling, as well as from scrollByUnit().
-        int delta = units;
-
-        if (direction > 0) {
-            delta *= scrollbar.getUnitIncrement(direction);
-        } else {
-            delta *= -scrollbar.getUnitIncrement(direction);
-        }
-
-        int oldValue = scrollbar.getValue();
-        int newValue = oldValue + delta;
-
-        // Check for overflow.
-        if (delta > 0 && newValue < oldValue) {
-            newValue = scrollbar.getMaximum();
-        } else if (delta < 0 && newValue > oldValue) {
-            newValue = scrollbar.getMinimum();
-        }
-        scrollbar.setValue(newValue);
-    }
 
     public java.awt.Cursor getCursor()
     {
