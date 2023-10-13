@@ -8,18 +8,14 @@
 package hec.ensembleview.charts;
 
 import hec.geometry.Axis;
-import hec.geometry.Scale;
 import hec.gfx2d.G2dPointerAdapter;
 import hec.gfx2d.G2dPointerComponent;
 import hec.gfx2d.Viewport;
-import hec.map.LocalPt;
 import rma.swing.RmaImage;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.util.List;
 
 /**
  * mouse adapter that can pan the plot and scroll using mouse wheel.
@@ -28,7 +24,6 @@ import java.util.List;
 public class PanMouseAdapter extends G2dPointerAdapter {
     public static final String PAN_CURSOR = "PanCursor";
     private Cursor panCursor;
-    private Point lastPoint;
     transient G2dPointerComponent pointerComponent;
 
     public PanMouseAdapter(G2dPointerComponent c, JPanel comp) {
@@ -130,63 +125,6 @@ public class PanMouseAdapter extends G2dPointerAdapter {
         a.setViewLimits(nMinw, nMaxw);
     }
 
-    @Override
-    public void mouseWheelMoved(MouseWheelEvent e) {
-        if (e.getScrollAmount() != 0) {
-            mouseWheelZoom(e);
-        }
-    }
-
-    /**
-     * @param e
-     */
-    private void mouseWheelZoom(MouseWheelEvent e) {
-        int direction = e.getWheelRotation() < 0 ? -1 : 1;
-        Point p = e.getPoint();
-        double zf;
-        if (!p.equals(lastPoint)) {
-            lastPoint = p;
-        }
-        if (direction == 1) {
-            zf = 1.105;
-        } else {
-            zf = 0.905;
-        }
-
-        LocalPt lpt = new LocalPt(p.x, p.y);
-        Viewport v = (Viewport) pointerComponent;
-        List<Scale> scaleVector = v.getScaleVector();
-        for (Scale scl : scaleVector) {
-            Axis xaxis = scl.getAxis(Axis.XAXIS);
-            Axis yaxis = scl.getAxis(Axis.YAXIS);
-            final double x = scl.x2e(lpt.x);
-            final double y = scl.y2n(lpt.y);
-
-            xaxis.zoomByFactor(zf);
-            yaxis.zoomByFactor(zf);
-
-
-            //find out where our mouse point world location now is after the zoom and pan back in order to
-            //have the zoom stay centered on this location
-            double localNewX = scl.e2x(x);
-            double localNewY = scl.n2y(y);
-            //compute a drag vector
-            //dxl, dyl are delta X,Y in local coordinates ( pixels )
-            double dxl = localNewX - p.x;
-            double dyl = localNewY - p.y;   //positive y change is a mouse move down because 0,0 is in the upper left N,N is in the lower right
-
-            if (dxl != 0) {
-                panAxis(v.getAxis("x1"), dxl);
-                panAxis(v.getAxis("x2"), dxl);
-            }
-
-            if (dyl != 0) {
-                panAxis(v.getAxis("y1"), dyl);
-                panAxis(v.getAxis("y2"), dyl);
-            }
-        }
-        v.getG2dPanel().repaint();
-    }
     /*
      * Method for scrolling by a block increment.
      * Added for mouse wheel scrolling support
