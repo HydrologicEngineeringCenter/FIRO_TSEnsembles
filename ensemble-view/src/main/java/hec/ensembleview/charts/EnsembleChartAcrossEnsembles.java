@@ -134,6 +134,8 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
         buildViewPortGraph();
 
         plotPanel.buildComponents(layout);
+        setPanAdapter();
+        setMouseWheelScroll();
 
         return plotPanel;
     }
