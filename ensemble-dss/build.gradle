@@ -57,7 +57,7 @@ jar {
     dependsOn copyNatives
 }
 
-version ="1.0"
+version ="1.0-SNAPSHOT"
 publishing {
     publications {
         mavenJava(MavenPublication) {
