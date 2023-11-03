@@ -7,7 +7,7 @@ public class EnsembleParentPanel extends JFrame{
 
     public EnsembleParentPanel(JPanel topPanel, JTabbedPane tabPane) {
         setTitle("Ensemble Viewer");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         setResizable(true);
         add(topPanel, BorderLayout.NORTH);
