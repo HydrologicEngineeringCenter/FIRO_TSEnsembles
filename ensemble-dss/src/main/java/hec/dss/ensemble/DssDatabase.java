@@ -170,20 +170,23 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     private ZonedDateTime getStartDate(TimeSeriesCollectionContainer tscc) {
         HecTime time = tscc.get(0).getStartTime();
-        System.out.println(time.toString());
-
         int hour = time.hour();
         int day = time.day();
 
         // Handling 2400 hours
         if (hour == 24) {
-            day = day + 1;
-            hour = 0;
+            String hecTimeStyle = time.toString(-13);
+            String[] timeParse = hecTimeStyle.replaceAll("\\s*,\\s*", ",").split(",");
+            String date = timeParse[0];
+            String timeReset = "00:00:00";
+            String offSet = "+00:00";
+            String formatDateTime = date + "T" + timeReset + offSet;
+            return ZonedDateTime.parse(formatDateTime).plusDays(1);
+        } else {
+            return ZonedDateTime.of(time.year(), time.month(), day, hour,
+                    time.minute(), time.second(), 0,
+                    TimeZone.getTimeZone(tscc.locationTimezone).toZoneId());
         }
-
-        return ZonedDateTime.of(time.year(), time.month(), day, hour,
-                time.minute(), time.second(), 0,
-                TimeZone.getTimeZone(tscc.locationTimezone).toZoneId());
     }
 
     private TimeSeriesCollectionContainer getEnsembleCollection(List<DSSPathname> paths) {
