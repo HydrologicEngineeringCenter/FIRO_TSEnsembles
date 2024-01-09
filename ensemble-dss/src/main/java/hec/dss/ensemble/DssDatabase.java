@@ -171,10 +171,10 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     private ZonedDateTime getStartDate(TimeSeriesCollectionContainer tscc) {
         HecTime time = tscc.get(0).getStartTime();
-        return hecTimeToZonedDateTime(time);
+        return getZonedDateTime(time);
     }
 
-    ZonedDateTime hecTimeToZonedDateTime(HecTime time) {
+    static ZonedDateTime getZonedDateTime(HecTime time) {
         int hour = time.hour();
         // Currently, assume all dss time series records in GMT. Time will appear as shown in dss record.
         ZoneId timeZone = ZoneId.of("GMT");
