@@ -18,12 +18,13 @@ import hec.metrics.MetricCollectionTimeSeries;
 import org.apache.commons.lang.NotImplementedException;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * DssDatabase implements EnsembleDatabase.
@@ -170,20 +171,27 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     private ZonedDateTime getStartDate(TimeSeriesCollectionContainer tscc) {
         HecTime time = tscc.get(0).getStartTime();
-        System.out.println(time.toString());
+        return getZonedDateTime(time);
+    }
 
+    static ZonedDateTime getZonedDateTime(HecTime time) {
         int hour = time.hour();
-        int day = time.day();
+        // Currently, assume all dss time series records in GMT. Time will appear as shown in dss record.
+        ZoneId timeZone = ZoneId.of("GMT");
 
-        // Handling 2400 hours
         if (hour == 24) {
-            day = day + 1;
-            hour = 0;
+            String hecTimeStyle = time.toString(-13);
+            String[] timeParse = hecTimeStyle.replaceAll("\\s*,\\s*", ",").split(",");
+            String date = timeParse[0];
+            String timeReset = "00:00:00";
+            String formatDateTime = date + "T" + timeReset;
+            LocalDateTime ldt = LocalDateTime.parse(formatDateTime);
+            return ZonedDateTime.of(ldt, timeZone).plusDays(1);
+        } else {
+            return ZonedDateTime.of(time.year(), time.month(), time.day(), time.hour(),
+                    time.minute(), time.second(), 0,
+                    timeZone);
         }
-
-        return ZonedDateTime.of(time.year(), time.month(), day, hour,
-                time.minute(), time.second(), 0,
-                TimeZone.getTimeZone(tscc.locationTimezone).toZoneId());
     }
 
     private TimeSeriesCollectionContainer getEnsembleCollection(List<DSSPathname> paths) {
