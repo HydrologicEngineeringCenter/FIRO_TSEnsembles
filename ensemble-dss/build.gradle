@@ -71,19 +71,18 @@ def getGitTag() {
     }
 }
 
+def gitTags = getGitTag()
+gitTags.each { gitTag ->
+    if (gitTag.contains("dss-")) {
+        def verNum = gitTag.trim().split('-')
+        version = verNum[1]
+    }
+}
+if(version.toString().contains("unspecified")) {
+    version = "main-SNAPSHOT"
+}
+
 publishing {
-    def gitTags = getGitTag()
-
-    gitTags.each { gitTag ->
-        if (gitTag.contains("dss-")) {
-            def verNum = gitTag.trim().split('-')
-            version = verNum[1]
-        }
-    }
-    if(version.toString().contains("unspecified")) {
-        version = "main-SNAPSHOT"
-    }
-
     publications {
         mavenJava(MavenPublication) {
             from components.java
