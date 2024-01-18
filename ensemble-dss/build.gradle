@@ -59,7 +59,6 @@ jar {
 
 def getGitTag() {
     def stdout = new ByteArrayOutputStream()
-
     try {
         exec {
             commandLine 'git', 'tag', '--list', '--contains', 'HEAD'
@@ -71,19 +70,22 @@ def getGitTag() {
     }
 }
 
-def gitTags = getGitTag()
-gitTags.each { gitTag ->
-    if (gitTag.contains("dss-")) {
-        def verNum = gitTag.trim().split('-')
-        version = verNum[1]
+def setGitTags() {
+    def gitTags = getGitTag()
+    gitTags.each { gitTag ->
+        if (gitTag.contains("dss-")) {
+            def verNum = gitTag.trim().split('-')
+            version = verNum[1]
+        }
+    }
+    if(version.toString().contains("unspecified")) {
+        version = "main-SNAPSHOT"
     }
 }
-if(version.toString().contains("unspecified")) {
-    version = "main-SNAPSHOT"
-}
+
 
 publishing {
-    gitTags
+    setGitTags()
     println(version)
     publications {
         mavenJava(MavenPublication) {
