@@ -40,8 +40,33 @@ jar {
     }
 }
 
-version ="1.0.1"
+def getGitTag() {
+    def stdout = new ByteArrayOutputStream()
+
+    try {
+        exec {
+            commandLine 'git', 'tag', '--list', '--contains', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim().split('\n')
+    } catch (Exception e) {
+        return null
+    }
+}
+
 publishing {
+    def gitTags = getGitTag()
+
+    gitTags.each { gitTag ->
+        if (gitTag.contains("ev-")) {
+            def verNum = gitTag.trim().split('-')
+            version = verNum[1]
+        }
+    }
+    if(version.toString().contains("unspecified")) {
+        version = "SNAPSHOT"
+    }
+
     publications {
         mavenJava(MavenPublication) {
             from components.java

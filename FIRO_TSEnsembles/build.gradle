@@ -1,4 +1,5 @@
 import org.gradle.internal.os.OperatingSystem
+
 plugins {
     id 'java'
     id 'maven-publish'
@@ -12,6 +13,7 @@ sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
 dependencies {
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:6.5.0.202303070854-r'
     implementation 'org.apache.directory.studio:org.apache.commons.lang:2.6'
     runtimeOnly 'org.xerial:sqlite-jdbc:3.40.1.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
@@ -37,13 +39,38 @@ jar {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-version ="1.0-SNAPSHOT"
+def getGitTag() {
+    def stdout = new ByteArrayOutputStream()
+
+    try {
+        exec {
+            commandLine 'git', 'tag', '--list', '--contains', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim().split('\n')
+    } catch (Exception e) {
+        return null
+    }
+}
+
 publishing {
+    def gitTags = getGitTag()
+
+    gitTags.each { gitTag ->
+        if (gitTag.contains("ts-")) {
+            def verNum = gitTag.trim().split('-')
+            version = verNum[1]
+        }
+    }
+    if(version.toString().contains("unspecified")) {
+        version = "SNAPSHOT"
+    }
+
     publications {
         mavenJava(MavenPublication) {
             from components.java
             groupId = 'mil.army.usace.hec'
-            artifactId = 'ts-ensembles'
+            artifactId = "ts-ensembles"
         }
     }
     repositories {
