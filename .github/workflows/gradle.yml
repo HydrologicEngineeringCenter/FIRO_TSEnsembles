@@ -23,8 +23,8 @@ jobs:
         distribution: 'adopt'
     - name: Build with Gradle
       run: cmd /r gradlew.bat build
-    - name: create UI distribution
-      run: gradle distZip
+    # - name: create UI distribution
+    #   run: gradle distZip
     - name: Archive jars 
       uses: actions/upload-artifact@v2
       with:
