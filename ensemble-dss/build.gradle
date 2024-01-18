@@ -83,6 +83,7 @@ if(version.toString().contains("unspecified")) {
 }
 
 publishing {
+    println(version)
     publications {
         mavenJava(MavenPublication) {
             from components.java
