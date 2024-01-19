@@ -18,9 +18,8 @@ jobs:
         fetch-depth: 0
     - name: Get Git Tag
       id: git_tag
-      run: echo "::set-output name=tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
-
-    - name: Set up JDK 
+      run: echo "::set-output name=tag::$(git describe --abbrev=0 --tags)"
+    - name: Set up JDK
       uses: actions/setup-java@v2
       with:
         java-version: '8'
@@ -30,7 +29,7 @@ jobs:
     # - name: create UI distribution
     #   run: gradle distZip
           # Add a step to fetch the Git tags
-    - name: Archive jars 
+    - name: Archive jars
       uses: actions/upload-artifact@v2
       with:
         name: firo-artifacts
