@@ -1,10 +1,20 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.palantir.gradle.gitversion:gradle-git-version:0.12.0-rc2"
+    }
+}
+
 plugins {
     id 'java'
     id 'application'
     id 'maven-publish'
+    id "com.palantir.git-version" version "3.0.0"
 }
-
-
 
 repositories {
     mavenCentral()
@@ -40,26 +50,16 @@ jar {
     }
 }
 
-def getGitTag() {
-    return System.getenv('GIT_TAG')
+def versionLabel(gitInfo) {
+    def branch = gitInfo.branchName // all branches are snapshots, only tags get released
+    def tag = gitInfo.lastTag
+    // tag is returned as is. Branch may need cleanup
+    return branch == null ? tag : branch.replace("/","-") + "-SNAPSHOT"
 }
 
-def setGitTags() {
-    def gitTags = getGitTag()
-    gitTags.each { gitTag ->
-        println("existing tags: " + gitTag)
-        if (gitTag.contains("ev-")) {
-            def verNum = gitTag.trim().split('-')
-            version = verNum[1]
-        }
-    }
-    if(version.toString().contains("unspecified")) {
-        version = "main-SNAPSHOT"
-    }
-}
 
 publishing {
-    setGitTags()
+    version = versionLabel(versionDetails())
     println("selected tag: " + version)
     publications {
         mavenJava(MavenPublication) {
