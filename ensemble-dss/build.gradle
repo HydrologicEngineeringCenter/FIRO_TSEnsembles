@@ -95,7 +95,6 @@ def setGitTags() {
     if(version.toString().contains("unspecified")) {
         version = "main-SNAPSHOT"
     }
-    println(version)
 }
 
 
