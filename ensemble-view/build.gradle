@@ -59,7 +59,7 @@ def getGitTag() {
     def stdout = new ByteArrayOutputStream()
     try {
         project.exec {
-            commandLine 'git', 'tag', '--list', '--contains', branchName
+            commandLine 'git', 'tag', '--list', '--contains'
             standardOutput = stdout
         }
         return stdout.toString().trim().split('\n')
