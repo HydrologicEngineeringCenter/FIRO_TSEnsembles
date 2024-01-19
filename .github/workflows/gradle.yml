@@ -7,16 +7,19 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    branches: 
-      - master
-      - '*-*'
+    branches: [ master ]
 jobs:
   build:
 
     runs-on: windows-latest
-
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Get Git Tag
+      id: git_tag
+      run: echo "::set-output name=tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
+
     - name: Set up JDK 
       uses: actions/setup-java@v2
       with:
@@ -26,6 +29,7 @@ jobs:
       run: cmd /r gradlew.bat build
     # - name: create UI distribution
     #   run: gradle distZip
+          # Add a step to fetch the Git tags
     - name: Archive jars 
       uses: actions/upload-artifact@v2
       with:
