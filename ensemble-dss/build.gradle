@@ -58,24 +58,10 @@ jar {
 }
 
 def getGitTag() {
-    def branchName = ''
-    def stdoutBranch = new ByteArrayOutputStream()
-
-    try {
-        exec {
-            commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
-            standardOutput = stdoutBranch
-        }
-
-        branchName = stdoutBranch.toString().trim()
-    } catch (Exception e) {
-        return null
-    }
-
     def stdout = new ByteArrayOutputStream()
     try {
         exec {
-            commandLine 'git', 'tag', '--list', '--merged', branchName
+            commandLine 'git', 'tag', '--list', '--contains', 'HEAD'
             standardOutput = stdout
         }
         return stdout.toString().trim().split('\n')
