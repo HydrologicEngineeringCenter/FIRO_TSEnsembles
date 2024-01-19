@@ -75,7 +75,7 @@ def getGitTag() {
     def stdout = new ByteArrayOutputStream()
     try {
         exec {
-            commandLine 'git', 'tag', '--list', '--merged', branchName
+            commandLine 'git', 'tag', '--list', '--contains', branchName
             standardOutput = stdout
         }
         return stdout.toString().trim().split('\n')
@@ -87,6 +87,7 @@ def getGitTag() {
 def setGitTags() {
     def gitTags = getGitTag()
     gitTags.each { gitTag ->
+        println("existing tags: " + gitTag)
         if (gitTag.contains("dss-")) {
             def verNum = gitTag.trim().split('-')
             version = verNum[1]
@@ -100,7 +101,7 @@ def setGitTags() {
 
 publishing {
     setGitTags()
-    println(version)
+    println("selected tag: " + version)
     publications {
         mavenJava(MavenPublication) {
             from components.java
