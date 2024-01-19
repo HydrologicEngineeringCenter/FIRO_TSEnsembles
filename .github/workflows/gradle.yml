@@ -14,6 +14,12 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Get Git Tag
+      id: git_tag
+      run: echo "::set-output name=tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
+
     - name: Set up JDK 
       uses: actions/setup-java@v2
       with:
@@ -24,8 +30,6 @@ jobs:
     # - name: create UI distribution
     #   run: gradle distZip
           # Add a step to fetch the Git tags
-    - name: Fetch Git tags
-      run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
     - name: Archive jars 
       uses: actions/upload-artifact@v2
       with:
