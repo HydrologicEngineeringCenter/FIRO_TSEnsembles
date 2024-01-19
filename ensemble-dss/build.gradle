@@ -1,7 +1,19 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.palantir.gradle.gitversion:gradle-git-version:0.12.0-rc2"
+    }
+}
+
 plugins {
     id 'java'
     id 'java-library'
     id 'maven-publish'
+    id "com.palantir.git-version" version "3.0.0"
 }
 dependencies {
     implementation project(":FIRO_TSEnsembles");
@@ -57,8 +69,33 @@ jar {
     dependsOn copyNatives
 }
 
-version ="1.0-SNAPSHOT"
+task showGit () {
+    doFirst {
+        def gitInfo = versionDetails()
+        println( "Used:    " + getVersion() ) // The select version (the project.version field)
+        println( "Tag:     " + gitInfo.lastTag) // actual tag or commit hash(short) if no tag
+        println( "Hash:    " + gitInfo.gitHash) // short commit hash
+        println( "Branch:  " + gitInfo.branchName) // branch name (null if tag checkout)
+        println( "TagBuild:" + gitInfo.isCleanTag) // true if repoi is in dettached head mode(e.g. git checkout <tag>)
+    }
+}
+
+def versionLabel(gitInfo) {
+    def branch = gitInfo.branchName // all branches are snapshots, only tags get released
+    def verNum = "-SNAPSHOT"
+    def tag = gitInfo.lastTag
+    println(tag)
+    if (tag.contains("dss-")) {
+        def tagArray = tag.trim().split('-')
+        verNum = tagArray[1]
+    }
+    return branch == null ? verNum : branch + verNum
+}
+
+
 publishing {
+    version = versionLabel(versionDetails())
+    println("selected tag: " + version)
     publications {
         mavenJava(MavenPublication) {
             from components.java
