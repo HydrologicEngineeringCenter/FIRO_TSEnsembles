@@ -40,11 +40,24 @@ jar {
 }
 
 def getGitTag() {
-    def stdout = new ByteArrayOutputStream()
+    def branchName = ''
+    def stdoutBranch = new ByteArrayOutputStream()
 
     try {
         exec {
-            commandLine 'git', 'tag', '--list', '--contains', 'HEAD'
+            commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
+            standardOutput = stdoutBranch
+        }
+
+        branchName = stdoutBranch.toString().trim()
+    } catch (Exception e) {
+        return null
+    }
+
+    def stdout = new ByteArrayOutputStream()
+    try {
+        exec {
+            commandLine 'git', 'tag', '--list', '--merged', branchName
             standardOutput = stdout
         }
         return stdout.toString().trim().split('\n')
@@ -53,18 +66,23 @@ def getGitTag() {
     }
 }
 
-def gitTags = getGitTag()
-gitTags.each { gitTag ->
-    if (gitTag.contains("ts-")) {
-        def verNum = gitTag.trim().split('-')
-        version = verNum[1]
+def setGitTags() {
+    def gitTags = getGitTag()
+    gitTags.each { gitTag ->
+        if (gitTag.contains("ts-")) {
+            def verNum = gitTag.trim().split('-')
+            version = verNum[1]
+        }
     }
-}
-if(version.toString().contains("unspecified")) {
-    version = "main-SNAPSHOT"
+    if(version.toString().contains("unspecified")) {
+        version = "main-SNAPSHOT"
+    }
+    println(version)
 }
 
 publishing {
+    setGitTags()
+    println(version)
     publications {
         mavenJava(MavenPublication) {
             from components.java
