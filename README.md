@@ -40,6 +40,18 @@ addjars C:\FIRO_TSEnsembles\libs
 
 ```
 
+## Release Versions and Git Tags 
+
+To add versioning to artifacts, the user must add a git tag to the commit.  There are three artifacts created when pushing 
+changes to remote.  To version for specific jars, the following texts are required:
+TS-Ensembles - needs the String "ts-".  For example, to version 1.0 the user would create a git tag with the name "ts-v1.0"
+Ensemble-View - needs the String "ev-". For example, to version 1.0 the user would create a git tag with the name "ev-v1.0"
+Dss-Ensembles - needs the String "dss-". For example, to version 1.0 the user would create a git tag with the name "dss-v1.0"
+
+Currently, only one version can be committed at a time.  **Tags also must be signed** using GPG, SSH, or S/MIME in order for
+the git tag to be recognized during the remote build process.  Unsigned git tags will not used. more information on 
+signing git tags can be found here: https://docs.github.com/en/authentication/managing-commit-signature-verification
+
 ## Sample Data
 
 sample data ResSim.db 
