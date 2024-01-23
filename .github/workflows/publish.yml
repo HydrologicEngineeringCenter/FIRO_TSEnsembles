@@ -4,7 +4,7 @@
 name: publish
 on:
   workflow_run:
-    workflows: "gradle.yml"
+    workflows: "gradle"
     types:
       - completed
   push:
