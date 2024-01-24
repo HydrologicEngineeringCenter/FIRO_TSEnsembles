@@ -42,16 +42,15 @@ addjars C:\FIRO_TSEnsembles\libs
 
 ## Release Versions and Git Tags 
 
-To add versioning to artifacts, the user must add a git tag to the commit.  There are three artifacts created when pushing 
+To add versioning to artifacts, the user must add a git tag to the master.  There are three artifacts created when pushing 
 changes to remote.  To version a specific jar, the following texts are required:
 
 TS-Ensembles - prefix with "ts-".  For example, to release version 1.0 the user would create a git tag with the name "ts-v1.0"
 Ensemble-View - prefix with "ev-". For example, to release version 1.0 the user would create a git tag with the name "ev-v1.0"
 Dss-Ensembles - prefix with "dss-". For example, to release version 1.0 the user would create a git tag with the name "dss-v1.0"
 
-Currently, only one version can be committed at a time.  **Tags also must be signed** using GPG, SSH, or S/MIME in order for
-the git tag to be recognized during the remote build process.  Unsigned git tags will not used. more information on 
-signing git tags can be found here: https://docs.github.com/en/authentication/managing-commit-signature-verification
+Currently, only one version can be committed at a time. Before merging the last commit, add the git tag with the version 
+to the master branch. This will ensure the git tag will be used and the jar will be published with the tag.
 
 ## Sample Data
 
