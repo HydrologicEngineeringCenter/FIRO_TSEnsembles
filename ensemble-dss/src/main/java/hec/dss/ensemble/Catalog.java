@@ -7,11 +7,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,9 +53,6 @@ public class Catalog {
                 }
                 else if (isMetricTimeseries){
                     addMetric(path);
-                }
-                else{
-                    System.out.println("uhoh.");
                 }
             }
         }
@@ -132,6 +125,10 @@ public class Catalog {
             ZonedDateTime zdt = getStartDateTime(path);
             if (zdt != null && zdt.equals(startTime))
                 rval.add(path);
+        }
+
+        if (rval.isEmpty()) {
+            rval.addAll(allPaths);
         }
 
         return rval;

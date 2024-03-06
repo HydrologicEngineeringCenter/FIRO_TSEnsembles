@@ -54,12 +54,16 @@ public class DatabaseController {
                 if(selectedRid == null) {
                     return;
                 }
+                locations.setToolTipText(selectedRid.toString());
                 databaseHandlerService.setDbHandlerRecordIdentifier(selectedRid);
                 resetZdt(selectedRid);
             }
 
             @Override
             public void setZdt() {
+                // If "T" tag does not exist in dss fPart, disable combo box
+                dateTimes.setEnabled(DatabaseHandlerService.getInstance().getIsIssueDateAvailableForDss());
+
                 ZonedDateTime selectedZdt = (ZonedDateTime) dateTimes.getSelectedItem();
                 if(selectedZdt == null) {
                     return;
