@@ -62,10 +62,6 @@ public class DatabaseHandlerService {  // handles ensemble and metric database a
         }
     }
 
-    public boolean getIsIssueDateAvailableForDss() {
-        return ((DssDatabase) ensembleDatabase).getIsIssueDateAvailable();
-    }
-
     public EnsembleDatabase getEnsembleDatabase() {
         return ensembleDatabase;
     }

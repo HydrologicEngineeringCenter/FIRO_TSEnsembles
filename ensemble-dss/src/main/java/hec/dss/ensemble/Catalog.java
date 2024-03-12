@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Catalog {
-
+    private static final ZonedDateTime defaultIssueDate = ZonedDateTime.now();
     String dssFilename;
     Pattern startTimePattern = Pattern.compile("T:(\\d{8}-\\d{4})");
     DateTimeFormatter startTimeFormat = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
@@ -127,10 +127,6 @@ public class Catalog {
                 rval.add(path);
         }
 
-        if (rval.isEmpty()) {
-            rval.addAll(allPaths);
-        }
-
         return rval;
     }
 
@@ -156,7 +152,7 @@ public class Catalog {
             return localDateTime.atZone(TimeZone.getTimeZone("GMT").toZoneId());
         }
 
-        return null;
+        return defaultIssueDate;
     }
 
     public void update() {

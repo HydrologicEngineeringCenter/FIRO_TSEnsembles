@@ -17,11 +17,14 @@ import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
 import org.apache.commons.lang.NotImplementedException;
 
-import java.time.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * DssDatabase implements EnsembleDatabase.
@@ -33,7 +36,6 @@ import java.util.logging.Logger;
  *
  */
 public class DssDatabase implements EnsembleDatabase,MetricDatabase {
-    private static final Logger LOGGER = Logger.getLogger(DssDatabase.class.getName());
     private String dssFileName;
     private Catalog catalog;
     private static final DateTimeFormatter dssDateFormat = DateTimeFormatter.ofPattern("ddMMMyyyy HHmm");
@@ -42,7 +44,6 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     static String metricTimeseriesIdentifier = "MetricTimeseries";
     static String metricPairedDataIdentifier = "MetricPairedData";
     boolean CatalogIsUpToDate = false;
-    private boolean isIssueDateAvailable = true;
 
     public DssDatabase(String dssFileName){
         this.dssFileName= dssFileName;
@@ -142,10 +143,6 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                 + "|V:" + issueDateformatter.format(v) + "|";
     }
 
-    public boolean getIsIssueDateAvailable() {
-        return isIssueDateAvailable;
-    }
-
     public Ensemble getEnsemble(RecordIdentifier recordID, ZonedDateTime issue_time){
         List<DSSPathname> paths = catalog.getPaths(recordID, issue_time);
         TimeSeriesCollectionContainer tscc = getEnsembleCollection(paths);
@@ -234,34 +231,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
      * @return
      */
     public java.util.List<java.time.ZonedDateTime> getEnsembleIssueDates(RecordIdentifier recordID) {
-        List<ZonedDateTime> issueDate = getCatalog().getEnsembleStartDates(recordID);
-        isIssueDateAvailable = true;
-        if(issueDate.contains(null)) {
-            isIssueDateAvailable = false;
-            issueDate.removeAll(Collections.singleton(null));
-            ZonedDateTime now = setIssueDateToDssDpart(recordID);
-            issueDate.add(now);
-        }
-        return issueDate;
-    }
-
-    private ZonedDateTime setIssueDateToDssDpart(RecordIdentifier rid) {
-        ZoneId zoneId = ZoneId.of("UTC");
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(zoneId);
-
-        List<DSSPathname> path = getCatalog().pathNames.get(rid);
-        DSSPathname dssPathname = path.get(0);
-        String dPart = dssPathname.dPart().split("-")[0].trim();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMMyyyy", Locale.ENGLISH);
-
-        try {
-            LocalDate localDate = LocalDate.parse(dPart, formatter);
-            zonedDateTime = ZonedDateTime.of(localDate.atStartOfDay(), zoneId);
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error while parsing date: " + e.getMessage(), e);
-        }
-        return zonedDateTime;
+        return getCatalog().getEnsembleStartDates(recordID);
     }
 
     public void write(EnsembleTimeSeries[] etsArray) throws Exception{
