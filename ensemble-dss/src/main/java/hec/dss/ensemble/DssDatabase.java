@@ -76,10 +76,10 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     /**
      * translation of ensemble information to a DSS Path
-     * @param e
-     * @param memberNumber
-     * @param recordID
-     * @return
+     * @param e Ensemble
+     * @param memberNumber member of ensemble
+     * @param recordID identifier
+     * @return returns path
      */
     private static String buildDssPath(Ensemble e,int memberNumber, RecordIdentifier recordID ){
 
@@ -95,7 +95,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         DSSPathname path = new DSSPathname();
         path.setAPart("");
         path.setBPart(timeSeriesIdentifier.location);
-        path.setCPart(metricTimeseriesIdentifier+ "-" + timeSeriesIdentifier.parameter + "-" + stat);
+        path.setCPart(timeSeriesIdentifier.parameter + "-" + stat+"-" + metricTimeseriesIdentifier);
         path.setDPart("");
         path.setEPart(getEPart((int)interval.toMinutes()));
         path.setFPart(buildFpart(startDateTime, issueDate));
@@ -107,7 +107,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         DSSPathname path = new DSSPathname();
         path.setAPart("");
         path.setBPart(timeSeriesIdentifier.location);
-        path.setCPart(metricPairedDataIdentifier + "-" + timeSeriesIdentifier.parameter + "-stats");
+        path.setCPart(timeSeriesIdentifier.parameter + "-stats-" + metricPairedDataIdentifier);
         path.setDPart("");
         path.setEPart("");
         path.setFPart(buildFpart(startDateTime, issueDate));
@@ -129,7 +129,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
      * @param t - time stamp saved in T: tag in F part
      * @param v - version of ensemble - (issue_date)
      * @param  member - ensemble member number to be in C: tag in F part
-     * @return
+     * @return returns f-part
      */
     private static String buildFpart(int member , ZonedDateTime t, ZonedDateTime v){
         return String.format("C:%06d", member)
