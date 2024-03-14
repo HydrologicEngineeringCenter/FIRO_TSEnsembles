@@ -51,7 +51,11 @@ public class DatabaseHandlerService {  // handles ensemble and metric database a
     }
 
     public void setDbHandlerRecordIdentifier(RecordIdentifier rid) {
-        this.rid = rid;
+        RecordIdentifier currentRid = this.rid;
+        if(currentRid != rid) {
+            this.rid = rid;
+            support.firePropertyChange("dbChange", false, true);
+        }
     }
 
     public void setDbHandlerZonedDateTime(ZonedDateTime zdt) {
