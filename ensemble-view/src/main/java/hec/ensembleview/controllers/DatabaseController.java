@@ -54,6 +54,7 @@ public class DatabaseController {
                 if(selectedRid == null) {
                     return;
                 }
+                locations.setToolTipText(selectedRid.toString());
                 databaseHandlerService.setDbHandlerRecordIdentifier(selectedRid);
                 resetZdt(selectedRid);
             }

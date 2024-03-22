@@ -233,6 +233,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     public java.util.List<java.time.ZonedDateTime> getEnsembleIssueDates(RecordIdentifier recordID) {
         return getCatalog().getEnsembleStartDates(recordID);
     }
+
     public void write(EnsembleTimeSeries[] etsArray) throws Exception{
         for (EnsembleTimeSeries ets: etsArray){
             write(ets);

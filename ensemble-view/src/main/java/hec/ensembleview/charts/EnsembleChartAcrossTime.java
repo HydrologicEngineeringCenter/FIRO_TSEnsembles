@@ -67,8 +67,8 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
         String month = startDate.getMonth().toString();
         int day = startDate.getDayOfMonth();
         String hour = String.valueOf(startDate.getHour());
-        String minutes = String.valueOf(startDate.getMinute());
-
+        // HecTime requires two digits for minutes
+        String minutes = String.valueOf(String.format("%02d", startDate.getMinute()));
         return new HecTime(day + month + year, hour + minutes);
     }
 

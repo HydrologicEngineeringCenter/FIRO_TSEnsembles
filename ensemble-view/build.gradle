@@ -62,7 +62,6 @@ task showGit () {
 }
 
 def versionLabel(gitInfo) {
-    def branch = gitInfo.branchName // all branches are snapshots, only tags get released
     def verNum = "-SNAPSHOT"
     def tag = gitInfo.lastTag
     println(tag)
@@ -70,7 +69,7 @@ def versionLabel(gitInfo) {
         def tagArray = tag.trim().split('-')
         verNum = tagArray[1]
     }
-    return branch == null ? verNum : branch + verNum
+    return verNum
 }
 
 

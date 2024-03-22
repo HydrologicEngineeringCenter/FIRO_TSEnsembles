@@ -51,10 +51,13 @@ public class DatabaseHandlerService {  // handles ensemble and metric database a
     }
 
     public void setDbHandlerRecordIdentifier(RecordIdentifier rid) {
-        this.rid = rid;
+        RecordIdentifier currentRid = this.rid;
+        if(currentRid != rid) {
+            this.rid = rid;
+            support.firePropertyChange("dbChange", false, true);
+        }
     }
 
-    //TODO need help thinking how to handle changes.  Situation where you do not change zdt or rid
     public void setDbHandlerZonedDateTime(ZonedDateTime zdt) {
         ZonedDateTime currentZdt = this.zdt;
         if(currentZdt != zdt) {
