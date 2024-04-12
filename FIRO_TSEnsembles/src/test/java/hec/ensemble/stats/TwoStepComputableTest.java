@@ -5,6 +5,7 @@ import hec.ensemble.EnsembleConfiguration;
 import hec.ensemble.Logger;
 import hec.ensemble.TestData;
 import hec.ensemble.stats.*;
+import org.jdom.Element;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -127,4 +128,43 @@ class TwoStepComputableTest {
         }
     }
 
-}
+    @Test
+    public void testTwoStepComputableToAndFromXML(){
+        boolean computeAcrossEnsemble = false;
+        MultiComputable cumulative = new CumulativeComputable();
+        float[] numDays = new float[1];
+        numDays[0] = 5;
+        NDayMultiComputable stepOne = new NDayMultiComputable(cumulative,numDays);
+        Computable stepTwo = new MeanComputable();
+        TwoStepComputable twoStepComputable = new TwoStepComputable(stepOne,stepTwo,computeAcrossEnsemble);
+        try {
+            Element a = Serializer.toXML(twoStepComputable);
+            SingleComputable B = Serializer.fromXML(a);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+
+        }
+
+    @Test
+    public void testTwoStepComputableToAndFromXMLPercentile(){
+        boolean computeAcrossEnsemble = false;
+        MultiComputable cumulative = new CumulativeComputable();
+        float[] numDays = new float[1];
+        numDays[0] = 5;
+        NDayMultiComputable stepOne = new NDayMultiComputable(cumulative,numDays);
+        PercentilesComputable stepTwo = new PercentilesComputable(numDays);
+        TwoStepComputable twoStepComputable = new TwoStepComputable(stepOne,stepTwo,computeAcrossEnsemble);
+        try {
+            Element a = Serializer.toXML(twoStepComputable);
+            SingleComputable B = Serializer.fromXML(a);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+
+    }
+
+
+    }
