@@ -91,14 +91,20 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                   e.getStartDateTime(),e.getIssueDate())+"/";
     }
 
-    private String buildTimeSeriesStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval, ZonedDateTime startDateTime, ZonedDateTime issueDate, String stat) {
+    private String buildTimeSeriesStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval,
+                                               ZonedDateTime startDateTime, ZonedDateTime issueDate, String stat) {
+        return buildTimeSeriesStatPathName(timeSeriesIdentifier,interval,startDateTime,issueDate,stat,"");
+    }
+
+        private String buildTimeSeriesStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval, ZonedDateTime startDateTime, ZonedDateTime issueDate, String stat,
+                                               String fPartSuffix) {
         DSSPathname path = new DSSPathname();
         path.setAPart("");
         path.setBPart(timeSeriesIdentifier.location);
         path.setCPart(timeSeriesIdentifier.parameter + "-" + stat+"-" + metricTimeseriesIdentifier);
         path.setDPart("");
         path.setEPart(getEPart((int)interval.toMinutes()));
-        path.setFPart(buildFpart(startDateTime, issueDate));
+        path.setFPart(buildFpart(startDateTime, issueDate,fPartSuffix));
         return path.toString();
     }
 
@@ -142,7 +148,11 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         return "T:" + startDateformatter.format(t)
                 + "|V:" + issueDateformatter.format(v) + "|";
     }
+    private String buildFpart(ZonedDateTime t, ZonedDateTime v, String suffix ) {
 
+        return "T:" + startDateformatter.format(t)
+                + "|V:" + issueDateformatter.format(v) + "|"+suffix;
+    }
     public Ensemble getEnsemble(RecordIdentifier recordID, ZonedDateTime issue_time){
         List<DSSPathname> paths = catalog.getPaths(recordID, issue_time);
         TimeSeriesCollectionContainer tscc = getEnsembleCollection(paths);
@@ -433,6 +443,9 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
 
     @Override
     public void write(hec.metrics.MetricCollectionTimeSeries metrics) throws Exception {
+       write(metrics,"");
+    }
+    public void write(hec.metrics.MetricCollectionTimeSeries metrics, String fPartSuffix) throws Exception {
         HecTimeSeries dss = new HecTimeSeries(dssFileName);
         for (MetricCollection mc : metrics) {
             String stats = mc.getMetricStatistics();
@@ -448,7 +461,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                         mc.getInterval(),
                         mc.getStartDateTime(),
                         mc.getIssueDate(),
-                        statsAsSeparateTimeseries[i]);
+                        statsAsSeparateTimeseries[i],fPartSuffix);
                 dss.write(tsc);
             }
         }
