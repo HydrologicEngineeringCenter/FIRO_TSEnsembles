@@ -15,6 +15,8 @@ import hec.io.TimeSeriesCollectionContainer;
 import hec.io.TimeSeriesContainer;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
+import hec.metrics.MetricTypes;
+import mil.army.usace.hec.metadata.timeseries.TimeSeriesIdentifier;
 import org.apache.commons.lang.NotImplementedException;
 
 import java.time.Duration;
@@ -91,12 +93,12 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                   e.getStartDateTime(),e.getIssueDate())+"/";
     }
 
-    private String buildTimeSeriesStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval,
+    private static String buildTimeSeriesStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval,
                                                ZonedDateTime startDateTime, ZonedDateTime issueDate, String stat) {
         return buildTimeSeriesStatPathName(timeSeriesIdentifier,interval,startDateTime,issueDate,stat,"");
     }
 
-        private String buildTimeSeriesStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval, ZonedDateTime startDateTime, ZonedDateTime issueDate, String stat,
+        private static String buildTimeSeriesStatPathName(RecordIdentifier timeSeriesIdentifier, Duration interval, ZonedDateTime startDateTime, ZonedDateTime issueDate, String stat,
                                                String fPartSuffix) {
         DSSPathname path = new DSSPathname();
         path.setAPart("");
@@ -143,12 +145,12 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                 +"|V:"+issueDateformatter.format(v)+"|";
     }
 
-    private String buildFpart(ZonedDateTime t, ZonedDateTime v) {
+    private static String buildFpart(ZonedDateTime t, ZonedDateTime v) {
 
         return "T:" + startDateformatter.format(t)
                 + "|V:" + issueDateformatter.format(v) + "|";
     }
-    private String buildFpart(ZonedDateTime t, ZonedDateTime v, String suffix ) {
+    private static String buildFpart(ZonedDateTime t, ZonedDateTime v, String suffix ) {
 
         return "T:" + startDateformatter.format(t)
                 + "|V:" + issueDateformatter.format(v) + "|"+suffix;
@@ -439,7 +441,33 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         CatalogIsUpToDate = false;
     }
 
+    public static TimeSeriesContainer[] toTimeSeriesContainer(MetricCollectionTimeSeries mcts) {
+        List<TimeSeriesContainer> tscList = new ArrayList<>();
+        for (MetricCollection mc : mcts) {
+            String stats = mc.getMetricStatistics();
+            String[] statsAsSeparateTimeseries = stats.split("\\|");
 
+            for (int i = 0; i < statsAsSeparateTimeseries.length; i++) {
+                TimeSeriesContainer tsc = getTimeSeriesContainer(mcts.getTimeSeriesIdentifier(), mc, statsAsSeparateTimeseries[i], mc.getValues()[i]);
+                tscList.add(tsc);
+            }
+        }
+        return tscList.toArray(new TimeSeriesContainer[0]);
+    }
+
+    private static TimeSeriesContainer getTimeSeriesContainer(RecordIdentifier identifier, MetricCollection mc, String stat, float[] values) {
+        TimeSeriesContainer tsc = new TimeSeriesContainer();
+        tsc.values = convertFloatsToDoubles(values);
+        tsc.numberValues = tsc.values.length;
+        HecTime time = getHecStartTime(mc.getStartDateTime());
+        tsc.setStartTime(time);
+        tsc.fullName = buildTimeSeriesStatPathName(identifier,
+                mc.getInterval(),
+                mc.getStartDateTime(),
+                mc.getIssueDate(),
+                stat);
+        return tsc;
+    }
 
     @Override
     public void write(hec.metrics.MetricCollectionTimeSeries metrics) throws Exception {
@@ -452,16 +480,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
             String[] statsAsSeparateTimeseries = stats.split("\\|");
 
             for (int i = 0; i < statsAsSeparateTimeseries.length; i++) {
-                TimeSeriesContainer tsc = new TimeSeriesContainer();
-                tsc.values = convertFloatsToDoubles(mc.getValues()[i]);
-                tsc.numberValues = tsc.values.length;
-                HecTime time = getHecStartTime(mc.getStartDateTime());
-                tsc.setStartTime(time);
-                tsc.fullName = buildTimeSeriesStatPathName(metrics.getTimeSeriesIdentifier(),
-                        mc.getInterval(),
-                        mc.getStartDateTime(),
-                        mc.getIssueDate(),
-                        statsAsSeparateTimeseries[i],fPartSuffix);
+                TimeSeriesContainer tsc = getTimeSeriesContainer(metrics.getTimeSeriesIdentifier(), mc, statsAsSeparateTimeseries[i], mc.getValues()[i]);
                 dss.write(tsc);
             }
         }
@@ -510,7 +529,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         return res;
     }
 
-    private HecTime getHecStartTime(ZonedDateTime startDateTime) {
+    private static HecTime getHecStartTime(ZonedDateTime startDateTime) {
         String dateStr = "";
         dateStr = startDateTime.format(dssDateFormat);
         return new HecTime(dateStr);
