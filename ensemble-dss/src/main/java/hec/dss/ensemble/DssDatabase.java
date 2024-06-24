@@ -15,8 +15,6 @@ import hec.io.TimeSeriesCollectionContainer;
 import hec.io.TimeSeriesContainer;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
-import hec.metrics.MetricTypes;
-import mil.army.usace.hec.metadata.timeseries.TimeSeriesIdentifier;
 import org.apache.commons.lang.NotImplementedException;
 
 import java.time.Duration;
@@ -448,14 +446,14 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
             String[] statsAsSeparateTimeseries = stats.split("\\|");
 
             for (int i = 0; i < statsAsSeparateTimeseries.length; i++) {
-                TimeSeriesContainer tsc = getTimeSeriesContainer(mcts.getTimeSeriesIdentifier(), mc, statsAsSeparateTimeseries[i], mc.getValues()[i]);
+                TimeSeriesContainer tsc = convertToTimeSeriesContainer(mcts.getTimeSeriesIdentifier(), mc, statsAsSeparateTimeseries[i], mc.getValues()[i]);
                 tscList.add(tsc);
             }
         }
         return tscList.toArray(new TimeSeriesContainer[0]);
     }
 
-    private static TimeSeriesContainer getTimeSeriesContainer(RecordIdentifier identifier, MetricCollection mc, String stat, float[] values) {
+    private static TimeSeriesContainer convertToTimeSeriesContainer(RecordIdentifier identifier, MetricCollection mc, String stat, float[] values) {
         TimeSeriesContainer tsc = new TimeSeriesContainer();
         tsc.values = convertFloatsToDoubles(values);
         tsc.numberValues = tsc.values.length;
@@ -480,7 +478,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
             String[] statsAsSeparateTimeseries = stats.split("\\|");
 
             for (int i = 0; i < statsAsSeparateTimeseries.length; i++) {
-                TimeSeriesContainer tsc = getTimeSeriesContainer(metrics.getTimeSeriesIdentifier(), mc, statsAsSeparateTimeseries[i], mc.getValues()[i]);
+                TimeSeriesContainer tsc = convertToTimeSeriesContainer(metrics.getTimeSeriesIdentifier(), mc, statsAsSeparateTimeseries[i], mc.getValues()[i]);
                 dss.write(tsc);
             }
         }
