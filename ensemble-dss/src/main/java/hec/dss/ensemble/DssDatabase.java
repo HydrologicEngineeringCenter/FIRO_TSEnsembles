@@ -439,6 +439,11 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         CatalogIsUpToDate = false;
     }
 
+    /**
+     * toTimeSeriesContainer returns a TimeSeriesContainer[] from a metricCollectionTimeSeries. The method is located in DssDatabase
+     * rather than the MetricCollectionTimeSeries class in order to keep dependency on hec-monolith out of FIRO_TSEnsembles and
+     * confine hec-monolith dependency to the ensemble-dss project.
+     */
     public static TimeSeriesContainer[] toTimeSeriesContainer(MetricCollectionTimeSeries mcts) {
         List<TimeSeriesContainer> tscList = new ArrayList<>();
         for (MetricCollection mc : mcts) {
