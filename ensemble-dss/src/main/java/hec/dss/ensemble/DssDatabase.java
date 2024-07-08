@@ -457,8 +457,12 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         }
         return tscList.toArray(new TimeSeriesContainer[0]);
     }
-
+    
     private static TimeSeriesContainer convertToTimeSeriesContainer(RecordIdentifier identifier, MetricCollection mc, String stat, float[] values) {
+        return convertToTimeSeriesContainer(identifier, mc, stat, values,"");
+    }
+
+    private static TimeSeriesContainer convertToTimeSeriesContainer(RecordIdentifier identifier, MetricCollection mc, String stat, float[] values, String fPartSuffix) {
         TimeSeriesContainer tsc = new TimeSeriesContainer();
         tsc.values = convertFloatsToDoubles(values);
         tsc.numberValues = tsc.values.length;
@@ -468,7 +472,8 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
                 mc.getInterval(),
                 mc.getStartDateTime(),
                 mc.getIssueDate(),
-                stat);
+                stat,
+                fPartSuffix);
         return tsc;
     }
 
@@ -483,7 +488,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
             String[] statsAsSeparateTimeseries = stats.split("\\|");
 
             for (int i = 0; i < statsAsSeparateTimeseries.length; i++) {
-                TimeSeriesContainer tsc = convertToTimeSeriesContainer(metrics.getTimeSeriesIdentifier(), mc, statsAsSeparateTimeseries[i], mc.getValues()[i]);
+                TimeSeriesContainer tsc = convertToTimeSeriesContainer(metrics.getTimeSeriesIdentifier(), mc, statsAsSeparateTimeseries[i], mc.getValues()[i], fPartSuffix);
                 dss.write(tsc);
             }
         }
