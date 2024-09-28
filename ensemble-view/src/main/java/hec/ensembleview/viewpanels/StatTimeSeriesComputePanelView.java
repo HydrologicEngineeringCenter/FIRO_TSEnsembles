@@ -1,7 +1,7 @@
 package hec.ensembleview.viewpanels;
 
 import hec.ensembleview.DatabaseHandlerService;
-import hec.ensembleview.controllers.TimeSeriesComputePanelListener;
+import hec.ensembleview.charts.ChartType;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -12,16 +12,16 @@ import java.util.logging.Logger;
 
 public class StatTimeSeriesComputePanelView extends ComputePanelView {
     private static final Logger logger = Logger.getLogger(StatTimeSeriesComputePanelView.class.getName());
-    private transient TimeSeriesComputePanelListener timeListener;
     private JCheckBox percentiles;
     private JTextField percentileValues;
+    private static final ChartType CHART_TYPE = ChartType.TIMEPLOT;
 
     public StatTimeSeriesComputePanelView() {
         super();
     }
 
-    public void setTimeListener(TimeSeriesComputePanelListener listener) {
-        this.timeListener = listener;
+    public ChartType getChartType() {
+        return CHART_TYPE;
     }
 
     @Override
@@ -74,8 +74,8 @@ public class StatTimeSeriesComputePanelView extends ComputePanelView {
                         return;
                     }
                 }
-                timeListener.setCheckedStatistics(checkboxName);
-                timeListener.initiateTimeSeriesCompute();
+                listener.setCheckedStatistics(checkboxName, CHART_TYPE);
+                listener.initiateCompute();
             } else {
                 JCheckBox source = (JCheckBox) e.getSource();
                 String checkboxName = source.getName();
@@ -84,8 +84,8 @@ public class StatTimeSeriesComputePanelView extends ComputePanelView {
                     percentileValues.setEditable(false);
                     percentileValues.setText("");
                 }
-                timeListener.setRemovedStatistics(checkboxName);
-                timeListener.initiateTimeSeriesCompute();
+                super.listener.setRemovedStatistics(checkboxName, CHART_TYPE);
+                super.listener.initiateCompute();
             }
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "Error in Checkbox selection");
@@ -99,9 +99,9 @@ public class StatTimeSeriesComputePanelView extends ComputePanelView {
                 return;
             }
             try {
-                timeListener.getTextFieldValues(percentileValues);
-                timeListener.setCheckedStatistics(percentiles.getName());
-                timeListener.initiateTimeSeriesCompute();
+                super.listener.getTextFieldValues(percentileValues, CHART_TYPE);
+                super.listener.setCheckedStatistics(percentiles.getName(), CHART_TYPE);
+                super.listener.initiateCompute();
             } catch (Exception ex) {
                 logger.log(Level.SEVERE, "Error in Text Field. Text input cannot be understood or parsed");
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);

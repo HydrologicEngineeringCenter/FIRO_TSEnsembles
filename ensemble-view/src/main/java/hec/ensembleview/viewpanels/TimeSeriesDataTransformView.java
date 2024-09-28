@@ -1,9 +1,9 @@
 package hec.ensembleview.viewpanels;
 
-import hec.ensembleview.controllers.CumulativeDataViewListener;
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.DefaultSettings;
 import hec.ensembleview.charts.ChartType;
+import hec.ensembleview.controllers.DataViewListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -12,13 +12,20 @@ import java.beans.PropertyChangeEvent;
 public class TimeSeriesDataTransformView extends DataTransformView {
     private JRadioButton original;
     private JRadioButton cumulative;
-    private transient CumulativeDataViewListener cumulativeListener;
+    private transient DataViewListener cumulativeListener;
+    private static final ChartType CHART_TYPE = ChartType.TIMEPLOT;
     public TimeSeriesDataTransformView() {
         super();
     }
 
-    public void setCumulativeListener(CumulativeDataViewListener listener) {
+    @Override
+    public void setListener(DataViewListener listener) {
         this.cumulativeListener = listener;
+    }
+
+    @Override
+    protected ChartType getChartType() {
+        return CHART_TYPE;
     }
 
     @Override
@@ -60,10 +67,10 @@ public class TimeSeriesDataTransformView extends DataTransformView {
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == this.original) {
             cumulativeListener.setIsDataViewCumulative(false);
-            cumulativeListener.initiateTimeSeriesCompute(ChartType.TIMEPLOT);
+            cumulativeListener.initiateCompute(ChartType.TIMEPLOT);
         } else if(e.getSource() == this.cumulative) {
             cumulativeListener.setIsDataViewCumulative(true);
-            cumulativeListener.initiateTimeSeriesCompute(ChartType.TIMEPLOT);
+            cumulativeListener.initiateCompute(ChartType.TIMEPLOT);
         }
     }
 

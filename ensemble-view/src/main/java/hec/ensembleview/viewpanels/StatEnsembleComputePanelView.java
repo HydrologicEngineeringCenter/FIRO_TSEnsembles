@@ -1,7 +1,7 @@
 package hec.ensembleview.viewpanels;
 
 import hec.ensembleview.DatabaseHandlerService;
-import hec.ensembleview.controllers.EnsembleArrayComputePanelListener;
+import hec.ensembleview.charts.ChartType;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -16,12 +16,16 @@ public class StatEnsembleComputePanelView extends ComputePanelView {
     private JCheckBox cumVol;
     private JTextField percentileText;
     private JTextField cumVolText;
+    private static final ChartType CHART_TYPE = ChartType.SCATTERPLOT;
     private static final String PERCENT_TEXT = "PERCENTILES";
     private static final String VOLUME = "CUMULATIVE VOLUME";
-    private transient EnsembleArrayComputePanelListener ensembleListener;
 
     public StatEnsembleComputePanelView() {
         super();
+    }
+
+    public ChartType getChartType() {
+        return CHART_TYPE;
     }
 
     @Override
@@ -96,10 +100,6 @@ public class StatEnsembleComputePanelView extends ComputePanelView {
         return false;
     }
 
-    public void setEnsembleListener(EnsembleArrayComputePanelListener listener) {
-        this.ensembleListener = listener;
-    }
-
     @Override
     public void itemStateChanged(ItemEvent e) {
         try {
@@ -119,8 +119,8 @@ public class StatEnsembleComputePanelView extends ComputePanelView {
                             break;
                         break;
                     default:
-                        this.ensembleListener.setCheckedStatistics(checkboxName);
-                        this.ensembleListener.initiateEnsembleCompute();
+                        super.listener.setCheckedStatistics(checkboxName, CHART_TYPE);
+                        super.listener.initiateCompute();
                         break;
                 }
             } else {
@@ -138,8 +138,8 @@ public class StatEnsembleComputePanelView extends ComputePanelView {
                     default:
                         break;
                 }
-                this.ensembleListener.setRemovedStatistics(checkboxName);
-                this.ensembleListener.initiateEnsembleCompute();
+                super.listener.setRemovedStatistics(checkboxName, CHART_TYPE);
+                super.listener.initiateCompute();
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -152,9 +152,9 @@ public class StatEnsembleComputePanelView extends ComputePanelView {
         JTextField textField = (JTextField) e.getSource();
         if(isTextBoxAvailable(textField)) {
             try {
-                this.ensembleListener.getTextFieldValues(textField);
-                this.ensembleListener.setCheckedStatistics(textField.getName());
-                this.ensembleListener.initiateEnsembleCompute();
+                super.listener.getTextFieldValues(textField, CHART_TYPE);
+                super.listener.setCheckedStatistics(textField.getName(), CHART_TYPE);
+                super.listener.initiateCompute();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
                 logger.log(Level.SEVERE, "Error in Text Field. Text input cannot be understood or parsed");

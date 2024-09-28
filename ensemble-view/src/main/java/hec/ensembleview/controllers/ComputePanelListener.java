@@ -1,9 +1,12 @@
 package hec.ensembleview.controllers;
 
+import hec.ensembleview.charts.ChartType;
+
 import javax.swing.*;
 
 public interface ComputePanelListener {
-    void setCheckedStatistics(String name);
-    void setRemovedStatistics(String name);
-    void getTextFieldValues(JTextField textField);
+    void initiateCompute();
+    void setCheckedStatistics(String name, ChartType type);
+    void setRemovedStatistics(String name, ChartType type);
+    void getTextFieldValues(JTextField textField, ChartType type);
 }

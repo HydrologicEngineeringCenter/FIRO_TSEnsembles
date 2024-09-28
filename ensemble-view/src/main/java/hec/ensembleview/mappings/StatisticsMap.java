@@ -22,14 +22,14 @@ public class StatisticsMap { //maps the statistics to the specific statistics pa
         if(this.timeSeriesMapList.isEmpty()) {
             return;
         }
-        support.firePropertyChange("time", false, true);
+        support.firePropertyChange("time", false, this);
     }
 
     public void setEnsembleStatisticsMap() {
         if(this.ensembleSeriesMapList.isEmpty()) {
             return;
         }
-        support.firePropertyChange("ensemble", false, true);
+        support.firePropertyChange("ensemble", false, this);
     }
 
     public void setDataView(boolean isSelected, ChartType chartType) {
