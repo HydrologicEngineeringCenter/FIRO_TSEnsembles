@@ -109,11 +109,11 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     }
 
 
-    private String buildPairedDataStatPathName(RecordIdentifier timeSeriesIdentifier, ZonedDateTime startDateTime, ZonedDateTime issueDate) {
+    private String buildPairedDataStatPathName(RecordIdentifier timeSeriesIdentifier, String stat, ZonedDateTime startDateTime, ZonedDateTime issueDate) {
         DSSPathname path = new DSSPathname();
         path.setAPart("");
         path.setBPart(timeSeriesIdentifier.location);
-        path.setCPart(timeSeriesIdentifier.parameter + "-stats-" + metricPairedDataIdentifier);
+        path.setCPart(timeSeriesIdentifier.parameter + "-" + stat + "-" + metricPairedDataIdentifier);
         path.setDPart("");
         path.setEPart("");
         path.setFPart(buildFpart(startDateTime, issueDate));
@@ -496,30 +496,36 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         CatalogIsUpToDate = false;
     }
 
-    @Override
     public void write(MetricCollection metrics) {
         HecPairedData dss = new HecPairedData(dssFileName);
         String stats = metrics.getMetricStatistics();
         String[] statsAsSeparateSeries = stats.split("\\|");
 
-        PairedDataContainer pdc = new PairedDataContainer();
-        pdc.yOrdinates = getYOrdinates(metrics.getValues());
-        pdc.xOrdinates = getXOrdinates(metrics.getValues()[0].length);
-        pdc.labels = new String[statsAsSeparateSeries.length];
-        pdc.numberCurves = pdc.yOrdinates.length;
-        pdc.numberOrdinates = pdc.xOrdinates.length;
-        for (int i = 0; i < statsAsSeparateSeries.length; i++)
-            pdc.labels[i] = statsAsSeparateSeries[i];
-        pdc.labelsUsed = true;
-        pdc.fullName = buildPairedDataStatPathName(metrics.parent.getTimeSeriesIdentifier(),
-                metrics.getStartDateTime(),
-                metrics.getIssueDate());
+        PairedDataContainer originalPdc = new PairedDataContainer();
+        originalPdc.yOrdinates = getYOrdinates(metrics.getValues());
+        originalPdc.xOrdinates = getXOrdinates(metrics.getValues()[0].length);
+        originalPdc.labels = statsAsSeparateSeries;
+        originalPdc.numberCurves = originalPdc.yOrdinates.length;
+        originalPdc.numberOrdinates = originalPdc.xOrdinates.length;
 
-        dss.write(pdc);
+        for (int i = 0; i < originalPdc.yOrdinates.length; i++) {
+            PairedDataContainer singlePdc = new PairedDataContainer();
+            singlePdc.yOrdinates = new double[1][];
+            singlePdc.yOrdinates[0] = originalPdc.yOrdinates[i];
+            singlePdc.xOrdinates = originalPdc.xOrdinates;
+            singlePdc.labels = new String[]{statsAsSeparateSeries[i]};
+            singlePdc.numberCurves = 1;
+            singlePdc.numberOrdinates = singlePdc.xOrdinates.length;
+            singlePdc.labelsUsed = true;
+            singlePdc.fullName = buildPairedDataStatPathName(metrics.parent.getTimeSeriesIdentifier(), singlePdc.labels[0],
+                    metrics.getStartDateTime(),
+                    metrics.getIssueDate());
+            dss.write(singlePdc);
+        }
+
         dss.done();
         CatalogIsUpToDate = false;
     }
-
 
     private double[] getXOrdinates(int length) {
         double[] res = new double[length];

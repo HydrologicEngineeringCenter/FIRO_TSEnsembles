@@ -216,16 +216,20 @@ public class TestDssDatabase {
         EnsembleTimeSeries ets = db.getEnsembleTimeSeries(id);
         MultiComputable test = new MultiStatComputable(new Statistics[] {MIN, MAX, AVERAGE});
         MetricCollectionTimeSeries output = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(test);
-        for(MetricCollection mc : output)
+        String statLabel = test.StatisticsLabel();
+        String[] statsAsSeparateSeries = statLabel.split("\\|");
+        for(MetricCollection mc : output) {
             db.write(mc);
+        }
+
         //db.catalog.update();
 
         HecPairedData dss = new HecPairedData(db.getFileName());
         String s =  DssDatabase.metricPairedDataIdentifier;
         String[] pathsToFind = new String[] {
-                "//Kanektok.BCAC1/flow-stats-" + s +"///T:20131103-1200|V:20131103-120000|/",
-                "//Kanektok.BCAC1/flow-stats-" + s +"///T:20131104-1200|V:20131104-120000|/",
-                "//Kanektok.BCAC1/flow-stats-" + s +"///T:20131105-1200|V:20131105-120000|/"
+                "//Kanektok.BCAC1/flow-"+statsAsSeparateSeries[0]+ "-" + s +"///T:20131103-1200|V:20131103-120000|/",
+                "//Kanektok.BCAC1/flow-"+statsAsSeparateSeries[1]+ "-" + s +"///T:20131104-1200|V:20131104-120000|/",
+                "//Kanektok.BCAC1/flow-"+statsAsSeparateSeries[2]+ "-" + s +"///T:20131105-1200|V:20131105-120000|/"
         };
 
         for (String path : pathsToFind) {
@@ -233,11 +237,11 @@ public class TestDssDatabase {
             pdc.fullName = path;
             int status = dss.read(pdc);
             assertEquals(0, status);
-            assertEquals(3, pdc.yOrdinates.length);
+            assertEquals(1, pdc.yOrdinates.length);
             assertEquals(59, pdc.xOrdinates.length);
         }
         dss.done();
         List<RecordIdentifier> mIds = db.getMectricPairedDataIDs();
-        assertEquals(1, mIds.size());
+        assertEquals(3, mIds.size());
     }
 }
