@@ -109,11 +109,11 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     }
 
 
-    private String buildPairedDataStatPathName(RecordIdentifier timeSeriesIdentifier, ZonedDateTime startDateTime, ZonedDateTime issueDate) {
+    private String buildPairedDataStatPathName(RecordIdentifier timeSeriesIdentifier, String stat, ZonedDateTime startDateTime, ZonedDateTime issueDate) {
         DSSPathname path = new DSSPathname();
         path.setAPart("");
         path.setBPart(timeSeriesIdentifier.location);
-        path.setCPart(timeSeriesIdentifier.parameter + "-stats-" + metricPairedDataIdentifier);
+        path.setCPart(timeSeriesIdentifier.parameter + "-" + stat + "-" + metricPairedDataIdentifier);
         path.setDPart("");
         path.setEPart("");
         path.setFPart(buildFpart(startDateTime, issueDate));
@@ -511,7 +511,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         for (int i = 0; i < statsAsSeparateSeries.length; i++)
             pdc.labels[i] = statsAsSeparateSeries[i];
         pdc.labelsUsed = true;
-        pdc.fullName = buildPairedDataStatPathName(metrics.parent.getTimeSeriesIdentifier(),
+        pdc.fullName = buildPairedDataStatPathName(metrics.parent.getTimeSeriesIdentifier(), pdc.labels[0],
                 metrics.getStartDateTime(),
                 metrics.getIssueDate());
 
