@@ -10,7 +10,7 @@ import hec.metrics.MetricTypes;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.util.Map;
+import java.util.List;
 
 public class StatComputationHelper {
     public final DatabaseHandlerService databaseHandlerService;
@@ -95,44 +95,49 @@ public class StatComputationHelper {
         return null;
     }
 
+    private void setContainer(MetricCollectionTimeSeries mcts, MetricTypes type, Statistics stat) {
+        MetricCollectionTimeSeriesContainer container = new MetricCollectionTimeSeriesContainer(mcts, type, stat);
+        databaseHandlerService.setMetricCollectionTimeSeriesContainer(container);
+    }
+
     private void computeStatFromMultiStatComputable(EnsembleTimeSeries ets, Statistics stat, ChartType chartType) {
         if (chartType == ChartType.TIMEPLOT) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(new MultiStatComputable(new Statistics[]{stat}));
-            databaseHandlerService.setMetricCollectionTimeSeriesMap(stat, mct);
+            setContainer(mct, MetricTypes.TIMESERIES_OF_ARRAY, stat);
 
         } else if (chartType == ChartType.SCATTERPLOT) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(new MultiStatComputable(new Statistics[]{stat}));
-            databaseHandlerService.setMetricCollectionTimeSeriesMap(stat, mct);
+            setContainer(mct, MetricTypes.ARRAY_OF_ARRAY, stat);
         }
     }
 
     private void computeStatFromPercentilesComputable(EnsembleTimeSeries ets, float[] percentiles, ChartType chartType) {
         if(chartType == ChartType.TIMEPLOT) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(new PercentilesComputable(percentiles));
-            databaseHandlerService.setMetricCollectionTimeSeriesMap(Statistics.PERCENTILES, mct);
+            setContainer(mct, MetricTypes.TIMESERIES_OF_ARRAY, Statistics.PERCENTILES);
         } else if (chartType == ChartType.SCATTERPLOT) {
             MetricCollectionTimeSeries mct = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(new PercentilesComputable(percentiles));
-            databaseHandlerService.setMetricCollectionTimeSeriesMap(Statistics.PERCENTILES, mct);
+            setContainer(mct, MetricTypes.ARRAY_OF_ARRAY, Statistics.PERCENTILES);
         }
     }
 
     private void computeStatFromTotalComputable(EnsembleTimeSeries ets, Statistics stat) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossEnsembleTracesWithSingleComputable(new Total());
-        databaseHandlerService.setMetricCollectionTimeSeriesMap(stat, mct);
+        setContainer(mct, MetricTypes.SINGLE_VALUE, stat);
     }
 
     private void computeStatFromNDayComputable(EnsembleTimeSeries ets, Statistics stat, float[] value) {
         MetricCollectionTimeSeries mct = ets.iterateAcrossTracesOfEnsemblesWithMultiComputable(new NDayMultiComputable(new CumulativeComputable(), value));
-        databaseHandlerService.setMetricCollectionTimeSeriesMap(stat, mct);
+        setContainer(mct, MetricTypes.SINGLE_VALUE, stat);
     }
 
     public void computeStatFromProbabilityComputable() {
         PlottingPositionComputable plottingPositionComputable = new PlottingPositionComputable(PlottingType.WEIBULL);
-        Map<Statistics, MetricCollectionTimeSeries> computedMetrics = databaseHandlerService.getMetricCollectionTimeSeriesMap();
+        List<MetricCollectionTimeSeriesContainer> computedMetrics = databaseHandlerService.getMetricCollectionTimeSeriesContainer();
 
-        for(Map.Entry<Statistics, MetricCollectionTimeSeries> entry : computedMetrics.entrySet()) {
-            if(entry.getValue().getMetricType() == MetricTypes.ARRAY_OF_ARRAY) {
-                MetricCollection mc = entry.getValue().getMetricCollection(databaseHandlerService.getDbHandlerZdt());
+        for(MetricCollectionTimeSeriesContainer container : computedMetrics) {
+            if(container.getMetricTypes() == MetricTypes.ARRAY_OF_ARRAY) {
+                MetricCollection mc = container.getMetricCollectionTimeSeries().getMetricCollection(databaseHandlerService.getDbHandlerZdt());
                 String savedStat = mc.getMetricStatistics();
                 String[] savedStats = savedStat.split("\\|");
                 float[][] vals = mc.getValues();

@@ -2,7 +2,7 @@ package hec.ensembleview.viewpanels;
 
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.DefaultSettings;
-import hec.ensembleview.controllers.ProbabilityDataViewListener;
+import hec.ensembleview.controllers.DataViewListener;
 import hec.ensembleview.charts.ChartType;
 
 import javax.swing.*;
@@ -12,13 +12,19 @@ import java.beans.PropertyChangeEvent;
 public class EnsembleDataTransformView extends DataTransformView {
     private JRadioButton original;
     private JRadioButton probability;
-    private transient ProbabilityDataViewListener probabilityListener;
+    private transient DataViewListener probabilityListener;
+    private static final ChartType CHART_TYPE = ChartType.SCATTERPLOT;
     public EnsembleDataTransformView() {
         super();
     }
 
-    public void setProbabilityListener(ProbabilityDataViewListener listener) {
+    public void setListener(DataViewListener listener) {
         this.probabilityListener = listener;
+    }
+
+    @Override
+    protected ChartType getChartType() {
+        return CHART_TYPE;
     }
 
     @Override
@@ -60,10 +66,10 @@ public class EnsembleDataTransformView extends DataTransformView {
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == this.original) {
             probabilityListener.setIsDataViewProbability(false);
-            probabilityListener.initiateEnsembleCompute(ChartType.SCATTERPLOT);
+            probabilityListener.initiateCompute(ChartType.SCATTERPLOT);
         } else if(e.getSource() == this.probability) {
             probabilityListener.setIsDataViewProbability(true);
-            probabilityListener.initiateEnsembleCompute(ChartType.SCATTERPLOT);
+            probabilityListener.initiateCompute(ChartType.SCATTERPLOT);
         }
     }
 

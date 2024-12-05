@@ -2,6 +2,7 @@ package hec.ensembleview.controllers;
 
 import hec.ensemble.stats.Statistics;
 import hec.ensembleview.DatabaseHandlerService;
+import hec.ensembleview.MetricCollectionTimeSeriesContainer;
 import hec.ensembleview.PlotStatisticsForChartType;
 import hec.ensembleview.charts.EnsembleChart;
 import hec.ensembleview.charts.EnsembleChartAcrossEnsembles;
@@ -11,12 +12,13 @@ import hec.metrics.MetricCollectionTimeSeries;
 import hec.metrics.MetricTypes;
 
 import java.beans.PropertyChangeEvent;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class EnsembleArrayChartManager extends ChartManager {
     private static final Logger logger = Logger.getLogger(EnsembleArrayChartManager.class.getName());
@@ -24,8 +26,8 @@ public class EnsembleArrayChartManager extends ChartManager {
     private MetricCollectionTimeSeries residentMetricCollectionTimeSeries;
     private String secondaryUnits;
 
-    public EnsembleArrayChartManager(StatisticsMap statisticsMap, G2dPanel chartPanel) {
-        super(statisticsMap, chartPanel);
+    public EnsembleArrayChartManager(G2dPanel chartPanel, ComputePanelController controller) {
+        super(chartPanel, controller.getStatisticsMap());
     }
 
     @Override
@@ -47,12 +49,11 @@ public class EnsembleArrayChartManager extends ChartManager {
         Map<String, float[]> metricValues = new HashMap<>();
 
         //get map of MetricCollectionTImeSeries data and create a list of stats in map
-        Map<Statistics, MetricCollectionTimeSeries> metricCollectionTimeSeriesMap = databaseHandlerService.getMetricCollectionTimeSeriesMap();
-        List<Statistics> list = new ArrayList<>(metricCollectionTimeSeriesMap.keySet());
+        List<MetricCollectionTimeSeriesContainer> containers = databaseHandlerService.getMetricCollectionTimeSeriesContainer();
 
-        for (Statistics stat : list) {
-            residentMetricCollectionTimeSeries = metricCollectionTimeSeriesMap.get(stat);
-            chartLabelsForStatistic(stat);
+        for (MetricCollectionTimeSeriesContainer container : containers) {
+            residentMetricCollectionTimeSeries = container.getMetricCollectionTimeSeries();
+            chartLabelsForStatistic(container.getStatistics());
             databaseHandlerService.setResidentMetricCollectionTimeSeries(residentMetricCollectionTimeSeries);
             if (isMetricArrayOfArray(residentMetricCollectionTimeSeries)) {
                 String stats = databaseHandlerService.getResidentMetricStatisticsList();
@@ -108,14 +109,29 @@ public class EnsembleArrayChartManager extends ChartManager {
     }
 
     private void plotProbabilityChart(EnsembleChart chart) {
-        Map<Statistics, MetricCollectionTimeSeries> metricCollectionTimeSeriesMap = databaseHandlerService.getMetricCollectionTimeSeriesMap();
-
+        List<MetricCollectionTimeSeriesContainer> containers = databaseHandlerService.getMetricCollectionTimeSeriesContainer();
         Map<String, Map<Float, Float>> probList = databaseHandlerService.getEnsembleProbabilityList();
-        for(Map.Entry<String, Map<Float, Float>> entry : probList.entrySet()) {
-            residentMetricCollectionTimeSeries = metricCollectionTimeSeriesMap.get(Statistics.getStatName(entry.getKey()));
-            chartLabelsForStatistic(Statistics.getStatName(entry.getKey()));
-            PlotStatisticsForChartType.addStatisticsToEnsemblePlot((EnsembleChartAcrossEnsembles) chart, entry.getKey(), entry.getValue());
+
+        // Create a map for quick lookup of containers by statistics
+        Map<Statistics, MetricCollectionTimeSeriesContainer> containerMap = containers.stream()
+                .filter(container -> container.getMetricTypes().equals(MetricTypes.ARRAY_OF_ARRAY))
+                .collect(Collectors.toMap(
+                        MetricCollectionTimeSeriesContainer::getStatistics,
+                        Function.identity(),
+                        (existing, replacement) -> existing
+                ));
+
+        for (Map.Entry<String, Map<Float, Float>> entry : probList.entrySet()) {
+            Statistics statName = Statistics.getStatName(entry.getKey());
+            MetricCollectionTimeSeriesContainer container = containerMap.get(statName);
+
+            if (container != null) {
+                residentMetricCollectionTimeSeries = container.getMetricCollectionTimeSeries();
+                chartLabelsForStatistic(statName);
+                PlotStatisticsForChartType.addStatisticsToEnsemblePlot((EnsembleChartAcrossEnsembles) chart, entry.getKey(), entry.getValue());
+            }
         }
+
         chartPanel.revalidate();
         chartPanel.repaint();
     }
@@ -123,15 +139,14 @@ public class EnsembleArrayChartManager extends ChartManager {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if(evt.getSource() instanceof StatisticsMap && evt.getPropertyName().equalsIgnoreCase("ensemble")) {
+            databaseHandlerService.refreshMetricCollectionEnsembleSeriesMap(statisticsMap);
             addEnsembleValues();
-            databaseHandlerService.refreshMetricCollectionTimeSeriesMap();
             databaseHandlerService.refreshEnsembleProbabilityList();
         } else if (evt.getSource() instanceof  StatisticsMap && evt.getPropertyName().equalsIgnoreCase("probability")) {
             isProbability = (boolean) evt.getNewValue();
         }
 
-        else if(evt.getSource() instanceof DatabaseHandlerService) {
-            databaseHandlerService.refreshMetricCollectionTimeSeriesMap();
+        else if(evt.getSource() instanceof DatabaseHandlerService && evt.getOldValue() != null) {
             databaseHandlerService.refreshEnsembleProbabilityList();
             this.databaseHandlerService = DatabaseHandlerService.getInstance();
             addEnsembleValues();

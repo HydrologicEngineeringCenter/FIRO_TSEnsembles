@@ -19,7 +19,7 @@ public abstract class ChartManager implements PropertyChangeListener {
     EnsembleChart chart;
     String units;
 
-    protected ChartManager(StatisticsMap map, G2dPanel chartPanel) {
+    protected ChartManager(G2dPanel chartPanel, StatisticsMap map) {
         databaseHandlerService = DatabaseHandlerService.getInstance();
         databaseHandlerService.addDatabaseChangeListener(this);
 

@@ -1,7 +1,7 @@
 package hec.ensembleview.controllers;
 
-import hec.ensemble.stats.Statistics;
 import hec.ensembleview.DatabaseHandlerService;
+import hec.ensembleview.MetricCollectionTimeSeriesContainer;
 import hec.ensembleview.PlotStatisticsForChartType;
 import hec.ensembleview.charts.EnsembleChart;
 import hec.ensembleview.charts.EnsembleChartAcrossTime;
@@ -12,7 +12,6 @@ import hec.metrics.MetricTypes;
 
 import java.beans.PropertyChangeEvent;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +22,8 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
     private static final Logger logger = Logger.getLogger(EnsembleTimeSeriesChartManager.class.getName());
     private boolean isCumulative = false;
 
-    public EnsembleTimeSeriesChartManager(StatisticsMap statisticsMap, G2dPanel chartPanel) {
-        super(statisticsMap, chartPanel);
+    public EnsembleTimeSeriesChartManager(G2dPanel chartPanel, ComputePanelController controller) {
+        super(chartPanel, controller.getStatisticsMap());
     }
 
     @Override
@@ -47,12 +46,11 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
         Map<String, float[]> metricValues = new HashMap<>();
 
         //get map of MetricCollectionTImeSeries data and create a list of stats in map
-        Map<Statistics, MetricCollectionTimeSeries> metricCollectionTimeSeriesMap = databaseHandlerService.getMetricCollectionTimeSeriesMap();
-        List<Statistics> list = new ArrayList<>(metricCollectionTimeSeriesMap.keySet());
+        List<MetricCollectionTimeSeriesContainer> containers = databaseHandlerService.getMetricCollectionTimeSeriesContainer();
 
         //iterate through map
-        for (Statistics stat : list) {
-            MetricCollectionTimeSeries residentMetricCollectionTimeSeries = metricCollectionTimeSeriesMap.get(stat);
+        for (MetricCollectionTimeSeriesContainer container : containers) {
+            MetricCollectionTimeSeries residentMetricCollectionTimeSeries = container.getMetricCollectionTimeSeries();
             databaseHandlerService.setResidentMetricCollectionTimeSeries(residentMetricCollectionTimeSeries);
             if (isMetricTimeSeries(residentMetricCollectionTimeSeries)) {
                 String stats = databaseHandlerService.getResidentMetricStatisticsList();
@@ -116,22 +114,21 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
     public void propertyChange(PropertyChangeEvent evt) {
         if(evt.getSource() instanceof StatisticsMap && evt.getPropertyName().equalsIgnoreCase("time")) {
             addEnsembleValues();
+            databaseHandlerService.refreshMetricCollectionTimeSeriesMap(statisticsMap);
             try {
                 plotResidentMetricChart(chart, ensemble.startDateTime());
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error in the date time parse when adding metric statistics to the " +
                         "time plot from the EnsembleChartAcrossTime view class");
             }
-            databaseHandlerService.refreshMetricCollectionTimeSeriesMap();
 
         } else if(evt.getSource() instanceof StatisticsMap && evt.getPropertyName().equalsIgnoreCase("cumulative")) {  //This must happen before adding Ensembles
             isCumulative = (boolean) evt.getNewValue();
             isEnsembleDataViewTypeCumulative(isCumulative);
             addEnsembleValues();
         }
-        else if(evt.getSource() instanceof DatabaseHandlerService) {
+        else if(evt.getSource() instanceof DatabaseHandlerService && evt.getOldValue() != null) {
             isCumulative = false;
-            databaseHandlerService.refreshMetricCollectionTimeSeriesMap();
             this.databaseHandlerService = DatabaseHandlerService.getInstance();
             addEnsembleValues();
         }

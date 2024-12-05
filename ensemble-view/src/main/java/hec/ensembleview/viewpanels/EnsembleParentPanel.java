@@ -6,9 +6,12 @@ import java.util.Objects;
 
 public class EnsembleParentPanel extends JFrame{
 
-    public EnsembleParentPanel(JPanel topPanel, JTabbedPane tabPane) {
+    public EnsembleParentPanel(JPanel topPanel, JTabbedPane tabPane, MenuBar frame) {
         setTitle("Ensemble Viewer");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        setJMenuBar(frame.getMenuBar());
+
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         setResizable(true);
         add(topPanel, BorderLayout.NORTH);

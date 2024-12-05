@@ -2,6 +2,8 @@ package hec.ensembleview.viewpanels;
 
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.DefaultSettings;
+import hec.ensembleview.charts.ChartType;
+import hec.ensembleview.controllers.DataViewListener;
 import hec.ensembleview.controllers.SingleValueDataViewListener;
 import hec.ensembleview.mappings.SingleValueSummaryType;
 
@@ -16,6 +18,7 @@ public class SingleValueDataTransformView extends DataTransformView {
     private JRadioButton acrossTime;
     private JRadioButton acrossEnsembles;
     private transient SingleValueDataViewListener singleValueDataViewListener;
+    private static final ChartType CHART_TYPE = ChartType.SINGLEVALUE;
     private static final String ACROSSENSEMBLESTRING = "Across Ensembles";
     private static final String ACROSSTIMESTRING = "Across Time";
 
@@ -26,8 +29,18 @@ public class SingleValueDataTransformView extends DataTransformView {
         ((TitledBorder) getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
     }
 
+    @Override
+    public void setListener(DataViewListener listener) {
+        // no op
+    }
+
     public void setSingleValueDataViewListener(SingleValueDataViewListener listener) {
         this.singleValueDataViewListener = listener;
+    }
+
+    @Override
+    protected ChartType getChartType() {
+        return CHART_TYPE;
     }
 
     @Override

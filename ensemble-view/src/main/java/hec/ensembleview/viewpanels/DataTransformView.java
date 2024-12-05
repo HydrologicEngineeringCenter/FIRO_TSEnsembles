@@ -2,6 +2,8 @@ package hec.ensembleview.viewpanels;
 
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.DefaultSettings;
+import hec.ensembleview.charts.ChartType;
+import hec.ensembleview.controllers.DataViewListener;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -11,7 +13,6 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 
 public abstract class DataTransformView extends JPanel implements ActionListener, PropertyChangeListener {
-
     protected DataTransformView() {
         DatabaseHandlerService.getInstance().addDatabaseChangeListener(this);
 
@@ -28,6 +29,10 @@ public abstract class DataTransformView extends JPanel implements ActionListener
         setBorder((BorderFactory.createTitledBorder(grayLine, "Data View", TitledBorder.LEFT, TitledBorder.TOP)));
         ((TitledBorder) getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
     }
+
+    public abstract void setListener(DataViewListener listener);
+
+    protected abstract ChartType getChartType();
 
     protected abstract void initiateButtonSelection();
 

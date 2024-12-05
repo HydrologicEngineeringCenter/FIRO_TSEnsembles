@@ -1,28 +1,29 @@
 package hec.ensembleview;
 
 import hec.EnsembleDatabase;
+import hec.MetricDatabase;
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
 import hec.dss.ensemble.DssDatabase;
 import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.Statistics;
+import hec.ensembleview.mappings.StatisticsMap;
 import hec.metrics.MetricCollectionTimeSeries;
+import hec.metrics.MetricTypes;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.time.ZonedDateTime;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class DatabaseHandlerService {  // handles ensemble and metric database and gets ensemble and metric time series
     private static final DatabaseHandlerService instance = new DatabaseHandlerService();
     private EnsembleDatabase ensembleDatabase;
-//    private MetricDatabase metricDatabase;  - for viewing metrics in database
+    private MetricDatabase metricDatabase;
 //    private MetricCollectionTimeSeries metricCollectionTimeSeries; - for viewing metrics in database
     private EnsembleTimeSeries cumulativeEnsembleTimeSeries;
-    private final EnumMap<Statistics, MetricCollectionTimeSeries> metricCollectionTimeSeriesMap = new EnumMap<>(Statistics.class);
+    private final List<MetricCollectionTimeSeriesContainer> metricCollectionTimeSeriesContainers = new ArrayList<>();
     private MetricCollectionTimeSeries residentMetricCollectionTimeSeries;
     private final Map<String, Map<Float, Float>> ensembleProbabilityList = new HashMap<>();
     private RecordIdentifier rid;
@@ -42,19 +43,19 @@ public class DatabaseHandlerService {  // handles ensemble and metric database a
 
     public void setDatabase(SqliteDatabase sqliteDatabase) {
         this.ensembleDatabase = sqliteDatabase;
-//        this.metricDatabase = sqliteDatabase; - for viewing metrics in database
+        this.metricDatabase = sqliteDatabase;
     }
 
     public void setDatabase(DssDatabase dssDatabase) {
         this.ensembleDatabase = dssDatabase;
-//        this.metricDatabase = dssDatabase; - for viewing metrics in database
+        this.metricDatabase = dssDatabase;
     }
 
     public void setDbHandlerRecordIdentifier(RecordIdentifier rid) {
         RecordIdentifier currentRid = this.rid;
         if(currentRid != rid) {
             this.rid = rid;
-            support.firePropertyChange("dbChange", false, true);
+            support.firePropertyChange("dbChange", currentRid, rid);
         }
     }
 
@@ -82,20 +83,46 @@ public class DatabaseHandlerService {  // handles ensemble and metric database a
         this.residentMetricCollectionTimeSeries = metricCollectionsTimeSeries;
     }
 
-    public Map<Statistics, MetricCollectionTimeSeries> getMetricCollectionTimeSeriesMap() {
-        return metricCollectionTimeSeriesMap;
+    public List<MetricCollectionTimeSeriesContainer> getMetricCollectionTimeSeriesContainer() {
+        return metricCollectionTimeSeriesContainers;
     }
 
-    public void refreshMetricCollectionTimeSeriesMap() {
-        metricCollectionTimeSeriesMap.clear();
+    public void refreshMetricCollectionTimeSeriesMap(StatisticsMap map) {
+        for (Map.Entry<String, Boolean> entry : map.getTimeSeriesMapList().entrySet()) {
+            if (entry.getValue() == Boolean.FALSE) {
+                this.metricCollectionTimeSeriesContainers.removeIf(container ->
+                        container.getStatistics().equals(Statistics.getStatName(entry.getKey())) &&
+                                container.getMetricTypes().equals(MetricTypes.TIMESERIES_OF_ARRAY));
+            }
+        }
+    }
+
+    public void refreshMetricCollectionEnsembleSeriesMap(StatisticsMap map) {
+        for (Map.Entry<String, Boolean> entry : map.getEnsembleSeriesMapList().entrySet()) {
+            if (entry.getValue() == Boolean.FALSE) {
+                this.metricCollectionTimeSeriesContainers.removeIf(container ->
+                        container.getStatistics().equals(Statistics.getStatName(entry.getKey())) &&
+                                container.getMetricTypes().equals(MetricTypes.ARRAY_OF_ARRAY));
+            }
+        }
     }
 
     public void refreshEnsembleProbabilityList() {
         ensembleProbabilityList.clear();
     }
 
-    public void setMetricCollectionTimeSeriesMap(Statistics stat, MetricCollectionTimeSeries metricCollectionTimeSeries) {
-        this.metricCollectionTimeSeriesMap.put(stat, metricCollectionTimeSeries);
+    public void setMetricCollectionTimeSeriesContainer(MetricCollectionTimeSeriesContainer container) {
+        this.metricCollectionTimeSeriesContainers.add(container);
+    }
+
+
+    public void saveMctsToDatabase(MetricCollectionTimeSeries metricCollectionTimeSeries) throws Exception {
+        if (metricCollectionTimeSeries.getMetricType().equals(MetricTypes.TIMESERIES_OF_ARRAY)) {
+            this.metricDatabase.write(metricCollectionTimeSeries);
+        }
+        if (metricCollectionTimeSeries.getMetricType().equals(MetricTypes.ARRAY_OF_ARRAY)) {
+            this.metricDatabase.write(metricCollectionTimeSeries.getMetricCollection(zdt));
+        }
     }
 
     public void setCumulativeEnsembleTimeSeries(EnsembleTimeSeries ensembleTimeSeries) {

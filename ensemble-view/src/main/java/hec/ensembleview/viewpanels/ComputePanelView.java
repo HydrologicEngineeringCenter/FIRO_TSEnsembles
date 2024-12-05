@@ -2,6 +2,8 @@ package hec.ensembleview.viewpanels;
 
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.DefaultSettings;
+import hec.ensembleview.charts.ChartType;
+import hec.ensembleview.controllers.ComputePanelListener;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -16,6 +18,7 @@ import java.util.List;
 public abstract class ComputePanelView extends JPanel implements ItemListener, ActionListener, PropertyChangeListener {
     final transient List<JCheckBox> statisticsList = new ArrayList<>();
     private final List<JTextField> textFieldList = new ArrayList<>();
+    transient ComputePanelListener listener;
 
     protected ComputePanelView() {
         DatabaseHandlerService.getInstance().addDatabaseChangeListener(this);
@@ -26,6 +29,10 @@ public abstract class ComputePanelView extends JPanel implements ItemListener, A
         setupStatsPanel();
         setDefaultFont(statisticsList);
         setVisible(true);
+    }
+
+    public void setListener(ComputePanelListener listener) {
+        this.listener = listener;
     }
 
     void setupStatsPanel() {
@@ -116,6 +123,8 @@ public abstract class ComputePanelView extends JPanel implements ItemListener, A
         group.add(textField, gc);
         add(group);
     }
+
+    public abstract ChartType getChartType();
 
     protected abstract void initCheckBoxStat();
 
