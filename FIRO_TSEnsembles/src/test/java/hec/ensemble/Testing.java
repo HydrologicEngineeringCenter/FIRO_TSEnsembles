@@ -35,7 +35,7 @@ public class Testing {
         boolean create=true;
         for (String name : watershedNames) {
 
-            CsvEnsembleReader reader = new CsvEnsembleReader(CacheDir);
+            CsvEnsembleReader reader = new CsvEnsembleReader(CacheDir, "_hefs_csv_hourly");
             EnsembleTimeSeries[] ets = reader.Read(name, t1, t2);
             writeTime += ensembleWriter(fn, ets, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE);
             if( create)
@@ -84,7 +84,7 @@ public class Testing {
 
         long start = System.currentTimeMillis();
         int count = 0;
-        try (SqliteDatabase db = new SqliteDatabase(fileName, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE);){
+        try (SqliteDatabase db = new SqliteDatabase(fileName, SqliteDatabase.CREATION_MODE.OPEN_EXISTING_NO_UPDATE)){
             List<RecordIdentifier> locations = db.getEnsembleTimeSeriesIDs();
             for (RecordIdentifier tsid : locations) {
                 EnsembleTimeSeries ets = db.getEnsembleTimeSeries(tsid, t1,t2);

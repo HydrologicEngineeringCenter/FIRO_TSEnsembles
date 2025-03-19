@@ -35,7 +35,7 @@ class EnsembleTimeSeriesTest {
         ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
         ZonedDateTime issueDate2 = issueDate1.plusDays(3);
         //read from resource cache
-        CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir);
+        CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir, "_hefs_csv_hourly");
         EnsembleTimeSeries[] ets = csvReader.Read("Kanektok", issueDate1, issueDate2);
         SqliteDatabase db = new SqliteDatabase(_fn, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
         //write ensemble time series to database for use in other tests.

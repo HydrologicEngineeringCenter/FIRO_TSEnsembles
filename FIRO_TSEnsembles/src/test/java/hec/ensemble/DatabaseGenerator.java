@@ -20,7 +20,7 @@ public class DatabaseGenerator {
         ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
         ZonedDateTime issueDate2 = issueDate1.plusDays(numberOfDates);
 
-        CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir);
+        CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir, "_hefs_csv_hourly");
         EnsembleTimeSeries[] ets = csvReader.Read("Kanektok", issueDate1, issueDate2);
         EnsembleDatabase db = new SqliteDatabase(filename, SqliteDatabase.CREATION_MODE.CREATE_NEW);
 

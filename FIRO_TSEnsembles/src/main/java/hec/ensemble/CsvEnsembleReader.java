@@ -18,14 +18,16 @@ import java.util.Map;
 public class CsvEnsembleReader {
 
 
+    private final String suffix;
     private String pathToCSV; // pathToCSV to csv files
 
     /**
      *
      * @param path path to csv file cache (example C:\Temp\hefs_cache)
      */
-    public CsvEnsembleReader(String path) {
+    public CsvEnsembleReader(String path, String suffix) {
         this.pathToCSV = path;
+        this.suffix = suffix;
     }
 
 
@@ -49,7 +51,7 @@ public class CsvEnsembleReader {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHH");
         String fileName = formatter.format(issueDate) + "_";
         fileName += watershedName;
-        fileName += "_hefs_csv_hourly";
+        fileName += suffix;
 
         //String csvFileName =
           Path p = Paths.get(pathToCSV, fileName + ".csv");
