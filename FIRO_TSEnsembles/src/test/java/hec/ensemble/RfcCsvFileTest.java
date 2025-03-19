@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.file.FileAlreadyExistsException;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -17,7 +18,10 @@ class RfcCsvFileTest {
     @Test
     public void ReadCsv() {
 
-        String fn = TestingPaths.instance.getTestCsvFileName();
+        String watershedName = "Kanektok";
+        String suffix = "_hefs_csv_hourly";
+        ZonedDateTime issueDate = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+        String fn = TestingPaths.instance.getTestCsvFileName(watershedName, issueDate, suffix);
         RfcCsvFile csv = new RfcCsvFile(fn);
         float[][] data = csv.getEnsemble("SCRN2");
 
