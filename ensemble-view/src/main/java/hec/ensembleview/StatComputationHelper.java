@@ -56,11 +56,11 @@ public class StatComputationHelper {
     }
 
     public MetricCollectionTimeSeries computeTwoStepComputable(Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
-        SingleComputable compute;
+        SingleValueComputable compute;
         if(stepOne == Statistics.CUMULATIVE) {
-            compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), stepOneValues), getComputable(stepTwo, stepTwoValues), false);
+            compute = new TwoStepComputableSingleMetricValue(new NDayMultiComputable(new CumulativeComputable(), stepOneValues), getComputable(stepTwo, stepTwoValues), false);
         } else {
-            compute = new TwoStepComputable(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), computeAcrossEnsembles);
+            compute = new TwoStepComputableSingleMetricValue(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), computeAcrossEnsembles);
         }
         return databaseHandlerService.getEnsembleTimeSeries().computeSingleValueSummary(compute);
     }

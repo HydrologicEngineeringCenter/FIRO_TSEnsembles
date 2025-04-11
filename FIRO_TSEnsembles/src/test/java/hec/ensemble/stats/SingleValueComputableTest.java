@@ -5,12 +5,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-class SingleComputableTest {
-    SingleComputable maxOfMax = new MaxOfMaximumsComputable();
+class SingleValueComputableTest {
+    SingleValueComputable maxOfMax = new MaxOfMaximumsValueComputable();
     Statistics[] stats = new Statistics[]{Statistics.MAX};
     MultiComputable mc = new MultiStatComputable(stats);
     NDayMultiComputable nday = new NDayMultiComputable(mc,new float[] {2});
-    SingleComputable twostep = new TwoStepComputable(nday,new MeanComputable(), true);
+    SingleValueComputable twostep = new TwoStepComputableSingleMetricValue(nday,new MeanComputable(), true);
 
     @Test
     void ToAndFromXML() {
@@ -18,8 +18,8 @@ class SingleComputableTest {
             Element a= Serializer.toXML(maxOfMax);
             Element b = Serializer.toXML( twostep);
 
-            SingleComputable A = Serializer.fromXML(a);
-            SingleComputable B = Serializer.fromXML(b);
+            SingleValueComputable A = Serializer.fromXML(a);
+            SingleValueComputable B = Serializer.fromXML(b);
 
             System.out.println("uhhh");
 

@@ -1,6 +1,6 @@
 package hec.ensemble.stats;
 
-public class MaxOfMaximumsComputable implements SingleComputable {
+public class MaxOfMaximumsValueComputable implements SingleValueComputable {
     @Override
     public float compute(float[][] values) {
         float maxval = -Float.MAX_VALUE;
