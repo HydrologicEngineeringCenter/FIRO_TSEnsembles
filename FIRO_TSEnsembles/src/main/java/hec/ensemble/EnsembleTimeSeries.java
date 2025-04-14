@@ -125,7 +125,7 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
     }
 
     public MetricCollectionTimeSeries computeSingleValueSummaryTimeSeries(SingleTimeSeriesComputable compute){
-      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.SINGLE_VALUE);
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.units, MetricTypes.TIMESERIES_OF_SINGLE_VALUE);
       for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
         Ensemble e = it.next();
         float[] result = e.singleComputeForEnsembleTimeSeries(compute);
