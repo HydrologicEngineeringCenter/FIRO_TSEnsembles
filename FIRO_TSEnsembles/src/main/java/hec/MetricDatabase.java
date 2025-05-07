@@ -13,6 +13,7 @@ public interface MetricDatabase extends AutoCloseable {
     MetricCollection getMetricCollection(RecordIdentifier timeseriesID, ZonedDateTime issue_time);
     Map<RecordIdentifier,List<String>> getMetricStatistics();
     List<String> getMetricStatistics(RecordIdentifier timeseriesID);
+    List<String> getMetricStatistics (VersionIdentifier versionID);
     MetricCollectionTimeSeries getMetricCollectionTimeSeries(RecordIdentifier timeseriesID, String statistics);
     List<MetricCollectionTimeSeries> getMetricCollectionTimeSeries(RecordIdentifier timeseriesID);
     List<ZonedDateTime> getMetricCollectionIssueDates(RecordIdentifier timeseriesID);

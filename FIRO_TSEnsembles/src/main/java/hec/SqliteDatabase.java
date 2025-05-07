@@ -17,6 +17,7 @@ import hec.ensemble.*;
 import hec.paireddata.*;
 import hec.metrics.*;
 import hec.ensemble.stats.Statistics;
+import sun.java2d.marlin.Version;
 
 /**
  * A database with Read/Write abilities for various data types.
@@ -46,6 +47,8 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
     private PreparedStatement ps_insertMetricCollectionTimeSeries;
     private PreparedStatement ps_drop_ensemble;
     private PreparedStatement ps_drop_ensemble_timeseries;
+    private PreparedStatement ps_drop_metrics;
+    private PreparedStatement ps_drop_metrics_timeseries;
 
     /**
      * constructor for SqliteDatabase
@@ -168,6 +171,9 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                 else if (next_version.equals("20230718")) {
                     System.out.println("updated to version: 20230718");
                     this.version = next_version;
+                }
+                else if (next_version.equals("20250506")) {
+                    System.out.println("updated to version: 20250506");
                 }
             }
             try {
@@ -556,7 +562,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         for (MetricCollectionTimeSeries mts : mtsArray) {
             List<ZonedDateTime> issueDates = mts.getIssueDates();
             InsertMetricCollectionTimeSeries(++mc_ts_id, mts.getTimeSeriesIdentifier(), mts.getUnits(),
-                    mts.type());
+                    mts.type(), mts.getVersion());
             for (int i = 0; i < issueDates.size(); i++) {
                 ZonedDateTime t = issueDates.get(i);
                 MetricCollection mc = mts.getMetricCollection(t);
@@ -606,12 +612,33 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         }
         _connection.commit();
     }
+    /**
+     * Delete all metrics and metrics_timeseries from db
+     * **/
+    public void deleteAllMetricsFromDB() throws Exception{
 
+        if (doesTableExist("metrics")) {
+            if (ps_drop_metrics == null) {
+                String sql1 = "DELETE from metrics";
+                ps_drop_metrics = _connection.prepareStatement(sql1);
+                String sql2 = "DELETE from metrics_timeseries";
+                ps_drop_metrics_timeseries = _connection.prepareStatement(sql2);
+            }
+            if (ps_drop_metrics_timeseries == null) {
+                String sql2 = "DELETE from metrics_timeseries";
+                ps_drop_metrics_timeseries = _connection.prepareStatement(sql2);
+            }
+            ps_drop_metrics.execute();
+            ps_drop_metrics_timeseries.execute();
+        }
+        _connection.commit();
+    }
 
-    private void InsertMetricCollectionTimeSeries(int id, RecordIdentifier record_id, String units, MetricTypes metric_type) throws Exception {
+    private void InsertMetricCollectionTimeSeries(int id, RecordIdentifier record_id, String units,
+                                                  MetricTypes metric_type, String version) throws Exception {
         if (ps_insertMetricCollectionTimeSeries == null) {
             String sql = "INSERT INTO " + metricCollectionTimeSeriesTableName + " ([id], [location], [parameter_name], "
-                    + " [units], [metric_type]) VALUES " + "(?, ?, ?, ?, ?)";
+                    + " [units], [metric_type], [version]) VALUES " + "(?, ?, ?, ?, ?, ?)";
             ps_insertMetricCollectionTimeSeries = _connection.prepareStatement(sql);
         }
 
@@ -620,6 +647,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         ps_insertMetricCollectionTimeSeries.setString(3, record_id.parameter);
         ps_insertMetricCollectionTimeSeries.setString(4, units);
         ps_insertMetricCollectionTimeSeries.setString(5, metric_type.name());
+        ps_insertMetricCollectionTimeSeries.setString(6, version);
         ps_insertMetricCollectionTimeSeries.execute();
     }
     private void InsertMetricCollection(int id, int ts_id, ZonedDateTime issue_datetime,
@@ -650,6 +678,11 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         return readMetricStatistics(timeseriesID, sql);
     }
 
+    public List<String> getMetricStatistics(VersionIdentifier timeseriesID){
+        String sql = "select distinct statistics from view_metriccollection WHERE location = ? AND parameter_name = ? AND version = ?";
+        return readMetricStatistics(timeseriesID, sql);
+    }
+
     public Map<RecordIdentifier,List<String>> getMetricStatistics(){
         String sql = "select distinct statistics from view_metriccollection WHERE location = ? AND parameter_name = ?";
         HashMap<RecordIdentifier, List<String>> rval = new HashMap();
@@ -665,6 +698,25 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
             PreparedStatement statement = _connection.prepareStatement(sql);
             statement.setString(1, timeseriesID.location);
             statement.setString(2, timeseriesID.parameter);
+
+            ResultSet rs = statement.executeQuery();
+            // loop through the result set
+            while (rs.next()) {
+                statisticsForTSID.add(rs.getString("statistics"));
+            }
+        } catch (Exception e) {
+            Logger.logError(e.getMessage());
+        }
+        return statisticsForTSID;
+    }
+
+    private List<String> readMetricStatistics(VersionIdentifier timeseriesID, String sql){
+        LinkedList<String> statisticsForTSID = new LinkedList<String>();
+        try {
+            PreparedStatement statement = _connection.prepareStatement(sql);
+            statement.setString(1, timeseriesID.location);
+            statement.setString(2, timeseriesID.parameter);
+            statement.setString(3, timeseriesID.version);
 
             ResultSet rs = statement.executeQuery();
             // loop through the result set
@@ -695,6 +747,28 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
     }
 
     /**
+     * Gets EnsembleTimeSeries of specific version, loading ensembles into memory
+     *
+     * @param versionID VersionIdentifier
+     * @return returns @EnsembleTimeSeries
+     */
+    public List<MetricCollectionTimeSeries> getMetricCollectionTimeSeries(VersionIdentifier versionID) {
+        String sql = "select * from view_metriccollection WHERE location = ? "
+                + " AND parameter_name = ? " + "AND version = ?";
+        List<MetricCollectionTimeSeries> rval = new LinkedList();
+        try{
+            for(String stat : getMetricStatistics(versionID)){
+                rval.add(readMetricCollectionTimeSeriesFromDB(versionID, stat, sql));
+            }
+
+
+        } catch ( Exception e){
+            Logger.logError(e.getMessage());
+        }
+        return rval;
+    }
+
+    /**
      * Gets EnsembleTimeSeries, loading ensembles into memory
      *
      * @param timeseriesID TimeSeriesIdentifier
@@ -708,17 +782,12 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         return readMetricCollectionTimeSeriesFromDB(timeseriesID, statistics, sql);
     }
 
-    public MetricCollectionTimeSeries getMetricCollectionTimeSeries(RecordIdentifier timeseriesID, String statistics,
-                                                                    ZonedDateTime issueDateStart, ZonedDateTime issueDateEnd) {
-
-        String sql = "select * from  view_metriccollection " + " WHERE issue_datetime  >= '"
-                + DateUtility.formatDate(issueDateStart) + "' " + " AND issue_datetime <= '"
-                + DateUtility.formatDate(issueDateEnd) + "' " + " AND location = ? " + " AND parameter_name = ?"
-                + " AND statistics = ?";
-        sql += " order by issue_datetime";
-
+    public MetricCollectionTimeSeries getMetricCollectionTimeSeries(VersionIdentifier timeseriesID, String statistics) {
+        String sql = "select * from view_metriccollection WHERE location = ? "
+                + " AND parameter_name = ? and statistics = ? and version = ?";
         return readMetricCollectionTimeSeriesFromDB(timeseriesID, statistics, sql);
     }
+
     private MetricCollectionTimeSeries readMetricCollectionTimeSeriesFromDB(RecordIdentifier timeseriesID, String statistics, String sql) {
         MetricCollectionTimeSeries rval =null;
         try {
@@ -745,16 +814,43 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
         }
         return rval;
     }
+    private MetricCollectionTimeSeries readMetricCollectionTimeSeriesFromDB(VersionIdentifier timeseriesID, String statistics, String sql) {
+        MetricCollectionTimeSeries rval =null;
+        try {
+            PreparedStatement statement = _connection.prepareStatement(sql);
+            statement.setString(1, timeseriesID.location);
+            statement.setString(2, timeseriesID.parameter);
+            statement.setString(3, statistics);
+            statement.setString(4, timeseriesID.version);
 
+            ResultSet rs = statement.executeQuery();
+            boolean firstRow = true;
+            // loop through the result set
+            while (rs.next()) {
+                int mc_timeseries_id = rs.getInt("metriccollection_timeseries_id");
+                // first pass get the location,parameter_name, units, and data_type
+                if (firstRow) {
+                    rval = createMetricCollectionTimeSeries(rs);
+                    firstRow = false;
+                }
+                MetricCollection m = getMetricCollection(rs);
+                rval.addMetricCollection(m);
+            }
+        } catch (Exception e) {
+            Logger.logError(e.getMessage());
+        }
+        return rval;
+    }
     private MetricCollectionTimeSeries createMetricCollectionTimeSeries(ResultSet rs) throws SQLException {
 
         String location = rs.getString("location");
         String parameter = rs.getString("parameter_name");
         String units = rs.getString("units");
         String metric_type = rs.getString("metric_type");
+        String version = rs.getString("version");
         RecordIdentifier tsid = new RecordIdentifier(location, parameter);
         MetricTypes ms = MetricTypes.valueOf(metric_type);
-        MetricCollectionTimeSeries rval = new MetricCollectionTimeSeries(tsid, units, ms);
+        MetricCollectionTimeSeries rval = new MetricCollectionTimeSeries(tsid, version, units, ms);
 
         return rval;
     }
