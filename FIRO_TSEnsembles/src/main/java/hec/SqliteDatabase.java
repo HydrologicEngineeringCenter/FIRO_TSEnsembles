@@ -17,7 +17,6 @@ import hec.ensemble.*;
 import hec.paireddata.*;
 import hec.metrics.*;
 import hec.ensemble.stats.Statistics;
-import sun.java2d.marlin.Version;
 
 /**
  * A database with Read/Write abilities for various data types.
