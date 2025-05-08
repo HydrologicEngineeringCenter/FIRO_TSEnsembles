@@ -173,6 +173,7 @@ public class SqliteDatabase implements PairedDataDatabase, EnsembleDatabase, Ver
                 }
                 else if (next_version.equals("20250506")) {
                     System.out.println("updated to version: 20250506");
+                    this.version = next_version;
                 }
             }
             try {
