@@ -58,6 +58,7 @@ public class SqliteDatabaseTest {
             MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mid, stats.get(0));
             assertEquals(3, mcts.getIssueDates().size());
         }
+        db.close();
     }
 
     @Test
@@ -72,6 +73,7 @@ public class SqliteDatabaseTest {
         db.deleteAllEnsemblesFromDB();
         Integer testVal = db.getEnsembleTimeSeriesIDs().size();
         assertEquals(0, testVal);
+        db.close();
     }
 
     @Test
@@ -90,6 +92,7 @@ public class SqliteDatabaseTest {
         Ensemble e2 = ets2.getEnsemble(date);
         Float firstVal2 = e2.getValues()[0][0];
         assertEquals(123.0f, firstVal2 );
+        db.close();
     }
 
     @Test
@@ -119,6 +122,8 @@ public class SqliteDatabaseTest {
         // get the whole list without naming a stat
         List<MetricCollectionTimeSeries> mctsList = db.getMetricCollectionTimeSeries(recID);
         assertEquals(24, mctsList.size());
+
+        db.close();
     }
 
     private static void copyFileUsingStream(File source, File dest) throws IOException {
