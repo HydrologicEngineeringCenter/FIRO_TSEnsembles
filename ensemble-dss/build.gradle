@@ -15,8 +15,22 @@ plugins {
     id 'maven-publish'
     id "com.palantir.git-version" version "3.0.0"
 }
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
 dependencies {
-    implementation project(":FIRO_TSEnsembles");
+    implementation project(":FIRO_TSEnsembles")
+}
+
+// Copy test resources from FIRO_TSEnsembles to avoid duplication
+task copyTestResources(type: Copy) {
+    from project(":FIRO_TSEnsembles").file("src/test/resources/hefs_cache")
+    into file("$buildDir/resources/test/hefs_cache")
+}
+
+test {
+    dependsOn copyTestResources
 }
 configurations {
     windows_x64
