@@ -2,8 +2,10 @@ plugins {
     id 'java-library'
 }
 
-sourceCompatibility = '11'
-targetCompatibility = '11'
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 version = "1.0-SNAPSHOT"
 repositories {
