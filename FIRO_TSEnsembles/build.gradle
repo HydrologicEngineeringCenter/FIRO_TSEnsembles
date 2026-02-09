@@ -21,8 +21,8 @@ repositories {
     mavenCentral()
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '11'
+targetCompatibility = '11'
 
 dependencies {
     implementation 'org.apache.directory.studio:org.apache.commons.lang:2.6'
@@ -46,8 +46,8 @@ test {
 }
 
 jar {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 task showGit () {

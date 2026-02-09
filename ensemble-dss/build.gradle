@@ -16,8 +16,8 @@ plugins {
     id "com.palantir.git-version" version "3.0.0"
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '11'
+targetCompatibility = '11'
 
 dependencies {
     implementation project(":FIRO_TSEnsembles")
