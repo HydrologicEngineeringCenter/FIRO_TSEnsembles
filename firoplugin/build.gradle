@@ -11,7 +11,6 @@ version = "1.0-SNAPSHOT"
 repositories {
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
-    jcenter()
     mavenCentral()
     maven {
         url = 'https://www.hec.usace.army.mil/nexus/repository/maven-public'
