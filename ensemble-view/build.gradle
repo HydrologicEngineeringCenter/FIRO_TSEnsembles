@@ -39,12 +39,15 @@ test {
 
 
 application {
-    mainClassName = 'hec.ensembleview.EnsembleViewer'
+    mainClass = 'hec.ensembleview.EnsembleViewer'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 jar {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
     manifest {
         attributes 'Main-Class' : 'hec.ensembleview.EnsembleViewer'
     }
