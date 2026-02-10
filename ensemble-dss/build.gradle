@@ -21,8 +21,31 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+configurations {
+    windows_x64
+    linux_x64
+}
+
+group 'hec.dss.ensemble'
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://www.hec.usace.army.mil/nexus/repository/maven-public'
+    }
+}
+
 dependencies {
     implementation project(":FIRO_TSEnsembles")
+    windows_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-win-x86_64@zip'
+    linux_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-linux-x86_64@zip'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    implementation ('mil.army.usace.hec:hec-monolith:3.3.23'){
+        exclude group: "codebase", module: "*"
+        exclude group: "com.sun.media", module: "*"
+        exclude group: "javax.media", module: "*"
+    }
 }
 
 // Copy test resources from FIRO_TSEnsembles to avoid duplication
@@ -31,17 +54,6 @@ task copyTestResources(type: Copy) {
     into file("$buildDir/resources/test/hefs_cache")
 }
 
-test {
-    dependsOn copyTestResources, copyNatives
-    // Ensure tests always run from the project directory
-    workingDir = projectDir
-    useJUnitPlatform()
-    jvmArgs = ["-Djava.library.path=${buildDir}/x64"]
-}
-configurations {
-    windows_x64
-    linux_x64
-}
 
 task copyNatives(type: Copy){
     if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
@@ -58,29 +70,15 @@ task copyNatives(type: Copy){
     }
 }
 
-group 'hec.dss.ensemble'
-
-repositories {
-    mavenCentral()
-    maven {
-        url = 'https://www.hec.usace.army.mil/nexus/repository/maven-public'
-    }
-}
-dependencies {
-    implementation project(":FIRO_TSEnsembles")
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
-    implementation ('mil.army.usace.hec:hec-monolith:3.3.23'){
-        exclude group: "codebase", module: "*"
-        exclude group: "com.sun.media", module: "*"
-        exclude group: "javax.media", module: "*"
-    }
+test {
+    dependsOn copyTestResources, copyNatives
+    workingDir = projectDir
+    useJUnitPlatform()
+    jvmArgs = ["-Djava.library.path=${buildDir}/x64"]
 }
 
-dependencies {
-    windows_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-win-x86_64@zip'
-    linux_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-linux-x86_64@zip'
-}
+
+
 
 jar {
     dependsOn copyNatives
