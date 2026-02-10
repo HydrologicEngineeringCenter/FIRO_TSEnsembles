@@ -43,6 +43,21 @@ configurations {
     linux_x64
 }
 
+task copyNatives(type: Copy){
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        configurations.windows_x64.asFileTree.each {
+            from(zipTree(it))
+            into "$buildDir/x64"
+        }
+    }
+    if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        configurations.linux_x64.asFileTree.each {
+            from(zipTree(it))
+            into "$buildDir/x64"
+        }
+    }
+}
+
 group 'hec.dss.ensemble'
 
 repositories {
@@ -67,20 +82,6 @@ dependencies {
     linux_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-linux-x86_64@zip'
 }
 
-task copyNatives(type: Copy){
-    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-        configurations.windows_x64.asFileTree.each {
-            from(zipTree(it))
-            into "$buildDir/x64"
-        }
-    }
-    if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
-        configurations.linux_x64.asFileTree.each {
-            from(zipTree(it))
-            into "$buildDir/x64"
-        }
-    }
-}
 jar {
     dependsOn copyNatives
 }
