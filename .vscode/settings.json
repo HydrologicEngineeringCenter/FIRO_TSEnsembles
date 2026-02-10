@@ -1,0 +1,37 @@
+{
+
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.detectJdksAtStart": true,
+    "java.gradle.wrapper.enabled": true,
+    "java.gradle.gradle.enabled": true,
+    "java.import.gradle.enabled": true,
+    "java.import.gradle.wrapper.enabled": true,
+    "java.project.sourcePaths": [
+        "FIRO_TSEnsembles/src/main/java",
+        "ensemble-dss/src/main/java", 
+        "ensemble-view/src/main/java",
+        "firoplugin/src/main/java"
+    ],
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+    ],
+    "java.test.config": [
+        {
+            "name": "FIRO_TSEnsembles Tests",
+            "workingDirectory": "${workspaceFolder}/FIRO_TSEnsembles",
+            "classPaths": [
+                "FIRO_TSEnsembles/src/test/java"
+            ]
+        },
+        {
+            "name": "Ensemble-DSS Tests", 
+            "workingDirectory": "${workspaceFolder}/ensemble-dss",
+            "classPaths": [
+                "ensemble-dss/src/test/java"
+            ],
+            "vmArgs": [
+                "-Djava.library.path=${workspaceFolder}/ensemble-dss/build/x64"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,80 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "gradle: build",
+            "type": "shell",
+            "command": "./gradlew",
+            "args": ["build"],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$gradle"],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "label": "gradle: clean",
+            "type": "shell",
+            "command": "./gradlew",
+            "args": ["clean"],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$gradle"]
+        },
+        {
+            "label": "gradle: test",
+            "type": "shell",
+            "command": "./gradlew", 
+            "args": ["test"],
+            "group": "test",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$gradle"],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "gradle: build all modules",
+            "type": "shell",
+            "command": "./gradlew",
+            "args": [":FIRO_TSEnsembles:build", ":ensemble-dss:build", ":ensemble-view:build", ":firoplugin:build"],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$gradle"]
+        },
+        {
+            "label": "gradle: run EnsembleUtility",
+            "type": "shell",
+            "command": "./gradlew",
+            "args": [":FIRO_TSEnsembles:run", "--args=\"c:/temp/hefs_cache 30 1 src/test/resources/database/ResSim.db\""],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$gradle"],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new"
+            }
+        }
+    ]
+}

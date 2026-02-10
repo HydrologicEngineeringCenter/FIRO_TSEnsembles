@@ -48,7 +48,6 @@ ensemble-dss/build/**
 FIRO_TSEnsembles/delete_me3321028155427948925.sqlite
 FIRO_TSEnsembles/delete_me6470038471526261174.sqlite
 FIRO_TSEnsembles/delete_me5124707431396663684.sqlite
-.vscode/tasks.json
-.vscode/launch.json
-.vscode/settings.json
+
 gradle.properties
+.vscode/local.settings.json
