@@ -13,7 +13,9 @@ import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static hec.ensemble.stats.Statistics.*;
@@ -23,12 +25,20 @@ public class TestDssDatabase {
 
     private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(hec.dss.ensemble.TestDssDatabase.class.getName());
 
-    private String getTestDataDirectory() {
-        String path = new java.io.File(getClass().getResource(
-                "/hefs_cache/2013110312_Kanektok_hefs_csv_hourly.csv").getFile()).toString();
+    protected String getTestCsvFileName(String watershedName, ZonedDateTime issueDate, String suffix)
+    {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHH");
+        String issueDateString = formatter.format(issueDate);
+        String path = new File(getClass().getResource(
+                "/hefs_cache/"+ watershedName + "/" + issueDateString + "_" + watershedName + suffix + ".csv").getFile()).toString();
+        return path;
+    }
+    protected String getCacheDir(String watershedName, ZonedDateTime issueDate, String suffix)
+    {
 
-        java.io.File f = new java.io.File(path);
-        return f.getParent();
+        File f = new File(getTestCsvFileName(watershedName, issueDate, suffix));
+        String rval =  f.getParent();
+        return rval;
     }
     /**
      * Creates a DSS file with ensemble time series data
@@ -39,12 +49,16 @@ public class TestDssDatabase {
      */
     private void createDssFileFromCsv(String dssFilename, int numberOfDates) throws Exception {
 
-        String cacheDir = getTestDataDirectory();
-        java.time.ZonedDateTime issueDate1 = java.time.ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, java.time.ZoneId.of("GMT"));
-        java.time.ZonedDateTime issueDate2 = issueDate1.plusDays(numberOfDates-1);
+        ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, java.time.ZoneId.of("GMT"));
+        ZonedDateTime issueDate2 = issueDate1.plusDays(numberOfDates-1);
 
-        hec.ensemble.CsvEnsembleReader csvReader = new hec.ensemble.CsvEnsembleReader(cacheDir);
-        hec.ensemble.EnsembleTimeSeries[] ets = csvReader.Read("Kanektok", issueDate1, issueDate2);
+        String watershedName = "Kanektok";
+        String suffix = "_hefs_csv_hourly";
+        String resourceDir = getCacheDir(watershedName, issueDate1, suffix);
+
+        hec.ensemble.CsvEnsembleReader csvReader = new hec.ensemble.CsvEnsembleReader(resourceDir, suffix);
+
+        hec.ensemble.EnsembleTimeSeries[] ets = csvReader.Read(watershedName, issueDate1, issueDate2);
 
         LOGGER.info(System.getenv("java.library.path"));
 
@@ -77,7 +91,7 @@ public class TestDssDatabase {
 
         assertEquals(23,recordIdentifiers.size());
         RecordIdentifier id  = new hec.RecordIdentifier("Kanektok.BCAC1","flow");
-        List<java.time.ZonedDateTime> times = db.getEnsembleIssueDates(id);
+        List<ZonedDateTime> times = db.getEnsembleIssueDates(id);
         assertEquals(3,times.size());
 
         Ensemble e = db.getEnsemble(id,times.get(1));
@@ -154,7 +168,7 @@ public class TestDssDatabase {
         MultiComputable cumulativeComputable = new CumulativeComputable();
         Computable cumulative = new NDayMultiComputable(cumulativeComputable, new float[]{2.0f});
         Computable percentileCompute = new PercentilesComputable(0.95f);
-        SingleComputable twoStep = new TwoStepComputable(cumulative,percentileCompute,false);
+        SingleValueComputable twoStep = new TwoStepComputableSingleMetricValue(cumulative,percentileCompute,false);
         MetricCollectionTimeSeries output = ets.computeSingleValueSummary(twoStep);
         db.write(output);
 

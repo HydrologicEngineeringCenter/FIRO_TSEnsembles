@@ -13,19 +13,21 @@ public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>, 
 
     private RecordIdentifier timeseriesID;
     private String units;
+    private String version;
     private MetricTypes metricType;
     private TreeMap<ZonedDateTime,MetricCollection> items;
 
 
 
-    public MetricCollectionTimeSeries(RecordIdentifier timeseriesID, String units, MetricTypes metricType)
+    public MetricCollectionTimeSeries(RecordIdentifier timeseriesID, String version, String units, MetricTypes metricType)
     {
-        init(timeseriesID,units,metricType);
+        init(timeseriesID,units, version, metricType);
     }
 
-    private void init(RecordIdentifier timeseriesID, String units, MetricTypes metricType) {
+    private void init(RecordIdentifier timeseriesID, String units, String version, MetricTypes metricType) {
         this.timeseriesID = timeseriesID;
         this.units = units;
+        this.version = version;
         this.metricType = metricType;
         items = new TreeMap<>();
     }
@@ -83,6 +85,9 @@ public class MetricCollectionTimeSeries implements  Iterable<MetricCollection>, 
         return units;
     }
 
+    public String getVersion() {
+        return version;
+    }
     public MetricTypes type() {
         return metricType;
     }

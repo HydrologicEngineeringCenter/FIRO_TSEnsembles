@@ -3,8 +3,10 @@ import hec.SqliteDatabase;
 import hec.VersionIdentifier;
 import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
+import hec.ensemble.Logger;
 import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
+import hec.metrics.MetricTypes;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -15,8 +17,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SqliteDatabaseTest {
     private File get_test_file(String test_database_resource ) throws Exception{
@@ -48,7 +49,7 @@ public class SqliteDatabaseTest {
         MultiComputable cumulativeComputable = new CumulativeComputable();
         Computable cumulative = new NDayMultiComputable(cumulativeComputable, new float[]{2});
         Computable percentileCompute = new PercentilesComputable(0.95f);
-        SingleComputable twoStep = new TwoStepComputable(cumulative,percentileCompute,false);
+        SingleValueComputable twoStep = new TwoStepComputableSingleMetricValue(cumulative,percentileCompute,false);
         MetricCollectionTimeSeries output = ets.computeSingleValueSummary(twoStep);
         db.write(output);
 
@@ -58,6 +59,7 @@ public class SqliteDatabaseTest {
             MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(mid, stats.get(0));
             assertEquals(3, mcts.getIssueDates().size());
         }
+        db.close();
     }
 
     @Test
@@ -72,6 +74,7 @@ public class SqliteDatabaseTest {
         db.deleteAllEnsemblesFromDB();
         Integer testVal = db.getEnsembleTimeSeriesIDs().size();
         assertEquals(0, testVal);
+        db.close();
     }
 
     @Test
@@ -90,6 +93,23 @@ public class SqliteDatabaseTest {
         Ensemble e2 = ets2.getEnsemble(date);
         Float firstVal2 = e2.getValues()[0][0];
         assertEquals(123.0f, firstVal2 );
+        db.close();
+    }
+
+    @Test
+    public void testVersionMetricRead() throws Exception {
+        try {
+            String sourceData = "src/test/resources/database/versionTest.db";
+            SqliteDatabase db = new SqliteDatabase(sourceData, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
+            VersionIdentifier id = new hec.VersionIdentifier("american.FOLSOM", "flow", "test2");
+            MetricCollectionTimeSeries mcts = db.getMetricCollectionTimeSeries(id, "CUMULATIVE(1.0DAY)");
+            assertEquals(MetricTypes.ARRAY_OF_ARRAY, mcts.getMetricType());
+            assertEquals("test2", mcts.getVersion());
+            assertEquals("ACRE-FT", mcts.getUnits());
+        } catch (Exception e) {
+            Logger.logError(e);
+            fail();
+        }
     }
 
     @Test
@@ -119,6 +139,8 @@ public class SqliteDatabaseTest {
         // get the whole list without naming a stat
         List<MetricCollectionTimeSeries> mctsList = db.getMetricCollectionTimeSeries(recID);
         assertEquals(24, mctsList.size());
+
+        db.close();
     }
 
     private static void copyFileUsingStream(File source, File dest) throws IOException {

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static hec.ensemble.stats.Statistics.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,6 +20,8 @@ class EnsembleTimeSeriesTest {
     private static String _fn = TestingPaths.instance.getTempDir()+"/importCsvToDatabaseMutable.db";
     private static SqliteDatabase _db = null;
     private static File f;
+
+
     @BeforeAll
     static void prepareNewDatabase() throws Exception {
         //ensure no previous test db exists.
@@ -31,12 +34,15 @@ class EnsembleTimeSeriesTest {
         }
 
         //identify resource cache for csv files, and set up a 3 day time window
-        String cacheDir = TestingPaths.instance.getCacheDir();
         ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
         ZonedDateTime issueDate2 = issueDate1.plusDays(3);
+        String watershedName = "Kanektok";
+        String suffix = "_hefs_csv_hourly";
+        String cacheDir = TestingPaths.instance.getCacheDir(watershedName, issueDate1, suffix);
+
         //read from resource cache
-        CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir);
-        EnsembleTimeSeries[] ets = csvReader.Read("Kanektok", issueDate1, issueDate2);
+        CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir, suffix);
+        EnsembleTimeSeries[] ets = csvReader.Read(watershedName, issueDate1, issueDate2);
         SqliteDatabase db = new SqliteDatabase(_fn, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
         //write ensemble time series to database for use in other tests.
         db.write(ets);
@@ -168,7 +174,7 @@ class EnsembleTimeSeriesTest {
             //get an ensemble time series
             EnsembleTimeSeries ets = _db.getEnsembleTimeSeries(tsid);
             //create a computable statistic
-            SingleComputable test = new MaxOfMaximumsComputable();
+            SingleValueComputable test = new MaxOfMaximumsValueComputable();
             //compute the statistics for the entire ensemble time series
             MetricCollectionTimeSeries output = ets.computeSingleValueSummary(test);
             //verify at the data is properly computing for a set of known values
