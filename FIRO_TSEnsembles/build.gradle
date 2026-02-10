@@ -42,6 +42,8 @@ dependencies {
 
 test {
      useJUnitPlatform()
+     // Ensure tests always run from the project directory
+     workingDir = projectDir
     if (OperatingSystem.current().isWindows()) {
         jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
      }

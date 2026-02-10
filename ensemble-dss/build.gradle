@@ -32,7 +32,11 @@ task copyTestResources(type: Copy) {
 }
 
 test {
-    dependsOn copyTestResources
+    dependsOn copyTestResources, copyNatives
+    // Ensure tests always run from the project directory
+    workingDir = projectDir
+    useJUnitPlatform()
+    jvmArgs = ["-Djava.library.path=${buildDir}/x64"]
 }
 configurations {
     windows_x64
@@ -58,10 +62,6 @@ dependencies {
     }
 }
 
-test {
-    useJUnitPlatform()
-    jvmArgs = ["-Djava.library.path=${buildDir}/x64"]
-}
 dependencies {
     windows_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-win-x86_64@zip'
     linux_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-linux-x86_64@zip'
