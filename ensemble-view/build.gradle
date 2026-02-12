@@ -47,6 +47,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+run {
+    jvmArgs = ["-Djava.library.path=${buildDir}/../../ensemble-dss/build/x64"]
+}
+
 jar {
     manifest {
         attributes 'Main-Class' : 'hec.ensembleview.EnsembleViewer'
