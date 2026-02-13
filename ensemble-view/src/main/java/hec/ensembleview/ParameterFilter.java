@@ -10,6 +10,8 @@ public class ParameterFilter {
             case "FLOW":
             case "MOISTURE DEFICIT":
             case "SWE":
+            case "ELEV":
+            case "ELEVATION":
             case "PRECIP-INC":
             case "PRECIP-LWASS":
             case "TEMPERATURE-AIR":
