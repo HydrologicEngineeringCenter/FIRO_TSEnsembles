@@ -16,14 +16,14 @@ jobs:
       with:
         fetch-depth: 0
     - name: Set up JDK 
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
-        java-version: '8'
-        distribution: 'adopt'
+        java-version: '21'
+        distribution: 'temurin'
     - name: Build with Gradle
       run: cmd /r gradlew.bat build
     - name: create UI distribution
-      run: gradle distZip
+      run: cmd /r gradlew.bat distZip
     - name: Archive jars 
       uses: actions/upload-artifact@v4.4.0
       with:

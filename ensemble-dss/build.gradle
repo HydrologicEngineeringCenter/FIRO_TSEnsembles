@@ -15,9 +15,12 @@ plugins {
     id 'maven-publish'
     id "com.palantir.git-version" version "3.0.0"
 }
-dependencies {
-    implementation project(":FIRO_TSEnsembles");
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
+
 configurations {
     windows_x64
     linux_x64
@@ -31,8 +34,11 @@ repositories {
         url = 'https://www.hec.usace.army.mil/nexus/repository/maven-public'
     }
 }
+
 dependencies {
     implementation project(":FIRO_TSEnsembles")
+    windows_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-win-x86_64@zip'
+    linux_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-linux-x86_64@zip'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
     implementation ('mil.army.usace.hec:hec-monolith:3.3.23'){
@@ -42,14 +48,12 @@ dependencies {
     }
 }
 
-test {
-    useJUnitPlatform()
-    jvmArgs = ["-Djava.library.path=${buildDir}/x64"]
+// Copy test resources from FIRO_TSEnsembles to avoid duplication
+task copyTestResources(type: Copy) {
+    from project(":FIRO_TSEnsembles").file("src/test/resources/hefs_cache")
+    into file("$buildDir/resources/test/hefs_cache")
 }
-dependencies {
-    windows_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-win-x86_64@zip'
-    linux_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-linux-x86_64@zip'
-}
+
 
 task copyNatives(type: Copy){
     if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
@@ -65,6 +69,17 @@ task copyNatives(type: Copy){
         }
     }
 }
+
+test {
+    dependsOn copyTestResources, copyNatives
+    workingDir = projectDir
+    useJUnitPlatform()
+    jvmArgs = ["-Djava.library.path=${buildDir}/x64"]
+}
+
+
+
+
 jar {
     dependsOn copyNatives
 }

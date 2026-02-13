@@ -1,0 +1,55 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug EnsembleUtility",
+            "request": "launch",
+            "mainClass": "hec.ensemble.EnsembleUtility",
+            "projectName": "FIRO_TSEnsembles",
+            "args": ["c:/temp/hefs_cache", "30", "1", "src/test/resources/database/ResSim.db"],
+            "vmArgs": ["-Djava.io.tmpdir=c:/temp"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "classPaths": ["${workspaceFolder}/FIRO_TSEnsembles/build/classes/java/main", 
+                           "${workspaceFolder}/FIRO_TSEnsembles/build/classes/java/test"]
+        },
+        {
+            "type": "java",
+            "name": "Debug EnsembleViewer",
+            "request": "launch", 
+            "mainClass": "hec.ensembleview.EnsembleViewer",
+            "projectName": "ensemble-view",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "classPaths": ["${workspaceFolder}/ensemble-view/build/classes/java/main"]
+        },
+        {
+            "type": "java",
+            "name": "Debug EnsemblePickerDemo",
+            "request": "launch",
+            "mainClass": "hec.ensemble.ui.EnsemblePickerDemo", 
+            "projectName": "FIRO_TSEnsembles",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "classPaths": ["${workspaceFolder}/FIRO_TSEnsembles/build/classes/java/main"]
+        },
+        {
+            "type": "java",
+            "name": "Debug FIRO Plugin",
+            "request": "launch",
+            "mainClass": "hec.firoplugin.TsEnsembles_extGVplugin",
+            "projectName": "firoplugin", 
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "classPaths": ["${workspaceFolder}/firoplugin/build/classes/java/main"]
+        },
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}",
+            "console": "integratedTerminal"
+        }
+    ]
+}
