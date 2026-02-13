@@ -21,8 +21,10 @@ repositories {
     mavenCentral()
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 dependencies {
     implementation 'org.apache.directory.studio:org.apache.commons.lang:2.6'
@@ -40,14 +42,11 @@ dependencies {
 
 test {
      useJUnitPlatform()
+     // Ensure tests always run from the project directory
+     workingDir = projectDir
     if (OperatingSystem.current().isWindows()) {
         jvmArgs = ["-Djava.io.tmpdir=c:/temp"]
      }
-}
-
-jar {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 task showGit () {
@@ -98,4 +97,3 @@ publishing {
 
 publish.dependsOn(build)
 build {finalizedBy javadoc }
-
