@@ -81,7 +81,7 @@ public final class Serializer {
                         ele.addContent(mcomputableEle);
                         break;
                     case SINGLECOMPUTABLE:
-                        SingleComputable scomputable = (SingleComputable) objectFieldValue;
+                        SingleValueComputable scomputable = (SingleValueComputable) objectFieldValue;
                         Element scomputableEle = Serializer.toXML(scomputable); //recursive call
                         scomputableEle.setAttribute(FIELDNAMEATTRIBUTE, fieldName);
                         ele.addContent(scomputableEle);
@@ -187,7 +187,7 @@ public final class Serializer {
                             Element childElement = (Element)child;
                             String elementFieldName = childElement.getAttributeValue(FIELDNAMEATTRIBUTE);
                             if(elementFieldName.equals(fieldName)){
-                                SingleComputable computer = Serializer.fromXML(childElement);
+                                SingleValueComputable computer = Serializer.fromXML(childElement);
                                 field.set(computable, computer);
                             }
                         }

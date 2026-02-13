@@ -2,10 +2,7 @@ package hec.ensemble;
 
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
-import hec.ensemble.stats.Configurable;
-import hec.ensemble.stats.CumulativeComputable;
-import hec.ensemble.stats.MultiComputable;
-import hec.ensemble.stats.NDayMultiComputable;
+import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -45,6 +42,60 @@ class MetricCollectionTimeSeriesUnitsTest {
         //write ensemble time series to database for use in other tests.
         db.write(ets);
         _db =  db;
+    }
+
+
+    @Test
+    public void testMetricCollectionAsTimeSeries_TwoStep() throws Exception {
+
+        try {
+
+            float[] nDayDuration = new float[]{2.0f};
+            float targetPercentile = (float) 0.95;
+            ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+            RecordIdentifier id = new hec.RecordIdentifier("Kanektok.BCAC1", "flow");
+            EnsembleTimeSeries ets = _db.getEnsembleTimeSeries(id);
+
+            //Step One
+            MultiComputable cumulativeComputable = new CumulativeComputable();
+            Computable cumulative = new NDayMultiComputable(cumulativeComputable, nDayDuration);
+
+            //Step Two
+            ComputableIndex percentileIndexCompute = new PercentileIndexComputable(targetPercentile);
+            SingleTimeSeriesComputable twoStep = new TwoStepComputableSingleMetricTimeSeries(cumulative, percentileIndexCompute);
+            MetricCollectionTimeSeries output = ets.computeSingleValueSummaryTimeSeries(twoStep);
+            _db.write(output);
+
+            //Get N-Day volumes for the first issue ensemble
+            Ensemble e = ets.getEnsemble(issueDate1);
+            Computable test = new NDayMultiComputable(new CumulativeComputable(), nDayDuration);
+            float[] checkEnsembleVolumes = e.iterateForTracesAcrossTime(test);
+
+            //find the exact percentile volume
+            PercentilesComputable checkEnsemblePercentileVolume = new PercentilesComputable(targetPercentile);
+            float[] checkExactPercentile = checkEnsemblePercentileVolume.multiCompute(checkEnsembleVolumes);
+
+            //Convert first output hydrograph volume
+            MultiComputable testOutput = new NDayMultiComputable(new CumulativeComputable(), nDayDuration);
+            Configurable c = (Configurable) testOutput;
+            c.configure(new EnsembleConfiguration(null, null, Duration.ofHours(1), ""));
+            float[] value0 = output.iterator().next().getValues()[0];
+            float[] results = testOutput.multiCompute(value0);
+
+            // make sure metric collection is closest to what we want
+            int startIndex = (int) (targetPercentile * (checkEnsembleVolumes.length - 1));
+            int endIndex = startIndex + 1;
+
+            if (Math.abs(checkExactPercentile[0] - checkEnsembleVolumes[startIndex]) < Math.abs(checkExactPercentile[0] - checkEnsembleVolumes[endIndex])) {
+                assertEquals(results[0], checkEnsembleVolumes[startIndex]);
+            } else {
+                assertEquals(results[0], checkEnsembleVolumes[endIndex]);
+            }
+
+        } catch (Exception e) {
+            Logger.logError(e);
+            fail();
+        }
     }
 
     @Test
