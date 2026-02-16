@@ -154,7 +154,7 @@ public class TestDssDatabase {
         MultiComputable cumulativeComputable = new CumulativeComputable();
         Computable cumulative = new NDayMultiComputable(cumulativeComputable, new float[]{2.0f});
         Computable percentileCompute = new PercentilesComputable(0.95f);
-        SingleComputable twoStep = new TwoStepComputable(cumulative,percentileCompute,false);
+        SingleValueComputable twoStep = new TwoStepComputableSingleMetricValue(cumulative,percentileCompute,false);
         MetricCollectionTimeSeries output = ets.computeSingleValueSummary(twoStep);
         db.write(output);
 

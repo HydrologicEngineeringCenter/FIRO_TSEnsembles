@@ -1,6 +1,6 @@
 package hec.ensemble.stats;
 
-public class TwoStepComputable implements SingleComputable, Configurable {
+public class TwoStepComputableSingleMetricValue implements SingleValueComputable, Configurable {
 
     private Computable _stepOne;
     private Computable _stepTwo;
@@ -13,14 +13,14 @@ public class TwoStepComputable implements SingleComputable, Configurable {
      * Compute across time outputs a single value per ensemble.  Compute across ensembles outputs a single timeseries
      */
 
-    public TwoStepComputable(Computable stepOne, Computable stepTwo, boolean computeAcrossEnsembles) {
+    public TwoStepComputableSingleMetricValue(Computable stepOne, Computable stepTwo, boolean computeAcrossEnsembles) {
         _stepOne = stepOne;
         _stepTwo = stepTwo;
         _computeAcrossEnsembles = computeAcrossEnsembles;
     }
 
     //necessary for reflection.
-    public TwoStepComputable(){ }
+    public TwoStepComputableSingleMetricValue(){ }
 
     @Override
     public float compute(float[][] values) {
