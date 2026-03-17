@@ -25,7 +25,7 @@ public class TestDssDatabase {
 
     private String getTestDataDirectory() {
         String path = new java.io.File(getClass().getResource(
-                "/hefs_cache/2013110312_Kanektok_hefs_csv_hourly.csv").getFile()).toString();
+                "/hefs_cache/Kanektok/2013110312_Kanektok_hefs_csv_hourly.csv").getFile()).toString();
 
         java.io.File f = new java.io.File(path);
         return f.getParent();
@@ -43,7 +43,8 @@ public class TestDssDatabase {
         java.time.ZonedDateTime issueDate1 = java.time.ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, java.time.ZoneId.of("GMT"));
         java.time.ZonedDateTime issueDate2 = issueDate1.plusDays(numberOfDates-1);
 
-        hec.ensemble.CsvEnsembleReader csvReader = new hec.ensemble.CsvEnsembleReader(cacheDir);
+        hec.ensemble.CsvEnsembleReader csvReader = new hec.ensemble.CsvEnsembleReader(cacheDir, "_hefs_csv_hourly");
+
         hec.ensemble.EnsembleTimeSeries[] ets = csvReader.Read("Kanektok", issueDate1, issueDate2);
 
         LOGGER.info(System.getenv("java.library.path"));

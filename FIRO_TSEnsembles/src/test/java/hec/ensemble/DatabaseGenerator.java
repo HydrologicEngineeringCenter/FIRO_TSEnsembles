@@ -16,12 +16,14 @@ public class DatabaseGenerator {
      */
     static public void createTestDatabase(String filename, int numberOfDates) throws Exception {
 
-        String cacheDir = TestingPaths.instance.getCacheDir();
+        String watershedName = "Kanektok";
+        String suffix = "_hefs_csv_hourly";
         ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
         ZonedDateTime issueDate2 = issueDate1.plusDays(numberOfDates);
 
-        CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir);
-        EnsembleTimeSeries[] ets = csvReader.Read("Kanektok", issueDate1, issueDate2);
+        String cacheDir = TestingPaths.instance.getCacheDir(watershedName, issueDate1, suffix);
+        CsvEnsembleReader csvReader = new CsvEnsembleReader(cacheDir, suffix);
+        EnsembleTimeSeries[] ets = csvReader.Read(watershedName, issueDate1, issueDate2);
         EnsembleDatabase db = new SqliteDatabase(filename, SqliteDatabase.CREATION_MODE.CREATE_NEW);
 
         db.write(ets);
