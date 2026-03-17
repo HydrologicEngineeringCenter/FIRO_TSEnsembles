@@ -23,13 +23,22 @@ public class CsvEnsembleReader {
 
     /**
      *
-     * @param path path to csv file cache (example C:\Temp\hefs_cache)
+     * @param path path to csv file cache (example src/test/resources/hefs_cache)
+     * @param suffix suffix of csv file name not including .csv (example _hefs_csv_hourly)
      */
     public CsvEnsembleReader(String path, String suffix) {
         this.pathToCSV = path;
         this.suffix = suffix;
     }
 
+    /**
+     * Constructor with default suffix for backward compatibility
+     * @param path path to csv file cache (example src/test/resources/hefs_cache)
+     */
+    public CsvEnsembleReader(String path) {
+        this.pathToCSV = path;
+        this.suffix = "_hefs_csv_hourly";
+    }
 
     /**
      * Reads ensembles for all locations in the watershed
