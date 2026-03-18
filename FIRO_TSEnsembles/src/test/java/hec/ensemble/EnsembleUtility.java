@@ -48,7 +48,7 @@ public class EnsembleUtility {
         ZonedDateTime issueDate1 = ZonedDateTime.of(2015, 1, 1, 12, 0, 0, 0, ZoneId.of("GMT"));
         ZonedDateTime issueDate2 = issueDate1.plusDays(numberOfDates);
 
-        CsvEnsembleReader csvReader = new CsvEnsembleReader(hefs_dir);
+        CsvEnsembleReader csvReader = new CsvEnsembleReader(hefs_dir, "_hefs_csv_hourly");
         EnsembleTimeSeries[] ets = csvReader.Read("RussianNapa", issueDate1, issueDate2);
         EnsembleDatabase db = new SqliteDatabase(filename, SqliteDatabase.CREATION_MODE.CREATE_NEW);
         ZonedDateTime startDateTime = ZonedDateTime.of(1996, 12, 24, 12, 0, 0, 0, ZoneId.of("GMT"));
