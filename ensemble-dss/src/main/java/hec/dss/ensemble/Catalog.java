@@ -64,7 +64,8 @@ public class Catalog {
     private void addMetric(DSSPathname path) {
         String location = path.bPart();
         String parameter = path.cPart();
-        RecordIdentifier rid = new RecordIdentifier(location, parameter);
+        String version = extractVersionName(path.fPart());
+        RecordIdentifier rid = new RecordIdentifier(location, parameter, version);
 
         // Add record identifier if it doesn't exist
         if (!metricRids.containsKey(rid)) {
@@ -86,7 +87,8 @@ public class Catalog {
     private void addCollection(DSSPathname path) {
         String location = path.bPart();
         String parameter = path.cPart();
-        RecordIdentifier rid = new RecordIdentifier(location, parameter);
+        String version = extractVersionName(path.fPart());
+        RecordIdentifier rid = new RecordIdentifier(location, parameter, version);
 
         // Add record identifier if it doesn't exist
         if (!rids.containsKey(rid)) {
@@ -141,6 +143,30 @@ public class Catalog {
         }
 
         return rval;
+    }
+
+    /**
+     * Extracts the version name from the F-Part of a DSS path.
+     * The F-Part contains pipe-separated segments such as "C:000001|HEFS" or
+     * "C:000007|T:20131103-1200|V:20131103-120000|".
+     * Tagged segments (containing ':') like C:, T:, V: are skipped.
+     * The first untagged segment is returned as the version name.
+     *
+     * @param fPart the F-Part string from a DSS path
+     * @return the version name, or empty string if none found
+     */
+    private String extractVersionName(String fPart) {
+        if (fPart == null || fPart.isEmpty()) {
+            return "";
+        }
+        String[] segments = fPart.split("\\|");
+        for (String segment : segments) {
+            String trimmed = segment.trim();
+            if (!trimmed.isEmpty() && !trimmed.contains(":")) {
+                return trimmed;
+            }
+        }
+        return "";
     }
 
     private ZonedDateTime getStartDateTime(DSSPathname path) {
