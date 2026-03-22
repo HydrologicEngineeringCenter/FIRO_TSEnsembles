@@ -55,14 +55,14 @@ public class StatComputationHelper {
         }
     }
 
-    public MetricCollectionTimeSeries computeTwoStepComputable(Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
+    public MetricCollectionTimeSeries computeTwoStepComputable(EnsembleTimeSeries ets, Statistics stepOne, float[] stepOneValues, Statistics stepTwo, float[] stepTwoValues, boolean computeAcrossEnsembles) {
         SingleComputable compute;
         if(stepOne == Statistics.CUMULATIVE) {
             compute = new TwoStepComputable(new NDayMultiComputable(new CumulativeComputable(), stepOneValues), getComputable(stepTwo, stepTwoValues), false);
         } else {
             compute = new TwoStepComputable(getComputable(stepOne, stepOneValues), getComputable(stepTwo, stepTwoValues), computeAcrossEnsembles);
         }
-        return databaseHandlerService.getEnsembleTimeSeries().computeSingleValueSummary(compute);
+        return ets.computeSingleValueSummary(compute);
     }
 
     public static Computable getComputable(Statistics stat, float[] values) {
@@ -148,16 +148,12 @@ public class StatComputationHelper {
     public void convertToCumulative(EnsembleTimeSeries ets) {
         MetricCollectionTimeSeries mct = computeStatFromCumulativeComputable(ets);
 
-        float[][] cumulativeEnsembles= mct.getMetricCollection(databaseHandlerService.getDbHandlerZdt()).getValues();
-        ZonedDateTime issueDate = ets.getEnsemble(databaseHandlerService.getDbHandlerZdt()).getIssueDate();
-        ZonedDateTime startDate = ets.getEnsemble(databaseHandlerService.getDbHandlerZdt()).getStartDateTime();
-        Duration duration = ets.getEnsemble(databaseHandlerService.getDbHandlerZdt()).getInterval();
-        String dataType = ets.getDataType();
-        String version = ets.getVersion();
+        Ensemble sourceEnsemble = ets.getEnsemble(databaseHandlerService.getDbHandlerZdt());
+        float[][] cumulativeEnsembles = mct.getMetricCollection(databaseHandlerService.getDbHandlerZdt()).getValues();
         String units = mct.getUnits();
 
-        EnsembleTimeSeries cumulativeEts = new EnsembleTimeSeries(databaseHandlerService.getDbHandlerRid(), units, dataType,version);
-        cumulativeEts.addEnsemble(new Ensemble(issueDate, cumulativeEnsembles, startDate, duration, units));
+        EnsembleTimeSeries cumulativeEts = new EnsembleTimeSeries(databaseHandlerService.getDbHandlerRid(), units, ets.getDataType(), ets.getVersion());
+        cumulativeEts.addEnsemble(new Ensemble(sourceEnsemble.getIssueDate(), cumulativeEnsembles, sourceEnsemble.getStartDateTime(), sourceEnsemble.getInterval(), units));
         databaseHandlerService.setCumulativeEnsembleTimeSeries(cumulativeEts);
     }
 

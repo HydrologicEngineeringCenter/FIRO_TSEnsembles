@@ -6,11 +6,13 @@ import hec.ensembleview.*;
 import hec.ensembleview.charts.ChartType;
 import hec.ensembleview.mappings.StatisticsMap;
 import hec.ensembleview.viewpanels.*;
+import hec.metrics.MetricCollectionTimeSeries;
 
 import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -55,12 +57,13 @@ public class ComputePanelController implements PropertyChangeListener {
 
             @Override
             public void initiateTimeSeriesCompute(ChartType chartType) {
+                if (isCumulative) {
+                    ets = databaseHandlerService.getCumulativeEnsembleTimeSeries();
+                } else {
+                    ets = databaseHandlerService.getEnsembleTimeSeries();
+                }
+                removeUncheckedMetrics(statisticsMap.getTimeSeriesMapList());
                 for (String stat : statisticsMap.getTimeSeriesMapList().keySet()) {
-                    if (isCumulative) {
-                        ets = databaseHandlerService.getCumulativeEnsembleTimeSeries();
-                    } else {
-                        ets = databaseHandlerService.getEnsembleTimeSeries();
-                    }
                     if (Boolean.TRUE.equals(statisticsMap.getTimeSeriesMapList().get(stat))) {
                         computeMetric(ets, stat, chartType);
                     }
@@ -81,6 +84,7 @@ public class ComputePanelController implements PropertyChangeListener {
             @Override
             public void initiateEnsembleCompute(ChartType chartType) {
                 ets = databaseHandlerService.getEnsembleTimeSeries();
+                removeUncheckedMetrics(statisticsMap.getEnsembleSeriesMapList());
                 for (String stat : statisticsMap.getEnsembleSeriesMapList().keySet()) {
                     if (isProbability) {
                         if (Boolean.TRUE.equals(statisticsMap.getEnsembleSeriesMapList().get(stat))) {
@@ -100,12 +104,13 @@ public class ComputePanelController implements PropertyChangeListener {
         ((StatTimeSeriesComputePanelView)computePanelView).setTimeListener(new TimeSeriesComputePanelListener() {
             @Override
             public void initiateTimeSeriesCompute() {
+                if (isCumulative) {
+                    ets = databaseHandlerService.getCumulativeEnsembleTimeSeries();
+                } else {
+                    ets = databaseHandlerService.getEnsembleTimeSeries();
+                }
+                removeUncheckedMetrics(statisticsMap.getTimeSeriesMapList());
                 for (String stat : statisticsMap.getTimeSeriesMapList().keySet()) {
-                    if (isCumulative) {
-                        ets = databaseHandlerService.getCumulativeEnsembleTimeSeries();
-                    } else {
-                        ets = databaseHandlerService.getEnsembleTimeSeries();
-                    }
                     if (Boolean.TRUE.equals(statisticsMap.getTimeSeriesMapList().get(stat))) {
                         computeMetric(ets, stat, ChartType.TIMEPLOT);
                     }
@@ -145,6 +150,7 @@ public class ComputePanelController implements PropertyChangeListener {
             @Override
             public void initiateEnsembleCompute() {
                 ets = databaseHandlerService.getEnsembleTimeSeries();
+                removeUncheckedMetrics(statisticsMap.getEnsembleSeriesMapList());
                 for (String stat : statisticsMap.getEnsembleSeriesMapList().keySet()) {
                     boolean isStatSelected = Boolean.TRUE.equals(statisticsMap.getEnsembleSeriesMapList().get(stat));
                     if (isProbability && isStatSelected) {
@@ -193,6 +199,26 @@ public class ComputePanelController implements PropertyChangeListener {
     private void computeProbability(EnsembleTimeSeries ets, String stat) {
         computeMetric(ets, stat, ChartType.SCATTERPLOT);
         statComputationHelper.computeStatFromProbabilityComputable();
+    }
+
+    /**
+     * Removes metrics from the cache that are no longer selected in the statistics map.
+     */
+    private void removeUncheckedMetrics(Map<String, Boolean> statMap) {
+        Map<Statistics, MetricCollectionTimeSeries> metricMap = databaseHandlerService.getMetricCollectionTimeSeriesMap();
+        List<Statistics> toRemove = new java.util.ArrayList<>();
+        for (Statistics stat : metricMap.keySet()) {
+            // Check each stat map entry to see if it maps to this Statistics enum
+            for (Map.Entry<String, Boolean> entry : statMap.entrySet()) {
+                if (Boolean.FALSE.equals(entry.getValue()) && Statistics.getStatName(entry.getKey()) == stat) {
+                    toRemove.add(stat);
+                    break;
+                }
+            }
+        }
+        for (Statistics stat : toRemove) {
+            metricMap.remove(stat);
+        }
     }
 
     private void computeMetric(EnsembleTimeSeries ets, String statName, ChartType chartType) {

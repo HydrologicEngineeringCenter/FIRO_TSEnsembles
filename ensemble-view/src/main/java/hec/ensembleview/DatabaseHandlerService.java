@@ -12,22 +12,22 @@ import hec.metrics.MetricCollectionTimeSeries;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.time.ZonedDateTime;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
-public class DatabaseHandlerService {  // handles ensemble and metric database and gets ensemble and metric time series
+/**
+ * Central service for managing database access, current selection state (rid/zdt),
+ * and property change events. Delegates data caching to EnsembleDataCache and
+ * MetricResultCache.
+ */
+public class DatabaseHandlerService {
     private static final DatabaseHandlerService instance = new DatabaseHandlerService();
     private EnsembleDatabase ensembleDatabase;
-//    private MetricDatabase metricDatabase;  - for viewing metrics in database
-//    private MetricCollectionTimeSeries metricCollectionTimeSeries; - for viewing metrics in database
-    private EnsembleTimeSeries cumulativeEnsembleTimeSeries;
-    private final EnumMap<Statistics, MetricCollectionTimeSeries> metricCollectionTimeSeriesMap = new EnumMap<>(Statistics.class);
-    private MetricCollectionTimeSeries residentMetricCollectionTimeSeries;
-    private final Map<String, Map<Float, Float>> ensembleProbabilityList = new HashMap<>();
     private RecordIdentifier rid;
     private ZonedDateTime zdt;
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
+
+    private final EnsembleDataCache ensembleDataCache = new EnsembleDataCache();
+    private final MetricResultCache metricResultCache = new MetricResultCache();
 
     private DatabaseHandlerService() {
     }
@@ -36,38 +36,46 @@ public class DatabaseHandlerService {  // handles ensemble and metric database a
         return instance;
     }
 
-    public void addDatabaseChangeListener(PropertyChangeListener  listener) {
+    public void addDatabaseChangeListener(PropertyChangeListener listener) {
         support.addPropertyChangeListener(listener);
     }
 
+    // --- Database ---
+
     public void setDatabase(SqliteDatabase sqliteDatabase) {
         this.ensembleDatabase = sqliteDatabase;
-//        this.metricDatabase = sqliteDatabase; - for viewing metrics in database
+        ensembleDataCache.invalidate();
+        metricResultCache.invalidate();
     }
 
     public void setDatabase(DssDatabase dssDatabase) {
         this.ensembleDatabase = dssDatabase;
-//        this.metricDatabase = dssDatabase; - for viewing metrics in database
+        ensembleDataCache.invalidate();
+        metricResultCache.invalidate();
     }
+
+    public EnsembleDatabase getEnsembleDatabase() {
+        return ensembleDatabase;
+    }
+
+    // --- Selection state ---
 
     public void setDbHandlerRecordIdentifier(RecordIdentifier rid) {
         RecordIdentifier currentRid = this.rid;
-        if(currentRid != rid) {
+        if (currentRid != rid) {
             this.rid = rid;
+            ensembleDataCache.invalidate();
+            metricResultCache.invalidate();
             support.firePropertyChange("dbChange", false, true);
         }
     }
 
     public void setDbHandlerZonedDateTime(ZonedDateTime zdt) {
         ZonedDateTime currentZdt = this.zdt;
-        if(currentZdt != zdt) {
+        if (currentZdt != zdt) {
             this.zdt = zdt;
             support.firePropertyChange("dbChange", false, true);
         }
-    }
-
-    public EnsembleDatabase getEnsembleDatabase() {
-        return ensembleDatabase;
     }
 
     public RecordIdentifier getDbHandlerRid() {
@@ -78,55 +86,61 @@ public class DatabaseHandlerService {  // handles ensemble and metric database a
         return zdt;
     }
 
-    public void setResidentMetricCollectionTimeSeries(MetricCollectionTimeSeries metricCollectionsTimeSeries) {
-        this.residentMetricCollectionTimeSeries = metricCollectionsTimeSeries;
-    }
-
-    public Map<Statistics, MetricCollectionTimeSeries> getMetricCollectionTimeSeriesMap() {
-        return metricCollectionTimeSeriesMap;
-    }
-
-    public void refreshMetricCollectionTimeSeriesMap() {
-        metricCollectionTimeSeriesMap.clear();
-    }
-
-    public void refreshEnsembleProbabilityList() {
-        ensembleProbabilityList.clear();
-    }
-
-    public void setMetricCollectionTimeSeriesMap(Statistics stat, MetricCollectionTimeSeries metricCollectionTimeSeries) {
-        this.metricCollectionTimeSeriesMap.put(stat, metricCollectionTimeSeries);
-    }
-
-    public void setCumulativeEnsembleTimeSeries(EnsembleTimeSeries ensembleTimeSeries) {
-        this.cumulativeEnsembleTimeSeries = ensembleTimeSeries;
-    }
-
-    public void setEnsembleProbabilityMap(String stat, Map<Float, Float> ensembleProb) {
-        this.ensembleProbabilityList.put(stat, ensembleProb);
-    }
-
-    public Map<String, Map<Float, Float>> getEnsembleProbabilityList() {
-        return this.ensembleProbabilityList;
-    }
-
-    public EnsembleTimeSeries getCumulativeEnsembleTimeSeries() {
-        return this.cumulativeEnsembleTimeSeries;
-    }
-
-    public String getResidentMetricStatisticsList() {
-        return this.residentMetricCollectionTimeSeries.getMetricCollection(zdt).getMetricStatistics();
-    }
-
-    public float[][] getResidentMetricStatisticsValues() {
-        return residentMetricCollectionTimeSeries.getMetricCollection(zdt).getValues();
-    }
+    // --- Ensemble data (delegated to EnsembleDataCache) ---
 
     public EnsembleTimeSeries getEnsembleTimeSeries() {
-        return this.ensembleDatabase.getEnsembleTimeSeries(rid);
+        return ensembleDataCache.getEnsembleTimeSeries(rid, ensembleDatabase);
     }
 
     public Ensemble getEnsemble() {
-        return getEnsembleTimeSeries().getEnsemble(zdt);
+        return ensembleDataCache.getEnsemble(rid, zdt, ensembleDatabase);
+    }
+
+    public EnsembleTimeSeries getCumulativeEnsembleTimeSeries() {
+        return ensembleDataCache.getCumulativeEnsembleTimeSeries();
+    }
+
+    public void setCumulativeEnsembleTimeSeries(EnsembleTimeSeries ensembleTimeSeries) {
+        ensembleDataCache.setCumulativeEnsembleTimeSeries(ensembleTimeSeries);
+    }
+
+    // --- Metric results (delegated to MetricResultCache) ---
+
+    public Map<Statistics, MetricCollectionTimeSeries> getMetricCollectionTimeSeriesMap() {
+        return metricResultCache.getMetricMap();
+    }
+
+    public void setMetricCollectionTimeSeriesMap(Statistics stat, MetricCollectionTimeSeries metricCollectionTimeSeries) {
+        metricResultCache.putMetric(stat, metricCollectionTimeSeries);
+    }
+
+    public void refreshMetricCollectionTimeSeriesMap() {
+        metricResultCache.clearMetrics();
+    }
+
+    public void setResidentMetricCollectionTimeSeries(MetricCollectionTimeSeries metricCollectionsTimeSeries) {
+        metricResultCache.setResidentMetric(metricCollectionsTimeSeries);
+    }
+
+    public String getResidentMetricStatisticsList() {
+        return metricResultCache.getResidentMetricStatisticsList(zdt);
+    }
+
+    public float[][] getResidentMetricStatisticsValues() {
+        return metricResultCache.getResidentMetricStatisticsValues(zdt);
+    }
+
+    // --- Probability results (delegated to MetricResultCache) ---
+
+    public void setEnsembleProbabilityMap(String stat, Map<Float, Float> ensembleProb) {
+        metricResultCache.putProbability(stat, ensembleProb);
+    }
+
+    public Map<String, Map<Float, Float>> getEnsembleProbabilityList() {
+        return metricResultCache.getProbabilityList();
+    }
+
+    public void refreshEnsembleProbabilityList() {
+        metricResultCache.clearProbabilities();
     }
 }

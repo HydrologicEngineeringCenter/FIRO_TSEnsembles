@@ -122,7 +122,6 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
                 logger.log(Level.SEVERE, "Error in the date time parse when adding metric statistics to the " +
                         "time plot from the EnsembleChartAcrossTime view class");
             }
-            databaseHandlerService.refreshMetricCollectionTimeSeriesMap();
 
         } else if(evt.getSource() instanceof StatisticsMap && evt.getPropertyName().equalsIgnoreCase("cumulative")) {  //This must happen before adding Ensembles
             isCumulative = (boolean) evt.getNewValue();

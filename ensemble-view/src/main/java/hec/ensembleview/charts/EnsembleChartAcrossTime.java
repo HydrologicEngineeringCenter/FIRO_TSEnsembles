@@ -16,6 +16,8 @@ import java.util.List;
 public class EnsembleChartAcrossTime extends EnsembleChart {
     private final List<TimeSeriesDataSet> timeSeriesDataSetList = new ArrayList<>();
     private final List<G2dLineProperties> g2dLinePropertiesList = new ArrayList<>();
+    private int memberCount = 0;
+    private static final int LEGEND_MEMBER_LIMIT = 60;
 
 
     /**
@@ -24,7 +26,15 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
 
     public EnsembleChartAcrossTime() {
         super();
-        layout.setHasLegend(true);
+    }
+
+    /**
+     * Records the number of ensemble members. If over the limit,
+     * the legend only shows computed metric lines, not individual members.
+     */
+    public void setMemberCount(int count) {
+        this.memberCount = count;
+        layout.setHasLegend(count <= LEGEND_MEMBER_LIMIT);
     }
 
     public void addLine(LineSpec line) {
@@ -76,7 +86,12 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
         props.setLineWidth(lineSpec.lineWidth);
         props.setLinePattern(lineSpec.linePattern);
         props.setName(lineSpec.lineName);
-        props.setLabel(lineSpec.lineName);
+        // Hide member lines from legend when there are too many ensembles
+        if (memberCount > LEGEND_MEMBER_LIMIT && lineSpec.lineName.contains("Member")) {
+            props.setLabel("");
+        } else {
+            props.setLabel(lineSpec.lineName);
+        }
         props.setLineColor(lineSpec.lineColor);
         props.setDrawLine(true);
         props.setDrawPoints(false);
