@@ -3,6 +3,26 @@ package hec.ensembleview;
 import hec.RecordIdentifier;
 
 public class ParameterFilter {
+    /**
+     * Checks if the cumulative option is applicable for the given parameter.
+     * Parameters like elevation, temperature, and moisture deficit are not
+     * meaningful as cumulative values.
+     *
+     * @param parameter the parameter name to check
+     * @return true if cumulative is allowed, false if it should be disabled
+     */
+    public static boolean isCumulativeApplicable(String parameter) {
+        switch (parameter.toUpperCase()) {
+            case "MOISTURE DEFICIT":
+            case "ELEV":
+            case "ELEVATION":
+            case "TEMPERATURE-AIR":
+                return false;
+            default:
+                return true;
+        }
+    }
+
     public static RecordIdentifier checkParameter(RecordIdentifier recordIdentifier) {
 
         String parameter = recordIdentifier.parameter;

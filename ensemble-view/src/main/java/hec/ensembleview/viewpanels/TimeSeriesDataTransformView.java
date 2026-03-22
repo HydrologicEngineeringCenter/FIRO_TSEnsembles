@@ -1,8 +1,10 @@
 package hec.ensembleview.viewpanels;
 
+import hec.RecordIdentifier;
 import hec.ensembleview.controllers.CumulativeDataViewListener;
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.DefaultSettings;
+import hec.ensembleview.ParameterFilter;
 import hec.ensembleview.charts.ChartType;
 
 import javax.swing.*;
@@ -71,10 +73,22 @@ public class TimeSeriesDataTransformView extends DataTransformView {
         original.setSelected(true);
     }
 
+    private void updateCumulativeEnabled() {
+        RecordIdentifier selectedRid = DatabaseHandlerService.getInstance().getDbHandlerRid();
+        if (selectedRid != null) {
+            boolean allowed = ParameterFilter.isCumulativeApplicable(selectedRid.parameter);
+            cumulative.setEnabled(allowed);
+            if (!allowed && cumulative.isSelected()) {
+                original.setSelected(true);
+            }
+        }
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if(evt.getSource() instanceof DatabaseHandlerService) {
             resetRadioButton();
+            updateCumulativeEnabled();
             initiateButtonSelection();
         }
     }
