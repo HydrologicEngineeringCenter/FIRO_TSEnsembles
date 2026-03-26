@@ -185,7 +185,9 @@ public class SingleValueSummaryTab extends JPanel {
 
         computeButton.addActionListener(e -> {
             try {
-                MetricCollectionTimeSeries value = statComputationHelper.computeTwoStepComputable(getFirstStat(), getFirstTextFieldValue(),
+                MetricCollectionTimeSeries value = statComputationHelper.computeTwoStepComputable(
+                        DatabaseHandlerService.getInstance().getEnsembleTimeSeries(),
+                        getFirstStat(), getFirstTextFieldValue(),
                         getSecondStat(), getSecondTextFieldValue(),
                         getSummaryType() == SingleValueSummaryType.COMPUTEACROSSENSEMBLES ||
                                 getSummaryType() == SingleValueSummaryType.COMPUTECUMULATIVE);

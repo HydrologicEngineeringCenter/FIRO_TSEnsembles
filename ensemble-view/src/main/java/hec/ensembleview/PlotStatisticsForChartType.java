@@ -69,8 +69,10 @@ public class PlotStatisticsForChartType {
     }
 
     public static void addLineMembersToChart(EnsembleChart chart, float[][] vals, ZonedDateTime[] dates) {//This is for the Raw ensemble data itself
+        EnsembleChartAcrossTime timeChart = (EnsembleChartAcrossTime) chart;
+        timeChart.setMemberCount(vals.length);
         for (int i = 0; i < vals.length; i++) {
-            ((EnsembleChartAcrossTime) (chart)).addLine(new LineSpec(0, vals[i], dates,
+            timeChart.addLine(new LineSpec(0, vals[i], dates,
                     getLineWidthForStatType(Statistics.NONE), randomColor(i),
                     getLinePatternForStatType(Statistics.NONE), "Member " + (i + 1)));
         }

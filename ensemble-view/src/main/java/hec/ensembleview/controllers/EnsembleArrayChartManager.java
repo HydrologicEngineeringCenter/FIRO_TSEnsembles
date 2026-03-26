@@ -124,8 +124,6 @@ public class EnsembleArrayChartManager extends ChartManager {
     public void propertyChange(PropertyChangeEvent evt) {
         if(evt.getSource() instanceof StatisticsMap && evt.getPropertyName().equalsIgnoreCase("ensemble")) {
             addEnsembleValues();
-            databaseHandlerService.refreshMetricCollectionTimeSeriesMap();
-            databaseHandlerService.refreshEnsembleProbabilityList();
         } else if (evt.getSource() instanceof  StatisticsMap && evt.getPropertyName().equalsIgnoreCase("probability")) {
             isProbability = (boolean) evt.getNewValue();
         }

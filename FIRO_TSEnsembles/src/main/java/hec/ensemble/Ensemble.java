@@ -7,6 +7,7 @@ import hec.ensemble.stats.SingleComputable;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.stream.IntStream;
 
 /**
  * an Ensemble is an array of time-series data
@@ -16,6 +17,7 @@ import java.time.ZonedDateTime;
  */
 public class Ensemble
   {
+    private static final int PARALLEL_THRESHOLD = 100;
     private final EnsembleConfiguration _configuration;
     protected EnsembleTimeSeries parent = null;
     private final float[][] values;
@@ -86,10 +88,15 @@ public class Ensemble
       }
       int size= values.length;
       float[] rval = new float[size];
-      for (int i = 0; i <size ; i++) {
+      if (size >= PARALLEL_THRESHOLD) {
+        IntStream.range(0, size).parallel().forEach(i -> {
           rval[i] = cmd.compute(values[i]);
+        });
+      } else {
+        for (int i = 0; i < size; i++) {
+          rval[i] = cmd.compute(values[i]);
+        }
       }
-
       return rval;
     }
 
@@ -105,12 +112,22 @@ public class Ensemble
       int size= values[0].length;//number of timesteps
       float[] rval = new float[size];
       int traces = values.length;//number of traces
-      float[] tracevals = new float[traces];
-      for (int i = 0; i <size ; i++) {//this could be more efficient as a streaming compute process.. one less loop.
-        for(int j = 0; j <traces; j++){
-          tracevals[j] = values[j][i];//load all trace values for this timestep into an array
+      if (traces >= PARALLEL_THRESHOLD) {
+        IntStream.range(0, size).parallel().forEach(i -> {
+          float[] tracevals = new float[traces];
+          for (int j = 0; j < traces; j++) {
+            tracevals[j] = values[j][i];
+          }
+          rval[i] = cmd.compute(tracevals);
+        });
+      } else {
+        float[] tracevals = new float[traces];
+        for (int i = 0; i < size; i++) {
+          for (int j = 0; j < traces; j++) {
+            tracevals[j] = values[j][i];
+          }
+          rval[i] = cmd.compute(tracevals);
         }
-        rval[i] = cmd.compute(tracevals);//compute statistic for this timestep and store.
       }
       return rval;//a time series of a statistic.
     }
@@ -125,14 +142,21 @@ public class Ensemble
       }
       int size= values.length;
       int size2 = cmd.getStatCount();
-      float[] rval;
       float[][] val = new float[size2][size];
-      for (int i = 0; i <size ; i++) {
-        rval = cmd.multiCompute(values[i]);
-        for (int j = 0; j<size2;j++){
-          val[j][i] = rval[j];
+      if (size >= PARALLEL_THRESHOLD) {
+        IntStream.range(0, size).parallel().forEach(i -> {
+          float[] rval = cmd.multiCompute(values[i]);
+          for (int j = 0; j < size2; j++) {
+            val[j][i] = rval[j];
+          }
+        });
+      } else {
+        for (int i = 0; i < size; i++) {
+          float[] rval = cmd.multiCompute(values[i]);
+          for (int j = 0; j < size2; j++) {
+            val[j][i] = rval[j];
+          }
         }
-
       }
       return val;
     }
@@ -149,15 +173,27 @@ public class Ensemble
       int size2 = cmd.getStatCount();
       float[][] val = new float[size2][size];
       int traces = values.length;//number of traces
-      float[] rval;
-      float[] tracevals = new float[traces];
-      for (int i = 0; i <size ; i++) {
-        for(int j = 0; j <traces; j++){
-          tracevals[j] = values[j][i];//load all trace values for this timestep into an array
-        }
-        rval = cmd.multiCompute(tracevals);//compute a collection of statistics for this timestep and store.
-        for (int k = 0; k<size2;k++){
-          val[k][i] = rval[k];
+      if (traces >= PARALLEL_THRESHOLD) {
+        IntStream.range(0, size).parallel().forEach(i -> {
+          float[] tracevals = new float[traces];
+          for (int j = 0; j < traces; j++) {
+            tracevals[j] = values[j][i];
+          }
+          float[] rval = cmd.multiCompute(tracevals);
+          for (int k = 0; k < size2; k++) {
+            val[k][i] = rval[k];
+          }
+        });
+      } else {
+        float[] tracevals = new float[traces];
+        for (int i = 0; i < size; i++) {
+          for (int j = 0; j < traces; j++) {
+            tracevals[j] = values[j][i];
+          }
+          float[] rval = cmd.multiCompute(tracevals);
+          for (int k = 0; k < size2; k++) {
+            val[k][i] = rval[k];
+          }
         }
       }
       return val;//a time series of a collection of statistics.
@@ -180,12 +216,17 @@ public class Ensemble
       }
       int traces= values.length;  //number of traces
       int time = values[0].length;  //number of time steps
-      float[] rval;
       float[][] val = new float[traces][time];
-      for (int i = 0; i <traces ; i++) {
-        rval = cmd.multiCompute(values[i]);
-        System.arraycopy(rval, 0, val[i], 0, time);
-
+      if (traces >= PARALLEL_THRESHOLD) {
+        IntStream.range(0, traces).parallel().forEach(i -> {
+          float[] rval = cmd.multiCompute(values[i]);
+          System.arraycopy(rval, 0, val[i], 0, time);
+        });
+      } else {
+        for (int i = 0; i < traces; i++) {
+          float[] rval = cmd.multiCompute(values[i]);
+          System.arraycopy(rval, 0, val[i], 0, time);
+        }
       }
       return val;
     }
