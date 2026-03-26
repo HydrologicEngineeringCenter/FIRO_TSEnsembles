@@ -99,9 +99,13 @@ def versionLabel(gitInfo) {
     def verNum = "-SNAPSHOT"
     def tag = gitInfo.lastTag
     println(tag)
-    if (tag.contains("dss-")) {
-        def tagArray = tag.trim().split('-')
-        verNum = tagArray[1]
+    def prefixes = ["ts-", "dss-", "ev-"]
+    for (prefix in prefixes) {
+        if (tag.contains(prefix)) {
+            def tagArray = tag.trim().split('-')
+            verNum = "dss-" + tagArray[1]
+            break
+        }
     }
     return verNum
 }
