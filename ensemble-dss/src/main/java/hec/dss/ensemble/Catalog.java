@@ -64,7 +64,8 @@ public class Catalog {
     private void addMetric(DSSPathname path) {
         String location = path.bPart();
         String parameter = path.cPart();
-        RecordIdentifier rid = new RecordIdentifier(location, parameter);
+        String version = extractVersionLabel(path.fPart());
+        RecordIdentifier rid = new RecordIdentifier(location, parameter, version);
 
         // Add record identifier if it doesn't exist
         if (!metricRids.containsKey(rid)) {
@@ -86,7 +87,8 @@ public class Catalog {
     private void addCollection(DSSPathname path) {
         String location = path.bPart();
         String parameter = path.cPart();
-        RecordIdentifier rid = new RecordIdentifier(location, parameter);
+        String version = extractVersionLabel(path.fPart());
+        RecordIdentifier rid = new RecordIdentifier(location, parameter, version);
 
         // Add record identifier if it doesn't exist
         if (!rids.containsKey(rid)) {
@@ -141,6 +143,35 @@ public class Catalog {
         }
 
         return rval;
+    }
+
+    /**
+     * Extracts a descriptive label from the F-Part (version) of a DSS path.
+     * The F-Part contains pipe-separated segments such as "C:000001|HEFS".
+     * Tagged segments (containing ':') like C:, T:, V: are skipped.
+     * The first untagged segment is returned as the version label.
+     * <p>
+     * Examples:
+     * <ul>
+     *   <li>"C:000001|HEFS" returns "HEFS"</li>
+     *   <li>"C:000007|T:20131103-1200|V:20131103-120000|" returns "" (all segments are tagged)</li>
+     * </ul>
+     *
+     * @param fPart the F-Part string from a DSS path
+     * @return the version label, or empty string if none found
+     */
+    static String extractVersionLabel(String fPart) {
+        if (fPart == null || fPart.isEmpty()) {
+            return "";
+        }
+        String[] segments = fPart.split("\\|");
+        for (String segment : segments) {
+            String trimmed = segment.trim();
+            if (!trimmed.isEmpty() && !trimmed.contains(":")) {
+                return trimmed;
+            }
+        }
+        return "";
     }
 
     private ZonedDateTime getStartDateTime(DSSPathname path) {
