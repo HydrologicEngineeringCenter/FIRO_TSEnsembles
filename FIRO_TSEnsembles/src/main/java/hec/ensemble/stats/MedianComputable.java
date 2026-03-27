@@ -8,12 +8,13 @@ public class MedianComputable implements Computable, Configurable {
 
     @Override
     public float compute(float[] values) {
-        int n = values.length;
-        Arrays.sort(values);
+        float[] sorted = values.clone();
+        int n = sorted.length;
+        Arrays.sort(sorted);
         if(n % 2 !=0) {
-            return values[(n) /2];
+            return sorted[(n) /2];
         }
-        return (values[(n)/2-1] + values[n /2]) / 2;
+        return (sorted[(n)/2-1] + sorted[n /2]) / 2;
     }
 
     private String getInputUnits() {

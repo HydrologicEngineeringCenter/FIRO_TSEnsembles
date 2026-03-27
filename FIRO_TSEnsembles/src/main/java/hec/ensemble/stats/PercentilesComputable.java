@@ -24,11 +24,12 @@ public class PercentilesComputable implements Computable, MultiComputable, Confi
 
     @Override
     public float compute(float[] values) {
-        Arrays.sort(values);
+        float[] sorted = values.clone();
+        Arrays.sort(sorted);
         if(selectedPercentiles.length == 0) {
             throw new ArrayIndexOutOfBoundsException("Percentile(s) less than or equal to 1 must be entered in the text field");
         }
-        return computePercentile(values, selectedPercentiles[0]);
+        return computePercentile(sorted, selectedPercentiles[0]);
     }
 
     private String getInputUnits() {
@@ -49,10 +50,11 @@ public class PercentilesComputable implements Computable, MultiComputable, Confi
         int size = this.selectedPercentiles.length;
         float[] result = new float[size];
         int i = 0;
-        Arrays.sort(values);
+        float[] sorted = values.clone();
+        Arrays.sort(sorted);
 
         for (float p: this.selectedPercentiles) {
-            result[i] = computePercentile(values, p);
+            result[i] = computePercentile(sorted, p);
             i++;
         }
         return result;

@@ -7,9 +7,10 @@ public class MaxComputable implements Computable, Configurable {
     @Override
     public float compute(float[] values){
         //calculate the max of values
-        int size= values.length;
-        java.util.Arrays.sort(values);
-        return values[size-1];
+        float[] sorted = values.clone();
+        int size= sorted.length;
+        java.util.Arrays.sort(sorted);
+        return sorted[size-1];
     }
 
     private String getInputUnits() {
