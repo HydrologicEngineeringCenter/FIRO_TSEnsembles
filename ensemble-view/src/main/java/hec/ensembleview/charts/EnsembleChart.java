@@ -58,7 +58,7 @@ public abstract class EnsembleChart implements MouseWheelListener {
             case MAX:
                 return randomColor(1);
             case AVERAGE:
-                return randomColor(25);
+                return randomColor(2);
             case MEDIAN:
                 return randomColor(50);
             case STANDARDDEVIATION:
@@ -68,7 +68,7 @@ public abstract class EnsembleChart implements MouseWheelListener {
             case TOTAL:
                 return randomColor(150);
             case PERCENTILES:
-                return randomColor(200);
+                return randomColor(3);
             default:
                 return randomColor(100);
         }
@@ -87,6 +87,7 @@ public abstract class EnsembleChart implements MouseWheelListener {
         switch (statType) {
             case MIN:
             case MAX:
+            case AVERAGE:
             case CUMULATIVE:
             case PERCENTILES:
                 return 3;
