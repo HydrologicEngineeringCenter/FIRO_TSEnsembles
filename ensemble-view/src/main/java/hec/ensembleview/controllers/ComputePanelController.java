@@ -206,18 +206,24 @@ public class ComputePanelController implements PropertyChangeListener {
      */
     private void removeUncheckedMetrics(Map<String, Boolean> statMap) {
         Map<Statistics, MetricCollectionTimeSeries> metricMap = databaseHandlerService.getMetricCollectionTimeSeriesMap();
+        Map<String, Map<Float, Float>> probList = databaseHandlerService.getEnsembleProbabilityList();
         List<Statistics> toRemove = new java.util.ArrayList<>();
+        List<String> probToRemove = new java.util.ArrayList<>();
         for (Statistics stat : metricMap.keySet()) {
             // Check each stat map entry to see if it maps to this Statistics enum
             for (Map.Entry<String, Boolean> entry : statMap.entrySet()) {
                 if (Boolean.FALSE.equals(entry.getValue()) && Statistics.getStatName(entry.getKey()) == stat) {
                     toRemove.add(stat);
+                    probToRemove.add(entry.getKey());
                     break;
                 }
             }
         }
         for (Statistics stat : toRemove) {
             metricMap.remove(stat);
+        }
+        for (String key : probToRemove) {
+            probList.remove(key);
         }
     }
 

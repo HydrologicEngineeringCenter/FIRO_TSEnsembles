@@ -113,6 +113,9 @@ public class EnsembleArrayChartManager extends ChartManager {
         Map<String, Map<Float, Float>> probList = databaseHandlerService.getEnsembleProbabilityList();
         for(Map.Entry<String, Map<Float, Float>> entry : probList.entrySet()) {
             residentMetricCollectionTimeSeries = metricCollectionTimeSeriesMap.get(Statistics.getStatName(entry.getKey()));
+            if (residentMetricCollectionTimeSeries == null) {
+                continue;
+            }
             chartLabelsForStatistic(Statistics.getStatName(entry.getKey()));
             PlotStatisticsForChartType.addStatisticsToEnsemblePlot((EnsembleChartAcrossEnsembles) chart, entry.getKey(), entry.getValue());
         }

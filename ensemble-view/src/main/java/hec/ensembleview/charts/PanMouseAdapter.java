@@ -94,7 +94,7 @@ public class PanMouseAdapter extends G2dPointerAdapter {
      */
     private void panAxis(Axis a, double dal) {
 
-        if (a == null || a.getZoom() == 1) {
+        if (a == null || a.getZoom() >= 1.0) {
             return;
         }
         double vMaxw = a.getViewMax();
@@ -116,11 +116,11 @@ public class PanMouseAdapter extends G2dPointerAdapter {
             nMaxl = a.w2l(a.getMax());
             nMinw = a.l2w((int) (a.isReversed() ? nMaxl + viewRangeLocal : (nMaxl - viewRangeLocal)));
         }
-        if (vMinw < a.getMin()) {
-            double viewRangeLocal = vMaxl - vMinl;
+        if (nMinw < a.getMin()) {
+            double viewRangeLocal = Math.abs(vMaxl - vMinl);
             nMinl = a.w2l(a.getMin());
-            nMaxw = a.l2w((int) (nMinl + viewRangeLocal));
-            nMinw = a.l2w((int) (a.isReversed() ? (nMinl - viewRangeLocal) : (nMinl + viewRangeLocal)));
+            nMinw = a.l2w((int) nMinl);
+            nMaxw = a.l2w((int) (a.isReversed() ? (nMinl - viewRangeLocal) : (nMinl + viewRangeLocal)));
         }
         a.setViewLimits(nMinw, nMaxw);
     }

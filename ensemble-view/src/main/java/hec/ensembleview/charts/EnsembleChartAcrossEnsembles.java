@@ -19,6 +19,8 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
     private double[] xOrdinates;
     private double[][] yOrdinates;
     private boolean isProb = false;
+    private final List<double[][]> crosshairSeriesList = new ArrayList<>();
+    private final List<String> crosshairSeriesNames = new ArrayList<>();
 
     /**
      * Ensembles Charts Across Ensembles class sets up and displays the metrics for the scatter plot chart
@@ -65,6 +67,10 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
         G2dLineProperties props = new G2dLineProperties();
         setG2dPointProperties(props, point);
 
+        // Store raw data for crosshair snap
+        crosshairSeriesList.add(new double[][]{xOrdinates.clone(), yOrdinates[0].clone()});
+        crosshairSeriesNames.add(point.pointName);
+
         isProb = false;
         xLabel = "Ensembles";
     }
@@ -98,6 +104,11 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
         // Create G2dLineProperties
         G2dLineProperties props = new G2dLineProperties();
         setG2dPointProperties(props, point);
+
+        // Store raw data for crosshair snap
+        crosshairSeriesList.add(new double[][]{xOrdinates.clone(), yOrdinates[0].clone()});
+        crosshairSeriesNames.add(point.pointName);
+
         isProb = true;
         xLabel = "Probability";
     }
@@ -129,15 +140,32 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
         if(isProb) {
             view.setAxisType("X1", "PROBABILITY");
             view.setAxisLabel(ViewportLayout.X1, xLabel);
+            hasProbabilityXAxis = true;
+        } else {
+            hasProbabilityXAxis = false;
         }
 
         buildViewPortGraph();
 
         plotPanel.buildComponents(layout);
         setPanAdapter();
+        setupCrosshair();
+        populateCrosshairData();
         setMouseWheelScroll();
 
         return plotPanel;
+    }
+
+    private void populateCrosshairData() {
+        if (crosshairAdapter == null) {
+            return;
+        }
+        crosshairAdapter.clearSeries();
+        for (int i = 0; i < crosshairSeriesList.size(); i++) {
+            double[][] series = crosshairSeriesList.get(i);
+            String name = crosshairSeriesNames.get(i);
+            crosshairAdapter.addSeries(name, series[0], series[1]);
+        }
     }
 
     private void buildViewPortGraph() {

@@ -22,6 +22,7 @@ public class DatabaseController {
     private JTextField filePath;
     private DatabaseHandlerService databaseHandlerService;
     private boolean isNewLoad;  //checks if new database is added. If database is new, set to true
+    private java.io.File lastSelectedDirectory;
 
     public DatabaseController(OptionsPanel optionsPanel) {
         initiateDatabaseListener(optionsPanel);
@@ -90,11 +91,12 @@ public class DatabaseController {
     private void setFilePathAndInitialRidZdt() {
         databaseHandlerService = DatabaseHandlerService.getInstance();
 
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = new JFileChooser(lastSelectedDirectory);
         fileChooser.setAcceptAllFileFilterUsed(false);
         fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Database File", "db", "dss"));
 
         if (fileChooser.showOpenDialog(filePathPanel) == 0) {
+            lastSelectedDirectory = fileChooser.getSelectedFile().getParentFile();
             dateTimes.removeAllItems();
             locations.removeAllItems();
             isNewLoad = true;

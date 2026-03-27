@@ -5,8 +5,9 @@ public class MinComputable implements Computable, Configurable {
     private Configuration config;
     @Override
     public float compute(float[] values){
-        java.util.Arrays.sort(values);
-        return values[0];
+        float[] sorted = values.clone();
+        java.util.Arrays.sort(sorted);
+        return sorted[0];
     }
 
     private String getInputUnits() {

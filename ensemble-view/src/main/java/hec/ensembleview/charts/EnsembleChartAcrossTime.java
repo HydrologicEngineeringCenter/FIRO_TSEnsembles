@@ -18,6 +18,8 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
     private final List<G2dLineProperties> g2dLinePropertiesList = new ArrayList<>();
     private int memberCount = 0;
     private static final int LEGEND_MEMBER_LIMIT = 60;
+    private final List<double[][]> crosshairSeriesList = new ArrayList<>();
+    private final List<String> crosshairSeriesNames = new ArrayList<>();
 
 
     /**
@@ -60,6 +62,16 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
         timeSeriesDataSet.setName(line.lineName);
         timeSeriesDataSetList.add(timeSeriesDataSet);
 
+        // Store raw data for crosshair snap lookups
+        double[] xTimes = new double[length];
+        HecTime ht = convertZdtToHecTime(line);
+        for (int i = 0; i < length; i++) {
+            xTimes[i] = ht.value();
+            ht.addMinutes((int)duration.toMinutes());
+        }
+        crosshairSeriesList.add(new double[][]{xTimes, values});
+        crosshairSeriesNames.add(line.lineName);
+
         // Create Properties
         G2dLineProperties props = new G2dLineProperties();
         setG2dLineProperties(props, line);
@@ -68,6 +80,9 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
             view.addCurve(ViewportLayout.Y1, timeSeriesDataSet, props);
             plotPanel.buildComponents(layout);
             setPanAdapter();
+            setupCrosshair();
+            populateCrosshairData();
+            setMouseWheelScroll();
         }
     }
 
@@ -129,9 +144,23 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
 
         plotPanel.buildComponents(layout);
         setPanAdapter();
+        setupCrosshair();
+        populateCrosshairData();
         setMouseWheelScroll();
 
         return plotPanel;
+    }
+
+    private void populateCrosshairData() {
+        if (crosshairAdapter == null) {
+            return;
+        }
+        crosshairAdapter.clearSeries();
+        for (int i = 0; i < crosshairSeriesList.size(); i++) {
+            double[][] series = crosshairSeriesList.get(i);
+            String name = crosshairSeriesNames.get(i);
+            crosshairAdapter.addSeries(name, series[0], series[1]);
+        }
     }
 
     private void buildViewPortGraph() {

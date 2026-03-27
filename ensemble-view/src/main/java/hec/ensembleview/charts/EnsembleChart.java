@@ -24,6 +24,8 @@ public abstract class EnsembleChart implements MouseWheelListener {
     static final String ICON = "Images/Pan.gif";
     private Point lastPoint;
     transient G2dPointerComponent pointerComponent;
+    boolean hasProbabilityXAxis = false;
+    CrosshairMouseAdapter crosshairAdapter;
 
     EnsembleChart() {
         JPanel panel = new JPanel();
@@ -56,7 +58,7 @@ public abstract class EnsembleChart implements MouseWheelListener {
             case MAX:
                 return randomColor(1);
             case AVERAGE:
-                return randomColor(25);
+                return randomColor(2);
             case MEDIAN:
                 return randomColor(50);
             case STANDARDDEVIATION:
@@ -66,7 +68,7 @@ public abstract class EnsembleChart implements MouseWheelListener {
             case TOTAL:
                 return randomColor(150);
             case PERCENTILES:
-                return randomColor(200);
+                return randomColor(3);
             default:
                 return randomColor(100);
         }
@@ -85,6 +87,7 @@ public abstract class EnsembleChart implements MouseWheelListener {
         switch (statType) {
             case MIN:
             case MAX:
+            case AVERAGE:
             case CUMULATIVE:
             case PERCENTILES:
                 return 3;
@@ -120,11 +123,35 @@ public abstract class EnsembleChart implements MouseWheelListener {
         plotPanel.addTool(toolbarButtonProp);
     }
 
+    void setupCrosshair() {
+        if (plotPanel.getViewports().length > 0) {
+            Viewport v = plotPanel.getViewports()[0];
+            crosshairAdapter = new CrosshairMouseAdapter(v);
+            v.addMouseMotionListener(crosshairAdapter);
+            v.addMouseListener(crosshairAdapter);
+        }
+    }
+
     public G2dPanel generateChart() {
-        plotPanel = new G2dPanel();
+        plotPanel = new G2dPanel() {
+            @Override
+            public void paint(Graphics g) {
+                super.paint(g);
+                paintCrosshairOverlay((Graphics2D) g);
+            }
+        };
         plotPanel.setIgnorePopupPlotEvents(true);
 
         return plotPanel;
+    }
+
+    private void paintCrosshairOverlay(Graphics2D g2) {
+        if (crosshairAdapter == null || plotPanel.getViewports().length == 0) {
+            return;
+        }
+        Component viewport = plotPanel.getViewports()[0];
+        Rectangle bounds = viewport.getBounds();
+        crosshairAdapter.paintCrosshair(g2, bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
     @Override
@@ -158,9 +185,21 @@ public abstract class EnsembleChart implements MouseWheelListener {
             final double x = scl.x2e(lpt.x);
             final double y = scl.y2n(lpt.y);
 
-            xaxis.zoomByFactor(zf);
+            // Skip x-axis zoom for probability axes to avoid distortion
+            if (!hasProbabilityXAxis) {
+                xaxis.zoomByFactor(zf);
+            }
             yaxis.zoomByFactor(zf);
 
+            // If zoom reached full extent, reset view to full data range
+            boolean xAtFull = hasProbabilityXAxis || xaxis.getZoom() >= 1.0;
+            if (xAtFull && yaxis.getZoom() >= 1.0) {
+                if (!hasProbabilityXAxis) {
+                    xaxis.setViewLimits(xaxis.getMin(), xaxis.getMax());
+                }
+                yaxis.setViewLimits(yaxis.getMin(), yaxis.getMax());
+                continue;
+            }
 
             //find out where our mouse point world location now is after the zoom and pan back in order to
             //have the zoom stay centered on this location
@@ -171,7 +210,8 @@ public abstract class EnsembleChart implements MouseWheelListener {
             double dxl = localNewX - p.x;
             double dyl = localNewY - p.y;   //positive y change is a mouse move down because 0,0 is in the upper left N,N is in the lower right
 
-            if (dxl != 0) {
+            // Skip x-axis pan for probability axes
+            if (!hasProbabilityXAxis && dxl != 0) {
                 panAxis(v.getAxis("x1"), dxl);
                 panAxis(v.getAxis("x2"), dxl);
             }
@@ -186,7 +226,7 @@ public abstract class EnsembleChart implements MouseWheelListener {
 
     private void panAxis(Axis a, double dal) {
 
-        if (a == null || a.getZoom() == 1) {
+        if (a == null || a.getZoom() >= 1.0) {
             return;
         }
         double vMaxw = a.getViewMax();
@@ -208,11 +248,11 @@ public abstract class EnsembleChart implements MouseWheelListener {
             nMaxl = a.w2l(a.getMax());
             nMinw = a.l2w((int) (a.isReversed() ? nMaxl + viewRangeLocal : (nMaxl - viewRangeLocal)));
         }
-        if (vMinw < a.getMin()) {
-            double viewRangeLocal = vMaxl - vMinl;
+        if (nMinw < a.getMin()) {
+            double viewRangeLocal = Math.abs(vMaxl - vMinl);
             nMinl = a.w2l(a.getMin());
-            nMaxw = a.l2w((int) (nMinl + viewRangeLocal));
-            nMinw = a.l2w((int) (a.isReversed() ? (nMinl - viewRangeLocal) : (nMinl + viewRangeLocal)));
+            nMinw = a.l2w((int) nMinl);
+            nMaxw = a.l2w((int) (a.isReversed() ? (nMinl - viewRangeLocal) : (nMinl + viewRangeLocal)));
         }
         a.setViewLimits(nMinw, nMaxw);
     }
