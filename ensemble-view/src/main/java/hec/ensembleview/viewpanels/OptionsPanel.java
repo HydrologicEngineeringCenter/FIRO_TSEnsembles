@@ -20,6 +20,7 @@ public class OptionsPanel extends JPanel {
     private JPanel filePathPanel;
     private JTextField filePath;
     private JButton fileSearchButton;
+    private JButton saveToDbButton;
     private JComboBox<RecordIdentifier> locations;
     private JComboBox<ZonedDateTime> dateTimes;
     private transient ActionListener filePathListener;
@@ -192,6 +193,14 @@ public class OptionsPanel extends JPanel {
         gc.weightx = .1;
         filePathPanel.add(fileSearchButton, gc);
 
+        saveToDbButton = new JButton("Save Metrics to DB");
+        saveToDbButton.setFont(DefaultSettings.setSegoeFontText());
+        gc.gridx = 2;
+        gc.gridy = 0;
+        gc.weightx = 0;
+        gc.insets = new Insets(0, 5, 0, 0);
+        filePathPanel.add(saveToDbButton, gc);
+
         return filePathPanel;
     }
 
@@ -205,6 +214,10 @@ public class OptionsPanel extends JPanel {
         locations.addActionListener(locationsListener);
 
         return locations;
+    }
+
+    public void addSaveToDbListener(ActionListener listener) {
+        saveToDbButton.addActionListener(listener);
     }
 
     private JComboBox<ZonedDateTime> createDateTimeComboBox() {

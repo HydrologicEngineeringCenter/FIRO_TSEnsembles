@@ -8,11 +8,18 @@ import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.Statistics;
 import hec.metrics.MetricCollectionTimeSeries;
+import hec.metrics.MetricTypes;
+import hec.ensembleview.charts.ChartType;
+
+import hec.MetricDatabase;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Central service for managing database access, current selection state (rid/zdt),
@@ -20,6 +27,7 @@ import java.util.Map;
  * MetricResultCache.
  */
 public class DatabaseHandlerService {
+    private static final Logger logger = Logger.getLogger(DatabaseHandlerService.class.getName());
     private static final DatabaseHandlerService instance = new DatabaseHandlerService();
     private EnsembleDatabase ensembleDatabase;
     private RecordIdentifier rid;
@@ -142,5 +150,31 @@ public class DatabaseHandlerService {
 
     public void refreshEnsembleProbabilityList() {
         metricResultCache.clearProbabilities();
+    }
+
+    // --- Save metrics to database ---
+
+    public List<String> saveComputedMetricsToDatabase(ChartType chartType) {
+        List<String> savedMetrics = new java.util.ArrayList<>();
+        if (ensembleDatabase == null || !(ensembleDatabase instanceof MetricDatabase)) {
+            return savedMetrics;
+        }
+        MetricTypes targetType = (chartType == ChartType.TIMEPLOT)
+                ? MetricTypes.TIMESERIES_OF_ARRAY
+                : MetricTypes.ARRAY_OF_ARRAY;
+        MetricDatabase metricDb = (MetricDatabase) ensembleDatabase;
+        Map<Statistics, MetricCollectionTimeSeries> metricMap = getMetricCollectionTimeSeriesMap();
+        for (Map.Entry<Statistics, MetricCollectionTimeSeries> entry : metricMap.entrySet()) {
+            if (entry.getValue().getMetricType() != targetType) {
+                continue;
+            }
+            try {
+                metricDb.write(entry.getValue());
+                savedMetrics.add(entry.getKey().toString());
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Failed to save metric " + entry.getKey() + " to database", e);
+            }
+        }
+        return savedMetrics;
     }
 }

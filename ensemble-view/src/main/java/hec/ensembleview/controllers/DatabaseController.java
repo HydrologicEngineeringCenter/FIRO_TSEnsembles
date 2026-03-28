@@ -5,6 +5,7 @@ import hec.SqliteDatabase;
 import hec.dss.ensemble.DssDatabase;
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.ParameterFilter;
+import hec.ensembleview.charts.ChartType;
 import hec.ensembleview.viewpanels.OptionsPanel;
 
 import javax.swing.*;
@@ -24,8 +25,12 @@ public class DatabaseController {
     private boolean isNewLoad;  //checks if new database is added. If database is new, set to true
     private java.io.File lastSelectedDirectory;
 
-    public DatabaseController(OptionsPanel optionsPanel) {
+    private final JTabbedPane tabPane;
+
+    public DatabaseController(OptionsPanel optionsPanel, JTabbedPane tabPane) {
+        this.tabPane = tabPane;
         initiateDatabaseListener(optionsPanel);
+        initiateSaveToDbListener(optionsPanel);
     }
 
     private void initiateDatabaseListener(OptionsPanel optionsPanel) {
@@ -147,6 +152,41 @@ public class DatabaseController {
 
     private void setZdtList(RecordIdentifier selectedRid) {
         setupDateTimeComboBox(selectedRid);
+    }
+
+    private void initiateSaveToDbListener(OptionsPanel optionsPanel) {
+        DatabaseHandlerService dbService = DatabaseHandlerService.getInstance();
+        optionsPanel.addSaveToDbListener(e -> {
+            int selectedIndex = tabPane.getSelectedIndex();
+            String tabTitle = tabPane.getTitleAt(selectedIndex);
+            ChartType chartType;
+            String chartLabel;
+
+            if (selectedIndex == 0) {
+                chartType = ChartType.TIMEPLOT;
+                chartLabel = "Time Series";
+            } else if (selectedIndex == 1) {
+                chartType = ChartType.SCATTERPLOT;
+                chartLabel = "Scatter Plot";
+            } else {
+                JOptionPane.showMessageDialog(optionsPanel,
+                        "Save metrics is not supported for the \"" + tabTitle + "\" tab.",
+                        "Save Metrics", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            java.util.List<String> savedMetrics = dbService.saveComputedMetricsToDatabase(chartType);
+            if (savedMetrics.isEmpty()) {
+                JOptionPane.showMessageDialog(optionsPanel,
+                        "No computed " + chartLabel + " metrics to save.",
+                        "Save Metrics", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                String metricNames = String.join(", ", savedMetrics);
+                JOptionPane.showMessageDialog(optionsPanel,
+                        "Saved " + chartLabel + " metrics to database: " + metricNames,
+                        "Save Metrics", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
     }
 }
 
