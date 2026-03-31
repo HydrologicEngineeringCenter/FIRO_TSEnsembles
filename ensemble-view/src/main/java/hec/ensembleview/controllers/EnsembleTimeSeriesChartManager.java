@@ -5,6 +5,7 @@ import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.PlotStatisticsForChartType;
 import hec.ensembleview.charts.EnsembleChart;
 import hec.ensembleview.charts.EnsembleChartAcrossTime;
+import hec.ensembleview.charts.EnsembleDataTablePanel;
 import hec.ensembleview.mappings.StatisticsMap;
 import hec.gfx2d.G2dPanel;
 import hec.metrics.MetricCollectionTimeSeries;
@@ -23,8 +24,8 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
     private static final Logger logger = Logger.getLogger(EnsembleTimeSeriesChartManager.class.getName());
     private boolean isCumulative = false;
 
-    public EnsembleTimeSeriesChartManager(StatisticsMap statisticsMap, G2dPanel chartPanel) {
-        super(statisticsMap, chartPanel);
+    public EnsembleTimeSeriesChartManager(StatisticsMap statisticsMap, G2dPanel chartPanel, EnsembleDataTablePanel tablePanel) {
+        super(statisticsMap, chartPanel, tablePanel);
     }
 
     @Override
@@ -69,6 +70,20 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
     void setYAxisChartLabels() {
         String yLabelText = databaseHandlerService.getDbHandlerRid().parameter + " (" + units + ")";
         chart.setYLabel(yLabelText);
+    }
+
+    @Override
+    void updateTableData() {
+        if (tablePanel == null || ensemble == null) {
+            return;
+        }
+        ZonedDateTime[] dates = ensemble.startDateTime();
+        float[][] memberValues = ensemble.getValues();
+        Map<String, float[]> metricValues = getMetricValuesFromResidentMetricDatabase();
+        if (metricValues.isEmpty()) {
+            metricValues = null;
+        }
+        tablePanel.setTimeSeriesData(dates, memberValues, metricValues);
     }
 
     private boolean isMetricTimeSeries(MetricCollectionTimeSeries metricCollections) {
@@ -122,17 +137,20 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
                 logger.log(Level.SEVERE, "Error in the date time parse when adding metric statistics to the " +
                         "time plot from the EnsembleChartAcrossTime view class");
             }
+            updateTableData();
 
         } else if(evt.getSource() instanceof StatisticsMap && evt.getPropertyName().equalsIgnoreCase("cumulative")) {  //This must happen before adding Ensembles
             isCumulative = (boolean) evt.getNewValue();
             isEnsembleDataViewTypeCumulative(isCumulative);
             addEnsembleValues();
+            updateTableData();
         }
         else if(evt.getSource() instanceof DatabaseHandlerService) {
             isCumulative = false;
             databaseHandlerService.refreshMetricCollectionTimeSeriesMap();
             this.databaseHandlerService = DatabaseHandlerService.getInstance();
             addEnsembleValues();
+            updateTableData();
         }
     }
 }

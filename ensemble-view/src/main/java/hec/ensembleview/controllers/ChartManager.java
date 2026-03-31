@@ -3,6 +3,7 @@ package hec.ensembleview.controllers;
 import hec.ensemble.Ensemble;
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.charts.EnsembleChart;
+import hec.ensembleview.charts.EnsembleDataTablePanel;
 import hec.ensembleview.mappings.StatisticsMap;
 import hec.gfx2d.G2dPanel;
 
@@ -14,12 +15,13 @@ import java.util.Map;
 public abstract class ChartManager implements PropertyChangeListener {
     final StatisticsMap statisticsMap;
     final G2dPanel chartPanel;
+    final EnsembleDataTablePanel tablePanel;
     DatabaseHandlerService databaseHandlerService;
     Ensemble ensemble;
     EnsembleChart chart;
     String units;
 
-    protected ChartManager(StatisticsMap map, G2dPanel chartPanel) {
+    protected ChartManager(StatisticsMap map, G2dPanel chartPanel, EnsembleDataTablePanel tablePanel) {
         databaseHandlerService = DatabaseHandlerService.getInstance();
         databaseHandlerService.addDatabaseChangeListener(this);
 
@@ -27,6 +29,7 @@ public abstract class ChartManager implements PropertyChangeListener {
         statisticsMap.addStatisticsMapChangeListener(this);
 
         this.chartPanel = chartPanel;
+        this.tablePanel = tablePanel;
     }
 
     public void addEnsembleValues() {
@@ -52,5 +55,7 @@ public abstract class ChartManager implements PropertyChangeListener {
     abstract EnsembleChart createEnsembleChart() throws ParseException;
 
     abstract Map<String, float[]> getMetricValuesFromResidentMetricDatabase();
+
+    abstract void updateTableData();
 
 }

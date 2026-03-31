@@ -5,6 +5,7 @@ import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.PlotStatisticsForChartType;
 import hec.ensembleview.charts.EnsembleChart;
 import hec.ensembleview.charts.EnsembleChartAcrossEnsembles;
+import hec.ensembleview.charts.EnsembleDataTablePanel;
 import hec.ensembleview.mappings.StatisticsMap;
 import hec.gfx2d.G2dPanel;
 import hec.metrics.MetricCollectionTimeSeries;
@@ -24,8 +25,8 @@ public class EnsembleArrayChartManager extends ChartManager {
     private MetricCollectionTimeSeries residentMetricCollectionTimeSeries;
     private String secondaryUnits;
 
-    public EnsembleArrayChartManager(StatisticsMap statisticsMap, G2dPanel chartPanel) {
-        super(statisticsMap, chartPanel);
+    public EnsembleArrayChartManager(StatisticsMap statisticsMap, G2dPanel chartPanel, EnsembleDataTablePanel tablePanel) {
+        super(statisticsMap, chartPanel, tablePanel);
     }
 
     @Override
@@ -88,6 +89,28 @@ public class EnsembleArrayChartManager extends ChartManager {
     }
 
 
+    @Override
+    void updateTableData() {
+        if (tablePanel == null) {
+            return;
+        }
+        if (isProbability) {
+            Map<String, Map<Float, Float>> probList = databaseHandlerService.getEnsembleProbabilityList();
+            if (probList == null || probList.isEmpty()) {
+                tablePanel.clearData();
+            } else {
+                tablePanel.setProbabilityData(probList);
+            }
+        } else {
+            Map<String, float[]> metricValues = getMetricValuesFromResidentMetricDatabase();
+            if (metricValues.isEmpty()) {
+                tablePanel.clearData();
+            } else {
+                tablePanel.setScatterData(metricValues);
+            }
+        }
+    }
+
     private boolean isMetricArrayOfArray(MetricCollectionTimeSeries metricCollections) {
         return metricCollections.getMetricType() == MetricTypes.ARRAY_OF_ARRAY;
     }
@@ -127,6 +150,7 @@ public class EnsembleArrayChartManager extends ChartManager {
     public void propertyChange(PropertyChangeEvent evt) {
         if(evt.getSource() instanceof StatisticsMap && evt.getPropertyName().equalsIgnoreCase("ensemble")) {
             addEnsembleValues();
+            updateTableData();
         } else if (evt.getSource() instanceof  StatisticsMap && evt.getPropertyName().equalsIgnoreCase("probability")) {
             isProbability = (boolean) evt.getNewValue();
         }
@@ -136,6 +160,7 @@ public class EnsembleArrayChartManager extends ChartManager {
             databaseHandlerService.refreshEnsembleProbabilityList();
             this.databaseHandlerService = DatabaseHandlerService.getInstance();
             addEnsembleValues();
+            updateTableData();
         }
     }
 }
