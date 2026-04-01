@@ -68,6 +68,7 @@ public class ComputePanelController implements PropertyChangeListener {
                         computeMetric(ets, stat, chartType);
                     }
                 }
+
                 statisticsMap.setTimeStatisticsMap();
             }
         });
@@ -95,6 +96,7 @@ public class ComputePanelController implements PropertyChangeListener {
                         computeMetric(ets, stat, chartType);
                     }
                 }
+
                 statisticsMap.setEnsembleStatisticsMap();
             }
         });
@@ -115,6 +117,7 @@ public class ComputePanelController implements PropertyChangeListener {
                         computeMetric(ets, stat, ChartType.TIMEPLOT);
                     }
                 }
+
                 statisticsMap.setTimeStatisticsMap();
             }
 
@@ -159,6 +162,7 @@ public class ComputePanelController implements PropertyChangeListener {
                         computeMetric(ets, stat, ChartType.SCATTERPLOT);
                     }
                 }
+
                 statisticsMap.setEnsembleStatisticsMap();
             }
 

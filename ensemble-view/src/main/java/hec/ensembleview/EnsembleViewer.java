@@ -27,8 +27,8 @@ public class EnsembleViewer {
 
     public EnsembleViewer() {
         OptionsPanel optionsPanel = new OptionsPanel();
-        new DatabaseController(optionsPanel);
         createTabs();
+        new DatabaseController(optionsPanel, tabPane);
 
         new EnsembleParentPanel(optionsPanel, tabPane);
     }
