@@ -66,7 +66,7 @@ class MetricCollectionTimeSeriesUnitsTest {
             Computable cumulative = new NDayMultiComputable(cumulativeComputable, nDayDuration);
 
             //Step Two
-            ComputableIndex percentileIndexCompute = new PercentileIndexComputable(targetPercentile);
+            ComputableIndex percentileIndexCompute = new NearestIndexComputable(new PercentilesComputable(targetPercentile));
             SingleTimeSeriesComputable twoStep = new TwoStepComputableSingleMetricTimeSeriesWithSingleCompute(cumulative, percentileIndexCompute);
             MetricCollectionTimeSeries output = ets.computeSingleValueSummaryTimeSeriesWithSingleCompute(twoStep);
             _db.write(output);
@@ -119,7 +119,7 @@ class MetricCollectionTimeSeriesUnitsTest {
             NDayMultiComputable cumulative = new NDayMultiComputable(cumulativeComputable, nDayDurations);
 
             //Step Two  
-            ComputableIndex percentileIndexCompute = new PercentileIndexComputable(targetPercentile);
+            ComputableIndex percentileIndexCompute = new NearestIndexComputable(new PercentilesComputable(targetPercentile));
             MultiTimeSeriesComputable twoStep = new TwoStepComputableSingleMetricTimeSeriesWithMultiCompute(cumulative, percentileIndexCompute);
             
             // This now returns multiple time series, one for each duration
