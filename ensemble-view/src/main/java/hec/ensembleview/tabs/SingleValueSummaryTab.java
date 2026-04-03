@@ -33,7 +33,7 @@ public class SingleValueSummaryTab extends JPanel {
     private JPanel topPanel;
     private JPanel bottomPanel;
     private SingleValueDataTransformView singleValueDataTransformView;
-    private SingleValueSummaryType selectedSummaryType = SingleValueSummaryType.COMPUTEACROSSENSEMBLES;
+    private SingleValueSummaryType selectedSummaryType = SingleValueSummaryType.COMPUTEACROSSTIME;
     private JComboBox<Statistics> statComboBox1;
     private JComboBox<Statistics> statComboBox2;
     private String computeOrder1;
@@ -234,33 +234,28 @@ public class SingleValueSummaryTab extends JPanel {
     }
 
     private void updateFindButtonState() {
-        Statistics stat1 = getFirstStat();
-        Statistics stat2 = getSecondStat();
-        boolean isCumulative = stat1 == Statistics.CUMULATIVE;
-        boolean enabled = isCumulative &&
-                (stat2 == Statistics.PERCENTILES || stat2 == Statistics.MIN ||
-                        stat2 == Statistics.MAX || stat2 == Statistics.AVERAGE);
-        findButton.setEnabled(enabled);
-        toggleButton.setEnabled(isCumulative);
+        boolean isAcrossTime = selectedSummaryType == SingleValueSummaryType.COMPUTEACROSSTIME
+                || selectedSummaryType == SingleValueSummaryType.COMPUTECUMULATIVE;
+        findButton.setEnabled(isAcrossTime);
+        toggleButton.setEnabled(isAcrossTime);
 
-        if (isCumulative) {
+        if (isAcrossTime) {
             if (showingChart) {
                 toggleButton.setToolTipText("Switch to text view");
             } else {
                 toggleButton.setToolTipText("Switch to chart view");
             }
         } else {
-            toggleButton.setToolTipText("Select Across Time and Cumulative in Step 1 to enable chart view");
+            toggleButton.setToolTipText("Select Across Time to enable chart view");
         }
 
-        // Switch back to text view when cumulative is deselected
-        if (!isCumulative && showingChart) {
+        // Switch back to text view when switching away from Across Time
+        if (!isAcrossTime && showingChart) {
             showingChart = false;
             toggleButton.setSelected(false);
             toggleButton.setIcon(new ChartIcon());
             bottomCardLayout.show(bottomPanel, TEXT_CARD);
             findButton.setVisible(false);
-
         }
     }
 
@@ -274,47 +269,59 @@ public class SingleValueSummaryTab extends JPanel {
             }
 
             Statistics stat1 = getFirstStat();
-            float[] dayValues = getFirstTextFieldValue();
+            float[] stat1Values = getFirstTextFieldValue();
             Statistics stat2 = getSecondStat();
             float[] stat2Values = getSecondTextFieldValue();
 
-            if (stat1 == Statistics.CUMULATIVE && dayValues.length == 0) {
+            // Validate text field inputs for stats that require them
+            if (stat1 == Statistics.CUMULATIVE && stat1Values.length == 0) {
                 JOptionPane.showMessageDialog(this, "Enter a day value for Cumulative.", "Input Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            if (stat2 == Statistics.PERCENTILES && stat2Values.length == 0) {
+                JOptionPane.showMessageDialog(this, "Enter a percentile value.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-            // For percentiles, each value is a separate percentile to find
-            // For min/max/average, stat2Values is empty (no text field needed)
+            // Step 1: compute a value per ensemble member across time
+            // For CUMULATIVE, loop over each day value; for others, compute once
+            float[][] step1Iterations;
+            String[] step1Labels;
+            if (stat1 == Statistics.CUMULATIVE) {
+                step1Iterations = new float[stat1Values.length][];
+                step1Labels = new String[stat1Values.length];
+                for (int i = 0; i < stat1Values.length; i++) {
+                    Computable c = new NDayMultiComputable(new CumulativeComputable(), new float[]{stat1Values[i]});
+                    step1Iterations[i] = ensemble.iterateForTracesAcrossTime(c);
+                    step1Labels[i] = String.format("%.0f-day Cumulative", stat1Values[i]);
+                }
+            } else {
+                Computable c = StatComputationHelper.getComputable(stat1, stat1Values);
+                step1Iterations = new float[][]{ensemble.iterateForTracesAcrossTime(c)};
+                step1Labels = new String[]{stat1.toString()};
+            }
+
+            // Step 2: for each step 1 result, find the nearest ensemble member
+            // For PERCENTILES, loop over each percentile; for others, compute once
             float[] step2Entries;
             if (stat2 == Statistics.PERCENTILES) {
-                if (stat2Values.length == 0) {
-                    JOptionPane.showMessageDialog(this, "Enter a percentile value.", "Input Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
                 step2Entries = stat2Values;
             } else {
-                step2Entries = new float[]{0}; // single placeholder for min/max/avg
+                step2Entries = new float[]{0}; // single placeholder
             }
 
             List<Integer> highlightedMembers = new java.util.ArrayList<>();
 
-            for (float day : dayValues) {
-                float[] singleDay = {day};
-                // Compute cumulative volume per ensemble member for this day
-                Computable step1 = new NDayMultiComputable(new CumulativeComputable(), singleDay);
-                float[] memberVolumes = ensemble.iterateForTracesAcrossTime(step1);
-
+            for (int s1 = 0; s1 < step1Iterations.length; s1++) {
+                float[] memberValues = step1Iterations[s1];
                 for (float entry : step2Entries) {
-                    // Build the step 2 computable for this specific value
                     float[] singleVal = (stat2 == Statistics.PERCENTILES) ? new float[]{entry} : new float[0];
                     Computable step2 = StatComputationHelper.getComputable(stat2, singleVal);
                     NearestIndexComputable finder = new NearestIndexComputable(step2);
-                    int memberIndex = finder.compute(memberVolumes);
+                    int memberIndex = finder.compute(memberValues);
                     highlightedMembers.add(memberIndex);
 
-                    // Compute the target value for display
-                    float targetValue = step2.compute(memberVolumes);
-                    String dayLabel = String.format("%.0f-day Cumulative", day);
+                    float targetValue = step2.compute(memberValues);
                     String statLabel;
                     if (stat2 == Statistics.PERCENTILES) {
                         statLabel = String.format("%.2f%% Percentile", entry * 100);
@@ -322,7 +329,7 @@ public class SingleValueSummaryTab extends JPanel {
                         statLabel = stat2.toString();
                     }
                     writeLn("Found: Member " + (memberIndex + 1) + " is closest to " +
-                            statLabel + " of " + dayLabel +
+                            statLabel + " of " + step1Labels[s1] +
                             " (value = " + targetValue + ")");
                 }
             }
@@ -567,7 +574,7 @@ public class SingleValueSummaryTab extends JPanel {
 
         toggleButton = createToggleButton();
         toggleButton.setEnabled(false);
-        toggleButton.setToolTipText("Select Across Time and Cumulative in Step 1 to enable chart view");
+        toggleButton.setToolTipText("Select Across Time to enable chart view");
     }
 
     private JToggleButton createToggleButton() {

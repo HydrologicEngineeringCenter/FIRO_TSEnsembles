@@ -47,7 +47,6 @@ public class SingleValueDataTransformView extends DataTransformView {
         this.acrossEnsembles.setFont(DefaultSettings.setSegoeFontText());
         add(this.acrossEnsembles);
         this.acrossEnsembles.setEnabled(true);
-        this.acrossEnsembles.setSelected(true);
         this.acrossEnsembles.addActionListener(this);
 
         this.acrossTime = new JRadioButton();
@@ -55,6 +54,7 @@ public class SingleValueDataTransformView extends DataTransformView {
         this.acrossTime.setText(ACROSSTIMESTRING);
         this.acrossTime.setFont(DefaultSettings.setSegoeFontText());
         add(this.acrossTime);
+        this.acrossTime.setSelected(true);
         this.acrossTime.addActionListener(this);
     }
 
