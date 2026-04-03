@@ -111,7 +111,12 @@ public class PlotStatisticsForChartType {
 
     // Overloading EnsemblePlot since probability requires both an probability value (x value) and the metric value (y value).
     public static void addStatisticsToEnsemblePlot(EnsembleChartAcrossEnsembles chart, String stat, Map<Float, Float> probValues) {
+        addStatisticsToEnsemblePlot(chart, stat, probValues, null);
+    }
+
+    public static void addStatisticsToEnsemblePlot(EnsembleChartAcrossEnsembles chart, String stat, Map<Float, Float> probValues, int[] memberIndices) {
         Statistics statType = Statistics.getStatName(stat);
+        PointSpec pointSpec;
         switch (statType) {
             case MIN:
             case MAX:
@@ -119,13 +124,15 @@ public class PlotStatisticsForChartType {
             case MEDIAN:
             case STANDARDDEVIATION:
             case PERCENTILES:
-                chart.addProbPoint(
-                        new PointSpec(ViewportLayout.Y1, probValues, getLineWidthForStatType(statType), getColorForStatType(statType), stat));
+                pointSpec = new PointSpec(ViewportLayout.Y1, probValues, getLineWidthForStatType(statType), getColorForStatType(statType), stat);
+                if (memberIndices != null) pointSpec.setMemberIndices(memberIndices);
+                chart.addProbPoint(pointSpec);
                 break;
             case NDAYCOMPUTABLE:
             case TOTAL:
-                chart.addProbPoint(
-                        new PointSpec(ViewportLayout.Y2, probValues, getLineWidthForStatType(statType), getColorForStatType(statType), stat));
+                pointSpec = new PointSpec(ViewportLayout.Y2, probValues, getLineWidthForStatType(statType), getColorForStatType(statType), stat);
+                if (memberIndices != null) pointSpec.setMemberIndices(memberIndices);
+                chart.addProbPoint(pointSpec);
                 break;
             default:
                 logger.log(Level.INFO, "Statistic does not exist for Probability plot metric compute");
