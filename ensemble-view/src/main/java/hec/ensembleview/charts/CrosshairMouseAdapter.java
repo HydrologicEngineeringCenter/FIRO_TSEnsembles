@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class CrosshairMouseAdapter extends MouseAdapter {
     private static final int TOUCH_RADIUS_Y_PIXELS = 8;
+    private static final int TOUCH_RADIUS_PIXELS = 12;
     private static final Color CROSSHAIR_COLOR = new Color(100, 100, 100, 180);
 
     private final Viewport viewport;
@@ -32,7 +33,11 @@ public class CrosshairMouseAdapter extends MouseAdapter {
     }
 
     public void addSeries(String name, double[] xValues, double[] yValues) {
-        seriesList.add(new DataSeries(name, xValues, yValues));
+        seriesList.add(new DataSeries(name, xValues, yValues, null));
+    }
+
+    public void addPointSeries(String name, double[] xValues, double[] yValues, int[] memberIndices) {
+        seriesList.add(new DataSeries(name, xValues, yValues, memberIndices));
     }
 
     public void clearSeries() {
@@ -82,19 +87,49 @@ public class CrosshairMouseAdapter extends MouseAdapter {
         double worldX = scl.x2e(currentMouse.x);
         double worldY = scl.y2n(currentMouse.y);
 
-        // Check if the crosshair is touching any ensemble line.
-        // For each series, find the two bracketing x-points around the mouse,
-        // interpolate the y-value where the line actually is, and check proximity.
+        // Try point-snap first (for scatter/probability data with member indices)
+        String pointResult = findNearestPoint(scl);
+        if (pointResult != null) {
+            tooltipText = pointResult;
+            return;
+        }
+
+        // Fall back to line interpolation (for time series data)
+        String lineResult = findNearestLine(scl, worldX, worldY);
+        tooltipText = (lineResult != null) ? lineResult : String.format("y: %.2f", worldY);
+    }
+
+    private String findNearestPoint(Scale scl) {
+        double bestDistPx = Double.MAX_VALUE;
+        String bestLabel = null;
+
+        for (DataSeries series : seriesList) {
+            if (series.memberIndices == null) continue;
+
+            for (int i = 0; i < series.xValues.length; i++) {
+                int ptX = scl.e2x(series.xValues[i]);
+                int ptY = scl.n2y(series.yValues[i]);
+                double dist = Math.sqrt(Math.pow(ptX - currentMouse.x, 2) + Math.pow(ptY - currentMouse.y, 2));
+
+                if (dist <= TOUCH_RADIUS_PIXELS && dist < bestDistPx) {
+                    bestDistPx = dist;
+                    bestLabel = String.format("Member %d  %s: %.2f",
+                            series.memberIndices[i], series.name, series.yValues[i]);
+                }
+            }
+        }
+        return bestLabel;
+    }
+
+    private String findNearestLine(Scale scl, double worldX, double worldY) {
         String touchedName = null;
         double touchedYValue = 0;
         double bestYDistPx = Double.MAX_VALUE;
 
         for (DataSeries series : seriesList) {
-            if (series.xValues.length < 2) {
-                continue;
-            }
+            if (series.memberIndices != null) continue; // skip point series
+            if (series.xValues.length < 2) continue;
 
-            // Find the bracketing pair: the last point with x <= worldX
             int leftIdx = -1;
             for (int i = 0; i < series.xValues.length - 1; i++) {
                 if (series.xValues[i] <= worldX && series.xValues[i + 1] >= worldX) {
@@ -103,21 +138,15 @@ public class CrosshairMouseAdapter extends MouseAdapter {
                 }
             }
 
-            double interpolatedY;
-            if (leftIdx >= 0) {
-                // Interpolate y between the two bracketing points
-                double x0 = series.xValues[leftIdx];
-                double x1 = series.xValues[leftIdx + 1];
-                double y0 = series.yValues[leftIdx];
-                double y1 = series.yValues[leftIdx + 1];
-                double t = (x1 != x0) ? (worldX - x0) / (x1 - x0) : 0;
-                interpolatedY = y0 + t * (y1 - y0);
-            } else {
-                // Mouse is outside the series x-range, skip
-                continue;
-            }
+            if (leftIdx < 0) continue;
 
-            // Check pixel distance between interpolated line position and mouse
+            double x0 = series.xValues[leftIdx];
+            double x1 = series.xValues[leftIdx + 1];
+            double y0 = series.yValues[leftIdx];
+            double y1 = series.yValues[leftIdx + 1];
+            double t = (x1 != x0) ? (worldX - x0) / (x1 - x0) : 0;
+            double interpolatedY = y0 + t * (y1 - y0);
+
             int lineLocalY = scl.n2y(interpolatedY);
             double yDistPx = Math.abs(lineLocalY - currentMouse.y);
 
@@ -129,10 +158,9 @@ public class CrosshairMouseAdapter extends MouseAdapter {
         }
 
         if (touchedName != null) {
-            tooltipText = String.format("%s  y: %.2f", touchedName, touchedYValue);
-        } else {
-            tooltipText = String.format("y: %.2f", worldY);
+            return String.format("%s  y: %.2f", touchedName, touchedYValue);
         }
+        return null;
     }
 
     public void paintCrosshair(Graphics2D g2, int viewportX, int viewportY, int viewportWidth, int viewportHeight) {
@@ -187,11 +215,13 @@ public class CrosshairMouseAdapter extends MouseAdapter {
         final String name;
         final double[] xValues;
         final double[] yValues;
+        final int[] memberIndices;
 
-        DataSeries(String name, double[] xValues, double[] yValues) {
+        DataSeries(String name, double[] xValues, double[] yValues, int[] memberIndices) {
             this.name = name;
             this.xValues = xValues;
             this.yValues = yValues;
+            this.memberIndices = memberIndices;
         }
     }
 }

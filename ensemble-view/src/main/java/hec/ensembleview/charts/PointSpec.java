@@ -10,8 +10,9 @@ public class PointSpec {
     int lineWidth;
     Color pointColor;
     String pointName;
+    int[] memberIndices;
 
-    public PointSpec(String rangeAxis, float[] y,int lineWidth,
+    public PointSpec(String rangeAxis, float[] y, int lineWidth,
                      Color pointColor, String pointName) {
         this.rangeAxis = rangeAxis;
         this.yValue = y;
@@ -27,5 +28,13 @@ public class PointSpec {
         this.lineWidth = lineWidth;
         this.pointColor = pointColor;
         this.pointName = pointName;
+    }
+
+    /**
+     * Sets the 1-based member indices corresponding to each data point.
+     * For probability plots, this tracks which ensemble member each sorted point came from.
+     */
+    public void setMemberIndices(int[] memberIndices) {
+        this.memberIndices = memberIndices;
     }
 }

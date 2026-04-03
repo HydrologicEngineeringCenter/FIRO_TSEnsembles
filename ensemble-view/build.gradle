@@ -42,6 +42,7 @@ test {
 
 application {
     mainClass = 'hec.ensembleview.EnsembleViewer'
+    applicationDefaultJvmArgs = ['-Djava.library.path=APP_HOME_PLACEHOLDER/natives']
 }
 
 java {
@@ -51,6 +52,35 @@ java {
 
 run {
     jvmArgs = ["-Djava.library.path=${buildDir}/../../ensemble-dss/build/x64"]
+}
+
+tasks.register('copyNatives', Copy) {
+    // example source folder containing natives
+    from("${project(':ensemble-dss').buildDir}/x64")
+    into("$buildDir/natives")
+}
+
+distributions {
+    main {
+        contents {
+            from(tasks.named('copyNatives')) {
+                into 'natives'
+            }
+        }
+    }
+}
+
+tasks.named('distZip') { dependsOn(tasks.named('copyNatives')) }
+tasks.named('distTar') { dependsOn(tasks.named('copyNatives')) }
+
+// Fix native library path in generated start scripts to use APP_HOME
+startScripts {
+    doLast {
+        // Windows bat: replace placeholder with %APP_HOME%
+        windowsScript.text = windowsScript.text.replace('APP_HOME_PLACEHOLDER', '%APP_HOME%')
+        // Unix sh: replace placeholder with $APP_HOME
+        unixScript.text = unixScript.text.replace('APP_HOME_PLACEHOLDER', '\\$APP_HOME')
+    }
 }
 
 jar {
