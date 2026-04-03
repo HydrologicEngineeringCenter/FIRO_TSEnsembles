@@ -140,7 +140,8 @@ public class EnsembleArrayChartManager extends ChartManager {
                 continue;
             }
             chartLabelsForStatistic(Statistics.getStatName(entry.getKey()));
-            PlotStatisticsForChartType.addStatisticsToEnsemblePlot((EnsembleChartAcrossEnsembles) chart, entry.getKey(), entry.getValue());
+            int[] memberIndices = databaseHandlerService.getEnsembleProbabilityMemberIndices(entry.getKey());
+            PlotStatisticsForChartType.addStatisticsToEnsemblePlot((EnsembleChartAcrossEnsembles) chart, entry.getKey(), entry.getValue(), memberIndices);
         }
         chartPanel.revalidate();
         chartPanel.repaint();
