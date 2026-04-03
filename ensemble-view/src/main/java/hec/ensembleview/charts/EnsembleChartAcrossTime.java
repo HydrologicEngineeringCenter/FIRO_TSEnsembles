@@ -237,6 +237,10 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
             }
         }
         plotPanel.buildComponents(layout);
+        setPanAdapter();
+        setupCrosshair();
+        populateCrosshairData();
+        setMouseWheelScroll();
     }
 
     private void buildViewPortGraph() {
