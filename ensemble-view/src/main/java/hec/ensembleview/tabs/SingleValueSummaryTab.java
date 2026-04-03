@@ -1,23 +1,32 @@
 package hec.ensembleview.tabs;
 
-import hec.ensemble.stats.Statistics;
+import hec.ensemble.Ensemble;
+import hec.ensemble.EnsembleTimeSeries;
+import hec.ensemble.stats.*;
 import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.DefaultSettings;
+import hec.ensembleview.PlotStatisticsForChartType;
 import hec.ensembleview.StatComputationHelper;
+import hec.ensembleview.charts.EnsembleChartAcrossTime;
 import hec.ensembleview.controllers.SingleValueDataViewListener;
 import hec.ensembleview.mappings.SingleValueComboBoxMap;
 import hec.ensembleview.mappings.SingleValueSummaryType;
 import hec.ensembleview.mappings.StatisticUIType;
 import hec.ensembleview.mappings.StatisticsUITypeMap;
 import hec.ensembleview.viewpanels.SingleValueDataTransformView;
-import hec.metrics.MetricCollection;
+import hec.gfx2d.G2dPanel;
 import hec.metrics.MetricCollectionTimeSeries;
+import hec.metrics.MetricCollection;
+import hec.metrics.MetricTypes;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class SingleValueSummaryTab extends JPanel {
@@ -34,10 +43,21 @@ public class SingleValueSummaryTab extends JPanel {
     private JTextField textField1;
     private JTextField textField2;
     private JButton computeButton;
+    private JButton findButton;
     private JButton clearButton;
     private JTextArea outputArea;
     private String units;
     private final transient StatComputationHelper statComputationHelper = new StatComputationHelper();
+
+    // Chart/text toggle
+    private JToggleButton toggleButton;
+    private final CardLayout bottomCardLayout = new CardLayout();
+    private JPanel chartContainerPanel;
+    private transient EnsembleChartAcrossTime currentChart;
+    private G2dPanel currentChartPanel;
+    private boolean showingChart = false;
+    private static final String TEXT_CARD = "text";
+    private static final String CHART_CARD = "chart";
 
     public SingleValueSummaryTab() {
         initializeUI();
@@ -76,6 +96,9 @@ public class SingleValueSummaryTab extends JPanel {
     private void removeActionListener() {
         for(ActionListener listener : computeButton.getActionListeners()) {
             computeButton.removeActionListener(listener);
+        }
+        for(ActionListener listener : findButton.getActionListeners()) {
+            findButton.removeActionListener(listener);
         }
     }
 
@@ -174,14 +197,21 @@ public class SingleValueSummaryTab extends JPanel {
         statComboBox1.addActionListener(e -> {
             setTextboxEditable(textField1, statComboBox1);
             setTextFieldToolTip(textField1, statComboBox1);
+            updateFindButtonState();
         });
-        
+
         statComboBox2.addActionListener(e -> {
             setTextboxEditable(textField2, statComboBox2);
             setTextFieldToolTip(textField2, statComboBox2);
+            updateFindButtonState();
         });
 
-        clearButton.addActionListener(e -> outputArea.setText(""));
+        clearButton.addActionListener(e -> {
+            outputArea.setText("");
+            if (showingChart) {
+                buildChart();
+            }
+        });
 
         computeButton.addActionListener(e -> {
             try {
@@ -197,6 +227,169 @@ public class SingleValueSummaryTab extends JPanel {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
             }
         });
+
+        findButton.addActionListener(e -> findEnsemble());
+
+        updateFindButtonState();
+    }
+
+    private void updateFindButtonState() {
+        Statistics stat1 = getFirstStat();
+        Statistics stat2 = getSecondStat();
+        boolean isCumulative = stat1 == Statistics.CUMULATIVE;
+        boolean enabled = isCumulative &&
+                (stat2 == Statistics.PERCENTILES || stat2 == Statistics.MIN ||
+                        stat2 == Statistics.MAX || stat2 == Statistics.AVERAGE);
+        findButton.setEnabled(enabled);
+        toggleButton.setEnabled(isCumulative);
+
+        if (isCumulative) {
+            if (showingChart) {
+                toggleButton.setToolTipText("Switch to text view");
+            } else {
+                toggleButton.setToolTipText("Switch to chart view");
+            }
+        } else {
+            toggleButton.setToolTipText("Select Across Time and Cumulative in Step 1 to enable chart view");
+        }
+
+        // Switch back to text view when cumulative is deselected
+        if (!isCumulative && showingChart) {
+            showingChart = false;
+            toggleButton.setSelected(false);
+            toggleButton.setIcon(new ChartIcon());
+            bottomCardLayout.show(bottomPanel, TEXT_CARD);
+            findButton.setVisible(false);
+
+        }
+    }
+
+    private void findEnsemble() {
+        try {
+            DatabaseHandlerService db = DatabaseHandlerService.getInstance();
+            Ensemble ensemble = db.getEnsemble();
+            if (ensemble == null) {
+                JOptionPane.showMessageDialog(this, "No ensemble data loaded.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            Statistics stat1 = getFirstStat();
+            float[] dayValues = getFirstTextFieldValue();
+            Statistics stat2 = getSecondStat();
+            float[] stat2Values = getSecondTextFieldValue();
+
+            if (stat1 == Statistics.CUMULATIVE && dayValues.length == 0) {
+                JOptionPane.showMessageDialog(this, "Enter a day value for Cumulative.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // For percentiles, each value is a separate percentile to find
+            // For min/max/average, stat2Values is empty (no text field needed)
+            float[] step2Entries;
+            if (stat2 == Statistics.PERCENTILES) {
+                if (stat2Values.length == 0) {
+                    JOptionPane.showMessageDialog(this, "Enter a percentile value.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                step2Entries = stat2Values;
+            } else {
+                step2Entries = new float[]{0}; // single placeholder for min/max/avg
+            }
+
+            List<Integer> highlightedMembers = new java.util.ArrayList<>();
+
+            for (float day : dayValues) {
+                float[] singleDay = {day};
+                // Compute cumulative volume per ensemble member for this day
+                Computable step1 = new NDayMultiComputable(new CumulativeComputable(), singleDay);
+                float[] memberVolumes = ensemble.iterateForTracesAcrossTime(step1);
+
+                for (float entry : step2Entries) {
+                    // Build the step 2 computable for this specific value
+                    float[] singleVal = (stat2 == Statistics.PERCENTILES) ? new float[]{entry} : new float[0];
+                    Computable step2 = StatComputationHelper.getComputable(stat2, singleVal);
+                    NearestIndexComputable finder = new NearestIndexComputable(step2);
+                    int memberIndex = finder.compute(memberVolumes);
+                    highlightedMembers.add(memberIndex);
+
+                    // Compute the target value for display
+                    float targetValue = step2.compute(memberVolumes);
+                    String dayLabel = String.format("%.0f-day Cumulative", day);
+                    String statLabel;
+                    if (stat2 == Statistics.PERCENTILES) {
+                        statLabel = String.format("%.2f%% Percentile", entry * 100);
+                    } else {
+                        statLabel = stat2.toString();
+                    }
+                    writeLn("Found: Member " + (memberIndex + 1) + " is closest to " +
+                            statLabel + " of " + dayLabel +
+                            " (value = " + targetValue + ")");
+                }
+            }
+
+            // Build chart and highlight all found members
+            buildChart();
+            if (currentChart != null) {
+                currentChart.highlightMembers(highlightedMembers);
+                if (currentChartPanel != null) {
+                    currentChartPanel.repaint();
+                }
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Find Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void buildChart() {
+        chartContainerPanel.removeAll();
+
+        DatabaseHandlerService db = DatabaseHandlerService.getInstance();
+        if (db.getDbHandlerRid() == null || db.getDbHandlerZdt() == null) return;
+
+        // Mirror the Time Series tab: use cumulative ensemble if cumulative mode is active
+        Ensemble ensemble;
+        if (db.isCumulativeView()) {
+            EnsembleTimeSeries cumulativeEts = db.getCumulativeEnsembleTimeSeries();
+            Ensemble cumEnsemble = (cumulativeEts != null) ? cumulativeEts.getEnsemble(db.getDbHandlerZdt()) : null;
+            ensemble = (cumEnsemble != null) ? cumEnsemble : db.getEnsemble();
+        } else {
+            ensemble = db.getEnsemble();
+        }
+        if (ensemble == null) return;
+
+        currentChart = new EnsembleChartAcrossTime();
+        currentChart.setYLabel(db.getDbHandlerRid().parameter + " (" + ensemble.getUnits() + ")");
+
+        // Add ensemble member lines
+        PlotStatisticsForChartType.addLineMembersToChart(currentChart, ensemble.getValues(), ensemble.startDateTime());
+
+        // Generate the chart panel (only Y1 data at this point)
+        currentChartPanel = currentChart.generateChart();
+        chartContainerPanel.add(currentChartPanel, BorderLayout.CENTER);
+
+        // Add any metrics computed in the Time Series tab
+        addMetricsToChart(currentChart, ensemble, db);
+
+        chartContainerPanel.revalidate();
+        chartContainerPanel.repaint();
+    }
+
+    private void addMetricsToChart(EnsembleChartAcrossTime chart, Ensemble ensemble, DatabaseHandlerService db) {
+        Map<Statistics, MetricCollectionTimeSeries> metricMap = db.getMetricCollectionTimeSeriesMap();
+        ZonedDateTime[] dates = ensemble.startDateTime();
+
+        for (Map.Entry<Statistics, MetricCollectionTimeSeries> entry : metricMap.entrySet()) {
+            MetricCollectionTimeSeries mcts = entry.getValue();
+            if (mcts.getMetricType() == MetricTypes.TIMESERIES_OF_ARRAY) {
+                db.setResidentMetricCollectionTimeSeries(mcts);
+                String stats = db.getResidentMetricStatisticsList();
+                String[] statCollection = stats.split("\\|");
+                float[][] vals = db.getResidentMetricStatisticsValues();
+                for (int i = 0; i < vals.length; i++) {
+                    PlotStatisticsForChartType.addMetricStatisticsToTimePlot(chart, statCollection[i], vals[i], dates);
+                }
+            }
+        }
     }
 
     private void setTextFieldToolTip(JTextField textField, JComboBox<Statistics> comboBox) {
@@ -231,26 +424,16 @@ public class SingleValueSummaryTab extends JPanel {
 
     private void organizeUI() {
         setLayout(new BorderLayout());
-        bottomPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 
-        // topPanel contains the comboBoxes, textfields, and buttons.
-        // bottomPanel contains the text area.
-        add(topPanel, BorderLayout.PAGE_START);
-        add(bottomPanel, BorderLayout.CENTER);
+        // --- Top Panel: Compute Selection + Data View Row ---
+        topPanel.setLayout(new BorderLayout());
 
-        // creating panel to hold comboBoxes, textfields, and buttons and assigning to topPanel
+        // Compute Selection Panel
         JPanel selectionPanel = new JPanel();
         Border grayLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
         selectionPanel.setBorder((BorderFactory.createTitledBorder(grayLine, "Compute Selection", TitledBorder.LEFT, TitledBorder.TOP)));
-        ((TitledBorder )selectionPanel.getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
+        ((TitledBorder)selectionPanel.getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
 
-        topPanel.setLayout(new BorderLayout());
-        topPanel.add(selectionPanel, BorderLayout.PAGE_START);
-
-        singleValueDataTransformView = new SingleValueDataTransformView();
-        topPanel.add(singleValueDataTransformView, BorderLayout.SOUTH);
-
-        // organizing comboboxes, textfields, and buttons with GridBagLayout
         selectionPanel.setLayout(new GridBagLayout());
         GridBagConstraints gc = new GridBagConstraints();
 
@@ -262,43 +445,36 @@ public class SingleValueSummaryTab extends JPanel {
 
         gc.gridx = 0;
         gc.gridy = 0;
-
         gc.weightx = .1;
-
         gc.anchor = GridBagConstraints.LINE_START;
         selectionPanel.add(label1, gc);
 
         gc.gridx = 1;
         gc.gridy = 0;
         gc.insets = new Insets(5, 0, 5, 0);
-
         gc.anchor = GridBagConstraints.LINE_START;
         selectionPanel.add(statComboBox1, gc);
 
         gc.gridx = 2;
         gc.gridy = 0;
         gc.weightx = 1;
-
         gc.anchor = GridBagConstraints.LINE_START;
         selectionPanel.add(textField1, gc);
 
         gc.gridx = 0;
         gc.gridy = 1;
         gc.weightx = .1;
-
         gc.anchor = GridBagConstraints.LINE_START;
         selectionPanel.add(label2, gc);
 
         gc.gridx = 1;
         gc.gridy = 1;
-
         gc.anchor = GridBagConstraints.LINE_START;
         selectionPanel.add(statComboBox2, gc);
 
         gc.gridx = 2;
         gc.gridy = 1;
         gc.weightx = 1;
-
         gc.anchor = GridBagConstraints.LINE_START;
         selectionPanel.add(textField2, gc);
 
@@ -306,19 +482,44 @@ public class SingleValueSummaryTab extends JPanel {
         buttonGroup.add(computeButton);
         buttonGroup.add(clearButton);
         gc.anchor = GridBagConstraints.FIRST_LINE_END;
-
         gc.gridx = 5;
         gc.gridy = 1;
         gc.weightx = .8;
         gc.weighty = .2;
-
         selectionPanel.add(buttonGroup, gc);
 
-        BorderLayout rightArea = new BorderLayout();
-        bottomPanel.setLayout(rightArea);
+        topPanel.add(selectionPanel, BorderLayout.PAGE_START);
+
+        // Data View Row: toggle button + Compute Order panel + Find button
+        singleValueDataTransformView = new SingleValueDataTransformView();
+        JPanel dataViewRow = new JPanel(new BorderLayout());
+        JPanel togglePanel = new JPanel(new GridBagLayout());
+        togglePanel.add(toggleButton);
+        dataViewRow.add(togglePanel, BorderLayout.WEST);
+        dataViewRow.add(singleValueDataTransformView, BorderLayout.CENTER);
+
+        JPanel findPanel = new JPanel(new GridBagLayout());
+        findPanel.add(findButton);
+        findButton.setVisible(false);
+        dataViewRow.add(findPanel, BorderLayout.EAST);
+
+        topPanel.add(dataViewRow, BorderLayout.SOUTH);
+
+        add(topPanel, BorderLayout.PAGE_START);
+
+        // --- Bottom Panel: CardLayout with text area and chart ---
+        bottomPanel.setLayout(bottomCardLayout);
+        bottomPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 
         JScrollPane scrollPane = new JScrollPane(outputArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        bottomPanel.add(scrollPane, BorderLayout.CENTER);
+        bottomPanel.add(scrollPane, TEXT_CARD);
+
+        chartContainerPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(chartContainerPanel, CHART_CARD);
+
+        bottomCardLayout.show(bottomPanel, TEXT_CARD);
+
+        add(bottomPanel, BorderLayout.CENTER);
     }
 
     private void setupStatComboBoxes(SingleValueSummaryType option) {
@@ -356,10 +557,44 @@ public class SingleValueSummaryTab extends JPanel {
         textField2.setEditable(false);
 
         computeButton = new JButton("Compute");
+        findButton = new JButton("Find");
+        findButton.setEnabled(false);
+        findButton.setToolTipText("Find the ensemble member closest to the computed value");
         clearButton = new JButton("Clear");
 
         outputArea = new JTextArea();
         outputArea.setLineWrap(true);
+
+        toggleButton = createToggleButton();
+        toggleButton.setEnabled(false);
+        toggleButton.setToolTipText("Select Across Time and Cumulative in Step 1 to enable chart view");
+    }
+
+    private JToggleButton createToggleButton() {
+        JToggleButton btn = new JToggleButton(new ChartIcon());
+        btn.setToolTipText("Toggle Text/Chart View");
+        btn.setPreferredSize(new Dimension(28, 28));
+        btn.setFocusPainted(false);
+        btn.setMargin(new Insets(2, 2, 2, 2));
+        btn.addActionListener(e -> {
+            showingChart = btn.isSelected();
+            if (showingChart) {
+                btn.setIcon(new TextIcon());
+                btn.setToolTipText("Switch to text view");
+                buildChart();
+                bottomCardLayout.show(bottomPanel, CHART_CARD);
+                findButton.setVisible(true);
+
+                updateFindButtonState();
+            } else {
+                btn.setIcon(new ChartIcon());
+                btn.setToolTipText("Switch to chart view");
+                bottomCardLayout.show(bottomPanel, TEXT_CARD);
+                findButton.setVisible(false);
+    
+            }
+        });
+        return btn;
     }
 
     private void tryShowingOutput(float result) {
@@ -377,5 +612,56 @@ public class SingleValueSummaryTab extends JPanel {
             writeLn(String.join(" ", "Computing", getFirstStatString() + ",",
                     "then computing", getSecondStatString(), "across all ensemble members =", Float.toString(result), "(", units, ")"));
         }
+    }
+
+    // --- Icon inner classes ---
+
+    static class ChartIcon implements Icon {
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(Color.DARK_GRAY);
+            int w = getIconWidth();
+            int h = getIconHeight();
+            g2.setStroke(new BasicStroke(1.5f));
+            g2.drawLine(x + 2, y + 1, x + 2, y + h - 1);
+            g2.drawLine(x + 2, y + h - 1, x + w - 1, y + h - 1);
+            g2.setColor(new Color(51, 153, 255));
+            g2.setStroke(new BasicStroke(1.5f));
+            int[] xPoints = {x + 3, x + 6, x + 9, x + 12, x + 15};
+            int[] yPoints = {y + 10, y + 5, y + 8, y + 3, y + 6};
+            g2.drawPolyline(xPoints, yPoints, 5);
+            g2.dispose();
+        }
+
+        @Override
+        public int getIconWidth() { return 16; }
+
+        @Override
+        public int getIconHeight() { return 16; }
+    }
+
+    static class TextIcon implements Icon {
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setColor(Color.DARK_GRAY);
+            g2.setStroke(new BasicStroke(1.5f));
+            int w = getIconWidth();
+            // Draw horizontal lines representing text
+            for (int i = 0; i < 4; i++) {
+                int ly = y + 2 + i * 4;
+                int lineWidth = (i == 2) ? w - 4 : w; // Shorter third line for visual variety
+                g2.drawLine(x, ly, x + lineWidth, ly);
+            }
+            g2.dispose();
+        }
+
+        @Override
+        public int getIconWidth() { return 16; }
+
+        @Override
+        public int getIconHeight() { return 16; }
     }
 }
