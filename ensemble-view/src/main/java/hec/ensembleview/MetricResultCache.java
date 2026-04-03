@@ -17,6 +17,7 @@ class MetricResultCache {
     private final EnumMap<Statistics, MetricCollectionTimeSeries> metricMap = new EnumMap<>(Statistics.class);
     private MetricCollectionTimeSeries residentMetricCollectionTimeSeries;
     private final Map<String, Map<Float, Float>> probabilityList = new HashMap<>();
+    private final Map<String, int[]> probabilityMemberIndices = new HashMap<>();
 
     // --- Metric map ---
 
@@ -56,8 +57,17 @@ class MetricResultCache {
         probabilityList.put(stat, prob);
     }
 
+    void putProbabilityMemberIndices(String stat, int[] indices) {
+        probabilityMemberIndices.put(stat, indices);
+    }
+
+    int[] getProbabilityMemberIndices(String stat) {
+        return probabilityMemberIndices.get(stat);
+    }
+
     void clearProbabilities() {
         probabilityList.clear();
+        probabilityMemberIndices.clear();
     }
 
     // --- Bulk invalidation ---

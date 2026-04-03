@@ -137,12 +137,29 @@ public class StatComputationHelper {
                 String[] savedStats = savedStat.split("\\|");
                 float[][] vals = mc.getValues();
                 for(int i = 0; i < vals.length; i++) {
+                    // Compute argsort to track member indices through the descending sort
+                    int[] memberIndices = argsortDescending(vals[i]);
+
                     float[] prob = plottingPositionComputable.multiCompute(vals[i]);
                     float[] values = plottingPositionComputable.orderValues(vals[i]);
                     databaseHandlerService.setEnsembleProbabilityMap(savedStats[i], plottingPositionComputable.assignProbability(prob, values));
+                    databaseHandlerService.setEnsembleProbabilityMemberIndices(savedStats[i], memberIndices);
                 }
             }
         }
+    }
+
+    private static int[] argsortDescending(float[] values) {
+        Integer[] indices = new Integer[values.length];
+        for (int i = 0; i < values.length; i++) {
+            indices[i] = i;
+        }
+        java.util.Arrays.sort(indices, (a, b) -> Float.compare(values[b], values[a]));
+        int[] result = new int[values.length];
+        for (int i = 0; i < values.length; i++) {
+            result[i] = indices[i] + 1; // 1-based member index
+        }
+        return result;
     }
 
     public void convertToCumulative(EnsembleTimeSeries ets) {

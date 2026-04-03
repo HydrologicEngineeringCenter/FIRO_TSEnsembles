@@ -145,6 +145,14 @@ public class DatabaseHandlerService {
         metricResultCache.putProbability(stat, ensembleProb);
     }
 
+    public void setEnsembleProbabilityMemberIndices(String stat, int[] memberIndices) {
+        metricResultCache.putProbabilityMemberIndices(stat, memberIndices);
+    }
+
+    public int[] getEnsembleProbabilityMemberIndices(String stat) {
+        return metricResultCache.getProbabilityMemberIndices(stat);
+    }
+
     public Map<String, Map<Float, Float>> getEnsembleProbabilityList() {
         return metricResultCache.getProbabilityList();
     }
