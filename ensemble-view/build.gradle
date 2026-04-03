@@ -23,12 +23,19 @@ repositories {
     }
 }
 
+configurations {
+    windows_x64
+}
+
 dependencies {
     implementation project(":FIRO_TSEnsembles")
     implementation project(":ensemble-dss")
     implementation ('mil.army.usace.hec:hec-monolith:3.3.23') {
-        transitive = false
+        exclude group: "codebase", module: "*"
+        exclude group: "com.sun.media", module: "*"
+        exclude group: "javax.media", module: "*"
     }
+    windows_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-win-x86_64@zip'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 }
@@ -47,13 +54,62 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+// Copy native libraries for runtime
+task copyNatives(type: Copy) {
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        configurations.windows_x64.asFileTree.each {
+            from(zipTree(it))
+            into "$buildDir/natives"
+        }
+    }
+}
+
 run {
-    jvmArgs = ["-Djava.library.path=${buildDir}/../../ensemble-dss/build/x64"]
+    dependsOn copyNatives
+    jvmArgs = ["-Djava.library.path=${buildDir}/natives"]
 }
 
 jar {
     manifest {
         attributes 'Main-Class' : 'hec.ensembleview.EnsembleViewer'
+    }
+}
+
+// Fat JAR with all dependencies bundled for portable distribution
+task fatJar(type: Jar) {
+    archiveClassifier.set('all')
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes 'Main-Class': 'hec.ensembleview.EnsembleViewer'
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
+// Distribution task: fat JAR + native libraries in a single folder
+task portableDist(type: Copy) {
+    dependsOn fatJar, copyNatives
+
+    // Copy the fat JAR
+    from(fatJar.archiveFile) {
+        into '.'
+    }
+
+    // Copy native libraries
+    from("$buildDir/natives") {
+        into 'natives'
+    }
+
+    // Create a launch script
+    into "$buildDir/portable"
+
+    doLast {
+        def batFile = file("$buildDir/portable/EnsembleViewer.bat")
+        batFile.text = '@echo off\r\njava -Djava.library.path=natives -jar ' + fatJar.archiveFileName.get() + ' %*\r\n'
     }
 }
 
