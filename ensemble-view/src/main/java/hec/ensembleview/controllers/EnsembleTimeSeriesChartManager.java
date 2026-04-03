@@ -141,12 +141,14 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
 
         } else if(evt.getSource() instanceof StatisticsMap && evt.getPropertyName().equalsIgnoreCase("cumulative")) {  //This must happen before adding Ensembles
             isCumulative = (boolean) evt.getNewValue();
+            databaseHandlerService.setCumulativeView(isCumulative);
             isEnsembleDataViewTypeCumulative(isCumulative);
             addEnsembleValues();
             updateTableData();
         }
         else if(evt.getSource() instanceof DatabaseHandlerService) {
             isCumulative = false;
+            databaseHandlerService.setCumulativeView(false);
             databaseHandlerService.refreshMetricCollectionTimeSeriesMap();
             this.databaseHandlerService = DatabaseHandlerService.getInstance();
             addEnsembleValues();
