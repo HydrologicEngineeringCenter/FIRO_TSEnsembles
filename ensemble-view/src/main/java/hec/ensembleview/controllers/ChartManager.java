@@ -5,8 +5,8 @@ import hec.ensembleview.DatabaseHandlerService;
 import hec.ensembleview.charts.EnsembleChart;
 import hec.ensembleview.charts.EnsembleDataTablePanel;
 import hec.ensembleview.mappings.StatisticsMap;
-import hec.gfx2d.G2dPanel;
 
+import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
@@ -14,14 +14,14 @@ import java.util.Map;
 
 public abstract class ChartManager implements PropertyChangeListener {
     final StatisticsMap statisticsMap;
-    final G2dPanel chartPanel;
+    final JPanel chartPanel;
     final EnsembleDataTablePanel tablePanel;
     DatabaseHandlerService databaseHandlerService;
     Ensemble ensemble;
     EnsembleChart chart;
     String units;
 
-    protected ChartManager(StatisticsMap map, G2dPanel chartPanel, EnsembleDataTablePanel tablePanel) {
+    protected ChartManager(StatisticsMap map, JPanel chartPanel, EnsembleDataTablePanel tablePanel) {
         databaseHandlerService = DatabaseHandlerService.getInstance();
         databaseHandlerService.addDatabaseChangeListener(this);
 
@@ -29,6 +29,9 @@ public abstract class ChartManager implements PropertyChangeListener {
         statisticsMap.addStatisticsMapChangeListener(this);
 
         this.chartPanel = chartPanel;
+        if (!(chartPanel.getLayout() instanceof BorderLayout)) {
+            chartPanel.setLayout(new BorderLayout());
+        }
         this.tablePanel = tablePanel;
     }
 
@@ -44,11 +47,8 @@ public abstract class ChartManager implements PropertyChangeListener {
         }
 
         chartPanel.removeAll();
-        chartPanel.revalidate();
-        chartPanel.repaint();
-
-        chartPanel.setLayout(new BorderLayout());
         chartPanel.add(ec.generateChart(), BorderLayout.CENTER);
+        chartPanel.revalidate();
         chartPanel.repaint();
     }
 

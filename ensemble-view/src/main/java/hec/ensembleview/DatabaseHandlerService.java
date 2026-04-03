@@ -28,6 +28,7 @@ public class DatabaseHandlerService {
 
     private final EnsembleDataCache ensembleDataCache = new EnsembleDataCache();
     private final MetricResultCache metricResultCache = new MetricResultCache();
+    private boolean isCumulativeView = false;
 
     private DatabaseHandlerService() {
     }
@@ -104,6 +105,14 @@ public class DatabaseHandlerService {
         ensembleDataCache.setCumulativeEnsembleTimeSeries(ensembleTimeSeries);
     }
 
+    public boolean isCumulativeView() {
+        return isCumulativeView;
+    }
+
+    public void setCumulativeView(boolean cumulativeView) {
+        isCumulativeView = cumulativeView;
+    }
+
     // --- Metric results (delegated to MetricResultCache) ---
 
     public Map<Statistics, MetricCollectionTimeSeries> getMetricCollectionTimeSeriesMap() {
@@ -134,6 +143,14 @@ public class DatabaseHandlerService {
 
     public void setEnsembleProbabilityMap(String stat, Map<Float, Float> ensembleProb) {
         metricResultCache.putProbability(stat, ensembleProb);
+    }
+
+    public void setEnsembleProbabilityMemberIndices(String stat, int[] memberIndices) {
+        metricResultCache.putProbabilityMemberIndices(stat, memberIndices);
+    }
+
+    public int[] getEnsembleProbabilityMemberIndices(String stat) {
+        return metricResultCache.getProbabilityMemberIndices(stat);
     }
 
     public Map<String, Map<Float, Float>> getEnsembleProbabilityList() {

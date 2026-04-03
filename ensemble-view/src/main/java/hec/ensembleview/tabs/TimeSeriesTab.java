@@ -1,6 +1,5 @@
 package hec.ensembleview.tabs;
 
-import hec.ensembleview.charts.EnsembleChartAcrossTime;
 import hec.ensembleview.charts.EnsembleDataTablePanel;
 import hec.ensembleview.controllers.ComputePanelController;
 import hec.ensembleview.controllers.EnsembleTimeSeriesChartManager;
@@ -8,13 +7,12 @@ import hec.ensembleview.viewpanels.ComputePanelView;
 import hec.ensembleview.viewpanels.DataTransformView;
 import hec.ensembleview.viewpanels.StatTimeSeriesComputePanelView;
 import hec.ensembleview.viewpanels.TimeSeriesDataTransformView;
-import hec.gfx2d.G2dPanel;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class TimeSeriesTab extends JPanel {
-    private final G2dPanel ensembleChart;
+    private final JPanel chartContainer;
     private final JPanel statAndDataViewPanel = new JPanel();
     private final EnsembleDataTablePanel tablePanel;
     private final CardLayout cardLayout = new CardLayout();
@@ -24,7 +22,7 @@ public class TimeSeriesTab extends JPanel {
     private static final String TABLE_CARD = "table";
 
     public TimeSeriesTab() {
-        this.ensembleChart = createEnsembleChart();
+        this.chartContainer = new JPanel(new BorderLayout());
         this.tablePanel = new EnsembleDataTablePanel();
 
         ComputePanelView statTimeSeriesComputePanelView = new StatTimeSeriesComputePanelView();
@@ -33,7 +31,7 @@ public class TimeSeriesTab extends JPanel {
         initiateChartManager(timeSeriesDataTransformView, statTimeSeriesComputePanelView);
         setupStatisticsAndDataViewPanel(statTimeSeriesComputePanelView, timeSeriesDataTransformView);
 
-        cardPanel.add(ensembleChart, CHART_CARD);
+        cardPanel.add(chartContainer, CHART_CARD);
         cardPanel.add(tablePanel, TABLE_CARD);
 
         setLayout(new BorderLayout());
@@ -73,13 +71,9 @@ public class TimeSeriesTab extends JPanel {
         return toggleButton;
     }
 
-    private G2dPanel createEnsembleChart() {
-        return new EnsembleChartAcrossTime().generateChart();
-    }
-
     private void initiateChartManager(DataTransformView dataTransformView, ComputePanelView computePanelView) {
         ComputePanelController computePanelController = new ComputePanelController(dataTransformView, computePanelView);
-        new EnsembleTimeSeriesChartManager(computePanelController.getStatisticsMap(), ensembleChart, tablePanel);
+        new EnsembleTimeSeriesChartManager(computePanelController.getStatisticsMap(), chartContainer, tablePanel);
     }
 
     static class TableIcon implements Icon {

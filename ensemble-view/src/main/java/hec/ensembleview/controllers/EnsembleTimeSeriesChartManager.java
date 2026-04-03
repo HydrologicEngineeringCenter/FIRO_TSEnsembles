@@ -7,10 +7,10 @@ import hec.ensembleview.charts.EnsembleChart;
 import hec.ensembleview.charts.EnsembleChartAcrossTime;
 import hec.ensembleview.charts.EnsembleDataTablePanel;
 import hec.ensembleview.mappings.StatisticsMap;
-import hec.gfx2d.G2dPanel;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.metrics.MetricTypes;
 
+import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
     private static final Logger logger = Logger.getLogger(EnsembleTimeSeriesChartManager.class.getName());
     private boolean isCumulative = false;
 
-    public EnsembleTimeSeriesChartManager(StatisticsMap statisticsMap, G2dPanel chartPanel, EnsembleDataTablePanel tablePanel) {
+    public EnsembleTimeSeriesChartManager(StatisticsMap statisticsMap, JPanel chartPanel, EnsembleDataTablePanel tablePanel) {
         super(statisticsMap, chartPanel, tablePanel);
     }
 
@@ -141,12 +141,14 @@ public class EnsembleTimeSeriesChartManager extends ChartManager {
 
         } else if(evt.getSource() instanceof StatisticsMap && evt.getPropertyName().equalsIgnoreCase("cumulative")) {  //This must happen before adding Ensembles
             isCumulative = (boolean) evt.getNewValue();
+            databaseHandlerService.setCumulativeView(isCumulative);
             isEnsembleDataViewTypeCumulative(isCumulative);
             addEnsembleValues();
             updateTableData();
         }
         else if(evt.getSource() instanceof DatabaseHandlerService) {
             isCumulative = false;
+            databaseHandlerService.setCumulativeView(false);
             databaseHandlerService.refreshMetricCollectionTimeSeriesMap();
             this.databaseHandlerService = DatabaseHandlerService.getInstance();
             addEnsembleValues();
