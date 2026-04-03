@@ -47,6 +47,7 @@ test {
 
 application {
     mainClass = 'hec.ensembleview.EnsembleViewer'
+    applicationDefaultJvmArgs = ['-Djava.library.path=APP_HOME_PLACEHOLDER/natives']
 }
 
 java {
@@ -67,6 +68,30 @@ task copyNatives(type: Copy) {
 run {
     dependsOn copyNatives
     jvmArgs = ["-Djava.library.path=${buildDir}/natives"]
+}
+
+// Include native libraries in the application distribution (distZip/distTar)
+distributions {
+    main {
+        contents {
+            from(copyNatives) {
+                into 'natives'
+            }
+        }
+    }
+}
+
+distZip.dependsOn copyNatives
+distTar.dependsOn copyNatives
+
+// Fix native library path in generated start scripts to use APP_HOME
+startScripts {
+    doLast {
+        // Windows bat: replace placeholder with %APP_HOME%
+        windowsScript.text = windowsScript.text.replace('APP_HOME_PLACEHOLDER', '%APP_HOME%')
+        // Unix sh: replace placeholder with $APP_HOME
+        unixScript.text = unixScript.text.replace('APP_HOME_PLACEHOLDER', '\\$APP_HOME')
+    }
 }
 
 jar {
