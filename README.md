@@ -11,6 +11,19 @@ Download the latest Build here:
 https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/actions/workflows/gradle.yml
 
 
+## Running from the source with gradle
+
+```bat
+echo setup Java env
+set JAVA_HOME=C:\Programs\Java\java-11-openjdk-11.0.9.11-3
+set path=%JAVA_HOME%\bin;%PATH%
+::  from the FIRO_TSEnsembles directory
+gradlew run
+```
+
+
+
+
 ## Standalone ResSim Setup
 
 Install ResSim  currently: 3.5.0.283 
