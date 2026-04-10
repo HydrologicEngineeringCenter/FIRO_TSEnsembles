@@ -14,8 +14,8 @@ https://github.com/HydrologicEngineeringCenter/FIRO_TSEnsembles/actions/workflow
 ## Running from the source with gradle
 
 ```bat
-echo setup Java 1.8 env
-set JAVA_HOME=C:\Programs\Java\jdk1.8.0
+echo setup Java env
+set JAVA_HOME=C:\Programs\Java\java-11-openjdk-11.0.9.11-3
 set path=%JAVA_HOME%\bin;%PATH%
 ::  from the FIRO_TSEnsembles directory
 gradlew run
