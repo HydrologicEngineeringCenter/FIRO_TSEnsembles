@@ -21,6 +21,7 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
     private boolean isProb = false;
     private final List<double[][]> crosshairSeriesList = new ArrayList<>();
     private final List<String> crosshairSeriesNames = new ArrayList<>();
+    private final List<int[]> crosshairMemberIndices = new ArrayList<>();
 
     /**
      * Ensembles Charts Across Ensembles class sets up and displays the metrics for the scatter plot chart
@@ -67,9 +68,14 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
         G2dLineProperties props = new G2dLineProperties();
         setG2dPointProperties(props, point);
 
-        // Store raw data for crosshair snap
+        // Store raw data for crosshair snap with member indices
+        int[] members = new int[point.yValue.length];
+        for (int i = 0; i < members.length; i++) {
+            members[i] = i + 1;
+        }
         crosshairSeriesList.add(new double[][]{xOrdinates.clone(), yOrdinates[0].clone()});
         crosshairSeriesNames.add(point.pointName);
+        crosshairMemberIndices.add(members);
 
         isProb = false;
         xLabel = "Ensembles";
@@ -105,9 +111,19 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
         G2dLineProperties props = new G2dLineProperties();
         setG2dPointProperties(props, point);
 
-        // Store raw data for crosshair snap
+        // Store raw data for crosshair snap with member indices
+        int[] members;
+        if (point.memberIndices != null) {
+            members = point.memberIndices.clone();
+        } else {
+            members = new int[values.length];
+            for (int i = 0; i < members.length; i++) {
+                members[i] = i + 1;
+            }
+        }
         crosshairSeriesList.add(new double[][]{xOrdinates.clone(), yOrdinates[0].clone()});
         crosshairSeriesNames.add(point.pointName);
+        crosshairMemberIndices.add(members);
 
         isProb = true;
         xLabel = "Probability";
@@ -164,7 +180,8 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
         for (int i = 0; i < crosshairSeriesList.size(); i++) {
             double[][] series = crosshairSeriesList.get(i);
             String name = crosshairSeriesNames.get(i);
-            crosshairAdapter.addSeries(name, series[0], series[1]);
+            int[] members = crosshairMemberIndices.get(i);
+            crosshairAdapter.addPointSeries(name, series[0], series[1], members);
         }
     }
 
