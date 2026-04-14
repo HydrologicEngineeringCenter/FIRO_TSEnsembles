@@ -1,13 +1,19 @@
 package hec.ensembleview;
 
 import hec.ensembleview.controllers.DatabaseController;
-import hec.ensembleview.tabs.*;
+import hec.ensembleview.tabs.EnsembleArrayTab;
+import hec.ensembleview.tabs.SingleValueSummaryTab;
+import hec.ensembleview.tabs.TimeSeriesTab;
 import hec.ensembleview.viewpanels.EnsembleParentPanel;
 import hec.ensembleview.viewpanels.OptionsPanel;
+import io.github.andrewauclair.moderndocking.Dockable;
+import io.github.andrewauclair.moderndocking.DockableStyle;
+import io.github.andrewauclair.moderndocking.DockingRegion;
+import io.github.andrewauclair.moderndocking.app.Docking;
+import io.github.andrewauclair.moderndocking.app.RootDockingPanel;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.*;
 
 public class EnsembleViewer {
     static {
@@ -18,42 +24,99 @@ public class EnsembleViewer {
             throw new RuntimeException(e);
         }
     }
-    private JTabbedPane tabPane;
-    private final List<TabSpec> tabs = new ArrayList<>();
 
     public static void main(String[] args) {
-        new EnsembleViewer();
+        SwingUtilities.invokeLater(EnsembleViewer::new);
     }
 
     public EnsembleViewer() {
+        // Create the parent frame first - Docking.initialize needs a JFrame reference
+        EnsembleParentPanel frame = new EnsembleParentPanel();
+
         OptionsPanel optionsPanel = new OptionsPanel();
         new DatabaseController(optionsPanel);
-        createTabs();
 
-        new EnsembleParentPanel(optionsPanel, tabPane);
+        // Initialize the docking framework
+        Docking.initialize(frame);
+
+        // Wrap each tab content as a Dockable
+        DockablePanel timeSeriesDock = new DockablePanel("timeSeries", "Time Series Plot", new TimeSeriesTab());
+        DockablePanel scatterDock = new DockablePanel("scatter", "Scatter Plot", new EnsembleArrayTab());
+        DockablePanel summaryDock = new DockablePanel("summary", "Single Value Summary", new SingleValueSummaryTab());
+
+        // Create the root docking panel
+        RootDockingPanel rootPanel = new RootDockingPanel(frame);
+
+        // Mount the root docking panel into the parent frame
+        frame.setContents(optionsPanel, rootPanel);
+
+        // Default layout: dock all three as a tabbed group in the center
+        Docking.dock(timeSeriesDock, frame);
+        Docking.dock(scatterDock, timeSeriesDock, DockingRegion.CENTER);
+        Docking.dock(summaryDock, timeSeriesDock, DockingRegion.CENTER);
+
+        // Make Time Series the active tab on startup
+        Docking.bringToFront(timeSeriesDock);
     }
 
-    private void createTabs() { // create three types of charts in viewer
-        /*
-        Create tab spec.
-         */
+    /**
+     * A simple Dockable wrapper that hosts a content component as a draggable panel.
+     */
+    private static class DockablePanel extends JPanel implements Dockable {
+        private final String persistentID;
+        private final String tabText;
 
-        tabs.add(new TabSpec("Time Series Plot", new JPanel(), TabType.CHART));  // tab is a TabbedPane.  There are three tabs in the viewer. adding the name to the tab
-        tabs.get(0).setPanel(new TimeSeriesTab());
-
-        tabs.add(new TabSpec("Scatter Plot", new JPanel(), TabType.CHART));
-        tabs.get(1).setPanel(new EnsembleArrayTab());
-
-        tabs.add(new TabSpec("Single Value Summary", new JPanel(), TabType.SINGLEVALUESUMMARY));
-        tabs.get(2).setPanel(new SingleValueSummaryTab());
-
-        /*
-        Create tabs in tab pane.
-         */
-        tabPane = new JTabbedPane();
-        for(TabSpec tab: tabs) {
-            tabPane.addTab(tab.getTabName(), tab.getPanel());
+        DockablePanel(String persistentID, String tabText, JComponent content) {
+            super(new BorderLayout());
+            this.persistentID = persistentID;
+            this.tabText = tabText;
+            add(content, BorderLayout.CENTER);
+            Docking.registerDockable(this);
         }
-        tabPane.setFont(DefaultSettings.setSegoeFontText());
+
+        @Override
+        public String getPersistentID() {
+            return persistentID;
+        }
+
+        @Override
+        public int getType() {
+            return 0;
+        }
+
+        @Override
+        public String getTabText() {
+            return tabText;
+        }
+
+        @Override
+        public Icon getIcon() {
+            return null;
+        }
+
+        @Override
+        public boolean isLimitedToWindow() {
+            return false;
+        }
+
+        @Override
+        public DockableStyle getStyle() {
+            return DockableStyle.BOTH;
+        }
+
+        @Override
+        public boolean isClosable() {
+            return false;
+        }
+
+        @Override
+        public boolean isAutoHideAllowed() {
+            return false;
+        }
+
+        @Override
+        public boolean isMinMaxAllowed() {
+            return false;
+        }
     }
 }
