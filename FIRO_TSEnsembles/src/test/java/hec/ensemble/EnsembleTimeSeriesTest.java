@@ -20,6 +20,8 @@ class EnsembleTimeSeriesTest {
     private static String _fn = TestingPaths.instance.getTempDir()+"/importCsvToDatabaseMutable.db";
     private static SqliteDatabase _db = null;
     private static File f;
+
+
     @BeforeAll
     static void prepareNewDatabase() throws Exception {
         //ensure no previous test db exists.

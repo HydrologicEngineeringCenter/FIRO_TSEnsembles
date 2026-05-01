@@ -1,6 +1,8 @@
 package hec.ensemble;
 
 import hec.RecordIdentifier;
+import hec.ensemble.stats.SingleTimeSeriesComputable;
+import hec.ensemble.stats.MultiTimeSeriesComputable;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.metrics.MetricTypes;
@@ -118,6 +120,32 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
         computedUnits = compute.getOutputUnits();
         EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),computedUnits);
         MetricCollection mc = new MetricCollection(ec, compute.StatisticsLabel(), new float[][] {{result}});
+        mcts.addMetricCollection(mc);
+      }
+      return mcts;
+    }
+
+    public MetricCollectionTimeSeries computeSingleValueSummaryTimeSeriesWithSingleCompute(SingleTimeSeriesComputable compute){
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.version, this.units, MetricTypes.TIMESERIES_OF_SINGLE_VALUE);
+      for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
+        Ensemble e = it.next();
+        float[] result = e.singleComputeForEnsembleTimeSeries(compute);
+        computedUnits = compute.getOutputUnits();
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),computedUnits);
+        MetricCollection mc = new MetricCollection(ec, compute.StatisticsLabel(), new float[][] {result});
+        mcts.addMetricCollection(mc);
+      }
+      return mcts;
+    }
+    
+    public MetricCollectionTimeSeries computeSingleValueSummaryTimeSeriesWithMultiCompute(MultiTimeSeriesComputable compute){
+      MetricCollectionTimeSeries mcts = new MetricCollectionTimeSeries(this.timeseriesID, this.version, this.units, MetricTypes.TIMESERIES_OF_ARRAY);
+      for (Iterator<Ensemble> it = iterator(); it.hasNext(); ) {
+        Ensemble e = it.next();
+        float[][] results = e.multiComputeForEnsembleTimeSeries(compute);
+        computedUnits = compute.getOutputUnits();
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),computedUnits);
+        MetricCollection mc = new MetricCollection(ec, compute.StatisticsLabel(), results);
         mcts.addMetricCollection(mc);
       }
       return mcts;
