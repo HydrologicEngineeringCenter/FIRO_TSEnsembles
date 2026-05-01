@@ -11,12 +11,12 @@ public class PercentilesComputable implements Computable, MultiComputable, Confi
      * Instantiates a percentile computable object
      * @param percentile is expected to be in decimal
      */
-
     public PercentilesComputable(float percentile) {
         this.selectedPercentiles = new float[] {percentile};
     }
+
     //empty constructor added to satisfy <init>() function deserializing from XML with reflection
-    public PercentilesComputable(){}
+    public PercentilesComputable() {}
 
     public PercentilesComputable(float[] percentiles) {
         this.selectedPercentiles = percentiles;
@@ -26,14 +26,57 @@ public class PercentilesComputable implements Computable, MultiComputable, Confi
     public float compute(float[] values) {
         float[] sorted = values.clone();
         Arrays.sort(sorted);
-        if(selectedPercentiles.length == 0) {
+        if (selectedPercentiles.length == 0) {
             throw new ArrayIndexOutOfBoundsException("Percentile(s) less than or equal to 1 must be entered in the text field");
         }
         return computePercentile(sorted, selectedPercentiles[0]);
     }
 
+    @Override
+    public float[] multiCompute(float[] values) {
+        int size = this.selectedPercentiles.length;
+        float[] result = new float[size];
+        float[] sorted = values.clone();
+        Arrays.sort(sorted);
+
+        for (int i = 0; i < size; i++) {
+            result[i] = computePercentile(sorted, selectedPercentiles[i]);
+        }
+        return result;
+    }
+
+    /**
+     * computePercentile must be sorted.
+     * @param values must be sorted
+     * @param interpVal is the percentile value
+     */
+    private float computePercentile(float[] values, float interpVal) {
+        if (interpVal > 1.0) {
+            throw new ArithmeticException("Percentile must be less than or equal to 1");
+        }
+        if (interpVal < 0) {
+            throw new ArithmeticException("Percentile must be greater than or equal to 0");
+        }
+
+        if (interpVal == 0) {
+            return values[0];
+        } else if (interpVal == 1.0) {
+            return values[values.length - 1];
+        } else {
+            int startIndex = (int) (interpVal * (values.length - 1));
+            int endIndex = startIndex + 1;
+
+            float x1 = (float) startIndex / (values.length - 1);
+            float x2 = (float) endIndex / (values.length - 1);
+            float y1 = values[startIndex];
+            float y2 = values[endIndex];
+
+            return LinearInterp.linInterp(x1, x2, y1, y2, interpVal);
+        }
+    }
+
     private String getInputUnits() {
-        if(config == null || config.getUnits().isEmpty()) {
+        if (config == null || config.getUnits().isEmpty()) {
             return DEFAULT_INPUT_UNITS;
         } else {
             return config.getUnits();
@@ -46,60 +89,12 @@ public class PercentilesComputable implements Computable, MultiComputable, Confi
     }
 
     @Override
-    public float[] multiCompute(float[] values) {
-        int size = this.selectedPercentiles.length;
-        float[] result = new float[size];
-        int i = 0;
-        float[] sorted = values.clone();
-        Arrays.sort(sorted);
-
-        for (float p: this.selectedPercentiles) {
-            result[i] = computePercentile(sorted, p);
-            i++;
-        }
-        return result;
-    }
-    /**
-     * computePercentile must be sorted.
-     * @param values must be sorted
-     * @param interpVal is the percentile value
-     */
-
-    private float computePercentile(float[] values, float interpVal) {
-        if (interpVal > 1.0) {
-            throw new ArithmeticException("Percentile must be less than or equal to 1");
-        }
-        if (interpVal < 0) {
-            throw new ArithmeticException("Percentile must be greater than or equal to 0");
-        }
-
-        if (interpVal == 0) {
-            return values[0];
-        } else {
-            if (interpVal == 1.0) {
-                return values[values.length - 1];
-            } else {
-                int startIndex = (int) (interpVal * (values.length-1));
-                int endIndex = startIndex + 1;
-
-                float x1 = (float) startIndex / (values.length - 1);
-                float x2 = (float) endIndex / (values.length - 1);
-                float y1 = values[startIndex];
-                float y2 = values[endIndex];
-
-                return LinearInterp.linInterp(x1, x2, y1, y2, interpVal);
-            }
-        }
-    }
-
-    @Override
     public String StatisticsLabel() {
         StringBuilder label = new StringBuilder();
-        for (int i = 0; i < selectedPercentiles.length; i ++){
-            if(i == selectedPercentiles.length-1){
+        for (int i = 0; i < selectedPercentiles.length; i++) {
+            if (i == selectedPercentiles.length - 1) {
                 label.append(Statistics.PERCENTILES).append("(").append(selectedPercentiles[i]).append(")");
-            }
-            else{
+            } else {
                 label.append(Statistics.PERCENTILES).append("(").append(selectedPercentiles[i]).append(")|");
             }
         }
