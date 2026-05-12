@@ -1,9 +1,6 @@
 package hec.ensemble;
 
-import hec.ensemble.stats.Computable;
-import hec.ensemble.stats.Configurable;
-import hec.ensemble.stats.MultiComputable;
-import hec.ensemble.stats.SingleComputable;
+import hec.ensemble.stats.*;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -204,6 +201,23 @@ public class Ensemble
       }
       return cmd.compute(values);
     }
+
+
+    public float[] singleComputeForEnsembleTimeSeries(SingleTimeSeriesComputable cmd){
+      if (cmd instanceof Configurable){
+        ((Configurable)cmd).configure(_configuration);
+      }
+      return cmd.compute(values);
+    }
+
+    public float[][] multiComputeForEnsembleTimeSeries(MultiTimeSeriesComputable cmd){
+      if (cmd instanceof Configurable){
+        ((Configurable)cmd).configure(_configuration);
+      }
+      return cmd.compute(values);
+    }
+
+
 
     /**
      * iterate over each trace and its timestep.  The result is an array of time series as initial ensemble forecasts transformed based on the statistic, such as the cumulative discharge
