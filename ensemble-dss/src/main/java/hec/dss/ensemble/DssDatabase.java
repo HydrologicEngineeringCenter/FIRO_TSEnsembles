@@ -184,7 +184,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         return getZonedDateTime(time);
     }
 
-    static ZonedDateTime getZonedDateTime(HecTime time) {
+    public static ZonedDateTime getZonedDateTime(HecTime time) {
         int hour = time.hour();
         // Currently, assume all dss time series records in GMT. Time will appear as shown in dss record.
         ZoneId timeZone = ZoneId.of("GMT");
@@ -543,7 +543,7 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
         return res;
     }
 
-    private static HecTime getHecStartTime(ZonedDateTime startDateTime) {
+    public static HecTime getHecStartTime(ZonedDateTime startDateTime) {
         String dateStr = "";
         dateStr = startDateTime.format(dssDateFormat);
         return new HecTime(dateStr);
