@@ -1,7 +1,5 @@
 package hec.ensemble.stats;
 
-import org.apache.commons.lang.StringUtils;
-
 public enum Statistics {
     NONE("None"),
     MIN("Min"),
@@ -31,13 +29,38 @@ public enum Statistics {
         Statistics closetMatch = null;
 
         for (Statistics s : Statistics.values()) {
-            int distance = StringUtils.getLevenshteinDistance(statName.toUpperCase(), s.statName.toUpperCase());
+            int distance = levenshteinDistance(statName.toUpperCase(), s.statName.toUpperCase());
             if (distance < minDistance) {
                 minDistance = distance;
                 closetMatch = s;
             }
         }
         return closetMatch;
+    }
+
+    // Standard Levenshtein edit distance. Replaces the removed
+    // org.apache.commons.lang.StringUtils.getLevenshteinDistance after the
+    // migration to commons-lang3 (which relocated that method to commons-text).
+    private static int levenshteinDistance(String a, String b) {
+        int[] previous = new int[b.length() + 1];
+        int[] current = new int[b.length() + 1];
+
+        for (int j = 0; j <= b.length(); j++) {
+            previous[j] = j;
+        }
+
+        for (int i = 1; i <= a.length(); i++) {
+            current[0] = i;
+            for (int j = 1; j <= b.length(); j++) {
+                int cost = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
+                current[j] = Math.min(Math.min(current[j - 1] + 1, previous[j] + 1), previous[j - 1] + cost);
+            }
+            int[] swap = previous;
+            previous = current;
+            current = swap;
+        }
+
+        return previous[b.length()];
     }
 }
 
