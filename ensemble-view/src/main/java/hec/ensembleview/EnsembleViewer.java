@@ -118,5 +118,16 @@ public class EnsembleViewer {
         public boolean isMinMaxAllowed() {
             return false;
         }
+
+        // modern-docking's DisplayPanel wraps the dockable in a JScrollPane
+        // when this returns true (the interface default). The scroll pane
+        // honors the chart's preferred size, so the G2dPanel can extend
+        // beyond the visible viewport — i.e. the chart appears clipped and
+        // sized larger than the docking frame. Charts are self-resizing and
+        // should fill the available space directly, with no scroll pane.
+        @Override
+        public boolean isWrappableInScrollpane() {
+            return false;
+        }
     }
 }

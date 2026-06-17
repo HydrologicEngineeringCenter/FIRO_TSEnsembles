@@ -7,10 +7,10 @@ import hec.ensembleview.charts.EnsembleChart;
 import hec.ensembleview.charts.EnsembleChartAcrossEnsembles;
 import hec.ensembleview.charts.EnsembleDataTablePanel;
 import hec.ensembleview.mappings.StatisticsMap;
-import hec.gfx2d.G2dPanel;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.metrics.MetricTypes;
 
+import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class EnsembleArrayChartManager extends ChartManager {
     private MetricCollectionTimeSeries residentMetricCollectionTimeSeries;
     private String secondaryUnits;
 
-    public EnsembleArrayChartManager(StatisticsMap statisticsMap, G2dPanel chartPanel, EnsembleDataTablePanel tablePanel) {
+    public EnsembleArrayChartManager(StatisticsMap statisticsMap, JPanel chartPanel, EnsembleDataTablePanel tablePanel) {
         super(statisticsMap, chartPanel, tablePanel);
     }
 
@@ -140,7 +140,8 @@ public class EnsembleArrayChartManager extends ChartManager {
                 continue;
             }
             chartLabelsForStatistic(Statistics.getStatName(entry.getKey()));
-            PlotStatisticsForChartType.addStatisticsToEnsemblePlot((EnsembleChartAcrossEnsembles) chart, entry.getKey(), entry.getValue());
+            int[] memberIndices = databaseHandlerService.getEnsembleProbabilityMemberIndices(entry.getKey());
+            PlotStatisticsForChartType.addStatisticsToEnsemblePlot((EnsembleChartAcrossEnsembles) chart, entry.getKey(), entry.getValue(), memberIndices);
         }
         chartPanel.revalidate();
         chartPanel.repaint();
