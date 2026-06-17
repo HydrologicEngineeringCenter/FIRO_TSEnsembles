@@ -26,9 +26,9 @@ repositories {
 dependencies {
     implementation project(":FIRO_TSEnsembles")
     implementation project(":ensemble-dss")
-    implementation ('mil.army.usace.hec:hec-monolith:3.3.23') {
-        transitive = false
-    }
+    // hec-monolith is provided transitively via ensemble-dss's `api` declaration,
+    // so it no longer needs to be declared here (avoids a duplicate dependency
+    // entry in the published POM).
     implementation 'io.github.andrewauclair:modern-docking-api:1.4.8'
     implementation 'io.github.andrewauclair:modern-docking-single-app:1.4.8'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
