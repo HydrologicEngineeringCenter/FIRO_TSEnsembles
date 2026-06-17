@@ -61,18 +61,16 @@ task showGit () {
 }
 
 def versionLabel(gitInfo) {
-    def verNum = "-SNAPSHOT"
-    def tag = gitInfo.lastTag
+    // A release is published by tagging the master branch with "vX.Y" (e.g. v1.1).
+    // The same tag versions all jars uniformly; the leading "v" is stripped so the
+    // artifact version is just the number (e.g. 1.1). Builds without a matching tag
+    // are published as -SNAPSHOT.
+    def tag = gitInfo.lastTag?.trim()
     println(tag)
-    def prefixes = ["ts-", "dss-", "ev-"]
-    for (prefix in prefixes) {
-        if (tag.contains(prefix)) {
-            def tagArray = tag.trim().split('-')
-            verNum = "ts-" + tagArray[1]
-            break
-        }
+    if (tag && tag ==~ /v\d+(\.\d+)*/) {
+        return tag.substring(1)
     }
-    return verNum
+    return "-SNAPSHOT"
 }
 
 publishing {
