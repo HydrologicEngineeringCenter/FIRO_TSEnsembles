@@ -41,7 +41,9 @@ dependencies {
     linux_x64 'mil.army.usace.hec:javaHeclib:7-IO-RC1-linux-x86_64@zip'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
-    implementation ('mil.army.usace.hec:hec-monolith:3.3.23'){
+    // Exposed as `api` so consumers (e.g. ensemble-view) and downstream programs
+    // pick up hec-monolith from this single declaration instead of re-declaring it.
+    api ('mil.army.usace.hec:hec-monolith:3.3.23'){
         exclude group: "codebase", module: "*"
         exclude group: "com.sun.media", module: "*"
         exclude group: "javax.media", module: "*"
