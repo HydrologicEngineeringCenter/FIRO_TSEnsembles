@@ -104,11 +104,16 @@ task showGit () {
 def versionLabel(gitInfo) {
     // A release is published by tagging the master branch with "vX.Y" (e.g. v1.1).
     // The same tag versions all jars uniformly; the leading "v" is stripped so the
-    // artifact version is just the number (e.g. 1.1). Builds without a matching tag
-    // are published as -SNAPSHOT.
+    // artifact version is just the number (e.g. 1.1).
+    //
+    // The release version is used ONLY when HEAD is exactly on the tagged commit with a
+    // clean tree (isCleanTag). Any commit past the tag — including later branch merges —
+    // falls back to -SNAPSHOT. Without the isCleanTag guard, lastTag returns the nearest
+    // reachable tag, so every build after a vX.Y tag would keep re-publishing that release
+    // version from unreleased code until a newer tag superseded it.
     def tag = gitInfo.lastTag?.trim()
     println(tag)
-    if (tag && tag ==~ /v\d+(\.\d+)*/) {
+    if (gitInfo.isCleanTag && tag && tag ==~ /v\d+(\.\d+)*/) {
         return tag.substring(1)
     }
     return "-SNAPSHOT"
