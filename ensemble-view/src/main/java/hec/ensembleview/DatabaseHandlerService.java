@@ -41,6 +41,24 @@ public class DatabaseHandlerService {
         support.addPropertyChangeListener(listener);
     }
 
+    public void removeDatabaseChangeListener(PropertyChangeListener listener) {
+        support.removePropertyChangeListener(listener);
+    }
+
+    /**
+     * Removes every registered database-change listener. Called when a viewer closes so this
+     * process-wide singleton does not keep strong references to the closed viewer's controllers
+     * and panels — otherwise each open/close cycle leaks the whole UI graph and leaves stale
+     * listeners that still fire on the next database load. This clears all listeners rather than
+     * a specific set, which is safe because only one viewer exists at a time (see the
+     * single-instance guard in EnsembleViewer).
+     */
+    public void clearDatabaseChangeListeners() {
+        for (PropertyChangeListener listener : support.getPropertyChangeListeners()) {
+            support.removePropertyChangeListener(listener);
+        }
+    }
+
     // --- Database ---
 
     public void setDatabase(SqliteDatabase sqliteDatabase) {
