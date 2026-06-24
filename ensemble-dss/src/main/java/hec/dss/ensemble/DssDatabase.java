@@ -15,7 +15,6 @@ import hec.io.TimeSeriesCollectionContainer;
 import hec.io.TimeSeriesContainer;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
-import org.apache.commons.lang.NotImplementedException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -374,23 +373,23 @@ public class DssDatabase implements EnsembleDatabase,MetricDatabase {
     }*/
 
     @Override
-    public List<hec.metrics.MetricCollectionTimeSeries> getMetricCollectionTimeSeries(hec.RecordIdentifier timeseriesID) throws NotImplementedException{
-        throw new NotImplementedException();
+    public List<hec.metrics.MetricCollectionTimeSeries> getMetricCollectionTimeSeries(hec.RecordIdentifier timeseriesID) throws UnsupportedOperationException{
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public hec.metrics.MetricCollectionTimeSeries getMetricCollectionTimeSeries(hec.RecordIdentifier timeseriesID, String statistic) throws NotImplementedException {
-        throw new NotImplementedException();
+    public hec.metrics.MetricCollectionTimeSeries getMetricCollectionTimeSeries(hec.RecordIdentifier timeseriesID, String statistic) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public Map<RecordIdentifier, List<String>> getMetricStatistics() throws NotImplementedException {
-        throw new NotImplementedException();
+    public Map<RecordIdentifier, List<String>> getMetricStatistics() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<String> getMetricStatistics(hec.RecordIdentifier timeseriesID) throws NotImplementedException {
-        throw new NotImplementedException();
+    public List<String> getMetricStatistics(hec.RecordIdentifier timeseriesID) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 
     private float[][] getMetricValues(List<DSSPathname> paths) {
