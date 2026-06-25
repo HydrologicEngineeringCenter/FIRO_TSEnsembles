@@ -22,20 +22,14 @@ import java.util.logging.Logger;
 public class EnsembleViewer {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // Standalone launch: render in the system look and feel. Embedded in a host app
-            // (e.g. HMS), this main() never runs, so the frame is built under the host's
-            // active L&F and renders in the host's theme. Setting the L&F here (rather than
-            // in a static initializer) also means the viewer never re-stomps the global L&F,
-            // so a host theme toggle re-skins it.
+            // Standalone launch only: apply the system L&F before building the UI. When embedded
+            // in a host (e.g. HMS) main() never runs, so the viewer inherits the host's theme.
             setSystemLookAndFeel();
             show();
         });
     }
 
-    /**
-     * Installs the system look and feel. Used for the standalone launch and as the embedded
-     * fallback below; the single catch lives here so the two call sites don't duplicate it.
-     */
+    /** Installs the system look and feel; shared by the standalone launch and the embedded fallback. */
     private static void setSystemLookAndFeel() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -55,14 +49,12 @@ public class EnsembleViewer {
     private final EnsembleParentPanel frame;
 
     /**
-     * Opens the Ensemble Viewer, or focuses the already-open viewer if one exists. This is the
-     * entry point host programs should call to launch the viewer so that selecting it more than
-     * once never spawns duplicate windows.
+     * Opens the viewer, or focuses the already-open one. Host programs should call this so that
+     * launching the viewer more than once never spawns duplicate windows.
      * <p>
-     * Safe to call from any thread: a call off the event dispatch thread is re-dispatched onto
-     * the EDT (and returns {@code null}, since the viewer is built asynchronously). Swing builds
-     * the UI and mutates {@code instance} only on the EDT, so this also keeps {@code instance}
-     * race-free against the window-close handler.
+     * Safe to call from any thread: an off-EDT call is re-dispatched onto the EDT and returns
+     * {@code null}. {@code instance} is only touched on the EDT, keeping it race-free against the
+     * window-close handler.
      */
     public static synchronized EnsembleViewer show() {
         if (!SwingUtilities.isEventDispatchThread()) {
@@ -71,8 +63,8 @@ public class EnsembleViewer {
         }
         if (instance != null && instance.frame.isDisplayable()) {
             EnsembleParentPanel openFrame = instance.frame;
-            // Clear only the iconified bit so a window that was maximized before being minimized
-            // is restored to maximized, not shrunk to normal size.
+            // Clear only the iconified bit so a window minimized while maximized is restored to
+            // maximized, not shrunk to normal size.
             int state = openFrame.getExtendedState();
             if ((state & Frame.ICONIFIED) != 0) {
                 openFrame.setExtendedState(state & ~Frame.ICONIFIED);
@@ -86,18 +78,12 @@ public class EnsembleViewer {
     }
 
     private EnsembleViewer() {
-        // Defensive fallback for embedded use: if the host has not installed a look and feel
-        // (the JVM is still on the default cross-platform "Metal" L&F), apply the system L&F
-        // so an embedded viewer never renders in dated Metal. When a host such as HMS has
-        // already set its own theme, the current L&F is not Metal, so this is skipped and the
-        // viewer matches the host. Standalone, main() has already set the system L&F, so this
-        // is likewise skipped. Runs on the EDT (constructor is invoked from invokeLater / the
-        // host's EDT), which is where Swing requires the L&F to be set.
+        // Embedded fallback: if the host left the default cross-platform "Metal" L&F in place,
+        // switch to the system L&F so the viewer never renders in dated Metal. Skipped when a host
+        // (or main()) has already set a non-Metal L&F. Runs on the EDT, as the constructor does.
         if (UIManager.getLookAndFeel().getClass().getName()
                 .equals(UIManager.getCrossPlatformLookAndFeelClassName())) {
-            // Unlike the standalone launch, a failure here must not propagate: this is a cosmetic
-            // fallback running inside an embedding host, so log it and keep the default L&F rather
-            // than throwing out of the constructor and destabilizing the host.
+            // Cosmetic only and running inside a host: log and keep the default rather than throwing.
             try {
                 setSystemLookAndFeel();
             } catch (RuntimeException ex) {
@@ -105,49 +91,63 @@ public class EnsembleViewer {
             }
         }
 
-        // Create the parent frame first - Docking.initialize needs a JFrame reference
+        // Build the frame first - Docking.initialize needs a JFrame reference.
         frame = new EnsembleParentPanel();
 
         OptionsPanel optionsPanel = new OptionsPanel();
         new DatabaseController(optionsPanel);
 
-        // Initialize the docking framework
         Docking.initialize(frame);
 
-        // Wrap each tab content as a Dockable
         DockablePanel timeSeriesDock = new DockablePanel("timeSeries", "Time Series Plot", new TimeSeriesTab());
         DockablePanel scatterDock = new DockablePanel("scatter", "Scatter Plot", new EnsembleArrayTab());
         DockablePanel summaryDock = new DockablePanel("summary", "Single Value Summary", new SingleValueSummaryTab());
 
-        // Create the root docking panel
         RootDockingPanel rootPanel = new RootDockingPanel(frame);
-
-        // Mount the root docking panel into the parent frame
         frame.setContents(optionsPanel, rootPanel);
 
-        // Default layout: dock all three as a tabbed group in the center
+        // Dock all three as a tabbed group in the center, with Time Series active.
         Docking.dock(timeSeriesDock, frame);
         Docking.dock(scatterDock, timeSeriesDock, DockingRegion.CENTER);
         Docking.dock(summaryDock, timeSeriesDock, DockingRegion.CENTER);
-
-        // Make Time Series the active tab on startup
         Docking.bringToFront(timeSeriesDock);
 
-        // Tear down per-viewer state on close so a fresh open re-initializes cleanly:
-        //  - uninitialize docking so dockables can re-register,
-        //  - drop this viewer's listeners from the DatabaseHandlerService singleton so the
-        //    disposed UI graph can be garbage-collected and stale listeners stop firing,
-        //  - release the single-instance reference so show() can open a new viewer.
+        // Tear down per-viewer docking and listener state so the next open starts clean.
+        // This must run on windowClosing, not windowClosed: the frame is DISPOSE_ON_CLOSE, and once
+        // it is disposed modern-docking has already removed its root panel, so undock/deregister
+        // would throw RootDockingPanelNotFoundException and leave the dockable IDs registered. That
+        // strands the docking singleton and makes the next open fail to re-register "timeSeries"
+        // (DockableRegistrationFailureException) - the "viewer won't reopen" bug.
         frame.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosed(WindowEvent e) {
-                Docking.uninitialize();
+            public void windowClosing(WindowEvent e) {
+                safeDeregister(timeSeriesDock);
+                safeDeregister(scatterDock);
+                safeDeregister(summaryDock);
+                try {
+                    Docking.uninitialize();
+                } catch (RuntimeException ex) {
+                    logger.log(Level.WARNING, "Docking framework teardown failed on viewer close.", ex);
+                }
                 DatabaseHandlerService.getInstance().clearDatabaseChangeListeners();
                 if (instance == EnsembleViewer.this) {
                     instance = null;
                 }
             }
         });
+    }
+
+    /**
+     * Deregisters a dockable, logging instead of propagating on failure so that one panel's
+     * teardown error does not leave the other panels' IDs stranded in the registry.
+     */
+    private static void safeDeregister(Dockable dockable) {
+        try {
+            Docking.deregisterDockable(dockable);
+        } catch (RuntimeException ex) {
+            logger.log(Level.WARNING, "Failed to deregister dockable \"" + dockable.getPersistentID()
+                    + "\" on viewer close.", ex);
+        }
     }
 
     /**
@@ -210,12 +210,9 @@ public class EnsembleViewer {
             return false;
         }
 
-        // modern-docking's DisplayPanel wraps the dockable in a JScrollPane
-        // when this returns true (the interface default). The scroll pane
-        // honors the chart's preferred size, so the G2dPanel can extend
-        // beyond the visible viewport — i.e. the chart appears clipped and
-        // sized larger than the docking frame. Charts are self-resizing and
-        // should fill the available space directly, with no scroll pane.
+        // Return false so modern-docking's DisplayPanel does not wrap the dockable in a JScrollPane.
+        // A scroll pane honors the chart's preferred size, letting the G2dPanel extend past the
+        // viewport (clipped, oversized). Charts self-resize and should fill the space directly.
         @Override
         public boolean isWrappableInScrollpane() {
             return false;
