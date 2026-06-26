@@ -91,7 +91,7 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
 
         if(view != null) {
             view.addCurve(axis, timeSeriesDataSet, props);
-            plotPanel.buildComponents(layout);
+            buildPlotComponents();
             setPanAdapter();
             setupCrosshair();
             populateCrosshairData();
@@ -158,7 +158,7 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
 
         buildViewPortGraph();
 
-        plotPanel.buildComponents(layout);
+        buildPlotComponents();
         setPanAdapter();
         setupCrosshair();
         populateCrosshairData();
@@ -241,7 +241,7 @@ public class EnsembleChartAcrossTime extends EnsembleChart {
         // a single transition to the highlighted state instead of cycling through members.
         plotPanel.setVisible(false);
         try {
-            plotPanel.buildComponents(layout);
+            buildPlotComponents();
             setPanAdapter();
             setupCrosshair();
             populateCrosshairData();
