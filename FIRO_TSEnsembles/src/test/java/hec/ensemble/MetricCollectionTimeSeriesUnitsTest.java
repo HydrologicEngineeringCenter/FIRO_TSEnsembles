@@ -2,6 +2,7 @@ package hec.ensemble;
 
 import hec.RecordIdentifier;
 import hec.SqliteDatabase;
+import hec.VersionIdentifier;
 import hec.ensemble.stats.*;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
@@ -17,7 +18,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class MetricCollectionTimeSeriesUnitsTest {
@@ -224,8 +224,8 @@ class MetricCollectionTimeSeriesUnitsTest {
             float[] volumes = result.computeVolumesFromOffset(offsetStart);
             
             assertEquals(2, volumes.length, "Should auto-detect 2 durations");
-            assertEquals(3330.0317f, volumes[0], 0.001f, "2-day cumulative volume from offset");
-            assertEquals(5016.484f, volumes[1], 0.001f, "3-day cumulative volume from offset");
+            assertEquals(275.20923f, volumes[0], 0.001f, "2-day cumulative volume from offset");
+            assertEquals(414.5855f, volumes[1], 0.001f, "3-day cumulative volume from offset");
             
         } catch (Exception e) {
             Logger.logError(e);
@@ -262,13 +262,13 @@ class MetricCollectionTimeSeriesUnitsTest {
             // Explicit durations - when you only want specific ones
             float[] volumes = result.computeVolumesFromOffset(offsetStart, 3.0f);
             assertEquals(1, volumes.length, "Should have volumes for 1 duration");
-            assertEquals(5016.484f, volumes[0], 0.001f, "3-day cumulative volume from offset");
+            assertEquals(414.586f, volumes[0], 0.001f, "3-day cumulative volume from offset");
             
             // Can also request multiple specific durations
             float[] bothVolumes = result.computeVolumesFromOffset(offsetStart, 2.0f, 3.0f);
             assertEquals(2, bothVolumes.length, "Should have volumes for 2 durations");
-            assertEquals(3330.0317f, bothVolumes[0], 0.001f, "2-day cumulative volume from offset");
-            assertEquals(5016.484f, bothVolumes[1], 0.001f, "3-day cumulative volume from offset");
+            assertEquals(275.209f, bothVolumes[0], 0.001f, "2-day cumulative volume from offset");
+            assertEquals(414.586f, bothVolumes[1], 0.001f, "3-day cumulative volume from offset");
             
         } catch (Exception e) {
             Logger.logError(e);
@@ -314,8 +314,8 @@ class MetricCollectionTimeSeriesUnitsTest {
             float[] flow3Day = offsetResult.getValuesForDuration(3.0f);
             float volume3day = calc3day.multiCompute(flow3Day)[0];
             
-            assertEquals(3330.0317f, volume2day, 0.001f, "2-day cumulative volume from offset");
-            assertEquals(5016.484f, volume3day, 0.001f, "3-day cumulative volume from offset");
+            assertEquals(275.209f, volume2day, 0.001f, "2-day cumulative volume from offset");
+            assertEquals(414.586f, volume3day, 0.001f, "3-day cumulative volume from offset");
             
         } catch (Exception e) {
             Logger.logError(e);

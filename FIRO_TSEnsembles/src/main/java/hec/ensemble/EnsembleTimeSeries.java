@@ -131,7 +131,7 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
         Ensemble e = it.next();
         float[] result = e.singleComputeForEnsembleTimeSeries(compute);
         computedUnits = compute.getOutputUnits();
-        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),computedUnits);
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),this.units);
         MetricCollection mc = new MetricCollection(ec, compute.StatisticsLabel(), new float[][] {result});
         mcts.addMetricCollection(mc);
       }
@@ -144,10 +144,10 @@ public class EnsembleTimeSeries implements  Iterable<Ensemble>
         Ensemble e = it.next();
         float[][] results = e.multiComputeForEnsembleTimeSeries(compute);
         computedUnits = compute.getOutputUnits();
-        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),computedUnits);
+        EnsembleConfiguration ec = new EnsembleConfiguration(e.getIssueDate(),e.getStartDateTime(),e.getInterval(),this.units);
         MetricCollection mc = new MetricCollection(ec, compute.StatisticsLabel(), results);
         mcts.addMetricCollection(mc);
-      }
+      } 
       return mcts;
     }
     public MetricCollectionTimeSeries iterateAcrossTimestepsOfEnsemblesWithSingleComputable(Computable compute){
