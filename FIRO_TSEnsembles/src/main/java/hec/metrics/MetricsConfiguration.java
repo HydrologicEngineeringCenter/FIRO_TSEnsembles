@@ -11,7 +11,7 @@ public class MetricsConfiguration  implements Configuration {
     private final ZonedDateTime _startDateTime;
     private final String _units;
 
-    private MetricsConfiguration(ZonedDateTime issueDate, ZonedDateTime startDate, Duration interval, String units)
+    public MetricsConfiguration(ZonedDateTime issueDate, ZonedDateTime startDate, Duration interval, String units)
     {
         this._issueDate = issueDate;
         this._startDateTime = startDate;

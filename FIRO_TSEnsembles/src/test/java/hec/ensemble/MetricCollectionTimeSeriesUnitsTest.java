@@ -5,6 +5,8 @@ import hec.SqliteDatabase;
 import hec.ensemble.stats.*;
 import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
+import hec.metrics.MetricsConfiguration;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class MetricCollectionTimeSeriesUnitsTest {
@@ -139,6 +142,181 @@ class MetricCollectionTimeSeriesUnitsTest {
             assertEquals(expectedLabel, actualLabel, 
                       "Statistics label should exactly match expected format");
 
+        } catch (Exception e) {
+            Logger.logError(e);
+            fail();
+        }
+    }
+
+    @Test
+    public void testOffsetMetricCollectionTimeseries() throws Exception {
+
+        try {
+
+            float[] nDayDurations = new float[]{2.0f, 3.0f};
+            float targetPercentile = (float) 0.95;
+            ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+            RecordIdentifier id = new hec.RecordIdentifier("Kanektok.BCAC1", "flow");
+            EnsembleTimeSeries ets = _db.getEnsembleTimeSeries(id);
+
+            //Step One - NDayMultiComputable with multiple durations
+            MultiComputable cumulativeComputable = new CumulativeComputable();
+            NDayMultiComputable cumulative = new NDayMultiComputable(cumulativeComputable, nDayDurations);
+
+            //Step Two  
+            ComputableIndex percentileIndexCompute = new NearestIndexComputable(new PercentilesComputable(targetPercentile));
+            MultiTimeSeriesComputable twoStep = new TwoStepMultiTimeSeriesComputable(cumulative, percentileIndexCompute);
+            
+            // This now returns multiple time series, one for each duration
+            MetricCollectionTimeSeries output = ets.computeSingleValueSummaryTimeSeriesWithMultiCompute(twoStep);
+            
+            // Get metric collection for first issue date
+            MetricCollection result = output.getMetricCollection(issueDate1);
+
+            // Create new MetricCollection starting 6 hours later
+            ZonedDateTime offsetStart = issueDate1.plusHours(6);
+            MetricCollection offsetResult = result.createOffsetCollection(offsetStart);
+            
+            // Verify offset collection properties
+            assertEquals(offsetStart, offsetResult.getStartDateTime(), "Offset collection should start at offset time");
+            assertEquals(result.getIssueDate(), offsetResult.getIssueDate(), "Issue date should be preserved");
+            assertEquals(result.getInterval(), offsetResult.getInterval(), "Interval should be preserved");
+            assertEquals(result.getMetricStatistics(), offsetResult.getMetricStatistics(), "Statistics label should be preserved");
+            
+            // Verify data was sliced correctly - offset should have 6 fewer timesteps
+            int originalLength = result.getValues()[0].length;
+            int offsetLength = offsetResult.getValues()[0].length;
+            assertEquals(6, originalLength - offsetLength, "Offset should remove 6 hours (6 timesteps) of data");
+            
+        } catch (Exception e) {
+            Logger.logError(e);
+            fail();
+        }
+    }
+
+    @Test
+    public void testComputeVolumesFromOffset_AllDurations() throws Exception {
+
+        try {
+
+            float[] nDayDurations = new float[]{2.0f, 3.0f};
+            float targetPercentile = (float) 0.95;
+            ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+            RecordIdentifier id = new hec.RecordIdentifier("Kanektok.BCAC1", "flow");
+            EnsembleTimeSeries ets = _db.getEnsembleTimeSeries(id);
+
+            //Step One - NDayMultiComputable with multiple durations
+            MultiComputable cumulativeComputable = new CumulativeComputable();
+            NDayMultiComputable cumulative = new NDayMultiComputable(cumulativeComputable, nDayDurations);
+
+            //Step Two  
+            ComputableIndex percentileIndexCompute = new NearestIndexComputable(new PercentilesComputable(targetPercentile));
+            MultiTimeSeriesComputable twoStep = new TwoStepMultiTimeSeriesComputable(cumulative, percentileIndexCompute);
+            
+            // This now returns multiple time series, one for each duration
+            MetricCollectionTimeSeries output = ets.computeSingleValueSummaryTimeSeriesWithMultiCompute(twoStep);
+            
+            // Get metric collection for first issue date
+            MetricCollection result = output.getMetricCollection(issueDate1);
+            ZonedDateTime offsetStart = issueDate1.plusHours(6);
+
+            // Calculate nday volumes for all durations in metric collection starting from offset
+            float[] volumes = result.computeVolumesFromOffset(offsetStart);
+            
+            assertEquals(2, volumes.length, "Should auto-detect 2 durations");
+            assertEquals(3330.0317f, volumes[0], 0.001f, "2-day cumulative volume from offset");
+            assertEquals(5016.484f, volumes[1], 0.001f, "3-day cumulative volume from offset");
+            
+        } catch (Exception e) {
+            Logger.logError(e);
+            fail();
+        }
+    }
+
+    @Test
+    public void testComputeVolumesFromOffset_ExplicitDurations() throws Exception {
+
+        try {
+
+            float[] nDayDurations = new float[]{2.0f, 3.0f};
+            float targetPercentile = (float) 0.95;
+            ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+            RecordIdentifier id = new hec.RecordIdentifier("Kanektok.BCAC1", "flow");
+            EnsembleTimeSeries ets = _db.getEnsembleTimeSeries(id);
+
+            //Step One - NDayMultiComputable with multiple durations
+            MultiComputable cumulativeComputable = new CumulativeComputable();
+            NDayMultiComputable cumulative = new NDayMultiComputable(cumulativeComputable, nDayDurations);
+
+            //Step Two  
+            ComputableIndex percentileIndexCompute = new NearestIndexComputable(new PercentilesComputable(targetPercentile));
+            MultiTimeSeriesComputable twoStep = new TwoStepMultiTimeSeriesComputable(cumulative, percentileIndexCompute);
+            
+            // This now returns multiple time series, one for each duration
+            MetricCollectionTimeSeries output = ets.computeSingleValueSummaryTimeSeriesWithMultiCompute(twoStep);
+            
+            // Get metric collection for first issue date
+            MetricCollection result = output.getMetricCollection(issueDate1);
+            ZonedDateTime offsetStart = issueDate1.plusHours(6);
+
+            // Explicit durations - when you only want specific ones
+            float[] volumes = result.computeVolumesFromOffset(offsetStart, 3.0f);
+            assertEquals(1, volumes.length, "Should have volumes for 1 duration");
+            assertEquals(5016.484f, volumes[0], 0.001f, "3-day cumulative volume from offset");
+            
+            // Can also request multiple specific durations
+            float[] bothVolumes = result.computeVolumesFromOffset(offsetStart, 2.0f, 3.0f);
+            assertEquals(2, bothVolumes.length, "Should have volumes for 2 durations");
+            assertEquals(3330.0317f, bothVolumes[0], 0.001f, "2-day cumulative volume from offset");
+            assertEquals(5016.484f, bothVolumes[1], 0.001f, "3-day cumulative volume from offset");
+            
+        } catch (Exception e) {
+            Logger.logError(e);
+            fail();
+        }
+    }
+
+    @Test
+    public void testOffsetWithPreconfiguredComputable() throws Exception {
+
+        try {
+
+            float[] nDayDurations = new float[]{2.0f, 3.0f};
+            float targetPercentile = (float) 0.95;
+            ZonedDateTime issueDate1 = ZonedDateTime.of(2013, 11, 3, 12, 0, 0, 0, ZoneId.of("GMT"));
+            RecordIdentifier id = new hec.RecordIdentifier("Kanektok.BCAC1", "flow");
+            EnsembleTimeSeries ets = _db.getEnsembleTimeSeries(id);
+
+            //Step One - NDayMultiComputable with multiple durations
+            MultiComputable cumulativeComputable = new CumulativeComputable();
+            NDayMultiComputable cumulative = new NDayMultiComputable(cumulativeComputable, nDayDurations);
+
+            //Step Two  
+            ComputableIndex percentileIndexCompute = new NearestIndexComputable(new PercentilesComputable(targetPercentile));
+            MultiTimeSeriesComputable twoStep = new TwoStepMultiTimeSeriesComputable(cumulative, percentileIndexCompute);
+            
+            // This now returns multiple time series, one for each duration
+            MetricCollectionTimeSeries output = ets.computeSingleValueSummaryTimeSeriesWithMultiCompute(twoStep);
+            
+            // Get metric collection for first issue date
+            MetricCollection result = output.getMetricCollection(issueDate1);
+            ZonedDateTime offsetStart = issueDate1.plusHours(6);
+
+            // Pre-configured computable pattern - most flexible for custom workflows
+            MetricCollection offsetResult = result.createOffsetCollection(offsetStart);
+            
+            // Compute each duration with its correct time series
+            NDayMultiComputable calc2day = offsetResult.createConfiguredComputable(2.0f);
+            float[] flow2Day = offsetResult.getValuesForDuration(2.0f);
+            float volume2day = calc2day.multiCompute(flow2Day)[0];
+            
+            NDayMultiComputable calc3day = offsetResult.createConfiguredComputable(3.0f);
+            float[] flow3Day = offsetResult.getValuesForDuration(3.0f);
+            float volume3day = calc3day.multiCompute(flow3Day)[0];
+            
+            assertEquals(3330.0317f, volume2day, 0.001f, "2-day cumulative volume from offset");
+            assertEquals(5016.484f, volume3day, 0.001f, "3-day cumulative volume from offset");
+            
         } catch (Exception e) {
             Logger.logError(e);
             fail();
