@@ -1,5 +1,6 @@
 package hec.ensembleview.charts;
 
+import hec.ensembleview.FontManager;
 import hec.geometry.Scale;
 import hec.gfx2d.Viewport;
 
@@ -184,7 +185,8 @@ public class CrosshairMouseAdapter extends MouseAdapter {
 
         // Always draw the tooltip label
         if (tooltipText != null) {
-            g2.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            // Follow the host L&F font instead of a hard-coded face, so the tooltip tracks HMS fonts.
+            g2.setFont(FontManager.defaultFont());
             FontMetrics fm = g2.getFontMetrics();
             int textWidth = fm.stringWidth(tooltipText);
             int textHeight = fm.getHeight();

@@ -1,9 +1,10 @@
 package hec.ensembleview.charts;
 
-import hec.ensembleview.DefaultSettings;
+import hec.ensembleview.FontManager;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
@@ -29,8 +30,16 @@ public class EnsembleDataTablePanel extends JPanel {
             }
         };
         JTable table = new JTable(tableModel);
-        table.setFont(DefaultSettings.setSegoeFontText());
-        table.getTableHeader().setFont(DefaultSettings.setSegoeFontTitle());
+        // The table body inherits the L&F font so it follows the host (HMS) font and theme. The
+        // header stays bold but re-derives that bold font from the L&F on every UI update, so it
+        // tracks host font-size/theme changes instead of freezing at a hard-coded size.
+        table.setTableHeader(new JTableHeader(table.getColumnModel()) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setFont(FontManager.boldFont("TableHeader.font"));
+            }
+        });
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         table.setCellSelectionEnabled(true);
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);

@@ -4,9 +4,9 @@ import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.*;
 import hec.ensembleview.DatabaseHandlerService;
-import hec.ensembleview.DefaultSettings;
 import hec.ensembleview.PlotStatisticsForChartType;
 import hec.ensembleview.StatComputationHelper;
+import hec.ensembleview.ThemedTitledBorder;
 import hec.ensembleview.charts.EnsembleChartAcrossTime;
 import hec.ensembleview.controllers.SingleValueDataViewListener;
 import hec.ensembleview.mappings.SingleValueComboBoxMap;
@@ -427,8 +427,7 @@ public class SingleValueSummaryTab extends JPanel {
         // Compute Selection Panel
         JPanel selectionPanel = new JPanel();
         Border grayLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        selectionPanel.setBorder((BorderFactory.createTitledBorder(grayLine, "Compute Selection", TitledBorder.LEFT, TitledBorder.TOP)));
-        ((TitledBorder)selectionPanel.getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
+        selectionPanel.setBorder(new ThemedTitledBorder(grayLine, "Compute Selection", TitledBorder.LEFT, TitledBorder.TOP));
 
         selectionPanel.setLayout(new GridBagLayout());
         GridBagConstraints gc = new GridBagConstraints();

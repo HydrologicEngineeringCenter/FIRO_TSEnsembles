@@ -1,7 +1,6 @@
 package hec.ensembleview.viewpanels;
 
 import hec.ensembleview.DatabaseHandlerService;
-import hec.ensembleview.DefaultSettings;
 import hec.ensembleview.controllers.ProbabilityDataViewListener;
 import hec.ensembleview.charts.ChartType;
 
@@ -35,7 +34,6 @@ public class EnsembleDataTransformView extends DataTransformView {
         this.original = new JRadioButton();
         this.original.setName("Original");
         this.original.setText("Original");
-        this.original.setFont(DefaultSettings.setSegoeFontText());
         add(this.original);
         this.original.setEnabled(true);
         this.original.setSelected(true);
@@ -44,7 +42,6 @@ public class EnsembleDataTransformView extends DataTransformView {
         this.probability = new JRadioButton();
         this.probability.setName("Probability");
         this.probability.setText("Probability");
-        this.probability.setFont(DefaultSettings.setSegoeFontText());
         add(this.probability);
         this.probability.addActionListener(this);
     }
