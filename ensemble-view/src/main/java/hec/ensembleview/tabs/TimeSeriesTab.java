@@ -80,7 +80,7 @@ public class TimeSeriesTab extends JPanel {
         @Override
         public void paintIcon(Component c, Graphics g, int x, int y) {
             Graphics2D g2 = (Graphics2D) g.create();
-            g2.setColor(Color.DARK_GRAY);
+            g2.setColor(c.getForeground());
             g2.setStroke(new BasicStroke(1));
             int w = getIconWidth();
             int h = getIconHeight();
@@ -111,7 +111,7 @@ public class TimeSeriesTab extends JPanel {
         public void paintIcon(Component c, Graphics g, int x, int y) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(Color.DARK_GRAY);
+            g2.setColor(c.getForeground());
             int w = getIconWidth();
             int h = getIconHeight();
             g2.setStroke(new BasicStroke(1.5f));

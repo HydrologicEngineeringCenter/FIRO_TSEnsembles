@@ -139,10 +139,29 @@ public abstract class EnsembleChart implements MouseWheelListener {
                 super.paint(g);
                 paintCrosshairOverlay((Graphics2D) g);
             }
+
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                // Re-skin the plot to the (possibly just-changed) Look & Feel. The host (e.g. HMS)
+                // switches theme by calling SwingUtilities.updateComponentTreeUI on its windows,
+                // which reaches this panel and fires updateUI here.
+                ChartTheme.apply(this);
+            }
         };
         plotPanel.setIgnorePopupPlotEvents(true);
 
         return plotPanel;
+    }
+
+    /**
+     * Rebuilds the plot's child components and re-applies the current theme. gfx2d reseeds its
+     * viewports, axes, and labels with default colors on every {@code buildComponents}, so the theme
+     * must be re-applied afterwards or the plot reverts to gfx2d's light defaults.
+     */
+    void buildPlotComponents() {
+        plotPanel.buildComponents(layout);
+        ChartTheme.apply(plotPanel);
     }
 
     private void paintCrosshairOverlay(Graphics2D g2) {

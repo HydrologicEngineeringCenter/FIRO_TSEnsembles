@@ -163,7 +163,7 @@ public class EnsembleChartAcrossEnsembles extends EnsembleChart {
 
         buildViewPortGraph();
 
-        plotPanel.buildComponents(layout);
+        buildPlotComponents();
         setPanAdapter();
         setupCrosshair();
         populateCrosshairData();
