@@ -1,7 +1,7 @@
 package hec.ensembleview.viewpanels;
 
 import hec.ensembleview.DatabaseHandlerService;
-import hec.ensembleview.DefaultSettings;
+import hec.ensembleview.ThemedTitledBorder;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -24,21 +24,13 @@ public abstract class ComputePanelView extends JPanel implements ItemListener, A
         addCheckboxListeners(statisticsList);
         addTextBoxListeners(textFieldList);
         setupStatsPanel();
-        setDefaultFont(statisticsList);
         setVisible(true);
     }
 
     void setupStatsPanel() {
         setLayout(new GridLayout(2, 1));
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        setBorder(BorderFactory.createTitledBorder(graylineBorder, "Statistics", TitledBorder.LEFT, TitledBorder.TOP));
-        ((TitledBorder) getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
-    }
-
-    void setDefaultFont(List<JCheckBox> list) {
-        for(JCheckBox checkBox : list) {
-            checkBox.setFont(DefaultSettings.setSegoeFontText());
-        }
+        setBorder(new ThemedTitledBorder(graylineBorder, "Statistics", TitledBorder.LEFT, TitledBorder.TOP));
     }
 
     protected void setTextFieldAction(JTextField textField, boolean isEnable) {

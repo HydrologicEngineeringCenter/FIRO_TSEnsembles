@@ -1,7 +1,7 @@
 package hec.ensembleview.viewpanels;
 
 import hec.ensembleview.DatabaseHandlerService;
-import hec.ensembleview.DefaultSettings;
+import hec.ensembleview.ThemedTitledBorder;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -25,8 +25,7 @@ public abstract class DataTransformView extends JPanel implements ActionListener
         setLayout(layout);
 
         Border grayLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        setBorder((BorderFactory.createTitledBorder(grayLine, "Data View", TitledBorder.LEFT, TitledBorder.TOP)));
-        ((TitledBorder) getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
+        setBorder(new ThemedTitledBorder(grayLine, "Data View", TitledBorder.LEFT, TitledBorder.TOP));
     }
 
     protected abstract void initiateButtonSelection();

@@ -1,7 +1,7 @@
 package hec.ensembleview.viewpanels;
 
 import hec.RecordIdentifier;
-import hec.ensembleview.DefaultSettings;
+import hec.ensembleview.ThemedTitledBorder;
 import hec.ensembleview.controllers.DatabaseListener;
 
 import javax.swing.*;
@@ -73,8 +73,7 @@ public class OptionsPanel extends JPanel {
         parentPanel = new JPanel();
         parentPanel.setLayout(new GridBagLayout());
         Border graylineBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        parentPanel.setBorder(BorderFactory.createTitledBorder(graylineBorder, "Options", TitledBorder.LEFT, TitledBorder.TOP));
-        ((TitledBorder) parentPanel.getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
+        parentPanel.setBorder(new ThemedTitledBorder(graylineBorder, "Options", TitledBorder.LEFT, TitledBorder.TOP));
 
         add(parentPanel);
         filePathPanel = createFilePathPanel();
@@ -166,7 +165,6 @@ public class OptionsPanel extends JPanel {
         Create file select area.
          */
         fileText = new JLabel("File");
-        fileText.setFont(DefaultSettings.setSegoeFontText());
 
         fileSearchButton = new JButton();
         fileSearchButton.addActionListener(filePathListener);
@@ -197,10 +195,8 @@ public class OptionsPanel extends JPanel {
 
     private JComboBox<RecordIdentifier> createLocationsComboBox() {
         locationText = new JLabel("Location");
-        locationText.setFont(DefaultSettings.setSegoeFontText());
 
         locations = new JComboBox<>();
-        locations.setFont(DefaultSettings.setSegoeFontText());
 
         locations.addActionListener(locationsListener);
 
@@ -209,7 +205,6 @@ public class OptionsPanel extends JPanel {
 
     private JComboBox<ZonedDateTime> createDateTimeComboBox() {
         dateTimeText = new JLabel("Date/Time");
-        dateTimeText.setFont(DefaultSettings.setSegoeFontText());
 
         dateTimes = new JComboBox<>();
         dateTimes.addActionListener(dateTimesListener);

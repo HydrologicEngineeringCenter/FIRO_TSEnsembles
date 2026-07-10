@@ -1,26 +1,29 @@
 package hec.ensembleview.charts;
 
+import hec.ensembleview.FontManager;
 import hec.gfx2d.AxisLabel;
 import hec.gfx2d.AxisTics;
 import hec.gfx2d.G2dLabel;
 import hec.gfx2d.G2dPanel;
+import hec.gfx2d.LegendPanel;
 import hec.gfx2d.Viewport;
 
 import javax.swing.UIManager;
 import java.awt.Color;
+import java.awt.Font;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Repaints a gfx2d {@link G2dPanel} in the active Swing Look &amp; Feel's colors so the plot
- * follows the host theme (e.g. HMS light/dark).
+ * Repaints a gfx2d {@link G2dPanel} in the active Swing Look &amp; Feel's colors and font so the plot
+ * follows the host theme and font settings (e.g. HMS light/dark and the Program Settings font size).
  * <p>
- * gfx2d draws its plot background, gridlines, axis tics, axis labels, and title with its own
- * stored colors, which it seeds once at construction and never re-derives from the L&amp;F. So when
- * the host switches theme the surrounding Swing chrome re-skins but the plot stays in its original
- * colors. This class pushes the current L&amp;F colors into those gfx2d elements. The colors are read
- * from {@link UIManager} at call time, so the plot matches whatever theme is active without this
- * class needing to know which one.
+ * gfx2d draws its plot background, gridlines, axis tics, axis labels, title, and legend with its own
+ * stored colors and fonts, which it seeds once at construction and never re-derives from the L&amp;F.
+ * So when the host switches theme or changes its font the surrounding Swing chrome re-skins but the
+ * plot stays in its original colors and font. This class pushes the current L&amp;F colors and font
+ * into those gfx2d elements. They are read from {@link UIManager} at call time, so the plot matches
+ * whatever theme and font are active without this class needing to know which one.
  */
 final class ChartTheme {
     private static final Logger logger = Logger.getLogger(ChartTheme.class.getName());
@@ -45,6 +48,12 @@ final class ChartTheme {
         Color grid = blend(background, foreground, 0.30f);
         String foregroundString = rgb(foreground);
 
+        // Family and size come from the active L&F font, which HMS keeps in sync with its
+        // Program Settings font size (it rewrites the UIManager font defaults on change).
+        Font font = FontManager.defaultFont();
+        String fontFamily = font.getFamily();
+        int fontSize = font.getSize();
+
         panel.setBackground(background);
 
         Viewport[] viewports;
@@ -56,7 +65,7 @@ final class ChartTheme {
             return;
         }
 
-        applyLabel(panel.getTitlePanel(), background, foregroundString);
+        applyLabel(panel.getTitlePanel(), background, foregroundString, fontFamily, fontSize);
 
         if (viewports != null) {
             for (Viewport viewport : viewports) {
@@ -68,33 +77,53 @@ final class ChartTheme {
                 viewport.setGridYColor(grid);
                 viewport.setBorderColor(foregroundString);
                 for (int axis : AXES) {
-                    applyAxis(panel, viewport, axis, background, foregroundString);
+                    applyAxis(panel, viewport, axis, background, foregroundString, fontFamily, fontSize);
                 }
             }
         }
+        applyLegend(panel, background, foregroundString, fontFamily, fontSize);
         panel.repaint();
     }
 
-    private static void applyAxis(G2dPanel panel, Viewport viewport, int axis, Color background, String foregroundString) {
+    private static void applyAxis(G2dPanel panel, Viewport viewport, int axis, Color background,
+                                  String foregroundString, String fontFamily, int fontSize) {
         try {
             AxisTics tics = panel.getViewportAxisTics(viewport, axis);
             if (tics != null) {
                 tics.setAxisTicColor(foregroundString);
+                // AxisTics exposes only size (the tic labels keep gfx2d's family).
+                tics.setFontSizes(fontSize, fontSize, fontSize, fontSize);
             }
             AxisLabel label = panel.getViewportAxisLabel(viewport, axis);
-            applyLabel(label, background, foregroundString);
+            applyLabel(label, background, foregroundString, fontFamily, fontSize);
         } catch (RuntimeException ex) {
             // A viewport need not have all four axes; skip the ones it does not define.
             logger.log(Level.FINE, "Skipped theming an absent axis.", ex);
         }
     }
 
-    private static void applyLabel(G2dLabel label, Color background, String foregroundString) {
+    /** Themes the plot legend labels, if the plot has a legend. */
+    private static void applyLegend(G2dPanel panel, Color background, String foregroundString,
+                                    String fontFamily, int fontSize) {
+        LegendPanel legend = panel.getLegendPanel();
+        if (legend == null) {
+            return;
+        }
+        int count = legend.getLegendItemCount();
+        for (int i = 0; i < count; i++) {
+            applyLabel(legend.getLegendLabel(i), background, foregroundString, fontFamily, fontSize);
+        }
+    }
+
+    private static void applyLabel(G2dLabel label, Color background, String foregroundString,
+                                   String fontFamily, int fontSize) {
         if (label == null) {
             return;
         }
         label.setBackground(background);
         label.setForeground(foregroundString);
+        label.setFontFamily(fontFamily);
+        label.setFontSizes(fontSize, fontSize, fontSize, fontSize);
     }
 
     /** The plot background: the host's panel background, so the plot blends into the themed window. */

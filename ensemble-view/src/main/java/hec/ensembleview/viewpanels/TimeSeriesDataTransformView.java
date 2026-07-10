@@ -3,7 +3,6 @@ package hec.ensembleview.viewpanels;
 import hec.RecordIdentifier;
 import hec.ensembleview.controllers.CumulativeDataViewListener;
 import hec.ensembleview.DatabaseHandlerService;
-import hec.ensembleview.DefaultSettings;
 import hec.ensembleview.ParameterFilter;
 import hec.ensembleview.charts.ChartType;
 
@@ -37,7 +36,6 @@ public class TimeSeriesDataTransformView extends DataTransformView {
         this.original = new JRadioButton();
         this.original.setName("Original");
         this.original.setText("Original");
-        this.original.setFont(DefaultSettings.setSegoeFontText());
         add(this.original);
         this.original.setEnabled(true);
         this.original.setSelected(true);
@@ -46,7 +44,6 @@ public class TimeSeriesDataTransformView extends DataTransformView {
         this.cumulative = new JRadioButton();
         this.cumulative.setName("Cumulative");
         this.cumulative.setText("Cumulative");
-        this.cumulative.setFont(DefaultSettings.setSegoeFontText());
         add(this.cumulative);
         this.cumulative.addActionListener(this);
     }

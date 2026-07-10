@@ -1,7 +1,7 @@
 package hec.ensembleview.viewpanels;
 
 import hec.ensembleview.DatabaseHandlerService;
-import hec.ensembleview.DefaultSettings;
+import hec.ensembleview.ThemedTitledBorder;
 import hec.ensembleview.controllers.SingleValueDataViewListener;
 import hec.ensembleview.mappings.SingleValueSummaryType;
 
@@ -22,8 +22,7 @@ public class SingleValueDataTransformView extends DataTransformView {
     public SingleValueDataTransformView() {
         super();
         Border grayLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        setBorder((BorderFactory.createTitledBorder(grayLine, "Compute Order", TitledBorder.LEFT, TitledBorder.TOP)));
-        ((TitledBorder) getBorder()).setTitleFont(DefaultSettings.setSegoeFontTitle());
+        setBorder(new ThemedTitledBorder(grayLine, "Compute Order", TitledBorder.LEFT, TitledBorder.TOP));
     }
 
     public void setSingleValueDataViewListener(SingleValueDataViewListener listener) {
@@ -44,7 +43,6 @@ public class SingleValueDataTransformView extends DataTransformView {
         this.acrossEnsembles = new JRadioButton();
         this.acrossEnsembles.setName(ACROSSENSEMBLESTRING);
         this.acrossEnsembles.setText(ACROSSENSEMBLESTRING);
-        this.acrossEnsembles.setFont(DefaultSettings.setSegoeFontText());
         add(this.acrossEnsembles);
         this.acrossEnsembles.setEnabled(true);
         this.acrossEnsembles.addActionListener(this);
@@ -52,7 +50,6 @@ public class SingleValueDataTransformView extends DataTransformView {
         this.acrossTime = new JRadioButton();
         this.acrossTime.setName(ACROSSTIMESTRING);
         this.acrossTime.setText(ACROSSTIMESTRING);
-        this.acrossTime.setFont(DefaultSettings.setSegoeFontText());
         add(this.acrossTime);
         this.acrossTime.setSelected(true);
         this.acrossTime.addActionListener(this);
