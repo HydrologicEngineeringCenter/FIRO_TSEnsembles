@@ -93,7 +93,7 @@ task showGit () {
         println( "Tag:     " + gitInfo.lastTag) // actual tag or commit hash(short) if no tag
         println( "Hash:    " + gitInfo.gitHash) // short commit hash
         println( "Branch:  " + gitInfo.branchName) // branch name (null if tag checkout)
-        println( "TagBuild:" + gitInfo.isCleanTag) // true if repoi is in dettached head mode(e.g. git checkout <tag>)
+        println( "TagBuild:" + gitInfo.isCleanTag) // NOTE: unused for versioning; JGit reports this false on Windows (CRLF). versionLabel() gates on commitDistance instead.
     }
 }
 
@@ -102,14 +102,19 @@ def versionLabel(gitInfo) {
     // The same tag versions all jars uniformly; the leading "v" is stripped so the
     // artifact version is just the number (e.g. 1.1).
     //
-    // The release version is used ONLY when HEAD is exactly on the tagged commit with a
-    // clean tree (isCleanTag). Any commit past the tag — including later branch merges —
-    // falls back to -SNAPSHOT. Without the isCleanTag guard, lastTag returns the nearest
-    // reachable tag, so every build after a vX.Y tag would keep re-publishing that release
-    // version from unreleased code until a newer tag superseded it.
+    // The release version is used ONLY when HEAD is exactly on the tagged commit
+    // (commitDistance == 0). Any commit past the tag — including later branch merges —
+    // has commitDistance > 0 and falls back to -SNAPSHOT, so unreleased code never re-publishes
+    // the previous release version until a newer tag supersedes it.
+    //
+    // We gate on commitDistance rather than isCleanTag on purpose: isCleanTag also requires a
+    // clean working tree as computed by JGit, and JGit reports the tree ".dirty" on Windows
+    // (including the windows-latest CI runners) because it does not apply the CRLF/autocrlf
+    // normalization the git CLI does. That false-dirty made isCleanTag false even on a pristine
+    // checkout sitting exactly on the tag, demoting every release build to -SNAPSHOT.
     def tag = gitInfo.lastTag?.trim()
     println(tag)
-    if (gitInfo.isCleanTag && tag && tag ==~ /v\d+(\.\d+)*/) {
+    if (gitInfo.commitDistance == 0 && tag && tag ==~ /v\d+(\.\d+)*/) {
         return tag.substring(1)
     }
     return "-SNAPSHOT"

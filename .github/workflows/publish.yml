@@ -9,6 +9,9 @@ on:
       - completed
   push:
     branches: [ master ]
+    # Release tags (vX.Y) trigger a publish too. On a tag push actions/checkout lands on the
+    # tagged commit, so commitDistance == 0 and versionLabel() stamps the release version (e.g. 1.1).
+    tags: [ 'v*' ]
 jobs:
   build:
     runs-on: windows-latest
